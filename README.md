@@ -1,11 +1,28 @@
 # Event Platform
 
 부산 청년·외국인 문화행사 플랫폼의 Spring Boot 기본 프로젝트입니다.
-기획안의 업무 기능, 엔티티, 컨트롤러, 도메인 패키지는 아직 구현하지 않았습니다.
+역할 분담안을 기준으로 패키지 구조를 준비했으며, 업무 기능과 클래스는 아직 구현하지 않았습니다.
 
 - Java 21, Spring Boot 4.1.2, Gradle Wrapper
 - Spring MVC, Spring Data JPA, Bean Validation
 - H2 / MySQL / PostgreSQL(Supabase) JDBC 드라이버
+
+## 패키지 구조와 담당 영역
+
+기본 패키지는 `com.busan.eventplatform`입니다.
+각 도메인 아래에는 `controller`, `service`, `repository`, `entity`, `dto` 패키지를 두었습니다.
+빈 패키지는 `.gitkeep`으로 Git에 유지하며, 실제 클래스를 추가하면 해당 파일을 삭제해도 됩니다.
+
+| 담당 | 패키지 (`domain` 하위) |
+|---|---|
+| 조장: 회원·인증·이메일 인증·파일 | `user`, `auth`, `emailverification`, `file` |
+| 부조장: 결제·보증금·환불·알림 | `payment`, `deposit`, `refund`, `notification` |
+| 팀원 1: 행사·카테고리·행사 첨부파일 | `event`, `eventcategory` (행사 첨부파일은 `event`에서 공통 `file` 연동) |
+| 팀원 2: 참가 신청·출석·상태 이력 | `registration`, `attendance` (상태 이력은 해당 도메인에서 관리) |
+| 팀원 3: 기업·사업자 검증·관리자 심사 | `company`, `businessverification`, `adminreview` |
+
+조장이 관리하는 공통 영역은 `global.config`, `global.security`, `global.exception`, `global.response`, `global.util`입니다.
+API, 시큐리티 필터, 외부 연동, 더미 데이터 및 비즈니스 로직은 구현하지 않았습니다.
 
 ## 실행 및 빌드
 
