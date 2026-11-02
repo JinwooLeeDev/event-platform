@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: ${MYSQL_DB_URL:jdbc:mysql://localhost:3306/event_platform?connectionTimeZone=UTC&characterEncoding=UTF-8}
+    username: ${MYSQL_DB_USERNAME:root}
+    password: ${MYSQL_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
