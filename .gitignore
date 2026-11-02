@@ -42,6 +42,10 @@ out/
 !.env.example
 application-local.*
 
+### Python tooling ###
+__pycache__/
+*.pyc
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,java,intellij,eclipse
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,java,intellij,eclipse
 
