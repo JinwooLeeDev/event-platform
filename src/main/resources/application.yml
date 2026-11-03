@@ -1,12 +1,14 @@
 spring:
   application:
     name: event-platform
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     default: mysql
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         jdbc:
