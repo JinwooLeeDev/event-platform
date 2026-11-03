@@ -7,8 +7,6 @@ spring:
     default: h2
   jpa:
     open-in-view: false
-    hibernate:
-      ddl-auto: create
     properties:
       hibernate:
         jdbc:
