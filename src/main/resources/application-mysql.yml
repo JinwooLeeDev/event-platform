@@ -11,4 +11,6 @@ spring:
       ddl-auto: create
   sql:
     init:
-      mode: never
+      mode:
+      data-locations:
+        - classpath:db/local-mysql/data.sql  # data.sql 파일 읽기위한 설정.
