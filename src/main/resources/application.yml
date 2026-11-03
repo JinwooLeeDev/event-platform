@@ -4,7 +4,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   profiles:
-    default: mysql
+    default: h2
   jpa:
     open-in-view: false
     hibernate:
@@ -13,6 +13,6 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
-
+    defer-datasource-initialization: true   # data.sql 파일을 넣으려면 필요. 새로 추가.
 server:
   port: ${SERVER_PORT:8080}

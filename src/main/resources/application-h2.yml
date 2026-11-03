@@ -13,3 +13,9 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: false
+
+  sql:
+    init:
+      mode: always # never --> always로 변경
+      data-locations:
+        - classpath:db/local-mysql/data.sql # # data.sql 파일 읽기위한 설정.
