@@ -39,6 +39,7 @@ out/
 ### Local secrets ###
 .env
 .env.*
+.agent.md
 !.env.example
 application-local.*
 
