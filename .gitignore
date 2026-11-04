@@ -315,3 +315,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,java,intellij,eclipse
+
+/src/main/resources/application-h2.yml
+/src/main/resources/application-mysql.yml
+/src/main/resources/application-supabase.yml
