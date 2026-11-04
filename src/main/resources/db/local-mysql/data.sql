@@ -20,13 +20,98 @@ VALUES
      '2027-01-15 10:00:00', '2027-01-17 18:00:00', NULL);
 
 ------------------------------ Company테이블----------------------------------------
-INSERT INTO company_tb (name, status, phone, point)
+-- Company 테이블: 개발용 더미 데이터
+INSERT INTO company_tb (
+    name,
+    email,
+    password,
+    business_number,
+    representative_name,
+    opened_on,
+    address,
+    business_certificate_file_name,
+    contact_person_name,
+    contact_person_phone,
+    status,
+    point,
+    created_at
+)
 VALUES
-    ('부산문화재단', 'APPROVED', '051-123-4567', 500000),
-    ('해운대이벤트', 'PENDING', '051-234-5678', 100000),
-    ('부산페스티벌', 'APPROVED', '051-345-6789', 300000),
-    ('광안리축제기획', 'APPROVED', '051-456-7890', 400000),
-    ('부산공연기획사', 'PENDING', '051-567-8901', 150000);
+(
+    '부산문화재단',
+    'company1@example.test',
+    '1234',
+    '0000000001',
+    '가상대표1',
+    '2020-01-01',
+    '부산광역시 남구 가상로 1',
+    NULL,
+    '더미담당1',
+    '010-0000-0001',
+    'APPROVED',
+    500000,
+    CURRENT_TIMESTAMP
+),
+(
+    '해운대이벤트',
+    'company2@example.test',
+    '1234',
+    '0000000002',
+    '가상대표2',
+    '2021-02-01',
+    '부산광역시 해운대구 가상로 2',
+    NULL,
+    '더미담당2',
+    '010-0000-0002',
+    'PENDING',
+    100000,
+    CURRENT_TIMESTAMP
+),
+(
+    '부산페스티벌',
+    'company3@example.test',
+    '1234',
+    '0000000003',
+    '가상대표3',
+    '2022-03-01',
+    '부산광역시 부산진구 가상로 3',
+    NULL,
+    '더미담당3',
+    '010-0000-0003',
+    'APPROVED',
+    300000,
+    CURRENT_TIMESTAMP
+),
+(
+    '광안리축제기획',
+    'company4@example.test',
+    '1234',
+    '0000000004',
+    '가상대표4',
+    '2023-04-01',
+    '부산광역시 수영구 가상로 4',
+    NULL,
+    '더미담당4',
+    '010-0000-0004',
+    'APPROVED',
+    400000,
+    CURRENT_TIMESTAMP
+),
+(
+    '부산공연기획사',
+    'company5@example.test',
+    '1234',
+    '0000000005',
+    '가상대표5',
+    '2024-05-01',
+    '부산광역시 동래구 가상로 5',
+    NULL,
+    '더미담당5',
+    '010-0000-0005',
+    'PENDING',
+    150000,
+    CURRENT_TIMESTAMP
+);
 
 ------------------------------ User테이블----------------------------------------
 INSERT INTO user_tb(name, role, email, password, phone, point, created_at)
