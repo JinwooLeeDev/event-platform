@@ -39,6 +39,8 @@ out/
 ### Local secrets ###
 .env
 .env.*
+*.md
+*.sql
 .agent.md
 !.env.example
 application-local.*

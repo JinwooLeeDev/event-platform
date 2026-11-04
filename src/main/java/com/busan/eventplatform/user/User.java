@@ -22,7 +22,7 @@ public class User {
     private String name;
 
     @Column(nullable = false)
-    private String role;    // admin? 일반회원? 기업?
+    private String role;    // 플랫폼측 관리자와 일반회원 2개로 나눔
 
     @Column(nullable = false)
     private String email;
@@ -31,5 +31,4 @@ public class User {
     private String phone;
 
     private Timestamp createdAt;
-
 }
