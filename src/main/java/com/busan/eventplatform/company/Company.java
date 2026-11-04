@@ -21,4 +21,5 @@ public class Company {
 
     @Column(nullable = false)   @ColumnDefault("0")
     private Long point;
+
 }

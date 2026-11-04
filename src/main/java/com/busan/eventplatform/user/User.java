@@ -1,12 +1,14 @@
 package com.busan.eventplatform.user;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.sql.Timestamp;
 
 @Entity
 @Table(name = "user_tb")
+@Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,7 +17,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)   @ColumnDefault( "0")
+    @Column(nullable = false)   @ColumnDefault("0")
     private Long point;
 
     @Column(nullable = false)

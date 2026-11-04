@@ -28,7 +28,7 @@
                         현재 보유 포인트
                     </span>
                     <h4 class="fw-bold text-success mb-0">
-                        [너의 포인트]P
+                        {너의 포인트}P
                     </h4>
                 </div>
             </div>
@@ -145,7 +145,7 @@
     const naverPayBtn = document.querySelector("#naverPayBtn");
     const pointBtns = document.querySelectorAll(".amount-btn");
     const expectedPoint = document.querySelector("#expectedPoint")
-
+    const inputPoint = document.querySelector("#chargeAmount")
 
     document.querySelector("#amount-btn-group").addEventListener("click" , function (e) {
         const clickBtn = e.target.closest(".amount-btn")
@@ -156,21 +156,49 @@
         expectedPoint.innerText = selectedPoint + "P"
     })
 
-        const payInfo = Naver.Pay.create({
-            "mode" : "development", // development , production
-            "clientId": "HN3GGCMDdTgGUfl0kFCo", // 공유 가능
-            "chainId": "cWlQQ2p5V1RsWGt"  // 공유 가능
-        });
+    inputPoint.addEventListener("input" , function () {
+        selectedPoint = Number(inputPoint.value);
+        expectedPoint.innerText = selectedPoint + "P"
+    })
 
-    naverPayBtn.addEventListener("click", function() {
-        payInfo.open({
-                "merchantPayKey": "20261103zOdBjy", // 가맹점 주문 번호.
-                "productName": "POINT",
-                "totalPayAmount": "1000",
-                "taxScopeAmount": "1000",
-                "taxExScopeAmount": "0",
-                "returnUrl": "https://developers.pay.naver.com/user/sand-box/payment"
-            });
+    // '네이버 충전하기' 버튼 클릭
+    naverPayBtn.addEventListener("click", async function() {
+       if(selectedPoint <= 0 || selectedPoint === null) {
+           alert("충전할 포인트를 입력하세요(0포인트 이상)");
+           return;
+       }
+
+       try {
+           const prepareRes = await fetch("/api/payment/prepare" , {
+               method : "post" ,
+               headers : {"Content-Type" : "application/json"} ,
+               body : JSON.stringify({amount : selectedPoint})
+           })
+           const prepareReq = await prepareRes.json();
+           if(!prepareRes.ok) {throw new Error(prepareRes.message)}
+
+
+           // 포트원으로 결제 요청.
+           const payment = await PortOne.requestPayment({
+               storeId: prepareReq.storeId,
+               channelKey: prepareReq.channelKey,
+               paymentId: prepareReq.paymentId,
+               orderName: "POINT",
+               totalAmount: selectedPoint,
+               currency: "CURRENCY_KRW",
+               payMethod: "EASY_PAY"
+           })
+
+           const completeRes = await fetch("/api/payment/complete" , {
+               method : "post" ,
+               headers : {"Content-Type" : "application/json"} ,
+               body : JSON.stringify({paymentId : payment.paymentId})
+           })
+           const completeReq = await completeRes.json()
+
+       }catch (e) {
+
+       }
     })
 
 </script>
