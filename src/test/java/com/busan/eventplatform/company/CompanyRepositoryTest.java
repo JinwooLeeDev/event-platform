@@ -38,7 +38,6 @@ class CompanyRepositoryTest {
                 .contactPersonName("테스트담당자")
                 .contactPersonPhone("010-0000-0001")
                 .status(CompanyStatus.PENDING)
-                .point(0)
                 .build();
 
         companyId = companyRepository.saveAndFlush(company).getId();

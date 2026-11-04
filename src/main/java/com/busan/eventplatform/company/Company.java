@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // for test
 @Entity
 @Table(name = "company_tb")
 public class Company {
@@ -22,57 +21,134 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    기업명
+    //    기업명
     @Column(nullable = false, length = 50)
     private String name;
 
-//    기업 이메일
+    //    기업 이메일
     @Column(nullable = false, unique = true)
     private String email;
 
-//    비밀번호
+    //    비밀번호
     @Column(nullable = false)
     private String password;
 
-//    사업자 번호
+    //    사업자 번호
     @Column(nullable = false, length = 10, unique = true)
     private String businessNumber;
 
-//    대표자 이름
+    //    대표자 이름
     @Column(nullable = false, length = 50)
     private String representativeName;
 
-//    개업일자. (LocalDate가 현대적 API라 사용하기 좀 더 편함)
+    //    개업일자. (LocalDate가 현대적 API라 사용하기 좀 더 편함)
     @Column(nullable = false)
     private LocalDate openedOn;
 
-//    기업 주소
+    //    기업 주소
     @Column(nullable = false)
     private String address;
 
-//    사업자 등록증 파일 제출
+    //    사업자 등록증 파일 제출
     @Column(nullable = true) // TODO 일단 true, 파일 처리로직이 구현되면 false로 사업자 등록증을 무조건 제출해야 함.
     private String businessCertificateFileName;
 
-//    담당자 이름
+    //    담당자 이름
     @Column(nullable = false, length = 20)
     private String contactPersonName;
 
-//    담당자 연락처
+    //    담당자 연락처
     @Column(nullable = false, length = 13)
     private String contactPersonPhone;
 
-//    관리자 인증 상태
+    //    관리자 인증 상태
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private CompanyStatus status = CompanyStatus.PENDING;
+    @ColumnDefault("'PENDING'")
+    private CompanyStatus status;
 
     @Column(nullable = false)
     @ColumnDefault("0")
     private int point;
 
-//    계정 생성일
+    //    계정 생성일
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
+
+    @Builder
+    public Company(String name,
+                   String email,
+                   String password,
+                   String businessNumber,
+                   String representativeName,
+                   LocalDate openedOn,
+                   String address,
+                   String businessCertificateFileName,
+                   String contactPersonName,
+                   String contactPersonPhone,
+                   CompanyStatus status) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.businessNumber = businessNumber;
+        this.representativeName = representativeName;
+        this.openedOn = openedOn;
+        this.address = address;
+        this.businessCertificateFileName = businessCertificateFileName;
+        this.contactPersonName = contactPersonName;
+        this.contactPersonPhone = contactPersonPhone;
+        this.status = (status == null) ? CompanyStatus.PENDING : status;
+    }
+
+//    TODO 비밀번호 해싱처리
+    public void update(
+            String name,
+            String email,
+            String representativeName,
+            String businessNumber,
+            String address,
+            String contactPersonName,
+            String contactPersonPhone,
+            String businessCertificateFileName
+    ) {
+
+        if (name != null) {
+            this.name = name;
+        }
+
+        if (email != null) {
+            this.email = email;
+        }
+
+        if (representativeName != null) {
+            this.representativeName = representativeName;
+        }
+
+        if (businessNumber != null) {
+            this.businessNumber = businessNumber;
+        }
+
+        if (address != null) {
+            this.address = address;
+        }
+
+        if (contactPersonName != null) {
+            this.contactPersonName = contactPersonName;
+        }
+
+        if (contactPersonPhone != null) {
+            this.contactPersonPhone = contactPersonPhone;
+        }
+
+        if (businessCertificateFileName != null) {
+            this.businessCertificateFileName = businessCertificateFileName;
+        }
+    }
+
+//    인증 요구상태로 전환
+    public void requestReview() {
+        this.status = CompanyStatus.PENDING;
+    }
+
 }
