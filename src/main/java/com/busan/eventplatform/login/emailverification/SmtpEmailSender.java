@@ -1,4 +1,4 @@
-package com.busan.eventplatform.emailverification;
+package com.busan.eventplatform.login.emailverification;
 
 import com.busan.eventplatform.global.error.exception.Exception500;
 import com.busan.eventplatform.global.util.Define;

@@ -1,4 +1,4 @@
-package com.busan.eventplatform.emailverification;
+package com.busan.eventplatform.login.emailverification;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
