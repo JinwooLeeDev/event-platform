@@ -1,9 +1,13 @@
 package com.busan.eventplatform.event.event_category;
 
+import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.global.error.exception.Exception404;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -11,32 +15,47 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class EventCategoryService {
 
-    private EventCategoryRepository repository;
+    private final EventCategoryRepository eventCategoryRepository;
 
-    // 새로운 카테고리 등록 (추후 admin과 연결)
-    /**
-     * 카테고리 이름 비어 있는지 확인
-     * 이미 동일한 이름이 존재하는지 확인
-     * 새로운 카테고리 객체 생성
-     * Repository를 통해 저장
-     */
-    public EventCategory save(EventCategoryRequest.)
+    // 새로운 카테고리 등록 (관리자용)
+    @Transactional
+    public EventCategory save(EventCategoryRequest.SaveDto saveDto) {
+        if (eventCategoryRepository.findByName(saveDto.getName()).isPresent()) {
+            throw new Exception400("이미 존재하는 카테고리입니다.");
+        }
+
+        return eventCategoryRepository.save(saveDto.toEntity());
+    }
 
     // 전체 카테고리 목록 조회
-    /**
-     * Repository의 findAll 호출
-     * 조회한 카테고리 목록 반환
-     */
+    public EventCategoryResponse.ListDto findAllList() {
+        List<EventCategory> categoryList = eventCategoryRepository.findAll();
+        return new EventCategoryResponse.ListDto(categoryList);
+    }
 
-    // 기존 카테고리 이름 수정
-    /**
-     * 수정할 카테고리 ID로 기존 데이터 조회
-     * 새로운 이름이 비어 있는지 확인
-     * 다른 카테고리와 이름이 중복되는지 확인
-     * 기존 카테고리 이름 변경
-     * 변경 사항 저장
-     */
 
-    // 카테고리 이름 중복 검증
+    // 기존 카테고리 이름 수정 (관리자용)
+    public EventCategory update(Long id, EventCategoryRequest.UpdateDto updateDto) {
+        EventCategory eventCategory = eventCategoryRepository.findById(id)
+                .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
+
+        EventCategory findCategory = eventCategoryRepository.findByName(updateDto.getName())
+                .orElse(null);
+
+        if (findCategory != null && !findCategory.getId().equals(id)) {
+            throw new Exception400("이미 존재하는 카테고리입니다.");
+        }
+        eventCategory.setName(updateDto.getName());
+
+        return eventCategory;
+    }
+
+    // 기존 카테고리 삭제 (관리자용)
+    public void delete(Long id) {
+        EventCategory eventCategory = eventCategoryRepository.findById(id)
+                .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
+
+        eventCategoryRepository.delete(eventCategory);
+    }
 
 }
