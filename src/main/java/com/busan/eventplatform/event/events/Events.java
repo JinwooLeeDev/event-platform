@@ -18,7 +18,7 @@ public class Events {
 //    private Company companyId;
 
     // 행사 카테고리
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) // 카테고리 하나를 여러 게시물이 사용 가능
     @JoinColumn(name = "category_id", nullable = false)
     private EventCategory category;
 
