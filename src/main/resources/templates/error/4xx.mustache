@@ -1,0 +1,56 @@
+{{! 공통 헤더 }}
+{{> layout/header}}
+
+{{! 공통 오류 화면 CSS }}
+{{> layout/ErrorCss}}
+
+<main class="error-page">
+    <div class="error-content">
+
+        <div class="error-label">
+            BUSAN PLAY · ERROR
+        </div>
+
+        <div class="error-code">
+            {{#status}}{{status}}{{/status}}
+            {{^status}}4XX{{/status}}
+        </div>
+
+        <div class="error-divider"></div>
+
+        <h1 class="error-title">
+            요청을 처리할 수 없습니다
+        </h1>
+
+        <div class="error-description">
+            {{#errorMessage}}
+                <p>{{errorMessage}}</p>
+            {{/errorMessage}}
+
+            {{^errorMessage}}
+                <p>요청 내용이나 접근 경로를 확인해 주세요.</p>
+                <p>이전 화면으로 돌아가 다시 이용해 주세요.</p>
+            {{/errorMessage}}
+        </div>
+
+        <div class="error-actions">
+            <a href="/" class="error-btn error-btn-primary">
+                메인으로 돌아가기 &rarr;
+            </a>
+
+            <button type="button"
+                    class="error-btn error-btn-secondary"
+                    onclick="history.back()">
+                &larr; 이전 페이지
+            </button>
+        </div>
+
+        <div class="error-bottom">
+            부산의 모든 즐거움, <strong>Busan Play</strong>
+        </div>
+
+    </div>
+</main>
+
+{{! 공통 푸터 }}
+{{> layout/footer}}

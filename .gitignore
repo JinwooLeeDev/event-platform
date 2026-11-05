@@ -5,6 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+application-h2.yml
+application-mysql.yml
+application-supabase.yml
+
 ### STS ###
 .apt_generated
 .classpath
@@ -39,6 +43,7 @@ out/
 ### Local secrets ###
 .env
 .env.*
+.agent.md
 !.env.example
 application-local.*
 
@@ -314,6 +319,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,java,intellij,eclipse
+
 /src/main/resources/application-h2.yml
 /src/main/resources/application-mysql.yml
 /src/main/resources/application-supabase.yml
