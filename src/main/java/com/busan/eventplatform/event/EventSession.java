@@ -20,9 +20,14 @@ public class EventSession {
     @Column(name = "fee")
     private Integer fee;
 
+    // [추가] 행사 최대 정원
+    @Column(name = "capacity", nullable = false)
+    private Integer capacity;
+
     // 테스트 시 임시 더미 데이터 생성을 위한 Builder
     @Builder
     public EventSession(Integer fee) {
         this.fee = fee;
+        this.capacity = capacity;
     }
 }
