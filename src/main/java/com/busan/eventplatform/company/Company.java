@@ -164,4 +164,6 @@ public class Company {
                 java.util.Objects.requireNonNull(verifiedAt);
     }
 
+    // 기업이 포인트 충전시 사용할 메서드.
+    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
 }

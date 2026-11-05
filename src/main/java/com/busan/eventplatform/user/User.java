@@ -1,10 +1,12 @@
 package com.busan.eventplatform.user;
 
+import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
@@ -23,12 +25,16 @@ public class User {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash; // 보안을 위해 평문이 아닌 해시(암호화) 처리된 비밀번호
 
-    @Column(name = "display_name", nullable = false, length = 100)
-    private String displayName; // 플랫폼 서비스 화면에 노출되는 사용자의 이름 또는 닉네임
+    @Column(name = "display_name", nullable = false, length = 100, unique = true)
+    private String displayName; // 플랫폼 서비스 화면에 노출되는 사용자의 닉네임
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role; // 회원의 역할 및 권한 (MEMBER, ADMIN)
+
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int point; // 보유 중인 포인트 잔액 (기본값 0)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -48,6 +54,8 @@ public class User {
     // 기획안에서 요구한 'UTC 기준 시각 저장'을 완벽하게 지원
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+
 
     // 객체 생성 시 가독성과 안정성을 높이는 Builder 패턴 적용
     @Builder
@@ -80,7 +88,7 @@ public class User {
     // 3. 계정 상태를 변경하며, 탈퇴(WITHDRAWN) 상태로 변경 시 현재 시각을 탈퇴 일시로 자동 기록
     public void changeStatus(UserStatus status) {
         this.status = status;
-        if(status == UserStatus.WITHDRAWN) {
+        if (status == UserStatus.WITHDRAWN) {
             this.withdrawnAt = Instant.now();
         }
     }
@@ -89,5 +97,26 @@ public class User {
     public void verifyEmail(Instant verifiedAt) {
         this.emailVerifiedAt =
                 java.util.Objects.requireNonNull(verifiedAt);
+    }
+
+    // 유저가 포인트 충전시 사용할 메서드.
+    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
+  
+    // displayName을 이름이 아닌 닉네임으로 변경해서 닉네임 변경을 하도록하는 메서드.
+    public void changeDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * 유료 행사 참가비 결제 (포인트 차감)
+     *
+     * @param fee 차감할 포인트 금액
+     */
+    public void deductPoint(Integer fee) {
+        if (this.point < fee) {
+            throw new Exception400("잔액이 부족합니다.(현재잔액: " + this.point + "원)"
+            );
+        }
+        this.point -= fee;
     }
 }

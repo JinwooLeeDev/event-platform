@@ -1,4 +1,6 @@
-package com.busan.eventplatform.login;
+package com.busan.eventplatform.login.personallogin;
+
+import com.busan.eventplatform.login.LoginReqDto;
 
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
@@ -40,7 +42,6 @@ public class AuthService {
                 )
                 .displayName(request.getDisplayName())
                 .role(Role.MEMBER)
-                .status(UserStatus.ACTIVE)
                 .preferredLocale("ko")
                 .build();
         user.verifyEmail(verifiedAt);

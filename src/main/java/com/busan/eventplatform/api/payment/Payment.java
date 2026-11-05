@@ -43,23 +43,25 @@ public class Payment {
     private String paymentId;
 
     @Builder
-    public Payment(User user , PaymentStatus status , int amount , String paymentId) {
+    public Payment(User user , int amount , String paymentId) {
         this.user = user;
         this.status = PaymentStatus.READY;
         this.amount = amount;
         this.paymentId = paymentId;
     }
 
+    // 받은 유저가 현재 세션의 유저와 같은지?
     public boolean isOwner(Long userId) {
         return this.user.getId().equals(userId);
     }
 
+    // 현재 결제상태가 "결제완료" 인지?
     public boolean isPaid() {
         return this.status == PaymentStatus.PAID;
     }
 
     // 결제완료로 처리.
-    public void confirmPay() {
-        this.status = PaymentStatus.PAID;
-    }
+    public void confirmPay() {this.status = PaymentStatus.PAID;}
+
+    //
 }
