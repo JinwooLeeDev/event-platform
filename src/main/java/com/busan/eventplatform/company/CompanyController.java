@@ -12,6 +12,7 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
+    // TODO 후일에 유저 로그인이랑 통일
     @PostMapping("/company/join")
     @ResponseBody
     public ResponseEntity<?> join(CompanyRequest.JoinDTO joinDTO) {

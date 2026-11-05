@@ -1,0 +1,206 @@
+{{> layout/header}}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet">
+
+
+<div class="container py-5" style="max-width: 1050px;">
+    <!-- 페이지 제목 및 보유 포인트 -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-md-7">
+            <h2 class="fw-bold mb-2">
+                <i class="bi bi-coin text-success me-2"></i>
+                포인트 충전
+            </h2>
+            <p class="text-secondary mb-0">
+                티켓 예매와 서비스 이용에 사용할 포인트를 충전하세요.
+            </p>
+        </div>
+
+        <div class="col-md-5">
+            <div class="bg-success bg-opacity-10 rounded-4 p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">
+                        <i class="bi bi-wallet2 text-success me-2"></i>
+                        현재 보유 포인트
+                    </span>
+                    <h4 class="fw-bold text-success mb-0">
+                        {너의 포인트}P
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 p-md-5">
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">충전할 금액</h5>
+
+                <div class="input-group input-group-lg">
+                    <input type="number" class="form-control" id="chargeAmount" min="1000"
+                           placeholder="충전할 금액을 입력하세요">
+                    <span class="input-group-text">원</span>
+                </div>
+
+                <small class="text-secondary">
+                    <i class="bi bi-info-circle me-1"></i>
+                    1,000원 이상 입력해 주세요.
+                </small>
+            </div>
+
+            <div class="row g-2 mb-4" id="amount-btn-group">
+                <div class="col-6 col-md-3">
+                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="10000">
+                        +10,000원
+                    </button>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="30000">
+                        +30,000원
+                    </button>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="50000">
+                        +50,000원
+                    </button>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="100000">
+                        +100,000원
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-success bg-opacity-10 rounded-4 p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold mb-1">충전 예정 포인트</h5>
+                        <small class="text-secondary">1원 = 1P</small>
+                    </div>
+
+                    <h3 class="fw-bold text-success mb-0" id="expectedPoint">0P</h3>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">결제 수단</h5>
+
+                <div class="border rounded-3 p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="fw-bold fs-4">
+                            <span class="text-success">N</span> pay
+                        </span>
+
+                        <div>
+                            <div class="fw-semibold">네이버페이</div>
+                            <small class="text-secondary">
+                                네이버페이로 간편하게 결제할 수 있습니다.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-success btn-lg w-100 py-3 fw-bold" id="naverPayBtn">
+                N pay | 포인트 충전하기
+            </button>
+
+            <p class="text-center text-secondary small mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                버튼 클릭 시 네이버페이 결제창으로 이동합니다.
+            </p>
+
+        </div>
+    </div>
+
+    <div class="bg-light rounded-4 p-4 mt-4">
+        <p class="mb-2">
+            <i class="bi bi-info-circle text-success me-2"></i>
+            충전한 포인트는 티켓 예매 및 서비스 이용에 사용할 수 있습니다.
+        </p>
+
+        <p class="mb-0">
+            <i class="bi bi-info-circle text-success me-2"></i>
+            충전 및 환불 정책은 운영정책을 확인해 주세요.
+        </p>
+    </div>
+</div>
+
+
+<script src="https://nsp.pay.naver.com/sdk/js/naverpay.min.js"></script>
+<script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+
+
+<script>
+    let selectedPoint = 0;
+    const naverPayBtn = document.querySelector("#naverPayBtn");
+    const pointBtns = document.querySelectorAll(".amount-btn");
+    const expectedPoint = document.querySelector("#expectedPoint")
+    const inputPoint = document.querySelector("#chargeAmount")
+
+    document.querySelector("#amount-btn-group").addEventListener("click" , function (e) {
+        const clickBtn = e.target.closest(".amount-btn")
+        pointBtns.forEach(b => b.classList.remove("active"))
+        clickBtn.classList.add("active")
+        selectedPoint = Number(clickBtn.dataset.amount)
+
+        expectedPoint.innerText = selectedPoint + "P"
+    })
+
+    inputPoint.addEventListener("input" , function () {
+        selectedPoint = Number(inputPoint.value);
+        expectedPoint.innerText = selectedPoint + "P"
+    })
+
+    // '네이버 충전하기' 버튼 클릭
+    naverPayBtn.addEventListener("click", async function() {
+       if(selectedPoint <= 0 || selectedPoint === null) {
+           alert("충전할 포인트를 입력하세요(0포인트 이상)");
+           return;
+       }
+
+       try {
+           const prepareRes = await fetch("/api/payment/prepare" , {
+               method : "post" ,
+               headers : {"Content-Type" : "application/json"} ,
+               body : JSON.stringify({amount : selectedPoint})
+           })
+           const prepareReq = await prepareRes.json();
+           if(!prepareRes.ok) {throw new Error(prepareRes.message)}
+
+
+           // 포트원으로 결제 요청.
+           const payment = await PortOne.requestPayment({
+               storeId: prepareReq.storeId,
+               channelKey: prepareReq.channelKey,
+               paymentId: prepareReq.paymentId,
+               orderName: "POINT",
+               totalAmount: selectedPoint,
+               currency: "CURRENCY_KRW",
+               payMethod: "EASY_PAY"
+           })
+
+           const completeRes = await fetch("/api/payment/complete" , {
+               method : "post" ,
+               headers : {"Content-Type" : "application/json"} ,
+               body : JSON.stringify({paymentId : payment.paymentId})
+           })
+           const completeReq = await completeRes.json()
+
+       }catch (e) {
+
+       }
+    })
+
+</script>
+
+{{> layout/footer}}
