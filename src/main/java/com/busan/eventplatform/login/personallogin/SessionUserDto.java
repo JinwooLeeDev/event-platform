@@ -1,4 +1,4 @@
-package com.busan.eventplatform.login;
+package com.busan.eventplatform.login.personallogin;
 
 import com.busan.eventplatform.user.Role;
 import lombok.Builder;

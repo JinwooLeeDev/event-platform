@@ -1,4 +1,9 @@
-package com.busan.eventplatform.login;
+package com.busan.eventplatform.login.personallogin;
+
+import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginReqDto;
+import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.login.LoginType;
 
 import com.busan.eventplatform.global.util.Define;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AuthController {
 
     // 인터셉터에서도 같은 키를 사용해야 합니다.
-    public static final String SESSION_USER = "sessionUser";
+
+    public static final String SESSION_USER = LoginSession.USER;
+
 
     private final AuthService authService;
 
@@ -44,20 +51,25 @@ public class AuthController {
 
     // 로그인 처리
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginReqDto request, HttpServletRequest servletRequest, HttpSession session
-    ) {
-        // 이메일·비밀번호·회원 상태 검증
+    public String login(@ModelAttribute LoginReqDto request, HttpServletRequest servletRequest, HttpSession session) {
         SessionUserDto sessionUser = authService.login(request);
-        // 로그인 성공 시 세션 ID 교체
+
         servletRequest.changeSessionId();
 
-        session.setAttribute(SESSION_USER, sessionUser);
+        // 이전 기업 로그인 정보 제거
+        session.removeAttribute(LoginSession.COMPANY);
 
-        // TODO 로그인할 sessionUser가 "User" 인지 , "Company"인지 구분해야함.
-//        session.setAttribute("clientType", Client.ClientType.USER);
-//        session.setAttribute("clientType", Client.ClientType.COMPANY);
+        // 헤더 등에서 사용하는 개인 회원 정보
+        session.setAttribute(LoginSession.USER, sessionUser);
 
-
+        // 결제·환불 등에서 공통으로 사용하는 로그인 주체
+        session.setAttribute(
+                LoginSession.IDENTITY, // identity - id랑 logintype
+                LoginIdentity.builder()
+                        .id(sessionUser.getId())
+                        .loginType(LoginType.USER)
+                        .build()
+        );
         return "redirect:/";
     }
 

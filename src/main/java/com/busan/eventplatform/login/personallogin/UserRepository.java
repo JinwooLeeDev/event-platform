@@ -1,4 +1,4 @@
-package com.busan.eventplatform.login;
+package com.busan.eventplatform.login.personallogin;
 
 import com.busan.eventplatform.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
