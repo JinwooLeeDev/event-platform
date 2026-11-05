@@ -1,5 +1,6 @@
 package com.busan.eventplatform.user;
 
+import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,6 +31,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role; // 회원의 역할 및 권한 (MEMBER, ADMIN)
+
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int point; // 보유 중인 포인트 잔액 (기본값 0)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -87,7 +92,7 @@ public class User {
     // 3. 계정 상태를 변경하며, 탈퇴(WITHDRAWN) 상태로 변경 시 현재 시각을 탈퇴 일시로 자동 기록
     public void changeStatus(UserStatus status) {
         this.status = status;
-        if(status == UserStatus.WITHDRAWN) {
+        if (status == UserStatus.WITHDRAWN) {
             this.withdrawnAt = Instant.now();
         }
     }
@@ -104,5 +109,23 @@ public class User {
     // displayName을 이름이 아닌 닉네임으로 변경해서 닉네임 변경을 하도록하는 메서드.
     public void changeDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    /**
+     * 유료 행사 참가비 결제 (포인트 차감)
+     *
+     * @param fee 차감할 포인트 금액
+     */
+    public void deductPoint(Integer fee) {
+        if (this.point < fee) {
+            throw new Exception400("잔액이 부족합니다.(현재잔액: " + this.point + "원)"
+            );
+        }
+        this.point -= fee;
+    }
+
+    public void chargePoint(int amount) {
+        if (amount > 0)
+            this.point += amount;
     }
 }
