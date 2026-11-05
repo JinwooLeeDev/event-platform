@@ -133,3 +133,4 @@ VALUES
 
     ('정현우', 'ORGANIZER', 'hyunwoo@naver.com', '1234',
      '010-6666-6666', 30000, CURRENT_TIMESTAMP);
+
