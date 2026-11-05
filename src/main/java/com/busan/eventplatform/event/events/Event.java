@@ -54,10 +54,6 @@ public class Event {
     @Column(nullable = false)
     private String description;
 
-    // 행사 날짜
-    @Column(nullable = false)
-    private LocalDate eventDate;
-
     // 모집 시작일
     @Column(nullable = false)
     private LocalDateTime applyStartAt;
@@ -65,10 +61,6 @@ public class Event {
     // 모집 마감일
     @Column(nullable = false)
     private LocalDateTime applyEndAt;
-
-    // 행사 정보가 생성된 시각 -- 미승인 초안 정리, 확인
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     // 행사 정보가 공개된 시각 -- 목록 정렬 유용
     @Column
@@ -85,7 +77,11 @@ public class Event {
     // 취소 사유
     private String cancellationReason; // 취소 전에는 null
 
-    // 생성 시각
+    // 행사 정보가 생성된 시각 -- 미승인 초안 정리, 확인
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // 생성 시각 넣기
     @PrePersist // 처음 저장하기 직전에 실행 -- 생성 시 자동 채움
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
