@@ -1,8 +1,11 @@
 package com.busan.eventplatform.user;
 
+
+
 public enum RegistrationStatus {
-    PENDING_REVIEW,  // 유료 행사: 결제 완료 후 주최자 심사 대기
-    CONFIRMED,       // 참가 확정 (무료 행사: 즉시 확정, 유료 행사: 심사 승인)
-    WAITING,         // 만석으로 인한 대기열 등록
-    CANCELLED        // 취소 (사용자 자발적 취소 또는 주최자 심사 반려)
+    HOLD,             // [임시] 결제/차감을 진행 중인 상태 (트랜잭션 내에서만 짧게 유지되거나 생략 가능)
+    WAITING,          // [유료/무료] 정원 초과로 대기열에 등록된 상태 (유료의 경우 포인트가 이미 차감된 상태)
+    PENDING_APPROVAL, // [유료] 결제 차감 후 정원 내 자리를 확보하여 주최측 승인을 기다리는 상태
+    CONFIRMED,        // [유료/무료] 참가 최종 확정 (무료는 즉시, 유료는 승인 후 진입)
+    CANCELLED         // 사용자 자진 취소, 주최자 반려, 대기 취소 등
 }
