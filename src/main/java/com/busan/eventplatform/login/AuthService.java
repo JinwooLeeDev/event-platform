@@ -40,7 +40,6 @@ public class AuthService {
                 )
                 .displayName(request.getDisplayName())
                 .role(Role.MEMBER)
-                .status(UserStatus.ACTIVE)
                 .preferredLocale("ko")
                 .build();
         user.verifyEmail(verifiedAt);
