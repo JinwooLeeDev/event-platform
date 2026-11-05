@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>마이페이지 | Busan Play</title>
+    {{> login/style}}
+    <style>
+        .mypage-details { margin: 0; }
+        .mypage-item { padding: 20px 0; border-bottom: 1px solid #e6edf7; }
+        .mypage-item:first-child { padding-top: 0; }
+        .mypage-item:last-child { border-bottom: none; }
+        .mypage-item dt { margin-bottom: 8px; color: #7384a8; font-size: 13px; font-weight: 600; }
+        .mypage-item dd { margin: 0; color: #14285f; font-size: 16px; font-weight: 600; line-height: 1.6; overflow-wrap: anywhere; }
+        .mypage-actions { margin-top: 28px; }
+        .mypage-edit-actions { display: flex; gap: 10px; margin-top: 24px; }
+        .mypage-edit-actions .auth-button { flex: 1; }
+        .mypage-logout { margin-top: 12px; }
+        #mypage-locale { width: 100%; height: 48px; padding: 0 12px; border: 1px solid #cbd8ec; border-radius: 10px; background: white; color: #14285f; font: inherit; font-size: 14px; }
+        #mypage-locale:focus-visible { outline: 3px solid #9cbfff; outline-offset: 3px; }
+        @media (max-width: 400px) { .mypage-edit-actions { flex-direction: column; } }
+    </style>
+</head>
+<body>
+{{> layout/header}}
+<main class="auth-page">
+    <div class="auth-layout">
+        <section class="auth-intro" aria-labelledby="welcome-title">
+            <span class="auth-badge">BUSAN PLAY · MY PAGE</span>
+            <h1 id="welcome-title">반가워요,<br>{{myPage.displayName}} 님.</h1>
+            <p>나의 회원 정보를 확인하고<br>부산에서의 즐거움을 이어가세요.</p>
+        </section>
+
+        <section class="auth-card" aria-labelledby="mypage-title">
+            <h2 id="mypage-title">내 정보</h2>
+            <p id="mypage-description" class="auth-subtitle">현재 등록된 회원 정보입니다.</p>
+            {{#successMessage}}
+                <p id="save-success" class="auth-message" data-state="success" role="status">{{successMessage}}</p>
+            {{/successMessage}}
+
+            <div id="mypage-view">
+                <dl class="mypage-details">
+                    <div class="mypage-item"><dt>이메일</dt><dd>{{myPage.email}}</dd></div>
+                    <div class="mypage-item"><dt>이름</dt><dd>{{myPage.displayName}}</dd></div>
+                    <div class="mypage-item"><dt>선호 언어</dt><dd id="locale-label" data-locale="{{myPage.preferredLocale}}">{{myPage.preferredLocale}}</dd></div>
+                    <div class="mypage-item"><dt>가입일</dt><dd>{{myPage.createdAt}}</dd></div>
+                </dl>
+                <div class="mypage-actions">
+                    <button id="edit-button" class="auth-button auth-submit" type="button" aria-controls="mypage-form" aria-expanded="false">내 정보 수정</button>
+                </div>
+            </div>
+
+            <form id="mypage-form" action="/mypage" method="post" hidden>
+                <div class="auth-field">
+                    <label for="mypage-email">이메일</label>
+                    <input id="mypage-email" type="text" value="{{myPage.email}}" readonly>
+                    <p class="auth-hint">이메일은 변경할 수 없습니다.</p>
+                </div>
+                <div class="auth-field">
+                    <label for="mypage-name">이름</label>
+                    <input id="mypage-name" name="displayName" type="text" value="{{myPage.displayName}}" autocomplete="name" maxlength="100" required>
+                </div>
+                <div class="auth-field">
+                    <label for="mypage-locale">선호 언어</label>
+                    <select id="mypage-locale" name="preferredLocale" data-current="{{myPage.preferredLocale}}" required>
+                        <option value="" disabled>언어를 선택해주세요</option>
+                        <option value="ko">한국어</option>
+                        <option value="en">English</option>
+                        <option value="ja">日本語</option>
+                        <option value="zh-CN">简体中文</option>
+                    </select>
+                </div>
+                <p class="auth-hint">가입일: {{myPage.createdAt}}</p>
+                <p id="edit-message" class="auth-message" role="status" aria-live="polite"></p>
+                <div class="mypage-edit-actions">
+                    <button id="save-button" class="auth-button" type="submit">변경 사항 저장</button>
+                    <button id="cancel-button" class="auth-button secondary" type="button">취소</button>
+                </div>
+            </form>
+
+            <form class="mypage-logout" action="/logout" method="post">
+                <button class="auth-button secondary auth-submit" type="submit">로그아웃</button>
+            </form>
+            <noscript><p class="auth-hint">정보 수정은 JavaScript를 활성화한 후 이용해주세요.</p></noscript>
+        </section>
+    </div>
+</main>
+{{> layout/footer}}
+<script>
+(() => {
+    const element = id => document.getElementById(id);
+    const view = element('mypage-view');
+    const form = element('mypage-form');
+    const name = element('mypage-name');
+    const locale = element('mypage-locale');
+    const edit = element('edit-button');
+    const save = element('save-button');
+    const cancel = element('cancel-button');
+    const message = element('edit-message');
+    const originalName = name.value;
+    const originalLocale = locale.dataset.current;
+    const languages = { ko: '한국어', en: 'English', ja: '日本語', 'zh-CN': '简体中文' };
+    let editing = false;
+    let submitting = false;
+
+    locale.value = Object.hasOwn(languages, originalLocale) ? originalLocale : '';
+    element('locale-label').textContent = Object.hasOwn(languages, originalLocale)
+        ? languages[originalLocale] : originalLocale;
+
+    function setEditing(enabled) {
+        editing = enabled;
+        view.hidden = enabled;
+        form.hidden = !enabled;
+        edit.setAttribute('aria-expanded', String(enabled));
+        element('mypage-description').textContent = enabled
+            ? '이름과 선호 언어를 변경한 후 저장해주세요.'
+            : '현재 등록된 회원 정보입니다.';
+        message.textContent = '';
+    }
+
+    edit.addEventListener('click', () => {
+        const success = element('save-success');
+        if (success) success.hidden = true;
+        setEditing(true);
+        name.focus();
+    });
+
+    cancel.addEventListener('click', () => {
+        if (submitting) return;
+        name.value = originalName;
+        locale.value = Object.hasOwn(languages, originalLocale) ? originalLocale : '';
+        setEditing(false);
+        edit.focus();
+    });
+
+    form.addEventListener('submit', event => {
+        if (!editing || submitting) {
+            event.preventDefault();
+            return;
+        }
+        if (!name.value.trim()) {
+            event.preventDefault();
+            message.textContent = '이름을 입력해주세요.';
+            message.dataset.state = 'error';
+            name.focus();
+            return;
+        }
+        if (!form.reportValidity()) {
+            event.preventDefault();
+            return;
+        }
+        submitting = true;
+        save.disabled = true;
+        cancel.disabled = true;
+        save.textContent = '저장 중…';
+    });
+
+    window.addEventListener('pageshow', () => {
+        submitting = false;
+        save.disabled = false;
+        cancel.disabled = false;
+        save.textContent = '변경 사항 저장';
+    });
+    setEditing(false);
+})();
+</script>
+</body>
+</html>
