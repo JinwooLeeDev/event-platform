@@ -1,7 +1,7 @@
 package com.busan.eventplatform.api.payment;
 
 import com.busan.eventplatform.global.error.exception.Exception404;
-import com.busan.eventplatform.login.UserRepository;
+import com.busan.eventplatform.login.personallogin.UserRepository;
 import com.busan.eventplatform.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
