@@ -3,6 +3,7 @@ package com.busan.eventplatform.company;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -21,5 +22,15 @@ public class CompanyController {
         companyService.join(joinDTO);
 
         return ResponseEntity.ok("회원가입에 성공");
+    }
+
+    @PostMapping("/company/{id}/update")
+    @ResponseBody
+    public ResponseEntity<?> update(@PathVariable Long id, CompanyRequest.UpdateDTO updateDTO) {
+        updateDTO.validate();
+
+        companyService.update(id, updateDTO);
+
+        return ResponseEntity.ok("회원 수정 완료");
     }
 }

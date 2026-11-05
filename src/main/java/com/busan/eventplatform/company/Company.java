@@ -34,11 +34,11 @@ public class Company {
     private String password;
 
     //    사업자 번호
-    @Column(nullable = false, length = 10, unique = true)
+    @Column(name = "business_number", nullable = false, length = 10, unique = true)
     private String businessNumber;
 
     //    대표자 이름
-    @Column(nullable = false, length = 50)
+    @Column(name = "representative_name", nullable = false, length = 50)
     private String representativeName;
 
     //    개업일자. (LocalDate가 현대적 API라 사용하기 좀 더 편함)

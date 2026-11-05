@@ -1,38 +1,6 @@
 package com.busan.eventplatform.user;
 
 import jakarta.persistence.*;
-<<<<<<< HEAD
-import org.hibernate.annotations.ColumnDefault;
-
-import java.sql.Timestamp;
-
-@Entity
-@Table(name = "user_tb")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)   @ColumnDefault( "0")
-    private Long point;
-
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private String role;    // admin? 일반회원? 기업?
-
-    @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String phone;
-
-    private Timestamp createdAt;
-=======
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -113,7 +81,7 @@ public class User {
     public void changeStatus(UserStatus status) {
         this.status = status;
         if(status == UserStatus.WITHDRAWN) {
-        this.withdrawnAt = Instant.now();
+            this.withdrawnAt = Instant.now();
         }
     }
 
@@ -121,10 +89,6 @@ public class User {
     public void verifyEmail() {
         this.emailVerifiedAt = Instant.now();
     }
-
-
-
->>>>>>> 739147a5eb5e74e78dc90fe95f5b1a866b798bc5
 
     @Column(name = "withdrawn_at")
     private Instant withdrawnAt; // 회원이 탈퇴한 시각 (데이터를 즉시 삭제하지 않고 보존 기간을 가질 때 활용)
