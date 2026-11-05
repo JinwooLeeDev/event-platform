@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,7 +53,7 @@ class AuthFlowTest {
         assertThat(saved.getRole()).isEqualTo(Role.MEMBER);
         assertThat(saved.getStatus()).isEqualTo(UserStatus.ACTIVE);
         assertThat(saved.getCreatedAt()).isNotNull();
-        assertThat(saved.getEmailVerifiredAt()).isCloseTo(verifiedAt, within(1, java.time.temporal.ChronoUnit.MILLIS));
+        assertThat(saved.getEmailVerifiedAt()).isCloseTo(verifiedAt, within(1, java.time.temporal.ChronoUnit.MILLIS));
         assertThat(session.getAttribute(Define.EMAIL_VERIFICATION)).isNull();
 
         String oldSessionId = session.getId();
@@ -61,9 +63,27 @@ class AuthFlowTest {
         SessionUserDto loggedIn = (SessionUserDto) session.getAttribute(AuthController.SESSION_USER);
         assertThat(loggedIn.getId()).isEqualTo(saved.getId());
         assertThat(loggedIn.getDisplayName()).isEqualTo("테스트회원");
+        MockHttpServletRequest viewRequest = new MockHttpServletRequest();
+        viewRequest.setSession(session);
+        ExtendedModelMap model = new ExtendedModelMap();
+        new LoginViewAdvice().addLoginUser(viewRequest, model);
+        assertThat(model.get("loginUser")).isSameAs(loggedIn);
+        assertThat(model.get("isPersonal")).isEqualTo(true);
         mvc.perform(post("/logout").session(session))
                 .andExpect(redirectedUrl("/login"));
         assertThat(session.isInvalid()).isTrue();
+    }
+
+    @Test
+    void invalidLoginDoesNotCreateLoginSession() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
+        mvc.perform(post("/login").session(session)
+                        .param("email", UUID.randomUUID() + "@example.com")
+                        .param("password", "incorrect"))
+                .andExpect(status().isUnauthorized());
+        assertThat(session.getAttribute(AuthController.SESSION_USER)).isNull();
     }
 
     @Test
@@ -94,7 +114,7 @@ class AuthFlowTest {
         for (UserStatus state : new UserStatus[]{UserStatus.SUSPENDED, UserStatus.WITHDRAWN}) {
             String email = UUID.randomUUID() + "@example.com";
             users.saveAndFlush(User.builder().emailNormalized(email).passwordHash(encoder.encode("password123"))
-                    .displayName("제한회원").status(state).build());
+                    .displayName("제한회원").role(Role.MEMBER).status(state).build());
             LoginReqDto login = new LoginReqDto();
             login.setEmail(email);
             login.setPassword("password123");

@@ -19,7 +19,6 @@ public class LoginViewAdvice {
         Object value = session.getAttribute(AuthController.SESSION_USER);
         if (!(value instanceof SessionUserDto user)) return;
         model.addAttribute("loginUser", user);
-//        Todo - User 엔티티 클래스 완성 이후 주석 해제
         model.addAttribute("isAdmin", user.isAdmin());
         model.addAttribute("isPersonal", user.isMember());
     }

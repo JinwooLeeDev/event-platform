@@ -47,12 +47,11 @@ public class AuthController {
     public String login(@ModelAttribute LoginReqDto request, HttpServletRequest servletRequest, HttpSession session
     ) {
         // 이메일·비밀번호·회원 상태 검증
-        // SessionUserDto sessionUser = authService.login(request);
-        // Todo - authService.login 메서드 주석 해제하고 적용
+        SessionUserDto sessionUser = authService.login(request);
         // 로그인 성공 시 세션 ID 교체
         servletRequest.changeSessionId();
 
-//        session.setAttribute(SESSION_USER, sessionUser);
+        session.setAttribute(SESSION_USER, sessionUser);
 
         return "redirect:/";
     }

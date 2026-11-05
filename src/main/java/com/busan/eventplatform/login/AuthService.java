@@ -33,7 +33,6 @@ public class AuthService {
         if (userRepository.existsByEmailNormalized(request.getEmail())) {
             throw new Exception400("이미 가입된 이메일입니다.");
         }
-        // Todo - 유저 클래스 완성되면 완성본으로 수정
         User user = User.builder()
                 .emailNormalized(request.getEmail())
                 .passwordHash(
@@ -44,6 +43,7 @@ public class AuthService {
                 .status(UserStatus.ACTIVE)
                 .preferredLocale("ko")
                 .build();
+        user.verifyEmail(verifiedAt);
          userRepository.saveAndFlush(user);
     }
 
@@ -52,12 +52,11 @@ public class AuthService {
         request.validate();
         User user = userRepository.findByEmailNormalized(request.getEmail())
                 .orElseThrow(() -> new Exception401("이메일 또는 비밀번호가 올바르지 않습니다."));
-//         Todo - User 클래스 완성되면 수정
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new Exception401("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
         if (user.getStatus() != UserStatus.ACTIVE || user.getWithdrawnAt() != null) {
-            throw new Exception403("현재 로그인할 수 없는 계정입니다.");
+            throw new Exception403("현재 로그인할 수 없는 계정입니다."); // (상태가 ACTIVE가 아닌 계정, 차단된 계정 등등)
         }
         return SessionUserDto.builder()
                 .id(user.getId())
