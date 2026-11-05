@@ -1,9 +1,9 @@
 package com.busan.eventplatform.api.payment;
 
 import com.busan.eventplatform.global.util.Define;
-import com.busan.eventplatform.login.AuthController;
-import com.busan.eventplatform.login.SessionUserDto;
-import com.busan.eventplatform.login.UserRepository;
+import com.busan.eventplatform.login.personallogin.AuthController;
+import com.busan.eventplatform.login.personallogin.SessionUserDto;
+import com.busan.eventplatform.login.personallogin.UserRepository;
 import com.busan.eventplatform.user.User;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

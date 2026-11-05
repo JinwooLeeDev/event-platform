@@ -119,5 +119,4 @@ public class User {
         }
         this.point -= fee;
     }
-
 }
