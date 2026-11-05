@@ -38,8 +38,10 @@
                 <p id="save-success" class="auth-message" data-state="success" role="status">{{successMessage}}</p>
             {{/successMessage}}
 
+
             <div id="mypage-view">
                 <dl class="mypage-details">
+                    <div class="mypage-item"><dt>내 보유 포인트</dt><dd style="color: dodgerblue;" id="currentPoint">{{myPage.point}}</dd></div>
                     <div class="mypage-item"><dt>이메일</dt><dd>{{myPage.email}}</dd></div>
                     <div class="mypage-item"><dt>이름</dt><dd>{{myPage.displayName}}</dd></div>
                     <div class="mypage-item"><dt>선호 언어</dt><dd id="locale-label" data-locale="{{myPage.preferredLocale}}">{{myPage.preferredLocale}}</dd></div>
@@ -47,6 +49,9 @@
                 </dl>
                 <div class="mypage-actions">
                     <button id="edit-button" class="auth-button auth-submit" type="button" aria-controls="mypage-form" aria-expanded="false">내 정보 수정</button>
+                    <a href="/charge">
+                        <button id="charge-button" class="auth-button auth-submit" type="button" aria-controls="mypage-form" aria-expanded="false">포인트 충전하러 가기</button>
+                    </a>
                 </div>
             </div>
 
@@ -97,6 +102,7 @@
     const save = element('save-button');
     const cancel = element('cancel-button');
     const message = element('edit-message');
+    const currentPoint = element('currentPoint');
     const originalName = name.value;
     const originalLocale = locale.dataset.current;
     const languages = { ko: '한국어', en: 'English', ja: '日本語', 'zh-CN': '简体中文' };
@@ -162,6 +168,8 @@
         save.textContent = '변경 사항 저장';
     });
     setEditing(false);
+
+    currentPoint.innerText = Number(currentPoint.innerText).toLocaleString("ko-KR") + "P"
 })();
 </script>
 </body>
