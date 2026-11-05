@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
@@ -49,6 +50,8 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+
+
     // 객체 생성 시 가독성과 안정성을 높이는 Builder 패턴 적용
     @Builder
     public User(String emailNormalized, String passwordHash, String displayName, Role role, UserStatus status, String preferredLocale) {
@@ -65,6 +68,10 @@ public class User {
     protected void onCreate() {
         this.createdAt = Instant.now();
     }
+
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int point;
 
     // 비즈니스 메서드
     // 1. 회원의 비밀번호를 새로운 암호화(해시) 문자열로 변경하기
@@ -91,6 +98,9 @@ public class User {
                 java.util.Objects.requireNonNull(verifiedAt);
     }
 
+    // 유저가 포인트 충전시 사용할 메서드.
+    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
+  
     // displayName을 이름이 아닌 닉네임으로 변경해서 닉네임 변경을 하도록하는 메서드.
     public void changeDisplayName(String displayName) {
         this.displayName = displayName;

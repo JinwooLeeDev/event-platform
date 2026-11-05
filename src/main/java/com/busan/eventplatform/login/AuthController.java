@@ -53,6 +53,11 @@ public class AuthController {
 
         session.setAttribute(SESSION_USER, sessionUser);
 
+        // TODO 로그인할 sessionUser가 "User" 인지 , "Company"인지 구분해야함.
+//        session.setAttribute("clientType", Client.ClientType.USER);
+//        session.setAttribute("clientType", Client.ClientType.COMPANY);
+
+
         return "redirect:/";
     }
 

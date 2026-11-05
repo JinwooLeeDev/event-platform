@@ -1,5 +1,7 @@
 package com.busan.eventplatform.api.payment;
 
+import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.login.UserRepository;
 import com.busan.eventplatform.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,20 +16,26 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
+
+    // user 가져오기.
+    public User sessionUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new Exception404("유저를 찾을 수 없음"));
+    }
+
 
     // 처음 결제요청시 결제건 생성.
     @Transactional
     public String createPayment(Long userId, int amount) {
     String paymentId = createPaymentId(userId);
-
-    // TODO userId로 user 조회. userRepository 통해서.  추후 변경.
-    User user = paymentRepository.findUser(userId).orElseThrow(() -> new RuntimeException("유저없음 추후 변경."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저없음 추후 변경."));
 
     Payment payment = Payment.builder()
             .user(user)
             .amount(amount)
             .paymentId(paymentId)
             .build();
+
     paymentRepository.save(payment);
 
         return paymentId;
@@ -40,7 +48,7 @@ public class PaymentService {
     @Transactional
     public PaymentRes.CompleteDto complete(Long userId, PaymentRes.PortOnePayment portOnePayment , String paymentId) {
         // TODO userId로 user 조회. userRepository 통해서.  추후 변경.
-        User user = paymentRepository.findUser(userId).orElseThrow(() -> new RuntimeException("유저없음 추후 변경."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저없음 추후 변경."));
 
         // 1. 우리 서버가 요청한 결제가 맞는지 확인.
         Payment payment = paymentRepository.findByPayment(paymentId)
@@ -62,10 +70,15 @@ public class PaymentService {
             throw new RuntimeException("요청하신 금액과 일치하지 않습니다. 다시 시도해주세요");
         }
 
-        // 6. 최종 DB 반영 + status 값 변경.
+        // 6. 최종 DB 반영 + status 값 변경 + 유저 / company point 변경.
         payment.confirmPay();
-        log.info("payment 수정 후 : {}" , payment.getStatus());
+        user.chargePoint(payment.getAmount());
         return new PaymentRes.CompleteDto(payment.getAmount());
     }
 
+    // 포인트 충전 , 결제 , 환불시 화면에 즉시 보여지기 위해 현재 보유 포인트 가져오는 메서드.
+    public int currentPoint(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new Exception404("유저를 찾을 수 없음"));
+        return user.getPoint();
+    }
 }
