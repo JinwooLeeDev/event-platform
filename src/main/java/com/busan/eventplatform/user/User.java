@@ -74,10 +74,6 @@ public class User {
         this.createdAt = Instant.now();
     }
 
-    @Column(nullable = false)
-    @ColumnDefault("0")
-    private int point;
-
     // 비즈니스 메서드
     // 1. 회원의 비밀번호를 새로운 암호화(해시) 문자열로 변경하기
     public void changePassword(String newPasswordHash) {
@@ -124,8 +120,4 @@ public class User {
         this.point -= fee;
     }
 
-    public void chargePoint(int amount) {
-        if (amount > 0)
-            this.point += amount;
-    }
 }
