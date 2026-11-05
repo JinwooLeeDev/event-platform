@@ -20,7 +20,3 @@ spring:
       data-locations:
         - classpath:db/local-mysql/data.sql # # data.sql 파일 읽기위한 설정.
 
-portone:
-  store-id: ${NAVER_STORE_ID}
-  channel-key: ${NAVER_CHANNEL_KEY}
-  secret-key: ${NAVER_SECRET_KEY}

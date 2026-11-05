@@ -27,8 +27,8 @@
                         <i class="bi bi-wallet2 text-success me-2"></i>
                         현재 보유 포인트
                     </span>
-                    <h4 class="fw-bold text-success mb-0">
-                        {너의 포인트}P
+                    <h4 class="fw-bold text-success mb-0" id="myPoint">
+                        {{myPoint}}
                     </h4>
                 </div>
             </div>
@@ -115,8 +115,7 @@
             </button>
 
             <p class="text-center text-secondary small mt-3 mb-0">
-                <i class="bi bi-info-circle me-1"></i>
-                버튼 클릭 시 네이버페이 결제창으로 이동합니다.
+                <i class="bi bi-info-circle me-1"></i>버튼 클릭 시 네이버페이 결제창으로 이동합니다.
             </p>
 
         </div>
@@ -124,13 +123,11 @@
 
     <div class="bg-light rounded-4 p-4 mt-4">
         <p class="mb-2">
-            <i class="bi bi-info-circle text-success me-2"></i>
-            충전한 포인트는 티켓 예매 및 서비스 이용에 사용할 수 있습니다.
+            <i class="bi bi-info-circle text-success me-2"></i>충전한 포인트는 티켓 예매 및 서비스 이용에 사용할 수 있습니다.
         </p>
 
         <p class="mb-0">
-            <i class="bi bi-info-circle text-success me-2"></i>
-            충전 및 환불 정책은 운영정책을 확인해 주세요.
+            <i class="bi bi-info-circle text-success me-2"></i>충전 및 환불 정책은 운영정책을 확인해 주세요.
         </p>
     </div>
 </div>
@@ -146,6 +143,10 @@
     const pointBtns = document.querySelectorAll(".amount-btn");
     const expectedPoint = document.querySelector("#expectedPoint")
     const inputPoint = document.querySelector("#chargeAmount")
+    const myPoint = document.querySelector("#myPoint")
+
+    const point = Number(myPoint.textContent.trim())
+    myPoint.innerText = point.toLocaleString() + "P"
 
     document.querySelector("#amount-btn-group").addEventListener("click" , function (e) {
         const clickBtn = e.target.closest(".amount-btn")
@@ -153,12 +154,12 @@
         clickBtn.classList.add("active")
         selectedPoint = Number(clickBtn.dataset.amount)
 
-        expectedPoint.innerText = selectedPoint + "P"
+        expectedPoint.innerText = selectedPoint.toLocaleString() + "P"
     })
 
     inputPoint.addEventListener("input" , function () {
         selectedPoint = Number(inputPoint.value);
-        expectedPoint.innerText = selectedPoint + "P"
+        expectedPoint.innerText = selectedPoint.toLocaleString() + "P"
     })
 
     // '네이버 충전하기' 버튼 클릭
@@ -189,12 +190,18 @@
                payMethod: "EASY_PAY"
            })
 
+           if(!payment || payment.code !== undefined) {
+               alert("결제처리가 중단되었습니다")
+               return;
+           }
+
            const completeRes = await fetch("/api/payment/complete" , {
                method : "post" ,
                headers : {"Content-Type" : "application/json"} ,
                body : JSON.stringify({paymentId : payment.paymentId})
            })
            const completeReq = await completeRes.json()
+           myPoint.innerText = completeReq.currentPoint.toLocaleString() + "P"
 
        }catch (e) {
 

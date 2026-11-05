@@ -94,11 +94,11 @@ VALUES
 
 ------------------------------ User테이블----------------------------------------
 -- 로컬 확인용 계정의 비밀번호는 1234입니다. BCrypt 해시로 저장합니다.
-INSERT INTO users(display_name, role, email_normalized, password_hash, status, preferred_locale, email_verified_at, created_at)
+INSERT INTO users(display_name, role, email_normalized, point , password_hash, status, preferred_locale, email_verified_at, created_at)
 VALUES
-    ('관리자', 'ADMIN', 'admin@busan.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('김민수', 'MEMBER', 'minsu@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('이서연', 'MEMBER', 'seoyeon@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('박지훈', 'MEMBER', 'jihun@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('최유진', 'MEMBER', 'yujin@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('정현우', 'MEMBER', 'hyunwoo@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('관리자', 'ADMIN', 'admin@busan.com', 10000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('김민수', 'MEMBER', 'minsu@naver.com', 0 ,'$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('이서연', 'MEMBER', 'seoyeon@naver.com', 40000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('박지훈', 'MEMBER', 'jihun@naver.com', 70000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('최유진', 'MEMBER', 'yujin@naver.com', 150000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('정현우', 'MEMBER', 'hyunwoo@naver.com', 25000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
