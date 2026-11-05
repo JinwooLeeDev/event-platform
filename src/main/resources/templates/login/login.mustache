@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>로그인 | Busan Play</title>
+    {{> login/style}}
+</head>
+<body>
+{{> layout/header}}
+<main class="auth-page">
+    <div class="auth-layout">
+        <section class="auth-intro" aria-labelledby="welcome-title">
+            <span class="auth-badge">BUSAN PLAY · WELCOME BACK</span>
+            <h1 id="welcome-title">부산의 즐거움,<br>다시 이어가세요.</h1>
+            <p>가보고 싶은 행사부터 새로운 만남까지.<br>로그인하고 나만의 부산을 만나보세요.</p>
+        </section>
+        <section class="auth-card" aria-labelledby="form-title">
+            <h2 id="form-title">로그인</h2>
+            <p class="auth-subtitle">가입하신 이메일로 로그인해주세요.</p>
+            <form action="/login" method="post">
+                <div class="auth-field">
+                    <label for="email">이메일</label>
+                    <input id="email" name="email" type="text" inputmode="email" autocomplete="username" maxlength="254" placeholder="name@example.com" required>
+                </div>
+                <div class="auth-field">
+                    <label for="password">비밀번호</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" placeholder="비밀번호를 입력해주세요" required>
+                </div>
+                <button class="auth-button auth-submit" type="submit">로그인</button>
+            </form>
+            <p class="auth-links">아직 회원이 아니신가요? <a href="/signup">회원가입</a></p>
+        </section>
+    </div>
+</main>
+{{> layout/footer}}
+</body>
+</html>
