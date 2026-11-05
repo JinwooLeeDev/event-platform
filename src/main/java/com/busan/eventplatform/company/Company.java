@@ -9,6 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -42,7 +43,7 @@ public class Company {
     private String representativeName;
 
     //    개업일자. (LocalDate가 현대적 API라 사용하기 좀 더 편함)
-    @Column(nullable = false)
+    @Column(name = "opened_on", nullable = false)
     private LocalDate openedOn;
 
     //    기업 주소
@@ -50,15 +51,15 @@ public class Company {
     private String address;
 
     //    사업자 등록증 파일 제출
-    @Column(nullable = true) // TODO 일단 true, 파일 처리로직이 구현되면 false로 사업자 등록증을 무조건 제출해야 함.
+    @Column(name = "business_certificate_file_name", nullable = true) // TODO 일단 true, 파일 처리로직이 구현되면 false로 사업자 등록증을 무조건 제출해야 함.
     private String businessCertificateFileName;
 
     //    담당자 이름
-    @Column(nullable = false, length = 20)
+    @Column(name = "contact_person_name", nullable = false, length = 20)
     private String contactPersonName;
 
     //    담당자 연락처
-    @Column(nullable = false, length = 13)
+    @Column(name = "contact_person_phone", nullable = false, length = 13)
     private String contactPersonPhone;
 
     //    관리자 인증 상태
@@ -73,8 +74,11 @@ public class Company {
 
     //    계정 생성일
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
 
     @Builder
     public Company(String name,
@@ -146,9 +150,18 @@ public class Company {
         }
     }
 
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
 //    인증 요구상태로 전환
     public void requestReview() {
         this.status = CompanyStatus.PENDING;
+    }
+
+    public void verifyEmail(Instant verifiedAt) {
+        this.emailVerifiedAt =
+                java.util.Objects.requireNonNull(verifiedAt);
     }
 
 }

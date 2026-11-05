@@ -1,5 +1,6 @@
 package com.busan.eventplatform.company;
 
+import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -21,64 +22,63 @@ public class CompanyRequest {
         private String contactPersonName;
         private String contactPersonPhone;
 
-        //        TODO 글로벌 예외 적용
         public void validate() {
             if (name == null || name.isBlank()) {
-                throw new RuntimeException("기업명을 입력해주세요.");
+                throw new Exception400("기업명을 입력해주세요.");
             }
 
             if (email == null || email.isBlank()) {
-                throw new RuntimeException("이메일을 입력해주세요.");
+                throw new Exception400("이메일을 입력해주세요.");
             }
 
             if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-                throw new RuntimeException("이메일 형식으로 입력해주세요.");
+                throw new Exception400("이메일 형식으로 입력해주세요.");
             }
 
             if (password == null || password.isBlank()) {
-                throw new RuntimeException("비밀번호를 입력해주세요.");
+                throw new Exception400("비밀번호를 입력해주세요.");
             }
 
             if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$")) {
-                throw new RuntimeException("비밀번호는 영문자, 숫자, 특수문자($@!%*#?&)를 모두 포함한 8자~16자여야 합니다.");
+                throw new Exception400("비밀번호는 영문자, 숫자, 특수문자($@!%*#?&)를 모두 포함한 8자~16자여야 합니다.");
             }
 
             if (businessNumber == null || businessNumber.isBlank()) {
-                throw new RuntimeException("사업자 번호를 입력해주세요.");
+                throw new Exception400("사업자 번호를 입력해주세요.");
             }
 
             if (representativeName == null || representativeName.isBlank()) {
-                throw new RuntimeException("대표자 명을 입력해주세요.");
+                throw new Exception400("대표자 명을 입력해주세요.");
             }
 
             if (openedOn == null) {
-                throw new RuntimeException("개업일자를 입력해주세요.");
+                throw new Exception400("개업일자를 입력해주세요.");
             }
 
             if (address == null || address.isBlank()) {
-                throw new RuntimeException("기업 주소를 입력해주세요.");
+                throw new Exception400("기업 주소를 입력해주세요.");
             }
 
             // TODO: 파일 처리 구현 후 활성화
             // if (businessCertificateFileName == null
             //         || businessCertificateFileName.isBlank()) {
-            //     throw new RuntimeException("사업자 등록증을 제출해주세요.");
+            //     throw new Exception400("사업자 등록증을 제출해주세요.");
             // }
 
             if (contactPersonName == null || contactPersonName.isBlank()) {
-                throw new RuntimeException("담당자 명을 입력해주세요.");
+                throw new Exception400("담당자 명을 입력해주세요.");
             }
 
             if (contactPersonPhone == null || contactPersonPhone.isBlank()) {
-                throw new RuntimeException("담당자 전화번호를 입력해주세요.");
+                throw new Exception400("담당자 전화번호를 입력해주세요.");
             }
         }
 
-        public Company toEntity() {
+        public Company toEntity(String encodedPassword) {
             return Company.builder()
                     .name(name)
                     .email(email)
-                    .password(password)
+                    .password(encodedPassword)
                     .businessNumber(businessNumber)
                     .representativeName(representativeName)
                     .openedOn(openedOn)
@@ -124,7 +124,7 @@ public class CompanyRequest {
                     && representativeName == null
                     && address == null
                     && businessCertificateFileName == null) {
-                throw new RuntimeException("수정할 정보를 입력해주세요.");
+                throw new Exception400("수정할 정보를 입력해주세요.");
             }
 
             // 2. 전달된 값이 공백이면 거부
@@ -139,14 +139,29 @@ public class CompanyRequest {
 
             if (email != null) {
                 if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-                    throw new RuntimeException("이메일 형식이 올바르지 않습니다.");
+                    throw new Exception400("이메일 형식이 올바르지 않습니다.");
                 }
             }
 
             if (password != null) {
                 if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$")) {
-                    throw new RuntimeException("비밀번호 형식이 올바르지 않습니다.");
+                    throw new Exception400("비밀번호 형식이 올바르지 않습니다.");
                 }
+            }
+        }
+    }
+
+    @Data
+    public static class LoginDTO {
+        private String email; //기업 이메일
+        private String password; //기업 비밀번호
+
+        public void validate() {
+            if (email == null || email.trim().isEmpty()) {
+                throw new Exception400("사용자명은 필수 입니다.");
+            }
+            if (password == null || password.trim().isEmpty()) {
+                throw new Exception400("비밀번호는 필수 입니다.");
             }
         }
     }

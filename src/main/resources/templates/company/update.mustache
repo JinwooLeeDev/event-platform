@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>기업 정보 수정</title>
+</head>
+<body>
+{{>layout/header}}
+{{>company/style}}
+<main class="auth-page">
+    <section class="auth-card company-card">
+
+        <h1>기업 정보 수정</h1>
+
+        <p>
+            담당자 이름·연락처는 일반 수정입니다.
+            기업명·사업자번호·대표자명·주소를 변경하면 심사 대기로 전환됩니다.
+        </p>
+
+        <form id="updateForm" action="/company/update" method="post">
+            {{#company}}
+            <fieldset>
+                <legend>계정 정보</legend>
+
+                <div class="auth-field">
+                    <label for="email">이메일</label>
+
+                    <div class="auth-row company-verification-row">
+                        <input id="email"
+                               name="email"
+                               type="email"
+                               value="{{email}}"
+                               maxlength="254"
+                               autocomplete="username"
+                               placeholder="name@example.com"
+                               aria-describedby="emailMessage"
+                               required>
+
+                        <button id="sendEmailCode"
+                                class="auth-button secondary"
+                                type="button">
+                            인증번호 발송
+                        </button>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="emailCode">인증번호</label>
+
+                    <div class="auth-row company-verification-row">
+                        <input id="emailCode"
+                               type="text"
+                               inputmode="numeric"
+                               autocomplete="one-time-code"
+                               maxlength="6"
+                               placeholder="숫자 6자리"
+                               aria-describedby="emailMessage">
+
+                        <button id="confirmEmailCode"
+                                class="auth-button secondary"
+                                type="button">
+                            인증 확인
+                        </button>
+                    </div>
+
+                    <p id="emailMessage"
+                       class="auth-message"
+                       role="status"
+                       aria-live="polite">
+                        이메일을 변경하려면 새 주소를 인증해주세요.
+                    </p>
+                </div>
+
+                <p>
+                    <label for="password">새 비밀번호</label><br>
+                    <input id="password"
+                           name="password"
+                           type="password"
+                           autocomplete="new-password"
+                           minlength="8"
+                           maxlength="16">
+                    <br>
+                    <small>변경할 경우에만 입력하세요.</small>
+                </p>
+
+                <p>
+                    <label for="passwordConfirm">새 비밀번호 확인</label><br>
+                    <input id="passwordConfirm"
+                           type="password"
+                           autocomplete="new-password">
+                    <p id="passwordMatchMessage"
+                       class="auth-message"
+                       role="status"
+                       aria-live="polite"></p>
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <legend>담당자 정보 — 일반 수정</legend>
+
+                <p>
+                    <label for="contactPersonName">담당자 이름</label><br>
+                    <input id="contactPersonName"
+                           name="contactPersonName"
+                           value="{{contactPersonName}}"
+                           maxlength="20"
+                           required>
+                </p>
+
+                <p>
+                    <label for="contactPersonPhone">담당자 연락처</label><br>
+                    <input id="contactPersonPhone"
+                           name="contactPersonPhone"
+                           type="tel"
+                           value="{{contactPersonPhone}}"
+                           maxlength="13"
+                           required>
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <legend>기업 인증 정보 — 변경 시 재심사</legend>
+
+                {{#pending}}
+                <p class="company-review-notice" role="status">
+                    검토 중에는 기업 인증 정보 수정이 불가합니다.
+                </p>
+                {{/pending}}
+
+                <p>
+                    <label for="name">기업명</label><br>
+                    <input id="name"
+                           name="name"
+                           value="{{name}}"
+                           {{#pending}}readonly{{/pending}}
+                           maxlength="50"
+                           data-review
+                           required>
+                </p>
+
+                <p>
+                    <label for="businessNumber">사업자등록번호</label><br>
+                    <input id="businessNumber"
+                           name="businessNumber"
+                           value="{{businessNumber}}"
+                           {{#pending}}readonly{{/pending}}
+                           pattern="[0-9]{10}"
+                           minlength="10"
+                           maxlength="10"
+                           inputmode="numeric"
+                           data-review
+                           required>
+                </p>
+
+                <p>
+                    <label for="representativeName">대표자명</label><br>
+                    <input id="representativeName"
+                           name="representativeName"
+                           value="{{representativeName}}"
+                           {{#pending}}readonly{{/pending}}
+                           maxlength="50"
+                           data-review
+                           required>
+                </p>
+
+                <p>
+                    <label for="address">기업 주소</label><br>
+                    <input id="address"
+                           name="address"
+                           value="{{address}}"
+                           {{#pending}}readonly{{/pending}}
+                           maxlength="255"
+                           data-review
+                           required>
+                </p>
+
+                <p>
+                    <label for="certificate">새 사업자등록증</label><br>
+                    <input id="certificate"
+                           type="file"
+                           accept=".pdf,.jpg,.jpeg,.png"
+                           disabled>
+                    <br>
+                    <small>파일 교체 기능은 준비 중입니다.</small>
+                </p>
+
+                <p>현재 심사 상태:
+                    {{#pending}}
+                    <span class="review-badge review-badge--pending">검토 중</span>
+                    {{/pending}}
+
+                    {{#approved}}
+                    <span class="review-badge review-badge--approved">승인</span>
+                    {{/approved}}
+
+                    {{#feedbackNeeded}}
+                    <span class="review-badge review-badge--danger">보완 필요</span>
+                    {{/feedbackNeeded}}
+
+                    {{#rejected}}
+                    <span class="review-badge review-badge--danger">반려</span>
+                    {{/rejected}}
+
+                    {{#suspended}}
+                    <span class="review-badge review-badge--danger">이용 정지</span>
+                    {{/suspended}}</p>
+            </fieldset>
+            {{/company}}
+
+            <p id="reviewNotice" role="status" hidden>
+                기업 인증 정보가 변경되었습니다.
+                저장하면 검토 중 상태로 전환되며 관리자 재심사가 필요합니다.
+            </p>
+
+            <p id="formMessage" role="alert"></p>
+
+            <div class="company-form-actions">
+                <button type="submit">수정 저장</button>
+                <a class="company-cancel-button" href="/company/detail">취소</a>
+            </div>
+        </form>
+    </section>
+</main>
+
+{{>layout/footer}}
+
+<script>
+    const form = document.getElementById("updateForm");
+    const message = document.getElementById("formMessage");
+    const reviewNotice = document.getElementById("reviewNotice");
+
+    const emailInput = document.getElementById("email");
+    const emailCode = document.getElementById("emailCode");
+    const emailMessage = document.getElementById("emailMessage");
+    const sendEmailCode = document.getElementById("sendEmailCode");
+    const confirmEmailCode = document.getElementById("confirmEmailCode");
+
+    const passwordInput = document.getElementById("password");
+    const passwordConfirm = document.getElementById("passwordConfirm");
+
+    const passwordMatchMessage = document.getElementById("passwordMatchMessage");
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    const reviewFields = [...form.querySelectorAll("[data-review]")];
+
+    const passwordPattern =
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@!%*#?&])[A-Za-z\d$@!%*#?&]{8,16}$/;
+
+    let verifiedEmail = null;
+    let emailBusy = false;
+    let submitting = false;
+
+    function requiresReview() {
+        return reviewFields.some(input =>
+            input.value !== input.defaultValue
+        );
+    }
+
+    function isEmailChanged() {
+        return emailInput.value !== emailInput.defaultValue;
+    }
+
+    function updateButtons() {
+        sendEmailCode.disabled = emailBusy || submitting;
+        confirmEmailCode.disabled = emailBusy || submitting;
+        submitButton.disabled = emailBusy || submitting;
+    }
+
+    function showEmailMessage(text, state) {
+        emailMessage.textContent = text;
+        emailMessage.dataset.state = state;
+    }
+
+    // 기존 정보와 달라졌는지 표시
+    form.addEventListener("input", () => {
+        reviewNotice.hidden = !requiresReview();
+        message.textContent = "";
+    });
+
+    // 인증 후 주소를 바꾸면 인증 완료 표시 초기화
+    emailInput.addEventListener("input", () => {
+        verifiedEmail = null;
+        emailCode.value = "";
+
+        showEmailMessage(
+            isEmailChanged()
+                ? "새 이메일 인증을 완료해주세요."
+                : "기존 이메일을 유지합니다.",
+            "info"
+        );
+    });
+
+    async function emailRequest(url, body) {
+        const response = await fetch(url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+            throw new Error(
+                "인증 요청을 처리하지 못했습니다. HTTP " + response.status
+            );
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "이메일 인증 요청에 실패했습니다."
+            );
+        }
+
+        return data;
+    }
+
+    async function runEmailRequest(task) {
+        if (emailBusy || submitting) return;
+
+        emailBusy = true;
+        emailInput.readOnly = true;
+        emailCode.readOnly = true;
+        updateButtons();
+
+        try {
+            await task();
+        } catch (error) {
+            showEmailMessage(error.message, "error");
+        } finally {
+            emailBusy = false;
+            emailInput.readOnly = false;
+            emailCode.readOnly = false;
+            updateButtons();
+        }
+    }
+
+    // 새 이메일로 인증번호 발송
+    sendEmailCode.addEventListener("click", () => {
+        if (emailBusy || submitting) return;
+
+        if (!emailInput.reportValidity()) return;
+
+        if (!isEmailChanged()) {
+            showEmailMessage(
+                "변경할 새 이메일을 입력해주세요.",
+                "error"
+            );
+            return;
+        }
+
+        runEmailRequest(async () => {
+            verifiedEmail = null;
+            showEmailMessage("인증번호를 발송하고 있습니다.", "info");
+
+            const data = await emailRequest(
+                "/api/v1/email-verifications",
+                {email: emailInput.value}
+            );
+
+            emailCode.value = "";
+            showEmailMessage(data.message, "success");
+        });
+    });
+
+    // 인증번호 확인
+    confirmEmailCode.addEventListener("click", () => {
+        if (emailBusy || submitting) return;
+
+        if (!emailInput.reportValidity()) return;
+
+        if (!isEmailChanged()) {
+            showEmailMessage(
+                "기존 이메일은 다시 인증하지 않아도 됩니다.",
+                "info"
+            );
+            return;
+        }
+
+        if (!emailCode.value.trim()) {
+            showEmailMessage("인증번호를 입력해주세요.", "error");
+            return;
+        }
+
+        runEmailRequest(async () => {
+            verifiedEmail = null;
+
+            const data = await emailRequest(
+                "/api/v1/email-verifications/confirm",
+                {
+                    email: emailInput.value,
+                    code: emailCode.value.trim()
+                }
+            );
+
+            verifiedEmail = data.verified ? emailInput.value : null;
+
+            showEmailMessage(
+                data.message,
+                data.verified ? "success" : "error"
+            );
+        });
+    });
+
+    // 수정 폼 제출
+    form.addEventListener("submit", (event) => {
+        message.textContent = "";
+
+        if (submitting) {
+            event.preventDefault();
+            return;
+        }
+
+        if (emailBusy) {
+            event.preventDefault();
+            message.textContent =
+                "이메일 인증 요청이 끝난 뒤 저장해주세요.";
+            return;
+        }
+
+        const inputs = [
+            ...form.querySelectorAll("input[name]:not(:disabled)")
+        ];
+
+        const changedInputs = inputs.filter(input =>
+            input.value !== input.defaultValue
+        );
+
+        if (changedInputs.length === 0) {
+            event.preventDefault();
+            message.textContent = "변경된 정보가 없습니다.";
+            return;
+        }
+
+        if (changedInputs.some(input => input.value.trim() === "")) {
+            event.preventDefault();
+            message.textContent =
+                "수정할 정보는 공백으로 입력할 수 없습니다.";
+            return;
+        }
+
+        if (isEmailChanged() && verifiedEmail !== emailInput.value) {
+            event.preventDefault();
+            message.textContent = "새 이메일 인증을 완료해주세요.";
+            return;
+        }
+
+        if (passwordInput.value !== "") {
+            if (!passwordPattern.test(passwordInput.value)) {
+                event.preventDefault();
+                message.textContent =
+                    "새 비밀번호는 영문·숫자·특수문자($@!%*#?&)를 포함한 8~16자로 입력해주세요.";
+                return;
+            }
+
+            if (passwordInput.value !== passwordConfirm.value) {
+                event.preventDefault();
+                message.textContent =
+                    "비밀번호 확인이 일치하지 않습니다.";
+                return;
+            }
+        } else if (passwordConfirm.value !== "") {
+            event.preventDefault();
+            message.textContent = "새 비밀번호도 입력해주세요.";
+            return;
+        }
+
+        if (requiresReview()
+                && !window.confirm(
+                    "기업 인증 정보가 변경되어 검토 중 상태로 전환됩니다. 저장할까요?"
+                )) {
+            event.preventDefault();
+            return;
+        }
+
+        // 미변경 필드는 전송하지 않음 → DTO에서 null로 처리
+        inputs.forEach(input => {
+            if (input.value === input.defaultValue) {
+                input.disabled = true;
+                input.dataset.omittedByUpdate = "true";
+            }
+        });
+
+        submitting = true;
+        updateButtons();
+    });
+
+    function checkPasswordMatch() {
+        const hasConfirmation = passwordConfirm.value !== "";
+        const mismatch =
+            hasConfirmation
+            && passwordInput.value !== passwordConfirm.value;
+
+        passwordConfirm.setCustomValidity(
+            mismatch ? "새 비밀번호와 일치하지 않습니다." : ""
+        );
+
+        passwordMatchMessage.textContent = !hasConfirmation
+            ? ""
+            : mismatch
+                ? "새 비밀번호와 일치하지 않습니다."
+                : "비밀번호가 일치합니다.";
+
+        passwordMatchMessage.style.color =
+            mismatch ? "#b42318" : "#087443";
+    }
+
+    passwordInput.addEventListener("input", checkPasswordMatch);
+    passwordConfirm.addEventListener("input", checkPasswordMatch);
+
+    // 뒤로 가기로 돌아왔을 때 전송 제외했던 필드만 복원
+    window.addEventListener("pageshow", () => {
+        form.querySelectorAll('[data-omitted-by-update="true"]')
+            .forEach(input => {
+                input.disabled = false;
+                delete input.dataset.omittedByUpdate;
+            });
+
+        submitting = false;
+        updateButtons();
+        reviewNotice.hidden = !requiresReview();
+    });
+</script>
+</body>
+</html>

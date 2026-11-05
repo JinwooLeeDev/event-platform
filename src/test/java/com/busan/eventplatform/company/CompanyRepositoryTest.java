@@ -30,7 +30,6 @@ class CompanyRepositoryTest {
         Company company = Company.builder()
                 .name("테스트기업")
                 .email("company@example.test")
-                .password("테스트용_해시값")
                 .businessNumber("0000000001")
                 .representativeName("테스트대표")
                 .openedOn(LocalDate.of(2020, 1, 1))
