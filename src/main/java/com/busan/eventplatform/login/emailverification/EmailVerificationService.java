@@ -107,7 +107,7 @@ public class EmailVerificationService {
     }
 
     // 3. 회원가입 전에 인증 완료 여부 확인
-    public void requireVerifiedEmail(String email, HttpSession session) {
+    public Instant requireVerifiedEmail(String email, HttpSession session) {
         synchronized (session) {EmailVerificationSession verification = getVerification(session);
 
             if (verification == null || !verification.isVerified()) {
@@ -123,6 +123,7 @@ public class EmailVerificationService {
             if (!Instant.now().isBefore(verifiedUntil)) {
                 throw new Exception400("이메일 인증 유효시간이 지났습니다. " + "다시 인증해주세요.");
             }
+            return verification.getVerifiedAt();
         }
     }
 

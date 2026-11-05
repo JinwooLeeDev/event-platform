@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>회원가입 | Busan Play</title>
+    {{> login/style}}
+</head>
+<body>
+{{> layout/header}}
+<main class="auth-page">
+    <div class="auth-layout">
+        <section class="auth-intro" aria-labelledby="welcome-title">
+            <span class="auth-badge">BUSAN PLAY · JOIN US</span>
+            <h1 id="welcome-title">새로운 부산을 만나는<br>가장 즐거운 시작.</h1>
+            <p>나에게 맞는 행사를 발견하고,<br>함께할 순간을 만들어보세요.</p>
+        </section>
+        <section class="auth-card" aria-labelledby="form-title">
+            <h2 id="form-title">회원가입</h2>
+            <p class="auth-subtitle">이메일 인증 후 회원 정보를 입력해주세요.</p>
+            <form id="signup-form" action="/signup" method="post">
+                <div class="auth-field">
+                    <label for="email">이메일</label>
+                    <div class="auth-row">
+                        <input id="email" name="email" type="text" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com" aria-describedby="email-message" required>
+                        <button id="send-code" class="auth-button secondary" type="button">인증번호 발송</button>
+                    </div>
+                    <p id="email-message" class="auth-message" role="status" aria-live="polite"></p>
+                </div>
+                <div id="code-field" class="auth-field" hidden>
+                    <label for="code">인증번호</label>
+                    <div class="auth-row">
+                        <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="숫자 6자리" aria-describedby="code-message">
+                        <button id="confirm-code" class="auth-button secondary" type="button">인증 확인</button>
+                    </div>
+                    <p id="code-message" class="auth-message" role="status" aria-live="polite"></p>
+                </div>
+                <div class="auth-field">
+                    <label for="display-name">이름</label>
+                    <input id="display-name" name="displayName" type="text" autocomplete="name" maxlength="50" placeholder="이름을 입력해주세요" required>
+                </div>
+                <div class="auth-field">
+                    <label for="password">비밀번호</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="8자 이상 입력해주세요" aria-describedby="password-hint" required>
+                    <p id="password-hint" class="auth-hint">8자 이상 입력해주세요. 영문·숫자 기준 최대 72자이며 한글은 더 짧을 수 있습니다.</p>
+                </div>
+                <div class="auth-field">
+                    <label for="password-confirm">비밀번호 확인</label>
+                    <input id="password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="비밀번호를 다시 입력해주세요" required>
+                </div>
+                <p id="form-message" class="auth-message" role="status" aria-live="polite"></p>
+                <button id="submit-button" class="auth-button auth-submit" type="submit">회원가입</button>
+            </form>
+            <p class="auth-links">이미 회원이신가요? <a href="/login">로그인</a></p>
+        </section>
+    </div>
+</main>
+{{> layout/footer}}
+<script>
+(() => {
+    const element = id => document.getElementById(id);
+    const email = element('email');
+    const code = element('code');
+    const send = element('send-code');
+    const confirm = element('confirm-code');
+    let verifiedEmail = null;
+    let busy = false;
+    let submitting = false;
+    let resendAt = 0;
+
+    function message(id, text, success = false) {
+        element(id).textContent = text;
+        element(id).dataset.state = success ? 'success' : 'error';
+    }
+    function update() {
+        const seconds = Math.max(0, Math.ceil((resendAt - Date.now()) / 1000));
+        send.disabled = busy || submitting || seconds > 0;
+        send.textContent = busy ? '처리 중…' : seconds > 0 ? `${seconds}초 후 재발송` : '인증번호 발송';
+        confirm.disabled = busy || submitting || verifiedEmail !== null;
+        element('submit-button').disabled = busy || submitting;
+    }
+    async function post(url, body) {
+        const response = await fetch(url, {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!(response.headers.get('content-type') || '').includes('application/json')) {
+            throw new Error('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || '요청에 실패했습니다.');
+        return result;
+    }
+    email.addEventListener('input', () => {
+        verifiedEmail = null;
+        element('code-field').hidden = true;
+        code.value = '';
+        message('email-message', '');
+        message('code-message', '');
+        update();
+    });
+    send.addEventListener('click', async () => {
+        if (busy || submitting) return;
+        if (email.value.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+            message('email-message', '공백 없이 올바른 이메일 주소를 입력해주세요.');
+            email.focus();
+            return;
+        }
+        busy = true;
+        email.readOnly = true;
+        update();
+        try {
+            const result = await post('/api/v1/email-verifications', { email: email.value });
+            verifiedEmail = null;
+            resendAt = Date.now() + 60000;
+            code.value = '';
+            element('code-field').hidden = false;
+            message('email-message', result.message, true);
+            message('code-message', '');
+            code.focus();
+        } catch (error) {
+            message('email-message', error.message || '서버와 연결하지 못했습니다.');
+        } finally {
+            busy = false;
+            email.readOnly = verifiedEmail !== null;
+            update();
+        }
+    });
+    confirm.addEventListener('click', async () => {
+        if (busy || submitting) return;
+        if (!/^[0-9]{6}$/.test(code.value)) {
+            message('code-message', '인증번호는 숫자 6자리로 입력해주세요.');
+            return;
+        }
+        busy = true;
+        email.readOnly = true;
+        update();
+        try {
+            const result = await post('/api/v1/email-verifications/confirm', { email: email.value, code: code.value });
+            if (result.verified !== true) throw new Error('인증 결과를 확인하지 못했습니다.');
+            verifiedEmail = email.value;
+            message('code-message', result.message, true);
+        } catch (error) {
+            message('code-message', error.message || '서버와 연결하지 못했습니다.');
+        } finally {
+            busy = false;
+            email.readOnly = verifiedEmail !== null;
+            update();
+        }
+    });
+    element('signup-form').addEventListener('submit', event => {
+        let error = '';
+        if (busy || verifiedEmail !== email.value) error = '이메일 인증을 먼저 완료해주세요.';
+        else if (new TextEncoder().encode(element('password').value).length > 72) error = '비밀번호가 너무 깁니다. 더 짧게 입력해주세요.';
+        else if (element('password').value !== element('password-confirm').value) error = '비밀번호 확인이 일치하지 않습니다.';
+        if (error || submitting) {
+            event.preventDefault();
+            if (error) message('form-message', error);
+            return;
+        }
+        submitting = true;
+        update();
+    });
+    window.addEventListener('pageshow', () => { submitting = false; update(); });
+    setInterval(update, 1000);
+    update();
+})();
+</script>
+</body>
+</html>

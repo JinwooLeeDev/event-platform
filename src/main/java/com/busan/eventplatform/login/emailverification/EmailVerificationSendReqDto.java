@@ -24,13 +24,10 @@ public class EmailVerificationSendReqDto {
             throw new Exception400("이메일을 입력해주세요.");
         }
 
-        String trimmedEmail = email.strip();
-
-        if (trimmedEmail.length() > 254
-                || !EMAIL_PATTERN.matcher(trimmedEmail).matches()) {
+        if (email.length() > 254 || !EMAIL_PATTERN.matcher(email).matches()) {
             throw new Exception400("올바른 이메일 주소를 입력해주세요.");
         }
 
-        return trimmedEmail;
+        return email;
     }
 }
