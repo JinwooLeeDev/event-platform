@@ -1,4 +1,4 @@
-package com.busan.eventplatform.login;
+package com.busan.eventplatform.login.personallogin;
 
 import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.Getter;
