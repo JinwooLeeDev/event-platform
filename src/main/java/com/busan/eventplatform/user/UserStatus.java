@@ -1,6 +1,5 @@
 package com.busan.eventplatform.user;
 
-
 public enum UserStatus {
     ACTIVE, // 계정 활성 상태
     SUSPENDED, // 제재/정지 상태
