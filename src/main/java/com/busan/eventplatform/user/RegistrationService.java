@@ -4,6 +4,8 @@ package com.busan.eventplatform.user;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +35,9 @@ public class RegistrationService {
         // todo - EventSession 기존 다이어그램의 participation_fee_point를 fee 로 필드명 맞춤 (윤아씨께 공유 완료)
         boolean isPaidEvent = lockedSession.getFee() != null && lockedSession.getFee() > 0;
 
-        if(isPaidEvent) {
+        if (isPaidEvent) {
             // 2-1. [유료] 사용자 지갑 잔액 확인 (잔액 부족 시 예외 발생 및 트랜잭션 롤백)
-            if(user.getPoint() < lockedSession.getFee()) {
+            if (user.getPoint() < lockedSession.getFee()) {
                 // 잔액 부족 시 신청 중단 (Exception 발생 -> 트랜잭션 롤백)
                 throw new Exception400("잔액이 부족합니다. (현재 잔액: " + user.getPoint() + ")");
             }
@@ -48,28 +50,70 @@ public class RegistrationService {
 
         }
 
-        // 3. 현재 확정 및 승인 대기중인 인원수 계산
+        // 3. 선행 대기자 우선 승격 처리
+        // 누군가 취소하여 빈자리가 발생했는데 대기자가 있다면, 현재 유저 등록 전 대기자를 먼저 승격시킴
+        promoteWaitingUsersIfAny(lockedSession, isPaidEvent);
+
+
+        // 4. 승격 로직 반영 후 잔여 정원 재계산
         List<RegistrationStatus> activeStatuses = List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING_APPROVAL);
         long currentOccupancy = registrationRepository.countBySessionIdAndStatusIn(lockedSession.getId(), activeStatuses);
 
-        RegistrationStatus initialStatus;
-        Integer queueNumber = null;
+        RegistrationStatus initialStatus; // 유저가 가장 처음 가지게 될 참가 신청 상태를 담아두기 위한 변수
+        Integer queueNumber = null; // 대기번호
 
-        // 4. 정원(Capacity) 및 대기자 분기 처리
-        if(currentOccupancy < lockedSession.getCapacity()) {
-
+        // 5. 현재 유저 정원(Capacity) 및 대기자 분기 처리
+        if (currentOccupancy < lockedSession.getCapacity()) {
+            // [분기 1: 잔여 정원 있음 & 선행 대기자 없음이 보장됨]
+            initialStatus = isPaidEvent ? RegistrationStatus.PENDING_APPROVAL : RegistrationStatus.CONFIRMED;
+            queueNumber = null;
+        } else {
+            // [분기 2: 만석] 신규 유저는 대기열 마지막으로 등록
+            initialStatus = RegistrationStatus.WAITING;
+            Integer maxQueue = registrationRepository.findMaxQueueNumberBySessionId(lockedSession.getId(), RegistrationStatus.WAITING);
+            queueNumber = (maxQueue == null) ? 1 : maxQueue + 1;
         }
 
-        // 6. 참가 신청 원장 생성
+        // 6. 참가 신청 원장 생성 및 저장
+        // 원장(Ledger): 누가 어느 행사에 신청했는지에 대한 기록과 참가 신청자의 참가 가능 여부 파악을 위한 공식적인 신청 명부
         Registration registration = Registration.builder()
                 .user(user)
-                .session(session)
+                .session(lockedSession)
                 .status(initialStatus)
-                .queueNumber(1) // 임시 대기열 번호
+                .queueNumber(queueNumber)
                 .build();
 
         return registrationRepository.save(registration);
 
     }
+
+    /**
+     * [분기 3] 선행 대기자 승격 로직
+     * 빈자리가 있을 경우, 비어있는 수만큼 대기번호가 가장 앞선 유저들을 확정/ 승인대기 상태로 승격하기
+     */
+    private void promoteWaitingUsersIfAny(EventSession session, boolean isPaidEvent) {
+        List<RegistrationStatus> activeStatuses = List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING_APPROVAL);;
+        long currentOccupancy = registrationRepository.countBySessionIdAndStatusIn(session.getId(), activeStatuses);
+        long availableSpots = session.getCapacity() - currentOccupancy;
+
+        if(availableSpots > 0){
+            // 빈자리수(availableSpots)만큼만 대기열 최상위 유저를 조회 (JPA Pageable 활용)
+            //PageRequest.of(int page, int size) 메서드는 규격상 int 타입만 받을 수 있기에 long -> int로 다운캐스팅
+            Pageable limit = PageRequest.of(0, (int) availableSpots);
+            List<Registration> waitingUsers = registrationRepository.findBySessionIdAndStatusOrderByQueueNumberAsc(
+                    session.getId(), RegistrationStatus.WAITING, limit
+            );
+
+            RegistrationStatus targetStatus = isPaidEvent ? RegistrationStatus.PENDING_APPROVAL : RegistrationStatus.CONFIRMED;
+
+            // 조회된 대기자들을 순횐하며 상태를 승격하고 대기 번호를 회수
+            for (Registration waitingUser : waitingUsers) {
+                waitingUser.promoteTo(targetStatus);
+            }
+
+
+        }
+    }
+
 
 }

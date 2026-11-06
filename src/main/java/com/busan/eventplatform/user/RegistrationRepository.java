@@ -2,6 +2,7 @@ package com.busan.eventplatform.user;
 
 import com.busan.eventplatform.event.EventSession;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -23,7 +24,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     long countBySessionIdAndStatusIn(Long sessionId, List<RegistrationStatus> statuses);
 
     // 가장 마지막 대기 번호 조회(WATING 상태인 경우)
-    @Query("select max(r.queueNumber) from Registration r where r.session.id = :sessionId and r.status = 'WAITING'")
-    Integer findMaxQueueNumberBySessionId(@Param("sessionId") Long sessionId);
+    @Query("select max(r.queueNumber) from Registration r where r.session.id = :sessionId and r.status = :status")
+    Integer findMaxQueueNumberBySessionId(@Param("sessionId") Long sessionId, @Param("status") RegistrationStatus status);
 
+    // 빈자리 발생 시 승격 대상자 조회
+    List<Registration> findBySessionIdAndStatusOrderByQueueNumberAsc(Long sessionId, RegistrationStatus status, Pageable pageable);
 }

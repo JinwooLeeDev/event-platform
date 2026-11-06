@@ -26,7 +26,7 @@ public class EventSession {
 
     // 테스트 시 임시 더미 데이터 생성을 위한 Builder
     @Builder
-    public EventSession(Integer fee) {
+    public EventSession(Integer fee, Integer capacity) {
         this.fee = fee;
         this.capacity = capacity;
     }
