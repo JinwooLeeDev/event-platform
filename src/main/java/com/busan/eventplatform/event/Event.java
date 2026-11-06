@@ -3,8 +3,8 @@ package com.busan.eventplatform.event;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "event_tb")
@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Event {
 
     @Id

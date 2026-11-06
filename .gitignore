@@ -47,6 +47,7 @@ out/
 .agent.md
 !.env.example
 application-local.*
+/uploads/
 
 ### Python tooling ###
 __pycache__/
