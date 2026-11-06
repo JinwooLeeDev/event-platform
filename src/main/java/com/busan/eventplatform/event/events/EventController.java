@@ -37,7 +37,7 @@ public class EventController {
     }
 
     // 행사 상세 조회
-    // GET - http://localhost:8080/evets/{1}
+    // GET - http://localhost:8080/evets/1
     @GetMapping("/event/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session) {
 
