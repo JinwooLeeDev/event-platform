@@ -7,33 +7,6 @@ import java.time.LocalDate;
 public class CompanyResponse {
 
     @Data
-    public static class JoinDTO {
-        private String name;
-        private String email;
-        private String password;
-        private String businessNumber;
-        private String representativeName;
-        private LocalDate openedOn;
-        private String address;
-        private String businessCertificateFileName;
-        private String contactPersonName;
-        private String contactPersonPhone;
-
-        public JoinDTO(Company company) {
-            this.name = company.getName();
-            this.email = company.getEmail();
-            this.password = company.getPassword();
-            this.businessNumber = company.getBusinessNumber();
-            this.representativeName = company.getRepresentativeName();
-            this.openedOn = company.getOpenedOn();
-            this.address = company.getAddress();
-            this.businessCertificateFileName = company.getBusinessCertificateFileName();
-            this.contactPersonName = company.getContactPersonName();
-            this.contactPersonPhone = company.getContactPersonPhone();
-        }
-    }
-
-    @Data
     public static class UpdateDTO {
         private String email; //기업 이메일
         private String contactPersonName; // 담당자 명

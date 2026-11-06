@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.busan.eventplatform.global.util.Define;
 
 @Controller
 @RequiredArgsConstructor
@@ -18,7 +21,23 @@ public class CompanyAuthController {
 
     private final CompanyAuthService companyAuthService;
 
-    @PostMapping("/login/company")
+    @GetMapping("/signup/company")
+    public String signupForm() {
+        return "login/companysignup";
+    }
+
+    @PostMapping({"/signup/company", "/company/join"})
+    public String signup(@ModelAttribute CompanySignupReqDto request, HttpSession session,
+                         RedirectAttributes redirectAttributes) {
+        synchronized (session) {
+            companyAuthService.signup(request, session);
+            session.removeAttribute(Define.EMAIL_VERIFICATION);
+        }
+        redirectAttributes.addFlashAttribute("signupMessage", "기업 가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+        return "redirect:/login?type=company";
+    }
+
+    @PostMapping({"/login/company", "/company/login"})
     public String login(@ModelAttribute LoginReqDto request, HttpServletRequest servletRequest, HttpSession session) {
         SessionCompanyDto sessionCompany = companyAuthService.login(request);
 

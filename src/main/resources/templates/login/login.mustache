@@ -26,6 +26,9 @@
         </section>
         <section class="auth-card" aria-labelledby="form-title">
             <h2 id="form-title">로그인</h2>
+            {{#signupMessage}}
+                <p class="auth-message" data-state="success" role="status">{{signupMessage}}</p>
+            {{/signupMessage}}
             <div id="login-tabs" class="login-tabs" data-kind="personal" role="tablist" aria-label="회원 유형">
                 <button id="personal-tab" class="login-tab" type="button" role="tab" aria-selected="true" aria-controls="login-panel">개인회원</button>
                 <button id="company-tab" class="login-tab" type="button" role="tab" aria-selected="false" aria-controls="login-panel" tabindex="-1">기업회원</button>
@@ -44,6 +47,7 @@
                 <button id="login-submit" class="auth-button auth-submit" type="submit">개인회원 로그인</button>
             </form>
             <p id="personal-signup" class="auth-links">아직 회원이 아니신가요? <a href="/signup">개인회원 가입</a></p>
+            <p id="company-signup" class="auth-links" hidden>기업 계정이 필요하신가요? <a href="/signup/company">기업회원 가입</a></p>
             </div>
         </section>
     </div>
@@ -76,6 +80,7 @@
         );
         element('login-submit').disabled = false;
         element('personal-signup').hidden = company;
+        element('company-signup').hidden = !company;
         if (moveFocus) tabs[index].focus();
     }
 
@@ -92,7 +97,7 @@
         });
     });
     window.addEventListener('pageshow', () => selectTab(kind === 'company' ? 1 : 0));
-    selectTab(0);
+    selectTab(new URLSearchParams(window.location.search).get('type') === 'company' ? 1 : 0);
 })();
 </script>
 </body>
