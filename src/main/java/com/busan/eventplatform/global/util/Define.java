@@ -14,5 +14,4 @@ public class Define {
 
     // 인증 완료 결과의 유효시간: 10분
     public static final int EMAIL_VERIFIED_EXPIRE_MINUTES = 10;
-
 }

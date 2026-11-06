@@ -1,5 +1,10 @@
 package com.busan.eventplatform.global.error.interceptor;
 
+import com.busan.eventplatform.global.error.exception.Exception401;
+import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.global.util.Define;
+import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -14,17 +19,16 @@ public class AdminInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 확인만 해야 하므로 새로운 세션을 만들면 안됨. false 설정 필수 !
         HttpSession session = request.getSession(false);
-//        Todo - 유저dto 클래스 만들어지면 주석해제
-//        SessionUserDto sessionUserDto = (session == null) ? null : (SessionUserDto) session.getAttribute(Define.SESSION_USER);
-//
-//        // 1. 로그인 확인은 우리가 만들었던 LoginInterceptor 가 먼저 처리 (하지만 등록 순서가 바뀌면 대 참사가 일어 난다)
-//        if (sessionUserDto == null) {
-//            throw new Exception401("로그인 먼저 해주세요");
-//        }
-//        // 2. 관리자가 아니면 접근 거부
-//        if (!sessionUserDto.isAdmin()) {
-//            throw new Exception403("관리자만 접근할 수 있습니다");
-//        }
+        SessionUserDto sessionUserDto = (session == null) ? null : (SessionUserDto) session.getAttribute(LoginSession.USER);
+
+        // 1. 로그인 확인은 우리가 만들었던 LoginInterceptor 가 먼저 처리 (하지만 등록 순서가 바뀌면 대 참사가 일어 난다)
+        if (sessionUserDto == null) {
+            throw new Exception401("로그인 먼저 해주세요");
+        }
+        // 2. 관리자가 아니면 접근 거부
+        if (!sessionUserDto.isAdmin()) {
+            throw new Exception403("관리자만 접근할 수 있습니다");
+        }
 
         return true;
     }

@@ -1,5 +1,8 @@
 package com.busan.eventplatform.global.error.interceptor;
 
+import com.busan.eventplatform.global.error.exception.Exception401;
+import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginSession;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -14,11 +17,11 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
-//        Todo - 유저dto 클래스 만들어지면 주석해제
-//        SessionUserDto sessionUserDto = (session == null) ? null : (SessionUserDto) session.getAttribute(Define.SESSION_USER);
-//        if (sessionUserDto == null) {
-//            throw new Exception401("로그인 먼저 해주세요");
-//        }
+        // Todo - 유저dto 클래스 만들어지면 주석해제
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+        if (loginIdentity == null) {
+            throw new Exception401("로그인 먼저 해주세요");
+        }
         return true;
     }
 
