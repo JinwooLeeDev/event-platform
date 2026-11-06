@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EventSession {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,6 +18,10 @@ public class EventSession {
     // 윤아님과 공유 완료된 참가비 필드 (기존 participation_fee_point)
     @Column(name = "fee")
     private Integer fee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
+    private Event event;
 
     // 테스트 시 임시 더미 데이터 생성을 위한 Builder
     @Builder
