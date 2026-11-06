@@ -5,6 +5,7 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +31,13 @@ public class Purchase {
     @JoinColumn(name = "eventSession_id" , nullable = false)
     private EventSession eventSession;
 
+    private int price; // 이 결제내역에 저장될 결제한 포인트액.
+
+    @Builder
+    public Purchase( User user, Company company, EventSession eventSession , int price) {
+        this.user = user;
+        this.company = company;
+        this.eventSession = eventSession;
+        this.price = price;
+    }
 }

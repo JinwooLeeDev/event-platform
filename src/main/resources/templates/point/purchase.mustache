@@ -298,6 +298,7 @@
                         </small>
                     </div>
 
+                    {{#viewPoint}}
                     <div class="card-body">
                         <div class="point-balance d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -305,8 +306,8 @@
                                     현재 보유 포인트
                                 </small>
 
-                                <h3 class="mb-0 mt-2" id="currentPoint">
-                                    10000P
+                                <h3 class="format-point mb-0 mt-2" id="currentPoint">
+                                    {{currentPoint}}
                                 </h3>
                             </div>
                             <i class="bi bi-wallet2 fs-2 text-success"></i>
@@ -314,7 +315,7 @@
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-secondary">일반 입장권 (1매)</span>
-                            <strong>25,000P</strong>
+                            <strong class="format-point">{{eventPoint}}</strong>
                         </div>
 
                         <div class="d-flex justify-content-between mb-4">
@@ -326,14 +327,13 @@
 
                         <div class="d-flex justify-content-between align-items-center my-4">
                             <strong>최종 사용 포인트</strong>
-                            <span class="payment-price">25,000P</span>
+                            <span class="format-point payment-price">{{eventPoint}}</span>
                         </div>
 
                         <div class="remaining-point d-flex justify-content-between align-items-center mb-4">
 
                             <span class="small text-secondary">결제 후 예상 잔액</span>
-                            <strong class="text-primary" id="predict">0P</strong>
-
+                            <strong class="format-point text-primary" id="predict">{{predictedPoint}}</strong>
                         </div>
 
                         <div class="form-check mb-4">
@@ -344,10 +344,13 @@
                         </div>
 
 
-                        <button type="button" id="paymentBtn" class="btn btn-success pay-button w-100" disabled>
+                    <form action="/event/{{id}}/purchase" method="post" onsubmit="return confirm('결제를 진행하시겠습니까?')">
+                        <button type="submit" id="paymentBtn" class="btn btn-success pay-button w-100" disabled>
                             <i class="bi bi-check2-circle me-2"></i>
-                            25,000P 결제하기
+                            <span class="format-point">{{eventPoint}}</span> 결제하기
                         </button>
+                    </form>
+                    {{/viewPoint}}
 
                         <p class="text-center small text-secondary mt-3">
                             <i class="bi bi-shield-lock me-1"></i>
@@ -384,20 +387,21 @@
     const agreeCheck = document.querySelector("#agreeCheck");
     const paymentBtn = document.querySelector("#paymentBtn");
     const predictedPoint = document.querySelector("#predict")
-    const point = Number(predictedPoint.replace(/[^\d-]/g, ""));
+    const point = Number(predictedPoint.textContent.trim().replace(/[^\d-]/g, ""));
+
+    document.querySelectorAll(".format-point").forEach(e => {
+        const thisPoint = Number(e.textContent.trim())
+        e.textContent = thisPoint.toLocaleString("ko-KR") + "P"
+    })
 
     agreeCheck.addEventListener("change", function () {
-        if(point > 0) {
+        if(point >= 0) {
             paymentBtn.disabled = !this.checked;
         } else {
             paymentBtn.innerText = "포인트가 부족하여 결제할 수 없습니다"
         }
     });
 
-    // 현재는 시안용. 실제 API는 아직 연결하지 않음.
-    paymentBtn.addEventListener("click", function () {
-        alert("결제 화면 시안. 실제 포인트는 차감되지 않습니다.");
-    });
 </script>
 
 {{> layout/footer}}

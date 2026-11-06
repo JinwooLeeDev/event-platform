@@ -65,9 +65,11 @@ public class PaymentService {
             return paymentId;
     }
 
+
     private String createPaymentId(Long identityId) {
         return "payment-" + identityId + "_" + UUID.randomUUID().toString().substring(0 , 5);
     }
+
 
     @Transactional
     public PaymentRes.CompleteDto complete(LoginIdentity loginIdentity , PaymentRes.PortOnePayment portOnePayment , String paymentId) {

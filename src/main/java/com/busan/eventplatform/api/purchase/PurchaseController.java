@@ -7,17 +7,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller     @RequiredArgsConstructor
 public class PurchaseController {
+    private final PurchaseService purchaseService;
 
-    // TODO 이벤트컬럼 작성되면 이벤트 컬럼에 맞게 mustache 설정 + model + session
-    @GetMapping("/purchase")
-    public String purchaseView(Model model , HttpSession session){
+    // TODO 이벤트컬럼 작성되면 이벤트 컬럼에 맞게 mustache 설정("event/{id}/purchase") + model + session
+    @GetMapping("/event/{id}/purchase")
+    public String purchaseView(@PathVariable(name = "id") Long eventId , Model model , HttpSession session){
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
+        PurchaseRes.PurchasePointDto purchasePointDto = purchaseService.calcPoint(loginIdentity , eventId);
+        model.addAttribute("viewPoint" , purchasePointDto);
 
         return "point/purchase";
     }
+
+    @PostMapping("/event/{id}/purchase")
+    public String purchaseAction(@PathVariable(name = "id") Long eventId , HttpSession session) {
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        purchaseService.purchase(eventId , loginIdentity);
+
+        return "redirect:/myPage";
+    }
 }
- 
