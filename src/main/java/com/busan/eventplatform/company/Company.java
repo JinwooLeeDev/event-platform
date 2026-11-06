@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // for test
 @Entity
 @Table(name = "company_tb")
 public class Company {
@@ -77,6 +78,9 @@ public class Company {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
+    // 기업이 포인트 충전시 사용할 메서드.
+    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
+
     @Column(name = "email_verified_at")
     private Instant emailVerifiedAt;
 
@@ -105,7 +109,6 @@ public class Company {
         this.status = (status == null) ? CompanyStatus.PENDING : status;
     }
 
-//    TODO 비밀번호 해싱처리
     public void update(
             String name,
             String email,

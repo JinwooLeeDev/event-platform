@@ -1,6 +1,5 @@
 ------------------------------ Company테이블----------------------------------------
 -- Company 테이블: 개발용 더미 데이터
--- 개발용 비번 : Company123!
 INSERT INTO company_tb (
     name,
     email,
@@ -20,7 +19,7 @@ VALUES
 (
     '부산문화재단',
     'company1@example.test',
-    '$2a$10$NQn.74BuuZQMd5lQqoh8VOQGmGRHN9Vux9JFNadyo06C8Qs/8./v.',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
     '0000000001',
     '가상대표1',
     '2020-01-01',
@@ -35,7 +34,7 @@ VALUES
 (
     '해운대이벤트',
     'company2@example.test',
-    '$2a$10$NQn.74BuuZQMd5lQqoh8VOQGmGRHN9Vux9JFNadyo06C8Qs/8./v.',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
     '0000000002',
     '가상대표2',
     '2021-02-01',
@@ -50,7 +49,7 @@ VALUES
 (
     '부산페스티벌',
     'company3@example.test',
-    '$2a$10$NQn.74BuuZQMd5lQqoh8VOQGmGRHN9Vux9JFNadyo06C8Qs/8./v.',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
     '0000000003',
     '가상대표3',
     '2022-03-01',
@@ -65,7 +64,7 @@ VALUES
 (
     '광안리축제기획',
     'company4@example.test',
-    '$2a$10$NQn.74BuuZQMd5lQqoh8VOQGmGRHN9Vux9JFNadyo06C8Qs/8./v.',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
     '0000000004',
     '가상대표4',
     '2023-04-01',
@@ -80,7 +79,7 @@ VALUES
 (
     '부산공연기획사',
     'company5@example.test',
-    '$2a$10$NQn.74BuuZQMd5lQqoh8VOQGmGRHN9Vux9JFNadyo06C8Qs/8./v.',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
     '0000000005',
     '가상대표5',
     '2024-05-01',
@@ -95,11 +94,11 @@ VALUES
 
 ------------------------------ User테이블----------------------------------------
 -- 로컬 확인용 계정의 비밀번호는 1234입니다. BCrypt 해시로 저장합니다.
-INSERT INTO users(display_name, role, email_normalized, password_hash, status, preferred_locale, email_verified_at, created_at)
+INSERT INTO users(display_name, role, email_normalized, point , password_hash, status, preferred_locale, email_verified_at, created_at)
 VALUES
-    ('관리자', 'ADMIN', 'admin@busan.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('김민수', 'MEMBER', 'minsu@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('이서연', 'MEMBER', 'seoyeon@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('박지훈', 'MEMBER', 'jihun@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('최유진', 'MEMBER', 'yujin@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('정현우', 'MEMBER', 'hyunwoo@naver.com', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('관리자', 'ADMIN', 'admin@busan.com', 10000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('김민수', 'MEMBER', 'minsu@naver.com', 0 ,'$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('이서연', 'MEMBER', 'seoyeon@naver.com', 40000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('박지훈', 'MEMBER', 'jihun@naver.com', 70000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('최유진', 'MEMBER', 'yujin@naver.com', 150000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('정현우', 'MEMBER', 'hyunwoo@naver.com', 25000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

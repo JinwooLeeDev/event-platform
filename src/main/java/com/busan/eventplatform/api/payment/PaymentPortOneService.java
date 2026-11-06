@@ -13,7 +13,6 @@ public class PaymentPortOneService {
     private final PaymentService paymentService;
     private final PortOneApiConst portOneApiConst;
 
-
     public PaymentRes.PrepareDto prepare(Long userId , int amount) {
         String paymentId = paymentService.createPayment(userId , amount);
 
@@ -32,7 +31,6 @@ public class PaymentPortOneService {
         // 1.포트원에서 결제조회건 가져옴. (portOnePayment)
         try {
              portOnePayment = portOneApiConst.paymentInfo(paymentId);
-
         } catch(HttpClientErrorException e) {
             throw new RuntimeException(e.getMessage());
         } catch (ResourceAccessException e){
@@ -40,7 +38,8 @@ public class PaymentPortOneService {
         }
 
         // 2. 위 조회 결과로 내부에서 비교.
-
         return paymentService.complete(userId , portOnePayment , paymentId);
     }
+
+
 }
