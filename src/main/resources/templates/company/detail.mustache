@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>기업 마이페이지</title>
+</head>
+<body>
+{{>layout/header}}
+{{>company/style}}
+<main class="auth-page">
+    <section class="auth-card company-card">
+
+        <h1>기업 마이페이지</h1>
+
+        {{#company}}
+        <h2>{{name}}</h2>
+
+        <dl>
+            <dt>이메일</dt>
+            <dd>{{email}}</dd>
+
+            <dt>사업자등록번호</dt>
+            <dd>{{businessNumber}}</dd>
+
+            <dt>대표자명</dt>
+            <dd>{{representativeName}}</dd>
+
+            <dt>기업 주소</dt>
+            <dd>{{address}}</dd>
+
+            <dt>담당자 이름</dt>
+            <dd>{{contactPersonName}}</dd>
+
+            <dt>담당자 연락처</dt>
+            <dd>{{contactPersonPhone}}</dd>
+
+            <dt>기업 심사 상태</dt>
+            <dd>
+                {{#pending}}
+                <span class="review-badge review-badge--pending">검토 중</span>
+                {{/pending}}
+
+                {{#approved}}
+                <span class="review-badge review-badge--approved">승인</span>
+                {{/approved}}
+
+                {{#feedbackNeeded}}
+                <span class="review-badge review-badge--danger">보완 필요</span>
+                {{/feedbackNeeded}}
+
+                {{#rejected}}
+                <span class="review-badge review-badge--danger">반려</span>
+                {{/rejected}}
+
+                {{#suspended}}
+                <span class="review-badge review-badge--danger">이용 정지</span>
+                {{/suspended}}
+            </dd>
+        </dl>
+        {{/company}}
+
+        <p>
+            기업 인증 정보 수정 시 심사 대기로 전환됩니다.
+            담당자 이름·연락처만 변경하면 기존 심사 상태를 유지합니다.
+        </p>
+
+        <a href="/company/update">기업 정보 수정</a>
+        |
+        <a href="/">메인으로 이동</a>
+    </section>
+</main>
+
+{{>layout/footer}}
+</body>
+</html>
