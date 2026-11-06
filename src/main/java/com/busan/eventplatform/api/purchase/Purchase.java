@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 //@AllArgsConstructor
 //@Data
 public class Purchase {
-
+    
 }
