@@ -1,8 +1,8 @@
 package com.busan.eventplatform.login.mypage;
 
 import com.busan.eventplatform.global.error.exception.Exception401;
-import com.busan.eventplatform.login.AuthController;
-import com.busan.eventplatform.login.SessionUserDto;
+import com.busan.eventplatform.login.personallogin.AuthController;
+import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

@@ -1,0 +1,278 @@
+{{>login/style}}
+
+<style>
+    .company-card {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .company-card--login {
+        max-width: 460px;
+    }
+
+    .company-card h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        letter-spacing: -1px;
+    }
+
+    .company-card h2 {
+        margin-top: 28px;
+        font-size: 20px;
+    }
+
+    .company-card p {
+        line-height: 1.7;
+    }
+
+    .company-card form > p,
+    .company-card fieldset > p {
+        margin: 0 0 20px;
+    }
+
+    .company-card fieldset {
+        min-width: 0;
+        margin: 28px 0;
+        padding: 24px;
+        border: 1px solid #dce6f5;
+        border-radius: 16px;
+    }
+
+    .company-card legend {
+        padding: 0 8px;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .company-card label {
+        display: inline-block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .company-card input {
+        width: 100%;
+        min-width: 0;
+        height: 48px;
+        padding: 0 12px;
+        border: 1px solid #cbd8ec;
+        border-radius: 10px;
+        color: #14285f;
+        background: #fff;
+        font: inherit;
+        font-size: 14px;
+    }
+
+    .company-card input[readonly],
+    .company-card input:disabled {
+        background: #f2f6fc;
+    }
+
+    .company-card input[type="file"] {
+        height: auto;
+        padding: 12px;
+    }
+
+    .company-card small {
+        display: inline-block;
+        margin-top: 6px;
+        color: #647596;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .company-card button {
+        min-height: 48px;
+        padding: 10px 18px;
+        border: 1px solid #0750d8;
+        border-radius: 10px;
+        background: #0750d8;
+        color: white;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .company-card button:hover {
+        background: #003ba8;
+    }
+
+    .company-card button:disabled {
+        opacity: .5;
+        cursor: default;
+    }
+
+    .company-card button[type="button"] {
+        margin-top: 8px;
+        border-color: #c3d7f8;
+        background: #edf4ff;
+        color: #0750d8;
+    }
+
+    .company-card button[type="submit"] {
+        width: 100%;
+        margin-top: 12px;
+    }
+
+    .company-card a {
+        color: #0750d8;
+        font-size: 14px;
+        font-weight: 600;
+        text-underline-offset: 4px;
+    }
+
+    .company-card dl {
+        margin: 24px 0;
+    }
+
+    .company-card dt {
+        margin-top: 20px;
+        color: #647596;
+        font-size: 13px;
+    }
+
+    .company-card dd {
+        margin: 6px 0 0;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #edf1f7;
+        font-size: 15px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .company-card #verificationMessage {
+        color: #647596;
+        font-size: 13px;
+    }
+
+    .company-card #formMessage {
+        color: #b42318;
+        font-size: 13px;
+    }
+
+    .company-card #reviewNotice {
+        padding: 14px 16px;
+        border: 1px solid #f0d58c;
+        border-radius: 10px;
+        background: #fff8e6;
+        color: #854d0e;
+        font-size: 13px;
+    }
+
+    .review-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border: 1px solid;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .review-badge--pending {
+        color: #854d0e;
+        background: #fef9c3;
+        border-color: #eab308;
+    }
+
+    .review-badge--approved {
+        color: #166534;
+        background: #dcfce7;
+        border-color: #22c55e;
+    }
+
+    .review-badge--danger {
+        color: #991b1b;
+        background: #fee2e2;
+        border-color: #ef4444;
+    }
+
+    @media (max-width: 600px) {
+        .company-card fieldset {
+            padding: 18px 14px;
+        }
+    }
+
+    .company-review-notice {
+        padding: 14px 16px;
+        border: 1px solid #f0d58c;
+        border-radius: 10px;
+        background: #fff8e6;
+        color: #854d0e;
+        font-size: 13px;
+    }
+
+    .company-card .company-verification-row {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .company-card .company-verification-row input {
+        flex: 1;
+        width: 0;
+        min-width: 0;
+    }
+
+    .company-card .company-verification-row button {
+        flex-shrink: 0;
+        margin-top: 0;
+        white-space: nowrap;
+    }
+
+    .company-card .company-verification-row button:hover:not(:disabled) {
+        background: #dceaff;
+    }
+
+    .company-card .company-form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .company-card .company-form-actions button[type="submit"],
+    .company-card .company-form-actions .company-cancel-button {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        margin: 0;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .company-card .company-form-actions .company-cancel-button {
+        border: 1px solid #cbd8ec;
+        background: #fff;
+        color: #14285f;
+    }
+
+    .company-card .company-form-actions .company-cancel-button:hover {
+        border-color: #0750d8;
+        background: #f2f6fc;
+    }
+
+    @media (max-width: 400px) {
+        .company-card .company-verification-row {
+            flex-wrap: wrap;
+        }
+
+        .company-card .company-verification-row input,
+        .company-card .company-verification-row button {
+            flex: 1 1 100%;
+            width: 100%;
+        }
+    }
+
+    .company-card input:focus-visible {
+        outline: none;
+        border-color: #0750d8;
+        box-shadow: inset 0 0 0 1px #0750d8;
+    }
+</style>

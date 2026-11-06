@@ -1,4 +1,6 @@
-package com.busan.eventplatform.login;
+package com.busan.eventplatform.login.personallogin;
+
+import com.busan.eventplatform.login.LoginReqDto;
 
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
@@ -6,6 +8,7 @@ import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.emailverification.EmailVerificationService;
 import com.busan.eventplatform.user.Role;
 import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.UserStatus;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +43,6 @@ public class AuthService {
                 )
                 .displayName(request.getDisplayName())
                 .role(Role.MEMBER)
-                .status(UserStatus.ACTIVE)
                 .preferredLocale("ko")
                 .build();
         user.verifyEmail(verifiedAt);

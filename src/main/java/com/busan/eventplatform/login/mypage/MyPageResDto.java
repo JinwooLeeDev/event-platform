@@ -15,6 +15,8 @@ public class MyPageResDto {
     private final String displayName;
     private final String preferredLocale;
     private final String createdAt;
+    private final int point;
+
 
     public static MyPageResDto from(User user) {
         return MyPageResDto.builder()
@@ -32,6 +34,7 @@ public class MyPageResDto {
                                 Timestamp.from(user.getCreatedAt())
                         )
                 )
+                .point(user.getPoint())
                 .build();
     }
 }

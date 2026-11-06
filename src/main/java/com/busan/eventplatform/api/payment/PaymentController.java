@@ -1,6 +1,7 @@
 package com.busan.eventplatform.api.payment;
 
-import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginSession;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,21 +12,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Map;
+
 @Controller     @RequiredArgsConstructor        @Slf4j
 public class PaymentController {
     private final PaymentPortOneService paymentPortOneService;
+    private final PaymentService paymentService;
 
     @GetMapping("/charge")
     public String charge(Model model , HttpSession session) {
-        // TODO 추후 sessionUser , sessionCompany 세션 구현되면 변경.
-//        User user;  // 포인트 충전할때 user인지 company인지 구분 필요.
-//        Company company;
-//
-//        user = (User)session.getAttribute("sessionUser");
-//        if(user == null) company = (Company) session.getAttribute("sessionCompany");
-//        else throw new Exception403("로그인 먼저 해주세요");
-//            paymentService.
-//        model.addAttribute("myPoint");
+        // loginIdentity에 "IDENTITY" 키에 들어간 loginType(User인지 Company인지)를 보고 구분 가능.
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        int currentPoint = paymentService.currentPoint(loginIdentity);
+
+        model.addAttribute("myPoint" , currentPoint);
 
         return "point/charge-point";
     }
@@ -33,10 +34,10 @@ public class PaymentController {
     @PostMapping("/api/payment/prepare")
     public ResponseEntity<?> prepare(@RequestBody PaymentReq.PrepareDto prepareDto , HttpSession session) {
         prepareDto.validate();
-//        User user = (User) session.getAttribute("sessionUser"); // TODO 추후 sessionUser 구현되면 재설계.
 
-        // TODO 1L : 추후 session 생성시 user.getId()로 변경.
-        PaymentRes.PrepareDto body = paymentPortOneService.prepare(1L , prepareDto.getAmount());
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        PaymentRes.PrepareDto body = paymentPortOneService.prepare(loginIdentity , prepareDto.getAmount());
 
         return ResponseEntity.ok(body);
     }
@@ -44,11 +45,14 @@ public class PaymentController {
     @PostMapping("/api/payment/complete")
     public ResponseEntity<?> complete(@RequestBody PaymentReq.CompleteDto completeDto , HttpSession session) {
         completeDto.validate();
-//        User user = (User) session.getAttribute("sessionUser"); // TODO 추후 sessionUser 구현되면 재설계. user 검증코드도 필요.
 
-        // TODO 1L : 추후 session 생성시 user.getId()로 변경.
-        return ResponseEntity.ok(paymentPortOneService.complete(1L , completeDto.getPaymentId()));
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        PaymentRes.CompleteDto result = paymentPortOneService.complete(loginIdentity , completeDto.getPaymentId());
+        int currentPoint = paymentService.currentPoint(loginIdentity);
+
+        // 포인트 충전시 화면에 실시간으로 충전된 금액까지 포함하여 보여주기위해 "currentPoint"로 전달.
+        return ResponseEntity.ok(Map.of("payment" , result , "currentPoint" , currentPoint));
     }
-
 
 }

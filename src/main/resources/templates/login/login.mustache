@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>로그인 | Busan Play</title>
     {{> login/style}}
+    <style>
+        .login-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 5px; margin: 24px 0; border: 1px solid #dce6f5; border-radius: 14px; background: #edf3fc; }
+        .login-tabs::before { content: ''; position: absolute; inset: 5px auto 5px 5px; width: calc((100% - 10px) / 2); border-radius: 10px; background: white; box-shadow: 0 3px 12px #14285f12; transition: transform .25s ease; pointer-events: none; }
+        .login-tabs[data-kind="company"]::before { transform: translateX(100%); }
+        .login-tab { position: relative; z-index: 1; min-height: 46px; padding: 10px 8px; border: 0; border-radius: 10px; background: transparent; color: #647596; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: color .2s ease; }
+        .login-tab[aria-selected="true"] { color: #0750d8; }
+        .login-tab:focus-visible { outline: 3px solid #9cbfff; outline-offset: -3px; }
+        @media (prefers-reduced-motion: reduce) { .login-tabs::before, .login-tab { transition: none; } }
+    </style>
 </head>
 <body>
 {{> layout/header}}
@@ -17,22 +26,79 @@
         </section>
         <section class="auth-card" aria-labelledby="form-title">
             <h2 id="form-title">로그인</h2>
-            <p class="auth-subtitle">가입하신 이메일로 로그인해주세요.</p>
-            <form action="/login" method="post">
+            {{#signupMessage}}
+                <p class="auth-message" data-state="success" role="status">{{signupMessage}}</p>
+            {{/signupMessage}}
+            <div id="login-tabs" class="login-tabs" data-kind="personal" role="tablist" aria-label="회원 유형">
+                <button id="personal-tab" class="login-tab" type="button" role="tab" aria-selected="true" aria-controls="login-panel">개인회원</button>
+                <button id="company-tab" class="login-tab" type="button" role="tab" aria-selected="false" aria-controls="login-panel" tabindex="-1">기업회원</button>
+            </div>
+            <div id="login-panel" role="tabpanel" aria-labelledby="personal-tab">
+            <p id="login-description" class="auth-subtitle">개인회원으로 가입하신 이메일을 입력해주세요.</p>
+            <form id="login-form" action="/login" method="post">
                 <div class="auth-field">
                     <label for="email">이메일</label>
-                    <input id="email" name="email" type="text" inputmode="email" autocomplete="username" maxlength="254" placeholder="name@example.com" required>
+                    <input value="jihun@naver.com" id="email" name="email" type="text" inputmode="email" autocomplete="username" maxlength="254" placeholder="name@example.com" required>
                 </div>
                 <div class="auth-field">
                     <label for="password">비밀번호</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" placeholder="비밀번호를 입력해주세요" required>
+                    <input value="1234" id="password" name="password" type="password" autocomplete="current-password" placeholder="비밀번호를 입력해주세요" required>
                 </div>
-                <button class="auth-button auth-submit" type="submit">로그인</button>
+                <button id="login-submit" class="auth-button auth-submit" type="submit">개인회원 로그인</button>
             </form>
-            <p class="auth-links">아직 회원이 아니신가요? <a href="/signup">회원가입</a></p>
+            <p id="personal-signup" class="auth-links">아직 회원이 아니신가요? <a href="/signup">개인회원 가입</a></p>
+            <p id="company-signup" class="auth-links" hidden>기업 계정이 필요하신가요? <a href="/signup/company">기업회원 가입</a></p>
+            </div>
         </section>
     </div>
 </main>
 {{> layout/footer}}
+<script>
+(() => {
+    const element = id => document.getElementById(id);
+    const tabs = [element('personal-tab'), element('company-tab')];
+    let kind = 'personal';
+
+    function selectTab(index, moveFocus = false) {
+        const nextKind = index === 0 ? 'personal' : 'company';
+        if (kind !== nextKind) element('password').value = '';
+        kind = nextKind;
+        const company = kind === 'company';
+        element('login-tabs').dataset.kind = kind;
+        tabs.forEach((tab, position) => {
+            tab.setAttribute('aria-selected', String(position === index));
+            tab.tabIndex = position === index ? 0 : -1;
+        });
+        element('login-panel').setAttribute('aria-labelledby', tabs[index].id);
+        element('login-description').textContent = company
+            ? '기업회원으로 가입하신 이메일을 입력해주세요.'
+            : '개인회원으로 가입하신 이메일을 입력해주세요.';
+        element('login-submit').textContent = company ? '기업회원 로그인' : '개인회원 로그인';
+        element('login-form').setAttribute(
+                'action',
+                company ? '/login/company' : '/login'
+        );
+        element('login-submit').disabled = false;
+        element('personal-signup').hidden = company;
+        element('company-signup').hidden = !company;
+        if (moveFocus) tabs[index].focus();
+    }
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectTab(index));
+        tab.addEventListener('keydown', event => {
+            let nextIndex;
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') nextIndex = 1 - index;
+            else if (event.key === 'Home') nextIndex = 0;
+            else if (event.key === 'End') nextIndex = 1;
+            else return;
+            event.preventDefault();
+            selectTab(nextIndex, true);
+        });
+    });
+    window.addEventListener('pageshow', () => selectTab(kind === 'company' ? 1 : 0));
+    selectTab(new URLSearchParams(window.location.search).get('type') === 'company' ? 1 : 0);
+})();
+</script>
 </body>
 </html>
