@@ -42,7 +42,11 @@ public class EventRequest {
             if (applyEndAt == null) {
                 throw new Exception400("모집 마감일은 필수 입니다.");
             }
+            if (applyStartAt.isAfter(applyEndAt)) {
+                throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
+            }
         }
+
         public Event toEntity() {
             return Event.builder()
                     .title(this.title)
@@ -87,6 +91,33 @@ public class EventRequest {
             }
             if (applyEndAt == null) {
                 throw new Exception400("모집 마감일은 필수 입니다.");
+            }
+            if (applyStartAt.isAfter(applyEndAt)) {
+                throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
+            }
+        }
+
+        // 기존 Event 객체의 값 수정
+        public Event toEntity(Event event, EventCategory category) {
+            event.setTitle(this.title);
+            event.setSummary(this.summary);
+            event.setDescription(this.description);
+            event.setAddress(this.address);
+            event.setCategory(category);
+            event.setApplyStartAt(this.applyStartAt);
+            event.setApplyEndAt(this.applyEndAt);
+
+            return event;
+        }
+    }
+
+    @Data
+    public static class CancelDto {
+        private String cancellationReason;
+
+        public void validate() {
+            if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+                throw new Exception400("취소 사유를 입력해주세요.");
             }
         }
     }

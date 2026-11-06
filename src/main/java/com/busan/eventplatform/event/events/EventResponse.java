@@ -49,6 +49,10 @@ public class EventResponse {
         private String categoryName;
         private String title;
         private String summary;
+        private LocalDateTime createdAt;
+        private LocalDateTime publishedAt;
+        private EventStatus status;
+        private String feedbackMessage;
 
         public EventDto(Event event) {
             this.id = event.getId();
@@ -58,6 +62,10 @@ public class EventResponse {
             }
             this.title = event.getTitle();
             this.summary = event.getSummary();
+            this.createdAt = event.getCreatedAt();
+            this.publishedAt = event.getPublishedAt();
+            this.status = event.getStatus();
+            this.feedbackMessage = event.getFeedbackMessage();
         }
     }
 
@@ -75,8 +83,11 @@ public class EventResponse {
         private LocalDateTime applyStartAt;
         private LocalDateTime applyEndAt;
         private LocalDateTime publishedAt;
+        private LocalDateTime createdAt;
+        private boolean applicationClosed;
+        private boolean owner;
 
-        public DetailDto(Event event) {
+        public DetailDto(Event event, boolean owner) {
             this.id = event.getId();
             this.title = event.getTitle();
             if (event.getCompany() != null) {
@@ -92,6 +103,45 @@ public class EventResponse {
             this.applyStartAt = event.getApplyStartAt();
             this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
+            this.createdAt = event.getCreatedAt();
+            this.applicationClosed = event.isApplicationClosed();
+            this.owner = owner;
+        }
+    }
+
+    // 게시물 수정 화면 응답 DTO
+    @Data
+    public static class UpdateFormDto {
+        private Long id;
+        private String title;
+        private Long companyId;
+        private Long categoryId;
+        private String categoryName;
+        private String summary;
+        private String description;
+        private String address;
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
+        private LocalDateTime publishedAt;
+        private String feedbackMessage;
+
+        public UpdateFormDto(Event event) {
+            this.id = event.getId();
+            this.title = event.getTitle();
+            if (event.getCompany() != null) {
+                this.companyId = event.getCompany().getId();
+            }
+            if (event.getCategory() != null) {
+                this.categoryId = event.getCategory().getId();
+                this.categoryName = event.getCategory().getName();
+            }
+            this.summary = event.getSummary();
+            this.description = event.getDescription();
+            this.address = event.getAddress();
+            this.applyStartAt = event.getApplyStartAt();
+            this.applyEndAt = event.getApplyEndAt();
+            this.publishedAt = event.getPublishedAt();
+            this.feedbackMessage = event.getFeedbackMessage();
         }
     }
 

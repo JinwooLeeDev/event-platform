@@ -62,6 +62,10 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime applyEndAt;
 
+    public boolean isApplicationClosed() {
+        return applyEndAt != null && !LocalDateTime.now().isBefore(applyEndAt);
+    }
+
     // 행사 정보가 공개된 시각 -- 목록 정렬 유용
     @Column
     private LocalDateTime publishedAt; // 공개 전에는 null
@@ -69,13 +73,18 @@ public class Event {
     // 취소된 날짜와 시간 저장
     private LocalDateTime cancelledAt; // 취소 전에는 null
 
-    // 취소한 사용자 ID
-    @ManyToOne(fetch = FetchType.LAZY) // 행사 여러 개를 같은 사용자가 취소할 수 있음
-    @JoinColumn(name = "cancelled_by")
-    private User cancelledBy;
+    // Todo - 취소한 사용자 필요하면 복구
+//    // 취소한 사용자 ID
+//    @ManyToOne(fetch = FetchType.LAZY) // 행사 여러 개를 같은 사용자가 취소할 수 있음
+//    @JoinColumn(name = "cancelled_by")
+//    private User cancelledBy;
 
     // 취소 사유
     private String cancellationReason; // 취소 전에는 null
+
+    // 관리자 보완 요청 내용
+    @Column(length = 1000)
+    private String feedbackMessage;
 
     // 행사 정보가 생성된 시각 -- 미승인 초안 정리, 확인
     @Column(nullable = false, updatable = false)
@@ -85,5 +94,9 @@ public class Event {
     @PrePersist // 처음 저장하기 직전에 실행 -- 생성 시 자동 채움
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public boolean isOwner(Long companyId) {
+        return this.company.getId().equals(companyId);
     }
 }

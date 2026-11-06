@@ -40,13 +40,13 @@ public interface EventFileRepository extends JpaRepository<EventFile, Long> {
     @Modifying
     @Transactional
     @Query("""
-            delete from Eventfile f
+            delete from EventFile f
             where f.event.id = :eventId
             and f.file.id = :fileId
             """)
     void deleteByEventIdAndFileId(
             @Param("eventId") Long eventId,
-            @Param("eventId") Long fileId
+            @Param("fileId") Long fileId
     );
 
 }
