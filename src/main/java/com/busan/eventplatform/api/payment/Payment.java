@@ -63,5 +63,4 @@ public class Payment {
     // 결제완료로 처리.
     public void confirmPay() {this.status = PaymentStatus.PAID;}
 
-    //
 }
