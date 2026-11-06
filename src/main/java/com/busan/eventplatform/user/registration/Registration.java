@@ -1,6 +1,7 @@
-package com.busan.eventplatform.user;
+package com.busan.eventplatform.user.registration;
 
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

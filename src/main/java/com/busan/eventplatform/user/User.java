@@ -56,7 +56,6 @@ public class User {
     private Instant createdAt;
 
 
-
     // 객체 생성 시 가독성과 안정성을 높이는 Builder 패턴 적용
     @Builder
     public User(String emailNormalized, String passwordHash, String displayName, Role role, UserStatus status, String preferredLocale) {
@@ -100,8 +99,10 @@ public class User {
     }
 
     // 유저가 포인트 충전시 사용할 메서드.
-    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
-  
+    public void chargePoint(int amount) {
+        if (amount > 0) this.point += amount;
+    }
+
     // displayName을 이름이 아닌 닉네임으로 변경해서 닉네임 변경을 하도록하는 메서드.
     public void changeDisplayName(String displayName) {
         this.displayName = displayName;
@@ -118,5 +119,14 @@ public class User {
             );
         }
         this.point -= fee;
+    }
+
+    // 포인트 환불 (복구) 비즈니스 메서드
+    // 유저가 직접 자신의 잔액을 상태 변경하도록 캡슐화
+    // 타인이 유저의 지갑을 뒤져서 돈을 넣고 빼게하는 것이 아닌, 유저 본인이 직접 지갑에 돈을 넣는다.
+    public void refundPoint(int amount) {
+        if (amount > 0) {
+            this.point += amount;
+        }
     }
 }

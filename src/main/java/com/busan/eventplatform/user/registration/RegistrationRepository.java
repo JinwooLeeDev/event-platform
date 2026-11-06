@@ -1,4 +1,4 @@
-package com.busan.eventplatform.user;
+package com.busan.eventplatform.user.registration;
 
 import com.busan.eventplatform.event.EventSession;
 import jakarta.persistence.LockModeType;

@@ -1,5 +1,6 @@
-package com.busan.eventplatform.user;
+package com.busan.eventplatform.user.registration;
 
+import com.busan.eventplatform.user.attendance.Attendance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

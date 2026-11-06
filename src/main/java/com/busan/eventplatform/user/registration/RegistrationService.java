@@ -1,8 +1,9 @@
-package com.busan.eventplatform.user;
+package com.busan.eventplatform.user.registration;
 
 
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
