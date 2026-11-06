@@ -6,11 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "purchase_tb")
-@Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
+//@Table(name = "purchase_tb")
+//@Entity
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Data
 public class Purchase {
 
 }
