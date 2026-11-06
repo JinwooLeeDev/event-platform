@@ -24,10 +24,16 @@ public class EventSession {
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
+    // 행사(Event)와의 다대일(N:1) 연관관계 매핑
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
+    private Event event;
+
     // 테스트 시 임시 더미 데이터 생성을 위한 Builder
     @Builder
-    public EventSession(Integer fee, Integer capacity) {
+    public EventSession(Integer fee, Integer capacity, Event event) {
         this.fee = fee;
         this.capacity = capacity;
+        this.event = event;
     }
 }
