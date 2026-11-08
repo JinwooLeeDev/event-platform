@@ -1,5 +1,12 @@
 package com.busan.eventplatform.global.error.interceptor;
 
+import com.busan.eventplatform.global.error.exception.Exception401;
+import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.login.LoginType;
+import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
+import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -13,18 +20,30 @@ public class CompanyInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
-//        Todo - 컴퍼니dto 클래스 만들어지면 주석해제
-//        SessionCompanyDto sessionCompanyDto = (session == null) ? null : (SessionCompanyDto) session.getAttribute(Define.SESSION_Company);
-//
-//        // 1. 로그인 확인은 LoginInterceptor 가 먼저 처리 (하지만 등록 순서가 바뀌면 대 참사가 일어 난다)
-//        if (sessionCompanyDto == null) {
-//            throw new Exception401("로그인 먼저 해주세요");
-//        }
-//        // 2. 관리자가 아니면 접근 거부
-//        if (!sessionCompanyDto.isCompany()) {
-//            throw new Exception403("관리자만 접근할 수 있습니다");
-//        }
-        return true;
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+        // 개인 계정 중 관리자만 허용
+        if (loginIdentity.getLoginType() == LoginType.USER) {
+            Object value = session.getAttribute(LoginSession.USER);
+            if (!(value instanceof SessionUserDto user)
+                    || !java.util.Objects.equals(loginIdentity.getId(), user.getId())) {
+                throw new Exception401("다시 로그인해주세요.");
+            }
+            if (!user.isAdmin()) {
+                throw new Exception403("기업회원 또는 관리자만 접근할 수 있습니다.");
+            }
+            return true;
+        }
+
+        // 기업 계정은 허용
+        if (loginIdentity.getLoginType() == LoginType.COMPANY) {
+            Object value = session.getAttribute(LoginSession.COMPANY);
+            if (!(value instanceof SessionCompanyDto company)
+                    || !java.util.Objects.equals(loginIdentity.getId(), company.getId())) {
+                throw new Exception401("기업 계정으로 다시 로그인해주세요.");
+            }
+            return true;
+        }
+        throw new Exception403("접근 권한이 없습니다.");
     }
 
     @Override

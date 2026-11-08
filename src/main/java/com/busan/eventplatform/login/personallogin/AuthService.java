@@ -8,6 +8,7 @@ import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.emailverification.EmailVerificationService;
 import com.busan.eventplatform.user.Role;
 import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.UserStatus;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

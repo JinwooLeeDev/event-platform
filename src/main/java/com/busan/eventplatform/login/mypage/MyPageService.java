@@ -3,7 +3,7 @@ package com.busan.eventplatform.login.mypage;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
-import com.busan.eventplatform.login.personallogin.UserRepository;
+import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserStatus;
 import lombok.RequiredArgsConstructor;

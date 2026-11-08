@@ -1,6 +1,7 @@
 package com.busan.eventplatform.api.payment;
 
 import com.busan.eventplatform.company.Company;
+import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,11 @@ public class Payment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id" , nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id" , nullable = true)  // TODO 추후 false로 변경. 잠시 테스트때문에 false 상태.
+    @JoinColumn(name = "company_id")
     private Company company;
 
     @Enumerated(EnumType.STRING)
@@ -43,7 +44,8 @@ public class Payment {
     private String paymentId;
 
     @Builder
-    public Payment(User user , int amount , String paymentId) {
+    public Payment(User user , Company company , int amount , String paymentId) {
+        this.company = company;
         this.user = user;
         this.status = PaymentStatus.READY;
         this.amount = amount;
@@ -51,8 +53,14 @@ public class Payment {
     }
 
     // 받은 유저가 현재 세션의 유저와 같은지?
-    public boolean isOwner(Long userId) {
-        return this.user.getId().equals(userId);
+    public boolean isOwner(LoginIdentity loginIdentity) {
+        if((loginIdentity != null) && (loginIdentity.isUser())){
+           return this.user.getId().equals(loginIdentity.getId());
+        }
+        else if ((loginIdentity != null) && (loginIdentity.isCompany())) {
+            return this.company.getId().equals(loginIdentity.getId());
+        }
+        else return false;
     }
 
     // 현재 결제상태가 "결제완료" 인지?
@@ -63,5 +71,4 @@ public class Payment {
     // 결제완료로 처리.
     public void confirmPay() {this.status = PaymentStatus.PAID;}
 
-    //
 }
