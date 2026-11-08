@@ -1,5 +1,6 @@
 package com.busan.eventplatform.company;
 
+import com.busan.eventplatform.company.businessverification.BusinessVerificationService;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.login.emailverification.EmailVerificationService;
@@ -21,48 +22,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
-
-//    기업 가입절차
-    @Transactional
-    public CompanyResponse.JoinDTO join(CompanyRequest.JoinDTO joinDTO, HttpSession session) {
-
-        companyRepository.findByEmail(joinDTO.getEmail()).ifPresent(company -> {
-            log.warn("회원가입 실패 중복된 이메일 : {}", joinDTO.getEmail());
-            throw new Exception400("이미 가입되어있는 이메일입니다.");
-        });
-
-        Instant verifiedAt = emailVerificationService.requireVerifiedEmail(joinDTO.getEmail(), session);
-
-        companyRepository.findByBusinessNumber(joinDTO.getBusinessNumber()).ifPresent(company -> {
-            log.warn("회원가입 실패 중복된 사업자 등록번호 : {}", joinDTO.getBusinessNumber());
-            throw new Exception400("이미 등록되어 있는 사업자 번호입니다.");
-        });
-
-        String encodedPassword = passwordEncoder.encode(joinDTO.getPassword());
-
-        Company company = joinDTO.toEntity(encodedPassword);
-        company.verifyEmail(verifiedAt);
-
-        companyRepository.save(company);
-
-        return new CompanyResponse.JoinDTO(company);
-    }
-
-    @Transactional
-    public SessionCompanyDTO login(CompanyRequest.LoginDTO loginDTO) {
-        Company company = companyRepository.findByEmail(loginDTO.getEmail()).orElseThrow(
-                () -> new Exception404("이메일 또는 비밀번호가 일치하지 않습니다."));
-
-        if (!passwordEncoder.matches(loginDTO.getPassword(), company.getPassword())) {
-            throw new Exception400("이메일 또는 비밀번호가 일치하지 않습니다.");
-        }
-
-        if (company.getStatus() == CompanyStatus.SUSPENDED) {
-            throw new Exception400("현재 로그인할 수 없는 계정입니다.");
-        }
-
-        return new SessionCompanyDTO(company);
-    }
+    private final BusinessVerificationService businessVerificationService;
 
     public CompanyResponse.DetailDTO findByDetail(Long id) {
         Company company = companyRepository.findById(id).orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
@@ -77,7 +37,7 @@ public class CompanyService {
 
 //    기업 회원 정보 수정
     @Transactional
-    public SessionCompanyDTO update(Long id, CompanyRequest.UpdateDTO updateDTO, HttpSession session) {
+    public CompanyResponse.DetailDTO update(Long id, CompanyRequest.UpdateDTO updateDTO, HttpSession session) {
         Company company = companyRepository.findById(id).orElseThrow(() -> new Exception404("해당 기업을 찾을 수 없습니다."));
 
         boolean requiresReview = updateDTO.requiresReview(company);
@@ -124,7 +84,7 @@ public class CompanyService {
             company.requestReview();
         }
 
-        return new SessionCompanyDTO(company);
+        return new CompanyResponse.DetailDTO(company);
     }
 
 //    TODO 기업 회원 탈퇴 (임시보류)

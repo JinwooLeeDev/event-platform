@@ -84,9 +84,6 @@ public class Company {
     @ColumnDefault("'NOT_CHECKED'")
     private BusinessVerificationStatus businessVerificationStatus;
 
-    // 기업이 포인트 충전시 사용할 메서드.
-    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
-
     @Column(name = "email_verified_at")
     private Instant emailVerifiedAt;
 
@@ -113,9 +110,9 @@ public class Company {
         this.contactPersonName = contactPersonName;
         this.contactPersonPhone = contactPersonPhone;
         this.status = (status == null) ? CompanyStatus.PENDING : status;
+        this.businessVerificationStatus = BusinessVerificationStatus.NOT_CHECKED;
     }
 
-//    TODO 비밀번호 해싱처리
     public void update(
             String name,
             String email,
@@ -169,9 +166,24 @@ public class Company {
         this.status = CompanyStatus.PENDING;
     }
 
+    public void requestCorrection() {
+        this.status = CompanyStatus.FEEDBACK_NEEDED;
+    }
+
     public void verifyEmail(Instant verifiedAt) {
         this.emailVerifiedAt =
                 java.util.Objects.requireNonNull(verifiedAt);
     }
+
+    // 기업이 포인트 충전시 사용할 메서드.
+    public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
+
+    //    사업자 번호 검증결과를 기록하는 메서드
+    public void recordBusinessVerification(
+            BusinessVerificationStatus businessVerificationStatus
+    ) {
+        this.businessVerificationStatus = java.util.Objects.requireNonNull(businessVerificationStatus); //requireNonNull은 null값 입력을 막아줌
+    }
+
 
 }
