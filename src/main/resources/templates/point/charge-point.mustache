@@ -176,7 +176,10 @@
                body : JSON.stringify({amount : selectedPoint})
            })
            const prepareReq = await prepareRes.json();
-           if(!prepareRes.ok) {throw new Error(prepareRes.message)}
+           if(!prepareRes.ok) {
+               alert("결제 처리도중 오류가 발생했습니다")
+               return;
+           }
 
 
            // 포트원으로 결제 요청.
@@ -201,10 +204,15 @@
                body : JSON.stringify({paymentId : payment.paymentId})
            })
            const completeReq = await completeRes.json()
+           if(!completeRes.ok){
+               alert("결제 처리도중 오류가 발생했습니다")
+               return;
+           }
+
            myPoint.innerText = completeReq.currentPoint.toLocaleString() + "P"
 
        }catch (e) {
-
+            throw new Error("결제 실패하였습니다")
        }
     })
 
