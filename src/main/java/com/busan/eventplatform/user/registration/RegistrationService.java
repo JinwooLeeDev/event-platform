@@ -6,8 +6,10 @@ import com.busan.eventplatform.api.payment.PaymentRepository;
 import com.busan.eventplatform.api.refund.Refund;
 import com.busan.eventplatform.api.refund.RefundRepository;
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,35 @@ public class RegistrationService {
     private final RefundRepository refundRepository; // 추후 포인트 차감 내역 엔티티용 레포지토리
 
     private final PaymentRepository paymentRepository;
+
+    // DB에서 ID로 유저와 행사 세션을 찾아오기 위한 레포지토리 주입
+    private final UserRepository userRepository;
+    private final EventSessionRepository eventSessionRepository;
+
+    /**
+     * [컨트롤러와 연결되는 어댑터 메서드]
+     * ID를 받아 엔티티를 조회한 후, 핵심 비즈니스 로직(applyForEvent)을 호출
+     */
+    @Transactional
+    public RegistrationRes apply (Long eventId, Long userId) {
+        // 1. 전달받은 ID로 DB엣서 엔티티 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception400("존재하지 않는 유저입니다."));
+
+        EventSession session = eventSessionRepository.findById(eventId)
+                .orElseThrow(() -> new Exception400("존재하지 않는 행사입니다."));
+
+        // 2. 기존에 작성하신 핵심 로직 호출
+        Registration registration = applyForEvent(user, session);
+
+        // 3. 화면(프론트엔트)에 내려줄 응답 DTO로 변환하여 반환
+        return RegistrationRes.builder()
+                .isSuccess(true)
+                .message("신청이 완료되었습니다.")
+                .queueNumber(registration.getQueueNumber())
+                .status(registration.getStatus().name()) // Enum 이름을 String 으로 변환
+                .build();
+    }
 
     /**
      * 행사 참가 신청 서비스

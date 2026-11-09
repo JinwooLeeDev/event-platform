@@ -38,10 +38,18 @@ public class RegistrationApiController {
         }
 
         try {
-
+            // Service 로직 호출
+            // 참고: 구매 기능은 RegistrationService 호출이나 참가 신청 원장을 생성하지 않음.
+            // 구매와 참가 신청의 통합은 별도의 작업
+            RegistrationRes res = registrationService.apply(eventId, loginIdentity.getId());
+            log.info("참가 신청 성공 - 행사 ID: {}, 유저 ID: {}", eventId, loginIdentity.getId());
+            return  ResponseEntity.ok(res);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("참가 신청 중 에러 발생: {}", e.getMessage());
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
-    )
+
+
+
 }
