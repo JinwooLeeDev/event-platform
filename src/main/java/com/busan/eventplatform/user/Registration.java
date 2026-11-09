@@ -35,7 +35,7 @@ public class Registration {
     private RegistrationStatus status;
 
     // 대기 번호 (CONFIRMED 등은 null, WAITING 상태인 경우에만 값 할당)
-    @Column(name = "queue_number", nullable = false)
+    @Column(name = "queue_number", nullable = true)
     private Integer queueNumber;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -64,5 +64,12 @@ public class Registration {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = Instant.now();
+    }
+
+    // 대기자를 승격시킬 때 객체 지향적으로 상태를 변경하는 비즈니스 메서드
+    // 객체 지향(자신의 상태를 책임지고 능동적으로 변경)
+    public void promoteTo(RegistrationStatus targetStatus) {
+        this.status = targetStatus;
+        this.queueNumber = null; // 승격 되었으므로 대기 번호 회수 (null 처리)
     }
 }
