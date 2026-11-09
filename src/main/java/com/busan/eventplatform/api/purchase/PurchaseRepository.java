@@ -9,10 +9,11 @@ import java.util.Optional;
 
 
 public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
-    // TODO 추후 EventSession이 어느정도 구현되면 삭제.
+    // TODO 이벤트 ID로 이벤트 존재하는지? 추후 EventSession이 어느정도 구현되면 삭제.
     @Query("select es from EventSession es join fetch es.event where es.id = :eventId")
     Optional<EventSession> findByIdWithEvent(@Param("eventId") Long eventId);
 
+    // 해당 이벤트를 이미 구매 결제한 유저가 있는지?
     @Query("""
             select case when count(p.user) > 0 then true else false end
             from Purchase p 
@@ -22,6 +23,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
     boolean existsEventByUser (@Param("userId") Long userId , @Param("eventId") Long eventId);
 
 
+    // 해당 이벤트를 이미 구매 결제한 기업이 있는지?
     @Query("""
             select case when count(p.company) > 0 then true else false end
             from Purchase p 
