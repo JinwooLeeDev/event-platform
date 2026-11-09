@@ -103,3 +103,40 @@ VALUES
     ('박지훈', 'MEMBER', 'jihun@naver.com', 70000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('최유진', 'MEMBER', 'yujin@naver.com', 150000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('정현우', 'MEMBER', 'hyunwoo@naver.com', 25000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+
+------------------------------ event테이블----------------------------------------
+
+INSERT INTO event_tb
+(title, status, description, starts_at, ends_at, canceled_at)
+VALUES
+    (
+        '부산 오션 뮤직 페스티벌',
+        'OPEN',
+        '부산에서 진행되는 야외 음악 축제',
+        '2026-12-05 18:00:00',
+        '2026-12-05 22:00:00',
+        NULL
+    ),
+    (
+        '해운대 문화 예술 축제',
+        'OPEN',
+        '다양한 공연과 체험 프로그램을 제공하는 행사',
+        '2026-12-12 14:00:00',
+        '2026-12-12 20:00:00',
+        NULL
+    );
+
+
+------------------------------ eventSession테이블----------------------------------------
+
+INSERT INTO event_sessions
+(event_id, fee)
+VALUES
+    (1, 25000),
+    (1, 15000),
+    (2, 10000);
+
+
+
