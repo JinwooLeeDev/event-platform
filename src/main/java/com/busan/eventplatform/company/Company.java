@@ -121,6 +121,7 @@ public class Company {
             String address,
             String contactPersonName,
             String contactPersonPhone,
+            LocalDate openedOn,
             String businessCertificateFileName
     ) {
 
@@ -150,6 +151,10 @@ public class Company {
 
         if (contactPersonPhone != null) {
             this.contactPersonPhone = contactPersonPhone;
+        }
+
+        if (openedOn != null) {
+            this.openedOn = openedOn;
         }
 
         if (businessCertificateFileName != null) {
