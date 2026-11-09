@@ -31,6 +31,6 @@ public class PurchaseController {
 
         purchaseService.purchase(eventId , loginIdentity);
 
-        return "redirect:/myPage";
+        return "redirect:/myPage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
     }
 }
