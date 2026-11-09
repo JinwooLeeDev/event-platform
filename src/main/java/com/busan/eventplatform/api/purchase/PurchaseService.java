@@ -63,10 +63,14 @@ public class PurchaseService {
                     .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
 
             // 2. 유저가 이미 결제한 행사인지.
-            if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
+            if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) {
+                throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
+            }
 
             // 3. 유저의 현재 보유 포인트가 결제 포인트보다 작은지.
-            if(user.getPoint() < eventSession.getFee()) throw new Exception400("현재 보유하신 포인트가 부족하여 결제할 수 없습니다");
+            if(user.getPoint() < eventSession.getFee()) {
+                throw new Exception400("현재 보유하신 포인트가 부족하여 결제할 수 없습니다");
+            }
 
             // 4. 통과했다면 포인트 차감 + 결제내역 건 생성.
             user.deductPoint(eventSession.getFee());
@@ -86,10 +90,14 @@ public class PurchaseService {
                     .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다"));
 
             // 2. 기업이 이미 결제한 행사인지.
-            if(purchaseRepository.existsEventByCompany(company.getId() , eventSession.getId())) throw new Exception400("이미 결제처리된 행사입니다");
+            if(purchaseRepository.existsEventByCompany(company.getId() , eventSession.getId())) {
+                throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
+            }
 
             // 3. 기업의 현재 보유 포인트가 결제 포인트보다 작은지.
-            if(company.getPoint() < eventSession.getFee()) throw new Exception400("현재 보유하신 포인트가 부족하여 결제할 수 없습니다");
+            if(company.getPoint() < eventSession.getFee()) {
+                throw new Exception400("현재 보유하신 포인트가 부족하여 결제할 수 없습니다");
+            }
 
             // 4. 통과했다면 포인트 차감 + 결제내역 건 생성.
             company.deductPoint(eventSession.getFee());
