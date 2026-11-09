@@ -1,6 +1,10 @@
 package com.busan.eventplatform.user.registration;
 
 
+import com.busan.eventplatform.api.payment.Payment;
+import com.busan.eventplatform.api.payment.PaymentRepository;
+import com.busan.eventplatform.api.refund.Refund;
+import com.busan.eventplatform.api.refund.RefundRepository;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.user.User;
@@ -17,7 +21,9 @@ import java.util.List;
 public class RegistrationService {
     private final RegistrationRepository registrationRepository;
 
-    // private final PointHistoryRepository pointHistoryRepository; // 추후 포인트 차감 내역 엔티티용 레포지토리
+    private final RefundRepository refundRepository; // 추후 포인트 차감 내역 엔티티용 레포지토리
+
+    private final PaymentRepository paymentRepository;
 
     /**
      * 행사 참가 신청 서비스
@@ -33,7 +39,6 @@ public class RegistrationService {
         EventSession lockedSession = registrationRepository.findSessionWithPessimisticLock(session.getId());
 
         // 2. 유무료 여부 확인(fee가 0보다 크면 유료 행사로 간주)
-        // todo - EventSession 기존 다이어그램의 participation_fee_point를 fee 로 필드명 맞춤 (윤아씨께 공유 완료)
         boolean isPaidEvent = lockedSession.getFee() != null && lockedSession.getFee() > 0;
 
         if (isPaidEvent) {
@@ -46,9 +51,19 @@ public class RegistrationService {
             // 2-2. [유료] 참가비만큼 선차감 처리
             user.deductPoint(lockedSession.getFee());
 
-            // 2-3. 포인트 차감 기록 (트랜잭션에 묶임) todo - 추후 구현
-            // pointHistoryRepository.save(new PointHistory(user, -session.getFee(), "행사 참가비 선차감"));
+            // 2-3. 포인트 차감 기록
+            // 고유한 결제 번호 생성(예시: REG-유저PK-세션PK-현재시간)
+            String uniquePaymentId = "REG-" + user.getId() + "-" + lockedSession.getId() + "-" + System.currentTimeMillis();
 
+            Payment payment = Payment.builder()
+                    .user(user)
+                    .company(null) // 일반 유저의 참가비 결제 이므로 company는 null
+                    .amount(lockedSession.getFee())
+                    .paymentId(uniquePaymentId)
+                    .build();
+            // Builder 의 기본값이 READY(대기)이므로, 포인트가 이미 차감되었으니 PAID(완료)
+            payment.confirmPay();
+            paymentRepository.save(payment);
         }
 
         // 3. 선행 대기자 우선 승격 처리
@@ -115,6 +130,58 @@ public class RegistrationService {
 
         }
     }
+
+    /**
+     * [Branch 5] 참가 취소 및 자동 환불 로직
+     * - 본인 및 기취소 여부 검증
+     * - Registration 상태 CANCELED 변경
+     * - 유료 행사일 경우 포인트 원복 및 Refund 엔티티 저장
+     * - 취소로 인해 발생한 빈자리를 채우기 위해 대기열 승격 로직 호출
+     */
+    @Transactional
+    public void cancelAndRefund(Long registrationId, Long userId) {
+        // 1. 내역 조회 및 예외 처리
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new Exception400("존재하지 않는 신청 내역입니다."));
+
+        // 2. 본인 요청 검증
+        if(!registration.getUser().getId().equals(userId)) {
+            throw new Exception400("본인의 신청 내역만 취소할 수 있습니다.");
+        }
+
+        // 3. 기취소 상태 방어
+        if(registration.getStatus() == RegistrationStatus.CANCELLED) {
+            throw new Exception400("이미 취소된 내역입니다.");
+        }
+
+        EventSession session = registration.getSession();
+        boolean isPaidEvent = session.getFee() != null && session.getFee() > 0;
+
+        // 4. 상태를 '취소'로 변경
+        registration.promoteTo(RegistrationStatus.CANCELLED);
+
+        // 5. 포인트 환불 (유료 행사의 경우)
+        if(isPaidEvent) {
+            User user = registration.getUser();
+
+            // 유저 엔티티 환불 메서드 호출 (더티 체킹을 통한 자동 UPDATE)
+            user.refundPoint(session.getFee());
+
+            // 환불 내역(Refund) 객체 생성 및 저장
+            Refund refund = Refund.builder()
+                    .user(user)
+                    .amount(session.getFee())
+                    .reason("유저 참가 취소 환불 - 세션 ID: " + session.getId())
+                    .build();
+
+            refundRepository.save(refund);
+        }
+
+        // 6. 취소로 인해 잔여 정원이 생겼을 수 있으므로 대기자 승격 로직 즉시 실행
+        // 취소된 세션에 비관적 락이 걸린 상태가 아니지만 트랜잭션 내에서 처리됨
+        promoteWaitingUsersIfAny(session, isPaidEvent);
+    }
+
 
 
 }

@@ -3,6 +3,7 @@ package com.busan.eventplatform.event;
 import com.busan.eventplatform.event.events.Event;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -87,10 +88,21 @@ public class EventSession {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
+    // 테스트 시 임시 더미 데이터 생성을 위한 Builder
+    @Builder
+    public EventSession(Integer fee, Integer capacity, Event event) {
+        this.fee = fee;
+        this.capacity = capacity;
+        this.event = event;
+
+    }
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
             createdAt = Instant.now();
         }
     }
+
+
 }
