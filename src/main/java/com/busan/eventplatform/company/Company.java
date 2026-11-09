@@ -1,6 +1,7 @@
 package com.busan.eventplatform.company;
 
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
+import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -191,4 +192,13 @@ public class Company {
     }
 
 
+
+    // 기업 포인트 결제시 사용할 메서드.
+    public void deductPoint(Integer fee) {
+        if (this.point < fee) {
+            throw new Exception400("잔액이 부족합니다.(현재잔액: " + this.point + "원)"
+            );
+        }
+        this.point -= fee;
+    }
 }
