@@ -1,8 +1,11 @@
 package com.busan.eventplatform.global.error.exception;
 
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
@@ -60,6 +63,22 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
         );
+    }
+
+    /// 행사 중복 결제를 alert창으로 띄워서 막아주기 위해 추가.
+    @ExceptionHandler(AlreadyPurchaseException.class)
+    public ResponseEntity<String> handleAlready(AlreadyPurchaseException exception){
+
+        String html = """
+                <script>
+                    alert('이미 결제된 행사입니다');
+                    history.back();
+                </script>
+                """   ;
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.parseMediaType("text/html; charset=UTF-8")) // 안쓰면 한글 깨짐.
+                .body(html);
     }
 
     private ModelAndView errorPage(

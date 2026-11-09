@@ -3,6 +3,7 @@ package com.busan.eventplatform.api.purchase;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.login.LoginIdentity;
@@ -49,6 +50,7 @@ public class PurchaseService {
     }
 
 
+
     @Transactional
     public void purchase(Long eventId, LoginIdentity loginIdentity) {
         // 1. 실제 있는 이벤트인지. TODO 나중에 eventSession 구현되면 삭제.
@@ -61,7 +63,7 @@ public class PurchaseService {
                     .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
 
             // 2. 유저가 이미 결제한 행사인지.
-            if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) throw new Exception400("이미 결제처리된 행사입니다");
+            if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
 
             // 3. 유저의 현재 보유 포인트가 결제 포인트보다 작은지.
             if(user.getPoint() < eventSession.getFee()) throw new Exception400("현재 보유하신 포인트가 부족하여 결제할 수 없습니다");
