@@ -58,11 +58,12 @@ public class User {
 
     // 객체 생성 시 가독성과 안정성을 높이는 Builder 패턴 적용
     @Builder
-    public User(String emailNormalized, String passwordHash, String displayName, Role role, UserStatus status, String preferredLocale) {
+    public User(String emailNormalized, String passwordHash, String displayName, Role role, int point, UserStatus status, String preferredLocale) {
         this.emailNormalized = emailNormalized;
         this.passwordHash = passwordHash;
         this.displayName = displayName;
         this.role = role;
+        this.point = point;
         this.status = (status != null) ? status : UserStatus.ACTIVE;
         this.preferredLocale = (preferredLocale != null) ? preferredLocale : "ko";
     }
@@ -126,6 +127,13 @@ public class User {
     // 타인이 유저의 지갑을 뒤져서 돈을 넣고 빼게하는 것이 아닌, 유저 본인이 직접 지갑에 돈을 넣는다.
     public void refundPoint(int amount) {
         if (amount > 0) {
+            this.point += amount;
+        }
+    }
+
+    // 포인트 충전 및 환불을 위한 비즈니스 메서드
+    public void addPoint(Integer amount) {
+        if (amount != null && amount > 0) {
             this.point += amount;
         }
     }

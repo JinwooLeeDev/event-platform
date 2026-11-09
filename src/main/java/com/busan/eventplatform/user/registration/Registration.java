@@ -73,4 +73,18 @@ public class Registration {
         this.status = targetStatus;
         this.queueNumber = null; // 승격 되었으므로 대기 번호 회수 (null 처리)
     }
+
+    // === 머스태치 화면 렌더링용 편의 메서드 추가 ===
+    public boolean isConfirmed() {
+        return this.status == RegistrationStatus.CONFIRMED; // (참가 확정 상태 이넘명에 맞게 조절)
+    }
+
+    public boolean isWaiting() {
+        return this.status == RegistrationStatus.WAITING; // (대기 상태 이넘명에 맞게 조절)
+    }
+
+    public boolean isCancelled() {
+        return this.status == RegistrationStatus.CANCELLED; // (취소 상태 이넘명에 맞게 조절)
+    }
+
 }

@@ -89,10 +89,13 @@ public class EventSession {
 
     // 테스트 시 임시 더미 데이터 생성을 위한 Builder
     @Builder
-    public EventSession(Integer fee, Integer capacity, Event event) {
+    public EventSession(String name, Integer fee, Integer capacity, Event event, Integer occupiedCount, Integer nextReceptionNumber) {
+        this.name = (name != null) ? name : "1회차 일반 세션";
         this.fee = fee;
         this.capacity = capacity;
         this.event = event;
+        this.occupiedCount = (occupiedCount != null) ? occupiedCount : 0; // 필수값 기본 0 설정
+        this.nextReceptionNumber = (nextReceptionNumber != null) ? nextReceptionNumber : 1; // 필수값 기본 1 설정
 
     }
 

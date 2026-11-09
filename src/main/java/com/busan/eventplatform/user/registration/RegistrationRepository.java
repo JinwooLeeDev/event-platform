@@ -29,4 +29,16 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     // 빈자리 발생 시 승격 대상자 조회
     List<Registration> findBySessionIdAndStatusOrderByQueueNumberAsc(Long sessionId, RegistrationStatus status, Pageable pageable);
+
+    // 행사 회차별 단일 상태 (확정 or 대기) 인원수 조회 (편의성 메서드)
+    long countBySessionIdAndStatus(Long sessionId, RegistrationStatus status);
+
+    // 행사 전체 회차의 특정 상태(확정 or 대기) 인원수 합산
+    // Registration -> session(EventSession) -> event(Event) 로 탐색하여 합산
+    @Query("select count(r) from Registration r where r.session.event.id = :eventId and r.status = :status")
+    long countTotalByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") RegistrationStatus status);
+
+    // [마이페이지용] 유저 본인의 참가 신청 내역 최신순 조회
+    List<Registration> findByUserIdOrderByIdDesc(Long userId);
+
 }

@@ -36,7 +36,7 @@ public class RegistrationService {
      * ID를 받아 엔티티를 조회한 후, 핵심 비즈니스 로직(applyForEvent)을 호출
      */
     @Transactional
-    public RegistrationRes apply (Long eventId, Long userId) {
+    public RegistrationRes apply(Long eventId, Long userId) {
         // 1. 전달받은 ID로 DB엣서 엔티티 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception400("존재하지 않는 유저입니다."));
@@ -139,11 +139,12 @@ public class RegistrationService {
      * 빈자리가 있을 경우, 비어있는 수만큼 대기번호가 가장 앞선 유저들을 확정/ 승인대기 상태로 승격하기
      */
     private void promoteWaitingUsersIfAny(EventSession session, boolean isPaidEvent) {
-        List<RegistrationStatus> activeStatuses = List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING_APPROVAL);;
+        List<RegistrationStatus> activeStatuses = List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING_APPROVAL);
+        ;
         long currentOccupancy = registrationRepository.countBySessionIdAndStatusIn(session.getId(), activeStatuses);
         long availableSpots = session.getCapacity() - currentOccupancy;
 
-        if(availableSpots > 0){
+        if (availableSpots > 0) {
             // 빈자리수(availableSpots)만큼만 대기열 최상위 유저를 조회 (JPA Pageable 활용)
             //PageRequest.of(int page, int size) 메서드는 규격상 int 타입만 받을 수 있기에 long -> int로 다운캐스팅
             Pageable limit = PageRequest.of(0, (int) availableSpots);
@@ -176,12 +177,12 @@ public class RegistrationService {
                 .orElseThrow(() -> new Exception400("존재하지 않는 신청 내역입니다."));
 
         // 2. 본인 요청 검증
-        if(!registration.getUser().getId().equals(userId)) {
+        if (!registration.getUser().getId().equals(userId)) {
             throw new Exception400("본인의 신청 내역만 취소할 수 있습니다.");
         }
 
         // 3. 기취소 상태 방어
-        if(registration.getStatus() == RegistrationStatus.CANCELLED) {
+        if (registration.getStatus() == RegistrationStatus.CANCELLED) {
             throw new Exception400("이미 취소된 내역입니다.");
         }
 
@@ -192,7 +193,7 @@ public class RegistrationService {
         registration.promoteTo(RegistrationStatus.CANCELLED);
 
         // 5. 포인트 환불 (유료 행사의 경우)
-        if(isPaidEvent) {
+        if (isPaidEvent) {
             User user = registration.getUser();
 
             // 유저 엔티티 환불 메서드 호출 (더티 체킹을 통한 자동 UPDATE)
@@ -211,8 +212,49 @@ public class RegistrationService {
         // 6. 취소로 인해 잔여 정원이 생겼을 수 있으므로 대기자 승격 로직 즉시 실행
         // 취소된 세션에 비관적 락이 걸린 상태가 아니지만 트랜잭션 내에서 처리됨
         promoteWaitingUsersIfAny(session, isPaidEvent);
+
     }
 
+    // 특정 회차(Session의 확정 인원 수 반환)
+    @Transactional(readOnly = true)
+    public long getConfirmedCountBySession(Long sessionId) {
+        return registrationRepository.countBySessionIdAndStatus(sessionId, RegistrationStatus.CONFIRMED);
+    }
 
+    // 특정 행사 (Event) 전체의 총 확정 인원수 합산 반환
+    @Transactional(readOnly = true)
+    public long getTotalConfirmedCountByEvent(Long eventId) {
+        return registrationRepository.countTotalByEventIdAndStatus(eventId, RegistrationStatus.CONFIRMED);
+    }
+    /**
+     * 참가 신청 취소 및 포인트 환불 처리
+     */
+    @Transactional
+    public void cancelRegistration(Long registrationId) {
+        // 1. 취소할 신청 내역 조회 (없으면 예외 처리)
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 참가 신청 내역입니다. ID: " + registrationId));
 
+        // 2. 이미 취소된 상태인지 확인
+        if (registration.getStatus() == RegistrationStatus.CANCELLED) {
+            throw new IllegalStateException("이미 취소된 참가 신청입니다.");
+        }
+
+        // 3. 신청 상태를 CANCELLED로 변경 (또는 엔티티 내부에 취소 메서드가 있다면 활용)
+        // 만약 Registration 엔티티에 상태 변경 메서드가 없다면 아래처럼 직접 처리하거나 엔티티에 메서드를 추가할 수 있습니다.
+        // 예: registration.cancel(); -> 엔티티에 비즈니스 메서드 구현 권장
+
+        // 4. 포인트 환불 처리 (결제했던 세션의 fee 만큼 유저 포인트 복구)
+        User user = registration.getUser();
+        Integer fee = registration.getSession().getFee();
+        if (fee != null && fee > 0) {
+            user.addPoint(fee); // User 엔티티에 포인트 증가 메서드가 있거나 point를 직접 더해줌
+        }
+
+        // 5. 신청 상태 변경 (엔티티에 필드가 final이 아니라면 setter 또는 변경 메서드 사용)
+        // registration.setStatus(RegistrationStatus.CANCELLED);
+    }
 }
+
+
+

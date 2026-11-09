@@ -5,10 +5,9 @@ import com.busan.eventplatform.login.LoginIdentity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,7 +18,7 @@ public class RegistrationApiController {
 
     // 1. 참가신청 API
     // JSON 요청활용, 상대 경로 지정
-    @PostMapping("/api/events/{eventId}/registrations}")
+    @PostMapping("/api/events/{eventId}/{registrations}")
     public ResponseEntity<?> applyEvent (
             @PathVariable Long eventId,
             // 인증은 서버 세션 기반이며, 세션 키 'loginIdentity' 사용
@@ -48,6 +47,14 @@ public class RegistrationApiController {
             log.error("참가 신청 중 에러 발생: {}", e.getMessage());
             return ResponseEntity.status(400).body(e.getMessage());
         }
+    }
+
+    // 참가 신청 취소 API
+    @PostMapping("/api/registrations/cancel/{id}")
+    public ResponseEntity<?> cancelRegistration(@PathVariable("id") Long registrationId) {
+        // 취소 비즈니스 로직 호출 (포인트 환불 등)
+        registrationService.cancelRegistration(registrationId);
+        return ResponseEntity.ok(Map.of("message", "신청이 성공적으로 취소되었습니다."));
     }
 
 
