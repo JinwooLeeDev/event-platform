@@ -1,6 +1,8 @@
 package com.busan.eventplatform.global.util;
 
 public class Define {
+    public static final String SESSION_COMPANY = "sessionCompanyDto";
+
     public static final int EMAIL_CODE_EXPIRE_MINUTES = 5;
 
     // 인증 정보를 저장할 세션 키
@@ -14,5 +16,4 @@ public class Define {
 
     // 인증 완료 결과의 유효시간: 10분
     public static final int EMAIL_VERIFIED_EXPIRE_MINUTES = 10;
-
 }

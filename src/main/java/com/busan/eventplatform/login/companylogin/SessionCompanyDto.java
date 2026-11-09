@@ -1,5 +1,6 @@
 package com.busan.eventplatform.login.companylogin;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.Builder;
 import lombok.Getter;
 

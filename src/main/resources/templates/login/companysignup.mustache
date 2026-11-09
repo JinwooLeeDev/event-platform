@@ -14,7 +14,7 @@
         <h1>기업 회원가입</h1>
         <p>가입 후 관리자 기업 심사를 진행합니다.</p>
 
-        <form id="joinForm" action="/company/join" method="post">
+        <form id="joinForm" action="/signup/company" method="post" enctype="multipart/form-data">
             <fieldset>
                 <legend>계정 정보</legend>
 
@@ -24,7 +24,7 @@
                     <div class="auth-row company-verification-row">
                         <input id="email"
                                name="email"
-                               type="email"
+                               type="text" inputmode="email"
                                maxlength="254"
                                autocomplete="username"
                                placeholder="name@example.com"
@@ -89,6 +89,7 @@
                 <div class="auth-field">
                     <label for="passwordConfirm">비밀번호 확인</label>
                     <input id="passwordConfirm"
+                           name="passwordConfirm"
                            type="password"
                            autocomplete="new-password"
                            required>
@@ -148,11 +149,12 @@
                 <p>
                     <label for="certificate">사업자등록증</label><br>
                     <input id="certificate"
+                           name="businessCertificate"
                            type="file"
                            accept=".pdf,.jpg,.jpeg,.png"
-                           disabled>
+                           required>
                     <br>
-                    <small>파일 업로드 준비 중입니다. 현재 테스트에서는 제출하지 않습니다.</small>
+                    <small>PDF·JPG·PNG 파일을 최대 10MB까지 첨부할 수 있습니다.</small>
                 </p>
             </fieldset>
 
@@ -184,7 +186,7 @@
                 기업 가입 신청
             </button>
 
-            <a href="/company/login">로그인으로 이동</a>
+            <a href="/login?type=company">로그인으로 이동</a>
         </form>
     </section>
 </main>
@@ -249,7 +251,6 @@
     }
 
     sendButton.addEventListener("click", async () => {
-        email.value = email.value.trim();
 
         if (!email.reportValidity() || busy) {
             return;

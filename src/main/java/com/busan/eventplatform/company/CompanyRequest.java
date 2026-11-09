@@ -9,88 +9,6 @@ import java.util.Objects;
 public class CompanyRequest {
 
     @Data
-    public static class JoinDTO {
-
-        private String name;
-        private String email;
-        private String password;
-        private String businessNumber;
-        private String representativeName;
-        private LocalDate openedOn;
-        private String address;
-        private String businessCertificateFileName;
-        private String contactPersonName;
-        private String contactPersonPhone;
-
-        public void validate() {
-            if (name == null || name.isBlank()) {
-                throw new Exception400("기업명을 입력해주세요.");
-            }
-
-            if (email == null || email.isBlank()) {
-                throw new Exception400("이메일을 입력해주세요.");
-            }
-
-            if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-                throw new Exception400("이메일 형식으로 입력해주세요.");
-            }
-
-            if (password == null || password.isBlank()) {
-                throw new Exception400("비밀번호를 입력해주세요.");
-            }
-
-            if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$")) {
-                throw new Exception400("비밀번호는 영문자, 숫자, 특수문자($@!%*#?&)를 모두 포함한 8자~16자여야 합니다.");
-            }
-
-            if (businessNumber == null || businessNumber.isBlank()) {
-                throw new Exception400("사업자 번호를 입력해주세요.");
-            }
-
-            if (representativeName == null || representativeName.isBlank()) {
-                throw new Exception400("대표자 명을 입력해주세요.");
-            }
-
-            if (openedOn == null) {
-                throw new Exception400("개업일자를 입력해주세요.");
-            }
-
-            if (address == null || address.isBlank()) {
-                throw new Exception400("기업 주소를 입력해주세요.");
-            }
-
-            // TODO: 파일 처리 구현 후 활성화
-            // if (businessCertificateFileName == null
-            //         || businessCertificateFileName.isBlank()) {
-            //     throw new Exception400("사업자 등록증을 제출해주세요.");
-            // }
-
-            if (contactPersonName == null || contactPersonName.isBlank()) {
-                throw new Exception400("담당자 명을 입력해주세요.");
-            }
-
-            if (contactPersonPhone == null || contactPersonPhone.isBlank()) {
-                throw new Exception400("담당자 전화번호를 입력해주세요.");
-            }
-        }
-
-        public Company toEntity(String encodedPassword) {
-            return Company.builder()
-                    .name(name)
-                    .email(email)
-                    .password(encodedPassword)
-                    .businessNumber(businessNumber)
-                    .representativeName(representativeName)
-                    .openedOn(openedOn)
-                    .address(address)
-                    .businessCertificateFileName(businessCertificateFileName)
-                    .contactPersonName(contactPersonName)
-                    .contactPersonPhone(contactPersonPhone)
-                    .build();
-        }
-    }
-
-    @Data
     public static class UpdateDTO {
         private String email; //기업 이메일
         private String password; //기업 비밀번호
@@ -102,7 +20,6 @@ public class CompanyRequest {
         private String businessNumber; // 사업자번호
         private String representativeName; // 대표자 명
         private String address; // 기업 주소
-
         private String businessCertificateFileName; // 사업자등록증 파일
 
         //        수정 시 PENDING으로 변경할지 여부를 정하는 메서드
@@ -151,18 +68,5 @@ public class CompanyRequest {
         }
     }
 
-    @Data
-    public static class LoginDTO {
-        private String email; //기업 이메일
-        private String password; //기업 비밀번호
 
-        public void validate() {
-            if (email == null || email.trim().isEmpty()) {
-                throw new Exception400("사용자명은 필수 입니다.");
-            }
-            if (password == null || password.trim().isEmpty()) {
-                throw new Exception400("비밀번호는 필수 입니다.");
-            }
-        }
-    }
 }
