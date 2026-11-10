@@ -33,7 +33,4 @@ public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
             """
     )
     boolean existsEventByCompany (@Param("companyId") Long companyId , @Param("eventId") Long eventId);
-
-    @Query("select ")
-    List<PurchaseRes.PurchaseListDto> findByUserIdWithPurchaseList(Long userId);
 }

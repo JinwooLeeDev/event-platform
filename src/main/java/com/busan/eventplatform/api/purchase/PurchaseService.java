@@ -112,11 +112,4 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
         }
     }
-
-
-    // TODO 아직 구현중.
-    public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId) {
-        List<PurchaseRes.PurchaseListDto> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);
-        return null;
-    }
 }
