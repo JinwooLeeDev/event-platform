@@ -107,6 +107,8 @@ public class User {
         this.displayName = displayName;
     }
 
+
+
     /**
      * 유료 행사 참가비 결제 (포인트 차감)
      *

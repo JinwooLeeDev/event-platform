@@ -1,5 +1,7 @@
 package com.busan.eventplatform.login.companylogin;
 
+import com.busan.eventplatform.company.businessverification.BusinessVerificationService;
+import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.login.LoginReqDto;
 
 import com.busan.eventplatform.company.Company;
@@ -33,6 +35,7 @@ public class CompanyAuthService {
     private final EmailVerificationService emailVerificationService;
     private final FileStorage fileStorage;
     private final PlatformTransactionManager transactionManager;
+    private final BusinessVerificationService businessVerificationService;
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void signup(CompanySignupReqDto request, HttpSession session) {
@@ -47,6 +50,19 @@ public class CompanyAuthService {
         companyRepository.findByBusinessNumber(request.getBusinessNumber()).ifPresent(company -> {
             throw new Exception400("이미 등록되어 있는 사업자 번호입니다.");
         });
+
+        BusinessVerificationStatus verificationStatus = businessVerificationService.verify(
+                request.getBusinessNumber(),
+                request.getRepresentativeName(),
+                request.getOpenedOn()
+        );
+
+        if (verificationStatus == BusinessVerificationStatus.MISMATCHED) {
+            throw new Exception400(
+                    "사업자 정보가 일치하지 않습니다. "
+                            + "사업자등록번호·대표자명·개업일자를 확인해주세요."
+            );
+        }
 
         // TODO: 외부 사업자 진위 확인 모듈을 파일 저장 전에 연결합니다.
         // 현재는 외부 검증 완료로 간주하지 않으며 관리자 승인 대기로 저장합니다.
@@ -71,6 +87,7 @@ public class CompanyAuthService {
                 .businessCertificateFileName(storedFile.getStorageKey())
                 .build();
                 company.verifyEmail(verifiedAt);
+                company.recordBusinessVerification(verificationStatus);
                 companyRepository.saveAndFlush(company);
             });
         } catch (RuntimeException | Error failure) {

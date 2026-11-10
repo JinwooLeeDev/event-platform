@@ -65,9 +65,11 @@ public class PaymentService {
             return paymentId;
     }
 
+
     private String createPaymentId(Long identityId) {
         return "payment-" + identityId + "_" + UUID.randomUUID().toString().substring(0 , 5);
     }
+
 
     @Transactional
     public PaymentRes.CompleteDto complete(LoginIdentity loginIdentity , PaymentRes.PortOnePayment portOnePayment , String paymentId) {
@@ -113,8 +115,6 @@ public class PaymentService {
                         .orElseThrow(() -> new Exception404("유저를 찾을 수 없음"));
                 return company.getPoint();
         } else throw new Exception400("로그인 유형(User | Company)이 올바르지 않습니다");
-
     }
-
 
 }

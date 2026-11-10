@@ -1,0 +1,273 @@
+<style>
+    .account-layout {
+        --account-ink: #292f3d;
+        --account-muted: #72757e;
+        --account-line: #e6e7eb;
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        align-items: start;
+        gap: 36px;
+        max-width: 1360px;
+        margin: 0 auto;
+        font-family: 'Pretendard', sans-serif;
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--account-ink);
+    }
+
+    .account-layout *, .account-layout *::before, .account-layout *::after {
+        box-sizing: border-box;
+    }
+
+    .account-layout [hidden] {
+        display: none !important;
+    }
+
+    .account-sidebar {
+        padding: 26px 18px;
+        border: 1px solid var(--account-line);
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .account-brand {
+        display: block;
+        padding: 0 12px 24px;
+        text-decoration: none;
+        color: var(--account-ink);
+    }
+
+    .account-brand span {
+        display: block;
+        margin-bottom: 8px;
+        color: #72757e;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .account-brand strong {
+        font-size: 22px;
+        letter-spacing: -.6px;
+    }
+
+    .account-nav-label {
+        padding: 0 12px;
+        margin: 0 0 8px;
+        color: #72757e;
+        font-size: 12px;
+    }
+
+    .account-nav {
+        display: grid;
+        gap: 6px;
+    }
+
+    .account-nav a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 12px;
+        border-radius: 10px;
+        color: #555c68;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .account-nav a span {
+        color: #91949c;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .account-nav a:hover {
+        background: #f5f5f6;
+    }
+
+    .account-nav a[aria-current='page'] {
+        background: #eef1f6;
+        color: #0750d8;
+    }
+
+    .account-nav a[aria-current='page'] span {
+        color: #0750d8;
+    }
+
+    .account-sidebar-bottom {
+        margin-top: 32px;
+        padding: 20px 12px 0;
+        border-top: 1px solid var(--account-line);
+    }
+
+    .account-sidebar-bottom p {
+        color: #72757e;
+        font-size: 12px;
+        margin: 0 0 8px;
+    }
+
+    .account-sidebar-bottom a {
+        color: #555c68;
+        font-size: 13px;
+        text-decoration: none;
+    }
+
+    .account-content {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .account-layout h1, .account-layout .account-page-title {
+        margin: 0 0 12px;
+        font-size: clamp(26px, 3vw, 32px);
+        font-weight: 800;
+        line-height: 1.35;
+        letter-spacing: -1px;
+        color: var(--account-ink);
+    }
+
+    .account-layout .member-eyebrow {
+        display: block;
+        margin-bottom: 12px;
+        color: #72757e;
+        font-size: 11px;
+    }
+
+    .account-layout h2 {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.4;
+        letter-spacing: -.4px;
+    }
+
+    .account-layout h3.event-title {
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    .account-layout .member-muted, .account-layout .point-description {
+        color: var(--account-muted);
+        font-size: 14px;
+        line-height: 1.75;
+    }
+
+    .account-layout .member-box, .account-layout .point-history, .account-layout .point-balance, .account-layout .history-card {
+        border-radius: 16px;
+        border: 1px solid var(--account-line);
+        box-shadow: 0 3px 16px rgba(30, 35, 45, .025);
+    }
+
+    .account-layout .member-box, .account-layout .point-history, .account-layout .point-balance {
+        padding: 26px;
+    }
+
+    .account-layout .member-point strong, .account-layout .point-balance strong {
+        font-size: 32px;
+        line-height: 1.3;
+    }
+
+    .account-layout .member-button, .account-layout .point-link, .account-layout .btn {
+        min-height: 44px;
+        padding: 11px 18px;
+        border-radius: 10px !important;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .account-layout .member-point a {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .account-layout .member-details dt, .account-layout .summary-label {
+        font-size: 12px;
+        color: var(--account-muted);
+    }
+
+    .account-layout .member-details dd {
+        font-size: 15px;
+    }
+
+    .account-layout .point-sample, .account-layout .alert-primary {
+        padding: 14px 18px;
+        border: 1px solid #e2ddd4;
+        border-radius: 12px;
+        background: #f0ede7;
+        color: #64615a;
+        font-size: 13px;
+        line-height: 1.75;
+    }
+
+    .account-layout .event-meta, .account-layout .status-note, .account-layout .history-notice p {
+        font-size: 13px;
+        line-height: 1.75;
+    }
+
+    .account-layout .history-tabs .nav-link {
+        font-size: 14px;
+    }
+
+    .account-layout .point-crumb {
+        margin-bottom: 22px;
+        font-size: 12px;
+    }
+
+    .account-layout a:focus-visible, .account-layout button:focus-visible {
+        outline: 3px solid #9cbfff;
+        outline-offset: 3px;
+    }
+
+    @media (max-width: 1000px) {
+        .account-layout {
+            grid-template-columns: 190px minmax(0, 1fr);
+            gap: 24px;
+        }
+
+        .account-layout .member-summary, .account-layout .point-columns {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .account-layout {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 24px;
+        }
+
+        .account-sidebar {
+            padding: 16px;
+        }
+
+        .account-brand {
+            padding: 0 4px 14px;
+        }
+
+        .account-brand strong {
+            font-size: 18px;
+        }
+
+        .account-nav {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .account-nav a {
+            justify-content: center;
+            padding: 12px 6px;
+            font-size: 13px;
+        }
+
+        .account-nav a span, .account-nav-label, .account-sidebar-bottom {
+            display: none;
+        }
+
+        .account-layout .member-box, .account-layout .point-history, .account-layout .point-balance {
+            padding: 22px;
+        }
+    }
+</style>
