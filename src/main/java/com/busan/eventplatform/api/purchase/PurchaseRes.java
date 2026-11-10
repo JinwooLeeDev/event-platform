@@ -53,7 +53,7 @@ public class PurchaseRes {
             this.sessionName = session.getName();
             this.location = event.getAddress();
             this.price = purchase.getPrice();
-            this.purchaseDate = getPurchaseDate();
+            this.purchaseDate = purchase.getPurchasedAt();
 
             if(registration != null) {
                 this.status = registration.getStatus();

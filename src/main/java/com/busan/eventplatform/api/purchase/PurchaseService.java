@@ -117,7 +117,7 @@ public class PurchaseService {
     }
 
 
-    public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId , EventSession eventSession) {
+    public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId) {
         List<Purchase> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);
         if(purchaseList == null) return List.of(); // 구매내역 없으면 그냥 빈 목록으로.
 
