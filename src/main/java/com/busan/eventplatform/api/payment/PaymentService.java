@@ -67,14 +67,15 @@ public class PaymentService {
 
 
     private String createPaymentId(Long identityId) {
-        return "payment-" + identityId + "_" + UUID.randomUUID().toString().substring(0 , 5);
+        return "payment-" + identityId + "_" + System.currentTimeMillis() + "_" +
+                UUID.randomUUID().toString().substring(0 , 7);
     }
 
 
     @Transactional
     public PaymentRes.CompleteDto complete(LoginIdentity loginIdentity , PaymentRes.PortOnePayment portOnePayment , String paymentId) {
         // 1. 우리 서버가 요청한 결제가 맞는지 확인.
-        Payment payment = paymentRepository.findByPayment(paymentId)
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new Exception404("존재하지 않는 결제건입니다."));
 
         // 2. 현재 결제가 현재 세션이용자의 결제가 맞는지.
@@ -116,5 +117,11 @@ public class PaymentService {
                 return company.getPoint();
         } else throw new Exception400("로그인 유형(User | Company)이 올바르지 않습니다");
     }
+
+
+//    public PaymentRes.ListDto paymentList(Long userId){
+//
+//
+//    }
 
 }
