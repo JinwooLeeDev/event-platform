@@ -25,6 +25,7 @@
         </section>
         <section class="auth-card" aria-labelledby="form-title">
             <h2 id="form-title">로그인</h2>
+            {{#passwordChangedMessage}}<p class="auth-message" data-state="success" role="status">{{passwordChangedMessage}}</p>{{/passwordChangedMessage}}
             {{#signupMessage}}
                 <p class="auth-message" data-state="success" role="status">{{signupMessage}}</p>
             {{/signupMessage}}

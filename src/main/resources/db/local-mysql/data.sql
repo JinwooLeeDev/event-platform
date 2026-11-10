@@ -390,3 +390,35 @@ SELECT c.id, k.id, '광안리 해변', '부산 해변 음악회 취소', '행사
 FROM company_tb c CROSS JOIN event_category_tb k
 WHERE c.email = 'company4@example.test' AND k.id = 1
     AND NOT EXISTS (SELECT 1 FROM events e WHERE e.title = '부산 해변 음악회 취소' AND e.company_id = c.id);
+
+
+
+INSERT INTO purchase_tb (
+    user_id,
+    company_id,
+    event_session_id,
+    price
+)
+SELECT
+    u.id,
+    NULL,
+    s.id,
+    COALESCE(s.fee, 0)
+FROM users u
+         CROSS JOIN event_sessions s
+WHERE u.email_normalized = 'minsu@naver.com'
+  AND s.id IN (
+    SELECT selected_session.id
+    FROM (
+             SELECT id
+             FROM event_sessions
+             ORDER BY id
+                 LIMIT 3
+         ) selected_session
+)
+  AND NOT EXISTS (
+    SELECT 1
+    FROM purchase_tb p
+    WHERE p.user_id = u.id
+      AND p.event_session_id = s.id
+);

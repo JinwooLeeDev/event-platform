@@ -83,6 +83,18 @@
             </form>
             <noscript><p class="member-muted">정보 수정은 JavaScript를 활성화한 뒤 이용해주세요.</p></noscript>
         </section>
+        <section id="password-settings" class="member-box" aria-labelledby="password-title" style="margin-top: 24px;">
+            <h2 id="password-title">비밀번호 변경</h2>
+            <p class="member-muted">변경 후 현재 기기에서 로그아웃됩니다. 새 비밀번호로 다시 로그인해주세요.</p>
+            {{#passwordError}}<p class="member-error" role="alert">{{passwordError}}</p>{{/passwordError}}
+            <form id="password-form" class="member-form" action="/mypage/password" method="post">
+                <div class="member-field"><label for="current-password">현재 비밀번호</label><input id="current-password" name="currentPassword" type="password" autocomplete="current-password" required></div>
+                <div class="member-field"><label for="new-password">새 비밀번호</label><input id="new-password" name="newPassword" type="password" autocomplete="new-password" minlength="8" aria-describedby="password-rule" required><p id="password-rule" class="member-muted">8자 이상, UTF-8 기준 72바이트 이하로 입력해주세요. 현재 비밀번호는 사용할 수 없습니다.</p></div>
+                <div class="member-field"><label for="new-password-confirm">새 비밀번호 확인</label><input id="new-password-confirm" name="newPasswordConfirm" type="password" autocomplete="new-password" required></div>
+                <p id="password-form-message" class="member-error" role="status"></p>
+                <button id="password-save" class="member-button" type="submit">비밀번호 변경</button>
+            </form>
+        </section>
         <div class="member-bottom">
             <a class="member-button secondary" href="/">메인으로 돌아가기</a>
             <form action="/logout" method="post"><button class="member-button secondary" type="submit">로그아웃</button></form>
@@ -92,6 +104,29 @@
 </main>
 {{> layout/footer}}
 <script>
+(() => {
+    const form = document.getElementById('password-form');
+    const password = document.getElementById('new-password');
+    const confirmation = document.getElementById('new-password-confirm');
+    const message = document.getElementById('password-form-message');
+    const button = document.getElementById('password-save');
+    let submitting = false;
+    function validateConfirmation() {
+        confirmation.setCustomValidity(confirmation.value && confirmation.value !== password.value ? '새 비밀번호 확인이 일치하지 않습니다.' : '');
+    }
+    password.addEventListener('input', validateConfirmation);
+    confirmation.addEventListener('input', validateConfirmation);
+    form.addEventListener('submit', event => {
+        if (submitting) { event.preventDefault(); return; }
+        validateConfirmation();
+        if (!form.reportValidity()) { event.preventDefault(); return; }
+        if (new TextEncoder().encode(password.value).length > 72) {
+            event.preventDefault(); message.textContent = '새 비밀번호는 UTF-8 기준 72바이트 이하로 입력해주세요.'; password.focus(); return;
+        }
+        message.textContent = ''; submitting = true; button.disabled = true; button.textContent = '변경 중…';
+    });
+    window.addEventListener('pageshow', () => { form.reset(); submitting = false; button.disabled = false; button.textContent = '비밀번호 변경'; message.textContent = ''; validateConfirmation(); });
+})();
 (() => {
     const get = id => document.getElementById(id);
     const form = get('member-form'), view = get('member-view'), edit = get('member-edit');

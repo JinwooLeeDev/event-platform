@@ -1,6 +1,8 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.api.purchase.PurchaseService;
 import com.busan.eventplatform.global.error.exception.Exception401;
+import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.login.personallogin.AuthController;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MyPageController {
 
     private final MyPageService myPageService;
+    private final PurchaseService purchaseService;
 
     @GetMapping("/mypage")
     public String myPage(@SessionAttribute(name = AuthController.SESSION_USER, required = false) SessionUserDto sessionUser, Model model) {
@@ -30,21 +33,48 @@ public class MyPageController {
     }
 
     @GetMapping("/myhistory")
-    public String myHistory() {
+    public String myHistory(
+            @SessionAttribute(
+                    name = AuthController.SESSION_USER,
+                    required = false
+            ) SessionUserDto sessionUser,
+            Model model
+    ) {
+        if (sessionUser == null) {
+            throw new Exception401("로그인 후 이용해주세요.");
+        }
+
+        model.addAttribute(
+                "purchaseList",
+                // 회차별 조회 구현 전까지 사용하지 않는 EventSession 인자는 null로 전달
+                purchaseService.purchaseList(sessionUser.getId())
+        );
+
         return "user/myhistory";
     }
 
     @GetMapping("/mypoint")
     public String myPoint(
-            @SessionAttribute(name = AuthController.SESSION_USER, required = false)
-            SessionUserDto sessionUser,
-            Model model) {
+            @SessionAttribute(
+                    name = AuthController.SESSION_USER,
+                    required = false
+            ) SessionUserDto sessionUser,
+            Model model
+    ) {
         if (sessionUser == null) {
             throw new Exception401("로그인 후 이용해주세요.");
         }
 
-        MyPageResDto myPage = myPageService.getMyPage(sessionUser.getId());
-        model.addAttribute("myPage", myPage);
+        model.addAttribute(
+                "myPage",
+                myPageService.getMyPage(sessionUser.getId())
+        );
+
+        model.addAttribute(
+                "purchaseList",
+                purchaseService.purchaseList(sessionUser.getId())
+        );
+
         return "user/mypoint";
     }
 
@@ -73,5 +103,28 @@ public class MyPageController {
                 "회원 정보가 수정되었습니다."
         );
         return "redirect:/mypage";
+    }
+
+    @PostMapping("/mypage/password")
+    public String updatePassword(
+            @SessionAttribute(name = AuthController.SESSION_USER, required = false)
+            SessionUserDto sessionUser,
+            @ModelAttribute MyPasswordUpdateReqDto request,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        if (sessionUser == null) {
+            throw new Exception401("로그인 후 이용해주세요.");
+        }
+        try {
+            myPageService.updatePassword(sessionUser.getId(), request);
+        } catch (Exception400 exception) {
+            redirectAttributes.addFlashAttribute("passwordError", exception.getMessage());
+            return "redirect:/mypage#password-settings";
+        }
+
+        session.invalidate();
+        redirectAttributes.addFlashAttribute("passwordChangedMessage",
+                "비밀번호가 변경되었습니다. 새 비밀번호로 다시 로그인해주세요.");
+        return "redirect:/login";
     }
 }
