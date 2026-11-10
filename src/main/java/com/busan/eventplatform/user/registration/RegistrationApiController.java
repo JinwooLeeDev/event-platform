@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * 참가 신청 API.
+ * 참가 신청 API. URL 규칙: /api/registrations/{동작}/{id}
  * - 인증: 서버 세션의 LoginSession.IDENTITY 에 저장된 LoginIdentity
  * - 미로그인 401 / 권한 없는 계정 유형 403 은 컨트롤러에서 바로 응답
  * - 비즈니스 예외(정원·잔액·중복 등)는 RegistrationApiExceptionHandler 가 JSON {"message": ...} 로 변환
@@ -19,12 +19,28 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/registrations")
 public class RegistrationApiController {
 
     private final RegistrationService registrationService;
 
-    // 1. 참가 신청 (detail.mustache) — 정원·결제가 회차 단위이므로 sessionId 로 신청
-    @PostMapping("/api/event-sessions/{sessionId}/registrations")
+    // 1. 신청 가능 여부 + 포인트 확인 (행사 상세: 충전 / 차감 화면 분기용)
+    @GetMapping("/check/{sessionId}")
+    public ResponseEntity<?> check(
+            @PathVariable Long sessionId,
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
+
+        if (loginIdentity == null) {
+            return unauthorized();
+        }
+        if (!loginIdentity.isUser()) {
+            return forbidden("개인 회원만 참가 신청이 가능합니다.");
+        }
+        return ResponseEntity.ok(registrationService.check(sessionId, loginIdentity));
+    }
+
+    // 2. 참가 신청 (포인트 차감 + 확정/대기)
+    @PostMapping("/apply/{sessionId}")
     public ResponseEntity<?> apply(
             @PathVariable Long sessionId,
             @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
@@ -43,8 +59,8 @@ public class RegistrationApiController {
         return ResponseEntity.ok(res);
     }
 
-    // 2. 내 신청 내역 (mypage.mustache)
-    @GetMapping("/api/registrations/me")
+    // 3. 내 신청 내역
+    @GetMapping("/me")
     public ResponseEntity<?> myRegistrations(
             @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
 
@@ -57,10 +73,10 @@ public class RegistrationApiController {
         return ResponseEntity.ok(registrationService.getMyRegistrations(loginIdentity));
     }
 
-    // 3. 신청 취소 (mypage.mustache) — 기존 경로 유지, 본인 확인 추가
-    @PostMapping("/api/registrations/cancel/{id}")
+    // 4. 신청 취소
+    @PostMapping("/cancel/{registrationId}")
     public ResponseEntity<?> cancel(
-            @PathVariable("id") Long registrationId,
+            @PathVariable Long registrationId,
             @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
 
         if (loginIdentity == null) {
@@ -75,8 +91,8 @@ public class RegistrationApiController {
         return ResponseEntity.ok(Map.of("message", "신청이 성공적으로 취소되었습니다."));
     }
 
-    // 4. 회차별 참가자 목록 (manage.mustache, 주최 기업)
-    @GetMapping("/api/event-sessions/{sessionId}/registrations")
+    // 5. 회차별 참가자 목록 (주최 기업)
+    @GetMapping("/participants/{sessionId}")
     public ResponseEntity<?> participants(
             @PathVariable Long sessionId,
             @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
@@ -90,10 +106,10 @@ public class RegistrationApiController {
         return ResponseEntity.ok(registrationService.getParticipants(sessionId, loginIdentity));
     }
 
-    // 5. 반려 (manage.mustache, 주최 기업) — 취소 API 와 같은 경로 형식
-    @PostMapping("/api/registrations/reject/{id}")
+    // 6. 반려 (주최 기업)
+    @PostMapping("/reject/{registrationId}")
     public ResponseEntity<?> reject(
-            @PathVariable("id") Long registrationId,
+            @PathVariable Long registrationId,
             @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
 
         if (loginIdentity == null) {
