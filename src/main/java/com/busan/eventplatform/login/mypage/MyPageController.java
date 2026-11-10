@@ -29,6 +29,25 @@ public class MyPageController {
         return "login/mypage";
     }
 
+    @GetMapping("/myhistory")
+    public String myHistory() {
+        return "user/myhistory";
+    }
+
+    @GetMapping("/mypoint")
+    public String myPoint(
+            @SessionAttribute(name = AuthController.SESSION_USER, required = false)
+            SessionUserDto sessionUser,
+            Model model) {
+        if (sessionUser == null) {
+            throw new Exception401("로그인 후 이용해주세요.");
+        }
+
+        MyPageResDto myPage = myPageService.getMyPage(sessionUser.getId());
+        model.addAttribute("myPage", myPage);
+        return "user/mypoint";
+    }
+
     @PostMapping("/mypage")
     public String updateMyPage(
             @SessionAttribute(name = AuthController.SESSION_USER, required = false)
