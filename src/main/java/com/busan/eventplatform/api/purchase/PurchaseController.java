@@ -2,6 +2,7 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller     @RequiredArgsConstructor
 public class PurchaseController {
     private final PurchaseService purchaseService;
+    private final RegistrationService registrationService;
 
     // TODO 이벤트컬럼 작성되면 이벤트 컬럼에 맞게 mustache 설정("event/{id}/purchase") + model + session
     @GetMapping("/event/purchase/{id}")
@@ -28,6 +30,8 @@ public class PurchaseController {
     @PostMapping("/event/purchase/{id}")
     public String purchaseAction(@PathVariable(name = "id") Long eventId , HttpSession session) {
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        registrationService.apply(eventId , loginIdentity);
 
         purchaseService.purchase(eventId , loginIdentity);
 
