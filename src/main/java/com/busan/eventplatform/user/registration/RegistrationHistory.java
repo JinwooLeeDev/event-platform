@@ -1,13 +1,13 @@
-package com.busan.eventplatform.user;
+package com.busan.eventplatform.user.registration;
 
 
+import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "registration_history")
