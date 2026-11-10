@@ -461,7 +461,15 @@
                 <div class="col-md-9"><div class="event-body">
                     {{#category}}<span class="badge text-bg-light mb-2">{{category}}</span>{{/category}}
                     <h3 class="event-title">{{#title}}{{title}}{{/title}}{{^title}}행사명 확인 중{{/title}}</h3>
-                    <span class="status-badge {{#status}}{{status}}{{/status}}{{^status}}status-cancelled{{/status}}" data-registration-label data-server-label="{{#}}true{{/}}" data-server-class="{{#status}}true{{/status}}">{{#}}{{}}{{/}}{{^}}{{#statusMessage}}{{statusMessage}}{{/statusMessage}}{{^statusMessage}}신청 상태 확인 중{{/statusMessage}}{{/}}</span><div class="status-note mt-3">{{#statusMessage}}{{statusMessage}}{{/statusMessage}}{{^statusMessage}}참가 상태 안내를 준비 중입니다.{{/statusMessage}}</div>
+                    <span class="status-badge" data-registration-label data-server-label="{{#statusMessage}}true{{/statusMessage}}{{^statusMessage}}false{{/statusMessage}}" data-server-class="false">
+                {{#statusMessage}}
+                    {{statusMessage}}
+                {{/statusMessage}}
+
+                        {{^statusMessage}}
+                            신청 상태 확인 중
+                        {{/statusMessage}}
+            </span>
                     <dl class="event-meta mt-3">
                         <div><dt>회차</dt><dd>{{#sessionName}}{{sessionName}}{{/sessionName}}{{^sessionName}}회차 확인 중{{/sessionName}}</dd></div>
                         <div><dt>개최 일시</dt><dd>{{#eventDate}}<span>{{eventDate}}</span>{{/eventDate}}{{^eventDate}}일정 확인 중{{/eventDate}}</dd></div>

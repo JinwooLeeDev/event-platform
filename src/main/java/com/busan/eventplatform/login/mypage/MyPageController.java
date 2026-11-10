@@ -2,6 +2,7 @@ package com.busan.eventplatform.login.mypage;
 
 import com.busan.eventplatform.api.purchase.PurchaseRes;
 import com.busan.eventplatform.api.purchase.PurchaseService;
+import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
