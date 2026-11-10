@@ -29,4 +29,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     // 빈자리 발생 시 승격 대상자 조회
     List<Registration> findBySessionIdAndStatusOrderByQueueNumberAsc(Long sessionId, RegistrationStatus status, Pageable pageable);
+
 }
+

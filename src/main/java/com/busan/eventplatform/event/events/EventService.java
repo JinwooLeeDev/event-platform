@@ -7,6 +7,8 @@ import com.busan.eventplatform.event.event_category.EventCategoryRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.user.RegistrationRepository;
+import com.busan.eventplatform.user.RegistrationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventCategoryRepository eventCategoryRepository;
     private final CompanyRepository companyRepository;
+    private final RegistrationRepository registrationRepository;
 
     // 행사 등록 기능
     @Transactional
@@ -67,41 +70,70 @@ public class EventService {
 
     // 행사 상세 조회 기능
     @Transactional
-    public EventResponse.DetailDto findById(Long id, Long companyId) {
+    public EventResponse.DetailDto findById(Long id, Long companyId, Long userId) {
         Event event = eventRepository.findByDetail(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         boolean owner = companyId != null && event.getCompany().getId().equals(companyId);
 
-        return new EventResponse.DetailDto(event, owner);
+        // 확정 + 승인 대기 인원
+        Long confirmedCount = registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.CONFIRMED)
+                + registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.PENDING_APPROVAL);
+        // 대기 인원
+        Long waitingCount = registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.WAITING);
+
+        // 참가 확정 회원인지 확인
+        boolean chatAvailable = false;
+
+        if (userId != null) {
+            chatAvailable = registrationRepository.countConfirmedByEventIdAndUserId(id, userId, RegistrationStatus.CONFIRMED) > 0;
+        }
+        return new EventResponse.DetailDto(event, owner, confirmedCount, waitingCount, chatAvailable);
     }
 
-    // 행사 수정 기능
-    @Transactional
+    // 행사 수정 화면 데이터 조회
+    @Transactional (readOnly = true)
     public EventResponse.UpdateFormDto update(Long id, Long companyId) {
         Event event = eventRepository.findByDetail(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (companyId == null || !event.isOwner(companyId)) {
-            throw new Exception403("게시글 수정 권한이 없습니다.");
+            throw new Exception403("행사 수정 권한이 없습니다.");
         }
         return new EventResponse.UpdateFormDto(event);
     }
 
-    // 보완 요청 - 수정 후 재제출 (수정된 내용 저장, 상태 변경, 메시지 초기화)
+    // 수정 내용 저장
     @Transactional
     public Event update(Long id, Long companyId, EventRequest.UpdateDto updateDto) {
         Event event = eventRepository.findByDetail(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (companyId == null || !event.isOwner(companyId)) {
-            throw new Exception403("게시글 수정 권한이 없습니다.");
+            throw new Exception403("행사 수정 권한이 없습니다.");
         }
         EventCategory category = eventCategoryRepository.findById(updateDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
-
         // 수정된 행사 내용 저장
-        event = updateDto.toEntity(event, category);
+        updateDto.toEntity(event, category);
+
+        return event;
+    }
+
+    // 보완 요청 - 수정 후 재제출 (수정된 내용 저장, 상태 변경, 메시지 초기화)
+    @Transactional
+    public Event resubmit(Long id, Long companyId) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
+
+        if (companyId == null || !event.isOwner(companyId)) {
+            throw new Exception403("재제출 권한이 없습니다.");
+        }
+
+        if (!EventStatus.FEEDBACK_REQUIRED.equals(event.getStatus())) {
+            throw new Exception400("보완 요청된 행사만 재제출할 수 있습니다.");
+        }
 
         event.setStatus(EventStatus.PENDING_REVIEW);
         event.setFeedbackMessage(null);
+
         return event;
     }
 
@@ -109,7 +141,7 @@ public class EventService {
     @Transactional
     public void delete(Long id, Long companyId) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("삭제 권한이 없습니다.");
         }
@@ -120,7 +152,7 @@ public class EventService {
     @Transactional
     public Event cancel(Long id, EventRequest.CancelDto cancelDto) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (EventStatus.CANCELLED.equals(event.getStatus())) {
             throw new Exception400("이미 취소된 행사입니다.");
         }
@@ -135,7 +167,7 @@ public class EventService {
     @Transactional
     public Event approve(Long id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (!EventStatus.PENDING_REVIEW.equals(event.getStatus())) {
             throw new Exception400("승인 대기 중인 행사만 승인할 수 있습니다.");
         }

@@ -1,5 +1,6 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.user.RegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -69,6 +70,20 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                 order by e.id desc
             """)
     List<Event> findAllByCompanyId(@Param("companyId") Long companyId);
+
+    // 특정 회원이 특정 행사의 참가 확정 상태인지 확인 -- 채팅 버튼 관련
+    @Query("""
+            select count(r)
+            from Registration r
+            where r.session.event.id = :eventId
+            and r.user.id = :userId
+            and r.status = :status
+        """)
+    long countConfirmedByEventIdAndUserId(
+            @Param("eventId") Long eventId,
+            @Param("userId") Long userId,
+            @Param("status") RegistrationStatus status
+    );
 }
 
 
