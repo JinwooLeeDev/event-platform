@@ -1,6 +1,7 @@
-package com.busan.eventplatform.user;
+package com.busan.eventplatform.user.attendance;
 
 
+import com.busan.eventplatform.user.registration.Registration;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
