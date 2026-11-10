@@ -1,4 +1,4 @@
-package com.busan.eventplatform.user.registration;
+package com.busan.eventplatform.global.error.exception;
 
 /**
  * 신청 도메인 권한 위반 (403).

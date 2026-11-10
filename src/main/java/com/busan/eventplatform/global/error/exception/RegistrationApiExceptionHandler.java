@@ -1,8 +1,6 @@
-package com.busan.eventplatform.user.registration;
+package com.busan.eventplatform.global.error.exception;
 
-import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
-import com.busan.eventplatform.global.error.exception.Exception400;
-import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.user.registration.RegistrationApiController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
