@@ -33,7 +33,7 @@ public class RegistrationTestController {
         // 🔍 디버깅용 콘솔 출력 (인텔리제이 Run 창을 확인해보세요!)
         System.out.println("=== [디버깅] 총 신청 내역 개수: " + allRegistrations.size());
         for (Registration reg : allRegistrations) {
-            System.out.println(" - 신청 ID: " + reg.getId() + ", 유저 ID: " + reg.getUser().getId() + ", 행사 제목: " + reg.getSession().getEvent().getTitle());
+            System.out.println(" - 신청 ID: " + reg.getId() + ", 유저 ID: " + reg.getUser().getId() + ", 행사 제목: " + reg.getEventSession().getEvent().getTitle());
         }
 
         final Long targetUserId;

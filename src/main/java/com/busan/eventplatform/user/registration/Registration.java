@@ -1,16 +1,23 @@
 package com.busan.eventplatform.user.registration;
 
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
-// 참가 신청 원장
+/**
+ * 행사 회차 참가 신청.
+ * 결제 정보(금액, 포인트)는 Purchase 도메인이 관리하므로 이 엔티티에는 두지 않는다.
+ */
 
 @Entity
 @Table(name = "registrations")
@@ -18,73 +25,80 @@ import java.time.Instant;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Registration {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // [추가] 행사 회차 연관 관계 매핑 (지연 로딩)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id", nullable = false)
-    private EventSession session; // todo - 추후 윤아씨 구현 예정인 점 확인 완료
-
-    // 신청자 연관관계 매핑(지연 로딩)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_session_id", nullable = false)
+    private EventSession eventSession;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private RegistrationStatus status;
 
-    // 대기 번호 (CONFIRMED 등은 null, WAITING 상태인 경우에만 값 할당)
-    @Column(name = "queue_number", nullable = true)
-    private Integer queueNumber;
+    /** 회차 내 접수 번호 (EventSession.nextReceptionNumber 에서 발급). 대기열 순서 기준 */
+    @Column(name = "reception_number", nullable = false)
+    private Integer receptionNumber;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
-    @Builder
-    public Registration(EventSession session, User user, RegistrationStatus status, Integer queueNumber) {
-        this.session = session;
+    private Registration(User user, EventSession eventSession, RegistrationStatus status, Integer receptionNumber) {
         this.user = user;
+        this.eventSession = eventSession;
         this.status = status;
-        this.queueNumber = queueNumber;
+        this.receptionNumber = receptionNumber;
     }
 
-
-    // 엔티티 영속화 시 시간 자동 기록
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
-        this.updatedAt = this.createdAt;
+    public static Registration create(User user, EventSession eventSession,
+                                      RegistrationStatus status, int receptionNumber) {
+        if (!status.isActive()) {
+            throw new IllegalArgumentException("신청 생성 시 상태는 CONFIRMED/PENDING/WAITING 중 하나여야 합니다");
+        }
+        return new Registration(user, eventSession, status, receptionNumber);
     }
 
-    // 엔티티 수정 시 시간 자동 기록
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = Instant.now();
+    // ===== 상태 변경 =====
+
+    /** 대기열 → 확정/승인대기 승격 */
+    public void promote(RegistrationStatus nextStatus) {
+        if (this.status != RegistrationStatus.WAITING) {
+            throw new Exception400("대기열 상태인 신청만 승격할 수 있습니다");
+        }
+        if (!nextStatus.isSeatOccupying()) {
+            throw new IllegalArgumentException("승격 대상 상태는 CONFIRMED 또는 PENDING 이어야 합니다");
+        }
+        this.status = nextStatus;
     }
 
-    // 대기자를 승격시킬 때 객체 지향적으로 상태를 변경하는 비즈니스 메서드
-    // 객체 지향(자신의 상태를 책임지고 능동적으로 변경)
-    public void promoteTo(RegistrationStatus targetStatus) {
-        this.status = targetStatus;
-        this.queueNumber = null; // 승격 되었으므로 대기 번호 회수 (null 처리)
+    /** 유저 본인 취소 */
+    public void cancel() {
+        validateActive("이미 취소되었거나 반려된 신청입니다");
+        this.status = RegistrationStatus.CANCELLED;
     }
 
-    // === 머스태치 화면 렌더링용 편의 메서드 추가 ===
-    public boolean isConfirmed() {
-        return this.status == RegistrationStatus.CONFIRMED; // (참가 확정 상태 이넘명에 맞게 조절)
+    /** 주최자 반려 */
+    public void reject() {
+        validateActive("이미 취소되었거나 반려된 신청입니다");
+        this.status = RegistrationStatus.REJECTED;
     }
 
-    public boolean isWaiting() {
-        return this.status == RegistrationStatus.WAITING; // (대기 상태 이넘명에 맞게 조절)
+    public boolean isOwnedBy(Long userId) {
+        return this.user.getId().equals(userId);
     }
 
-    public boolean isCancelled() {
-        return this.status == RegistrationStatus.CANCELLED; // (취소 상태 이넘명에 맞게 조절)
+    private void validateActive(String message) {
+        if (!this.status.isActive()) {
+            throw new Exception400(message);
+        }
     }
 
 }

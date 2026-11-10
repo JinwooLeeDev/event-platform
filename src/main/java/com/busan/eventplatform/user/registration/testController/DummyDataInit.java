@@ -5,7 +5,7 @@ import com.busan.eventplatform.company.CompanyRepository; // 패키지 경로 �
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.eventSession.EventSessionRepository;
+import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository; // 패키지 경로 확인 필요
 import com.busan.eventplatform.event.events.EventStatus;

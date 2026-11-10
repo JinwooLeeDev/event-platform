@@ -1,62 +1,120 @@
 package com.busan.eventplatform.user.registration;
 
-
 import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * 참가 신청 API.
+ * - 인증: 서버 세션의 LoginSession.IDENTITY 에 저장된 LoginIdentity
+ * - 미로그인 401 / 권한 없는 계정 유형 403 은 컨트롤러에서 바로 응답
+ * - 비즈니스 예외(정원·잔액·중복 등)는 RegistrationApiExceptionHandler 가 JSON {"message": ...} 로 변환
+ */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class RegistrationApiController {
 
     private final RegistrationService registrationService;
 
-    // 1. 참가신청 API
-    // JSON 요청활용, 상대 경로 지정
-    @PostMapping("/api/events/{eventId}/{registrations}")
-    public ResponseEntity<?> applyEvent (
-            @PathVariable Long eventId,
-            // 인증은 서버 세션 기반이며, 세션 키 'loginIdentity' 사용
-            @SessionAttribute(name = "loginIdentity", required = false)
-            LoginIdentity loginIdentity ) {
-        // 로그인 인증 확인 로직 추가
-        if(loginIdentity == null) {
-            log.warn("참가 신청 실패: 미로그인 사용자의 접근");
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+    // 1. 참가 신청 (detail.mustache) — 정원·결제가 회차 단위이므로 sessionId 로 신청
+    @PostMapping("/api/event-sessions/{sessionId}/registrations")
+    public ResponseEntity<?> apply(
+            @PathVariable Long sessionId,
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
+
+        if (loginIdentity == null) {
+            log.warn("참가 신청 실패: 미로그인 사용자 접근 - sessionId={}", sessionId);
+            return unauthorized();
+        }
+        if (!loginIdentity.isUser()) {
+            log.warn("참가 신청 실패: 개인 회원이 아닌 계정 - sessionId={}, loginId={}", sessionId, loginIdentity.getId());
+            return forbidden("개인 회원만 참가 신청이 가능합니다.");
         }
 
-        // LoginType.USER(개인 회원) 권한 확인 확인 로직 추가
-        if(!loginIdentity.isUser()) {
-            log.warn("참가 신청 실패: 권한 없는 자용자(기업/관리자 등)의 접근");
-            return ResponseEntity.status(403).body("일반 유저만 참가 신청이 가능합니다.");
-        }
-
-        try {
-            // Service 로직 호출
-            // 참고: 구매 기능은 RegistrationService 호출이나 참가 신청 원장을 생성하지 않음.
-            // 구매와 참가 신청의 통합은 별도의 작업
-            RegistrationRes res = registrationService.apply(eventId, loginIdentity.getId());
-            log.info("참가 신청 성공 - 행사 ID: {}, 유저 ID: {}", eventId, loginIdentity.getId());
-            return  ResponseEntity.ok(res);
-        } catch (Exception e) {
-            log.error("참가 신청 중 에러 발생: {}", e.getMessage());
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+        RegistrationRes.ApplyDto res = registrationService.apply(sessionId, loginIdentity);
+        log.info("참가 신청 성공 - sessionId={}, userId={}, status={}", sessionId, loginIdentity.getId(), res.getStatus());
+        return ResponseEntity.ok(res);
     }
 
-    // 참가 신청 취소 API
+    // 2. 내 신청 내역 (mypage.mustache)
+    @GetMapping("/api/registrations/me")
+    public ResponseEntity<?> myRegistrations(
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
+
+        if (loginIdentity == null) {
+            return unauthorized();
+        }
+        if (!loginIdentity.isUser()) {
+            return forbidden("개인 회원만 신청 내역을 조회할 수 있습니다.");
+        }
+        return ResponseEntity.ok(registrationService.getMyRegistrations(loginIdentity));
+    }
+
+    // 3. 신청 취소 (mypage.mustache) — 기존 경로 유지, 본인 확인 추가
     @PostMapping("/api/registrations/cancel/{id}")
-    public ResponseEntity<?> cancelRegistration(@PathVariable("id") Long registrationId) {
-        // 취소 비즈니스 로직 호출 (포인트 환불 등)
-        registrationService.cancelRegistration(registrationId);
+    public ResponseEntity<?> cancel(
+            @PathVariable("id") Long registrationId,
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
+
+        if (loginIdentity == null) {
+            return unauthorized();
+        }
+        if (!loginIdentity.isUser()) {
+            return forbidden("개인 회원만 신청을 취소할 수 있습니다.");
+        }
+
+        registrationService.cancel(registrationId, loginIdentity);
+        log.info("신청 취소 성공 - registrationId={}, userId={}", registrationId, loginIdentity.getId());
         return ResponseEntity.ok(Map.of("message", "신청이 성공적으로 취소되었습니다."));
     }
 
+    // 4. 회차별 참가자 목록 (manage.mustache, 주최 기업)
+    @GetMapping("/api/event-sessions/{sessionId}/registrations")
+    public ResponseEntity<?> participants(
+            @PathVariable Long sessionId,
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
 
+        if (loginIdentity == null) {
+            return unauthorized();
+        }
+        if (!loginIdentity.isCompany()) {
+            return forbidden("행사 주최 기업만 조회할 수 있습니다.");
+        }
+        return ResponseEntity.ok(registrationService.getParticipants(sessionId, loginIdentity));
+    }
 
+    // 5. 반려 (manage.mustache, 주최 기업) — 취소 API 와 같은 경로 형식
+    @PostMapping("/api/registrations/reject/{id}")
+    public ResponseEntity<?> reject(
+            @PathVariable("id") Long registrationId,
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity) {
+
+        if (loginIdentity == null) {
+            return unauthorized();
+        }
+        if (!loginIdentity.isCompany()) {
+            return forbidden("행사 주최 기업만 반려할 수 있습니다.");
+        }
+
+        registrationService.reject(registrationId, loginIdentity);
+        log.info("신청 반려 성공 - registrationId={}, companyId={}", registrationId, loginIdentity.getId());
+        return ResponseEntity.ok(Map.of("message", "신청이 반려되었습니다."));
+    }
+
+    // ===== 공통 응답 =====
+
+    private ResponseEntity<Map<String, String>> unauthorized() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+    }
+
+    private ResponseEntity<Map<String, String>> forbidden(String message) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", message));
+    }
 }
