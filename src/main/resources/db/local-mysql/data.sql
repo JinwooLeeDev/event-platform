@@ -14,7 +14,9 @@ INSERT INTO company_tb (
     contact_person_phone,
     status,
     point,
-    created_at
+    created_at,
+    business_verification_status,
+    email_verified_at
 )
 VALUES
 (
@@ -30,6 +32,8 @@ VALUES
     '010-0000-0001',
     'APPROVED',
     500000,
+    CURRENT_TIMESTAMP,
+    'NOT_CHECKED',
     CURRENT_TIMESTAMP
 ),
 (
@@ -45,6 +49,8 @@ VALUES
     '010-0000-0002',
     'PENDING',
     100000,
+    CURRENT_TIMESTAMP,
+    'NOT_CHECKED',
     CURRENT_TIMESTAMP
 ),
 (
@@ -60,6 +66,8 @@ VALUES
     '010-0000-0003',
     'APPROVED',
     300000,
+    CURRENT_TIMESTAMP,
+    'NOT_CHECKED',
     CURRENT_TIMESTAMP
 ),
 (
@@ -75,6 +83,8 @@ VALUES
     '010-0000-0004',
     'APPROVED',
     400000,
+    CURRENT_TIMESTAMP,
+    'NOT_CHECKED',
     CURRENT_TIMESTAMP
 ),
 (
@@ -90,6 +100,8 @@ VALUES
     '010-0000-0005',
     'PENDING',
     150000,
+    CURRENT_TIMESTAMP,
+    'NOT_CHECKED',
     CURRENT_TIMESTAMP
 );
 
@@ -394,35 +406,60 @@ WHERE c.email = 'company4@example.test' AND k.id = 1
 
 
 ------------------------------ purchase테이블----------------------------------------
+-- 개발용 신청·구매 예시: 빈 스키마 초기화 시 한 번 실행합니다.
+-- 계정 비밀번호는 기존과 동일하게 1234이며 해시로 저장됩니다.
+INSERT INTO registrations (session_id, user_id, status, queue_number, created_at, updated_at)
+SELECT s.id, u.id,
+    CASE WHEN s.id = 1 THEN 'CONFIRMED' WHEN s.id = 2 THEN 'PENDING_APPROVAL' ELSE 'WAITING' END,
+    CASE WHEN s.id = 3 AND u.email_normalized = 'minsu@naver.com' THEN 1 WHEN s.id = 3 THEN 2 ELSE NULL END,
+    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+FROM users u CROSS JOIN event_sessions s
+WHERE u.email_normalized IN ('minsu@naver.com', 'jihun@naver.com') AND s.id IN (1, 2, 3);
 
-INSERT INTO purchase_tb (
-    user_id,
-    company_id,
-    event_session_id,
-    price,
-    purchased_at
-)
-SELECT
-    u.id,
-    NULL,
-    s.id,
-    COALESCE(s.fee, 0),
-    CURRENT_TIMESTAMP
-FROM users u
-         CROSS JOIN event_sessions s
-WHERE u.email_normalized = 'jihun@naver.com'
-  AND s.id IN (
-    SELECT selected_session.id
-    FROM (
-             SELECT id
-             FROM event_sessions
-             ORDER BY id
-                 LIMIT 3
-         ) selected_session
-)
-  AND NOT EXISTS (
-    SELECT 1
-    FROM purchase_tb p
-    WHERE p.user_id = u.id
-      AND p.event_session_id = s.id
-);
+-- 정원을 채운 기존 신청자와 대기자 예시
+INSERT INTO registrations (session_id, user_id, status, queue_number, created_at, updated_at)
+SELECT s.id, u.id, 'CONFIRMED', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+FROM users u CROSS JOIN event_sessions s
+WHERE s.id = 3 AND u.email_normalized IN ('seoyeon@naver.com', 'yujin@naver.com');
+UPDATE event_sessions SET occupied_count = 2, next_reception_number = 3 WHERE id IN (1, 2);
+UPDATE event_sessions SET capacity = 2, occupied_count = 2, next_reception_number = 5 WHERE id = 3;
+
+-- @CreationTimestamp는 직접 SQL 삽입 시 실행되지 않으므로 구매 시각을 명시합니다.
+-- 계정의 기존 포인트는 초기 잔액 예시이며, 구매 SQL에서 별도 차감하지 않습니다.
+INSERT INTO purchase_tb (user_id, company_id, event_session_id, price, purchased_at)
+SELECT r.user_id, NULL, s.id, COALESCE(s.fee, 0), r.created_at
+FROM registrations r JOIN event_sessions s ON s.id = r.session_id;
+
+INSERT INTO registration_history (registration_id, changed_status, processed_by_user_id, reason, created_at)
+SELECT id, status, user_id, '개발용 신청 상태 초기 데이터', created_at FROM registrations;
+
+-- 지난 행사·출석 확인용 종료 회차
+INSERT INTO event_sessions (capacity, name, event_id, registration_opens_at, registration_closes_at,
+    starts_at, ends_at, occupied_count, next_reception_number, hold_duration_seconds, pricing_type,
+    fee, reservation_deposit_points, minimum_participants, minimum_check_at, status, created_at)
+SELECT 30, '지난 재즈 공연 회차', id,
+    TIMESTAMPADD(DAY, -30, CURRENT_TIMESTAMP), TIMESTAMPADD(DAY, -10, CURRENT_TIMESTAMP),
+    TIMESTAMPADD(DAY, -7, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 2, TIMESTAMPADD(DAY, -7, CURRENT_TIMESTAMP)),
+    1, 2, 300, 'FREE', 0, 0, 1, TIMESTAMPADD(DAY, -8, CURRENT_TIMESTAMP), 'COMPLETED',
+    TIMESTAMPADD(DAY, -35, CURRENT_TIMESTAMP)
+FROM events WHERE title = '지난 부산 재즈 공연';
+
+INSERT INTO registrations (session_id, user_id, status, queue_number, created_at, updated_at)
+SELECT s.id, u.id, 'CONFIRMED', NULL, TIMESTAMPADD(DAY, -14, CURRENT_TIMESTAMP), TIMESTAMPADD(DAY, -14, CURRENT_TIMESTAMP)
+FROM event_sessions s CROSS JOIN users u
+WHERE s.name = '지난 재즈 공연 회차' AND u.email_normalized = 'jihun@naver.com';
+
+INSERT INTO purchase_tb (user_id, company_id, event_session_id, price, purchased_at)
+SELECT r.user_id, NULL, s.id, 0, r.created_at
+FROM registrations r JOIN event_sessions s ON s.id = r.session_id WHERE s.name = '지난 재즈 공연 회차';
+
+INSERT INTO registration_history (registration_id, changed_status, processed_by_user_id, reason, created_at)
+SELECT r.id, r.status, r.user_id, '지난 행사 참가 확정 예시', r.created_at
+FROM registrations r JOIN event_sessions s ON s.id = r.session_id WHERE s.name = '지난 재즈 공연 회차';
+
+INSERT INTO attendances (registration_id, attempt_no, checked_by, attended_at, created_at)
+SELECT r.id, 1, a.id, s.starts_at, s.starts_at
+FROM registrations r JOIN event_sessions s ON s.id = r.session_id CROSS JOIN users a
+WHERE s.name = '지난 재즈 공연 회차' AND a.email_normalized = 'admin@busan.com';
+
+-- event_files: 실제 파일이 없으므로 가상 storage_key는 삽입하지 않습니다.
