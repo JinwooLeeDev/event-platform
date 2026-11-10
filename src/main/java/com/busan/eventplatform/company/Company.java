@@ -192,6 +192,7 @@ public class Company {
     }
 
 
+
     // 기업 포인트 결제시 사용할 메서드.
     public void deductPoint(Integer fee) {
         if (this.point < fee) {

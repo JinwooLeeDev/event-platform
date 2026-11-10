@@ -25,7 +25,7 @@ public class RegistrationService {
      */
 
     @Transactional
-    public Registration applyForEvent(User user, EventSession session) {
+    public Registration applyForEvent(User user , EventSession session) {
 
         // 1. [동시성 제어] 비관적 락을 걸어 세션 조회 (다른 트랜잭션 접근 대기)
         // 비관적 락을 적용하여 세션 조회 및 정원 보호
@@ -35,25 +35,13 @@ public class RegistrationService {
         // todo - EventSession 기존 다이어그램의 participation_fee_point를 fee 로 필드명 맞춤 (윤아씨께 공유 완료)
         boolean isPaidEvent = lockedSession.getFee() != null && lockedSession.getFee() > 0;
 
-        if (isPaidEvent) {
-            // 2-1. [유료] 사용자 지갑 잔액 확인 (잔액 부족 시 예외 발생 및 트랜잭션 롤백)
-            if (user.getPoint() < lockedSession.getFee()) {
-                // 잔액 부족 시 신청 중단 (Exception 발생 -> 트랜잭션 롤백)
-                throw new Exception400("잔액이 부족합니다. (현재 잔액: " + user.getPoint() + ")");
-            }
-
-            // 2-2. [유료] 참가비만큼 선차감 처리
-            user.deductPoint(lockedSession.getFee());
-
-            // 2-3. 포인트 차감 기록 (트랜잭션에 묶임) todo - 추후 구현
-            // pointHistoryRepository.save(new PointHistory(user, -session.getFee(), "행사 참가비 선차감"));
-
+        if(registrationRepository.existsBySessionIdAndUserId(lockedSession.getId() , user.getId())) {
+            throw new Exception400("이미 이 행사에 등록되었습니다");
         }
 
         // 3. 선행 대기자 우선 승격 처리
         // 누군가 취소하여 빈자리가 발생했는데 대기자가 있다면, 현재 유저 등록 전 대기자를 먼저 승격시킴
         promoteWaitingUsersIfAny(lockedSession, isPaidEvent);
-
 
         // 4. 승격 로직 반영 후 잔여 정원 재계산
         List<RegistrationStatus> activeStatuses = List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING_APPROVAL);
@@ -84,7 +72,6 @@ public class RegistrationService {
                 .build();
 
         return registrationRepository.save(registration);
-
     }
 
     /**
@@ -110,10 +97,7 @@ public class RegistrationService {
             for (Registration waitingUser : waitingUsers) {
                 waitingUser.promoteTo(targetStatus);
             }
-
-
         }
     }
-
 
 }
