@@ -1,5 +1,6 @@
 package com.busan.eventplatform.company;
 
+import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -78,6 +79,12 @@ public class Company {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
+//    사업자 등록증 검사
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'NOT_CHECKED'")
+    private BusinessVerificationStatus businessVerificationStatus;
+
     @Column(name = "email_verified_at")
     private Instant emailVerifiedAt;
 
@@ -104,9 +111,9 @@ public class Company {
         this.contactPersonName = contactPersonName;
         this.contactPersonPhone = contactPersonPhone;
         this.status = (status == null) ? CompanyStatus.PENDING : status;
+        this.businessVerificationStatus = BusinessVerificationStatus.NOT_CHECKED;
     }
 
-//    TODO 비밀번호 해싱처리
     public void update(
             String name,
             String email,
@@ -115,6 +122,7 @@ public class Company {
             String address,
             String contactPersonName,
             String contactPersonPhone,
+            LocalDate openedOn,
             String businessCertificateFileName
     ) {
 
@@ -146,6 +154,10 @@ public class Company {
             this.contactPersonPhone = contactPersonPhone;
         }
 
+        if (openedOn != null) {
+            this.openedOn = openedOn;
+        }
+
         if (businessCertificateFileName != null) {
             this.businessCertificateFileName = businessCertificateFileName;
         }
@@ -160,6 +172,10 @@ public class Company {
         this.status = CompanyStatus.PENDING;
     }
 
+    public void requestCorrection() {
+        this.status = CompanyStatus.FEEDBACK_NEEDED;
+    }
+
     public void verifyEmail(Instant verifiedAt) {
         this.emailVerifiedAt =
                 java.util.Objects.requireNonNull(verifiedAt);
@@ -167,6 +183,14 @@ public class Company {
 
     // 기업이 포인트 충전시 사용할 메서드.
     public void chargePoint(int amount) {if(amount > 0)  this.point += amount;}
+
+    //    사업자 번호 검증결과를 기록하는 메서드
+    public void recordBusinessVerification(
+            BusinessVerificationStatus businessVerificationStatus
+    ) {
+        this.businessVerificationStatus = java.util.Objects.requireNonNull(businessVerificationStatus); //requireNonNull은 null값 입력을 막아줌
+    }
+
 
 
     // 기업 포인트 결제시 사용할 메서드.
