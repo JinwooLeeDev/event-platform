@@ -4,6 +4,9 @@ app:
   file:
     upload-dir: ${FILE_UPLOAD_DIR:./uploads}
     max-size: 10485760
+  business-verification: # 사업자 등록증 확인 API
+    base-url: https://api.odcloud.kr/api/nts-businessman/v1
+    service-key: ${NTS_SERVICE_KEY}
 spring:
   application:
     name: event-platform

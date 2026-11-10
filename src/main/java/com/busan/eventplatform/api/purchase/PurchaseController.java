@@ -34,8 +34,4 @@ public class PurchaseController {
         return "redirect:/mypage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
     }
 
-    @GetMapping("/myhistory")
-    public String myhistory(){
-        return "user/myhistory";
-    }
 }
