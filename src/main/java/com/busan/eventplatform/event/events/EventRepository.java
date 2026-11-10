@@ -1,6 +1,6 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.user.RegistrationStatus;
+import com.busan.eventplatform.user.registration.RegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

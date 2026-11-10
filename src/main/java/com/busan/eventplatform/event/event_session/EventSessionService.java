@@ -5,7 +5,7 @@ import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
-import com.busan.eventplatform.user.RegistrationService;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

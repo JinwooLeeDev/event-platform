@@ -7,8 +7,8 @@ import com.busan.eventplatform.event.event_category.EventCategoryRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
-import com.busan.eventplatform.user.RegistrationRepository;
-import com.busan.eventplatform.user.RegistrationStatus;
+import com.busan.eventplatform.user.registration.RegistrationRepository;
+import com.busan.eventplatform.user.registration.RegistrationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -77,7 +77,7 @@ public class EventService {
 
         // 확정 + 승인 대기 인원
         Long confirmedCount = registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.CONFIRMED)
-                + registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.PENDING_APPROVAL);
+                + registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.PENDING);
         // 대기 인원
         Long waitingCount = registrationRepository.countTotalByEventIdAndStatus(id, RegistrationStatus.WAITING);
 
