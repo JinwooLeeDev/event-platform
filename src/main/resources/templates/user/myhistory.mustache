@@ -462,11 +462,11 @@
 
                     <!-- 행사 포스터 -->
                     <div class="col-md-3">
-                        <div class="event-poster {{posterClass}}">
+                        <div class="event-poster"> <!-- {posterClass} -->
                             <small>BUSAN PLAY · EVENT</small>
 
                             <div>
-                                <h3>{{posterTitle}}</h3>
+                                <h3>{행사 영어 제목}</h3>
                                 <small>BUSAN EVENT 2026</small>
                             </div>
                         </div>
@@ -487,9 +487,9 @@
                                     </h5>
                                 </div>
 
-                                <span class="status-badge {{statusClass}}">
+                                <span class="status-badge {{status}}">
                                 <i class="bi bi-circle-fill" style="font-size: 6px;"></i>
-                                    {{statusLabel}}
+                                    {{status}}
                             </span>
                             </div>
 
@@ -539,7 +539,7 @@
                                     <div class="event-actions d-flex gap-2">
 
                                         {{#canCancel}}
-                                            <form action="{{cancelUrl}}"
+                     <!-- {cancelUrl} -->   <form action=""
                                                   method="post"
                                                   onsubmit="return confirm('참가 신청을 취소하시겠습니까?')">
 
@@ -559,7 +559,7 @@
                                             </button>
                                         {{/canCancel}}
 
-                                        <a href="{{detailUrl}}"
+                                        <a href=""> <!-- {detailUrl} -->
                                            class="btn btn-primary">
                                             <i class="bi bi-box-arrow-up-right me-1"></i>
                                             행사 상세

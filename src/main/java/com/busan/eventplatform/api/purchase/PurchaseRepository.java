@@ -1,6 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.user.Registration;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,6 +35,11 @@ public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
     )
     boolean existsEventByCompany (@Param("companyId") Long companyId , @Param("eventId") Long eventId);
 
-    @Query("select ")
-    List<PurchaseRes.PurchaseListDto> findByUserIdWithPurchaseList(Long userId);
+    // purchase , event , eventSession 가져오기.
+    @Query("""
+    select p from Purchase p join fetch p.eventSession es join fetch es.event e 
+    where p.user.id = :userId 
+    """)
+    List<Purchase> findByUserIdWithPurchaseList(@Param("userId") Long userId);
+
 }

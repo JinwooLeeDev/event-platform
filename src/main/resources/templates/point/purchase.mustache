@@ -344,7 +344,7 @@
                         </div>
 
 
-                    <form action="/event/{{id}}/purchase" method="post" onsubmit="return confirm('결제를 진행하시겠습니까?')">
+                    <form action="/event/purchase/{{id}}" method="post" onsubmit="return confirm('결제를 진행하시겠습니까?')">
                         <button type="submit" id="paymentBtn" class="btn btn-success pay-button w-100" disabled>
                             <i class="bi bi-check2-circle me-2"></i>
                             <span class="format-point">{{eventPoint}}</span> 결제하기

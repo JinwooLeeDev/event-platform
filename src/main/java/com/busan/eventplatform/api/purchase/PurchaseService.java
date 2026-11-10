@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
+    private final RegistrationRepository registrationRepository;
     private final RegistrationService registrationService;
 
     // 결제창에 필요한 행사 결제 포인트와 행사 정보 조회.
@@ -114,9 +117,33 @@ public class PurchaseService {
     }
 
 
-    // TODO 아직 구현중.
-    public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId) {
-        List<PurchaseRes.PurchaseListDto> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);
-        return null;
+    public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId , EventSession eventSession) {
+        List<Purchase> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);
+        if(purchaseList == null) return List.of(); // 구매내역 없으면 그냥 빈 목록으로.
+
+        // registrationList 조회할때 동일 userId로 조회하므로 이벤트세션ID만 필요. --> map으로
+        List<Long> sessionIds =purchaseList.stream()
+                .map(p -> p.getEventSession().getId())
+                .distinct() // 동일 회차 등록 제거.
+                .toList();
+
+        List<Registration> registrationList =
+                registrationRepository.findByUserIdAndEventSessionIdWithRegistration(userId , sessionIds);
+
+        Map<Long, Registration> registrationMap = new HashMap<>();
+
+        for(Registration r : registrationList) {
+            Long eventSessionId = r.getSession().getId();
+            Registration savedRegistration = registrationMap.get(eventSessionId);
+
+            if(savedRegistration == null || r.getId() > savedRegistration.getId()) {
+                registrationMap.put(r.getSession().getId() , r);
+            }
+        }
+
+        return purchaseList.stream()
+                .map(p ->
+                        new PurchaseRes.PurchaseListDto(p , registrationMap.get(p.getEventSession().getId())))
+                .toList();
     }
 }

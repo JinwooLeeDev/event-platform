@@ -29,4 +29,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     // 빈자리 발생 시 승격 대상자 조회
     List<Registration> findBySessionIdAndStatusOrderByQueueNumberAsc(Long sessionId, RegistrationStatus status, Pageable pageable);
+
+    @Query("""
+       select r from Registration r 
+       where r.user.id = :userId and r.session.id in :sessionIds
+""")
+    List<Registration> findByUserIdAndEventSessionIdWithRegistration(@Param("userId") Long userId ,
+                                                                     @Param("sessionIds") List<Long> sessionIds);
 }
