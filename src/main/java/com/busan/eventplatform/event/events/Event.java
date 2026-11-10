@@ -48,7 +48,6 @@ public class Event {
     @Column(nullable = false)
     private EventStatus status;
 
-    //
 
     // 행사 설명
     @Column(nullable = false)
