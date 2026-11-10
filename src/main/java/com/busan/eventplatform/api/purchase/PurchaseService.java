@@ -23,6 +23,7 @@ public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
+    private final RegistrationRepository registrationRepository;
     private final RegistrationService registrationService;
     private final RegistrationRepository registrationRepository;
 
@@ -115,6 +116,7 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
         }
     }
+
 
     public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId) {
         List<Purchase> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);

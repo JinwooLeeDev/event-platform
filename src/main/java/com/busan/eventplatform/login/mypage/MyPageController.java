@@ -1,8 +1,10 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.api.purchase.PurchaseRes;
 import com.busan.eventplatform.api.purchase.PurchaseService;
 import com.busan.eventplatform.global.error.exception.Exception401;
-import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.personallogin.AuthController;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
