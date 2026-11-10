@@ -393,20 +393,24 @@ WHERE c.email = 'company4@example.test' AND k.id = 1
 
 
 
+------------------------------ purchase테이블----------------------------------------
+
 INSERT INTO purchase_tb (
     user_id,
     company_id,
     event_session_id,
-    price
+    price,
+    purchased_at
 )
 SELECT
     u.id,
     NULL,
     s.id,
-    COALESCE(s.fee, 0)
+    COALESCE(s.fee, 0),
+    CURRENT_TIMESTAMP
 FROM users u
          CROSS JOIN event_sessions s
-WHERE u.email_normalized = 'minsu@naver.com'
+WHERE u.email_normalized = 'jihun@naver.com'
   AND s.id IN (
     SELECT selected_session.id
     FROM (
