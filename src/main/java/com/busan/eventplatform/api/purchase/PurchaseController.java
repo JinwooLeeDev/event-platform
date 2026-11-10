@@ -15,7 +15,7 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
     // TODO 이벤트컬럼 작성되면 이벤트 컬럼에 맞게 mustache 설정("event/{id}/purchase") + model + session
-    @GetMapping("/event/{id}/purchase")
+    @GetMapping("/event/purchase/{id}")
     public String purchaseView(@PathVariable(name = "id") Long eventId , Model model , HttpSession session){
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
@@ -25,12 +25,13 @@ public class PurchaseController {
         return "point/purchase";
     }
 
-    @PostMapping("/event/{id}/purchase")
+    @PostMapping("/event/purchase/{id}")
     public String purchaseAction(@PathVariable(name = "id") Long eventId , HttpSession session) {
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
         purchaseService.purchase(eventId , loginIdentity);
 
-        return "redirect:/myPage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
+        return "redirect:/mypage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
     }
+
 }

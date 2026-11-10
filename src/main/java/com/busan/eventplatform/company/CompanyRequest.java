@@ -2,6 +2,7 @@ package com.busan.eventplatform.company;
 
 import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -20,14 +21,20 @@ public class CompanyRequest {
         private String businessNumber; // 사업자번호
         private String representativeName; // 대표자 명
         private String address; // 기업 주소
-        private String businessCertificateFileName; // 사업자등록증 파일
+        private LocalDate openedOn; // 개업일자
+        private MultipartFile businessCertificate; // 사업자등록증 파일
 
         //        수정 시 PENDING으로 변경할지 여부를 정하는 메서드
         public boolean requiresReview(Company company) {
-            return name != null && !name.trim().isBlank() && !Objects.equals(name, company.getName())
-                    || businessNumber != null && !businessNumber.trim().isBlank() && !Objects.equals(businessNumber, company.getBusinessNumber())
-                    || representativeName != null && !representativeName.trim().isBlank() && !Objects.equals(representativeName, company.getRepresentativeName())
-                    || address != null && !address.trim().isBlank() && !Objects.equals(address, company.getAddress());
+            return (name != null && !name.trim().isBlank() && !Objects.equals(name, company.getName()))
+                    || (businessNumber != null && !businessNumber.trim().isBlank() && !Objects.equals(businessNumber, company.getBusinessNumber()))
+                    || (representativeName != null && !representativeName.trim().isBlank() && !Objects.equals(representativeName, company.getRepresentativeName()))
+                    || (address != null && !address.trim().isBlank() && !Objects.equals(address, company.getAddress()))
+                    || (openedOn != null && !Objects.equals(openedOn, company.getOpenedOn()));
+        }
+
+        public boolean hasBusinessCertificate() {
+            return businessCertificate != null && !businessCertificate.isEmpty();
         }
 
         public void validate() {
@@ -40,7 +47,8 @@ public class CompanyRequest {
                     && businessNumber == null
                     && representativeName == null
                     && address == null
-                    && businessCertificateFileName == null) {
+                    && (businessCertificate == null || businessCertificate.isEmpty())
+                    && openedOn == null) {
                 throw new Exception400("수정할 정보를 입력해주세요.");
             }
 
@@ -51,7 +59,7 @@ public class CompanyRequest {
                     || (address != null && address.isBlank())
                     || (contactPersonName != null && contactPersonName.isBlank())
                     || (contactPersonPhone != null && contactPersonPhone.isBlank())) {
-                throw new RuntimeException("입력한 수정 정보는 공백일 수 없습니다.");
+                throw new Exception400("입력한 수정 정보는 공백일 수 없습니다.");
             }
 
             if (email != null) {
@@ -63,6 +71,12 @@ public class CompanyRequest {
             if (password != null) {
                 if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$")) {
                     throw new Exception400("비밀번호 형식이 올바르지 않습니다.");
+                }
+            }
+
+            if (businessNumber != null) {
+                if (!businessNumber.matches("^[0-9]{10}$")) {
+                    throw new Exception400("사업자번호는 숫자 10자리여야 합니다.");
                 }
             }
         }
