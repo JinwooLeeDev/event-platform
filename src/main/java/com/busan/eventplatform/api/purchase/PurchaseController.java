@@ -2,6 +2,7 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,9 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller     @RequiredArgsConstructor
 public class PurchaseController {
     private final PurchaseService purchaseService;
+    private final RegistrationService registrationService;
 
     // TODO 이벤트컬럼 작성되면 이벤트 컬럼에 맞게 mustache 설정("event/{id}/purchase") + model + session
-    @GetMapping("/event/{id}/purchase")
+    @GetMapping("/event/purchase/{id}")
     public String purchaseView(@PathVariable(name = "id") Long eventId , Model model , HttpSession session){
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
@@ -25,12 +27,15 @@ public class PurchaseController {
         return "point/purchase";
     }
 
-    @PostMapping("/event/{id}/purchase")
+    @PostMapping("/event/purchase/{id}")
     public String purchaseAction(@PathVariable(name = "id") Long eventId , HttpSession session) {
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
+        registrationService.apply(eventId , loginIdentity);
+
         purchaseService.purchase(eventId , loginIdentity);
 
-        return "redirect:/myPage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
+        return "redirect:/mypage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
     }
+
 }

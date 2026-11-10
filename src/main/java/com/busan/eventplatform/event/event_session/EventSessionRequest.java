@@ -1,7 +1,6 @@
 package com.busan.eventplatform.event.event_session;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.Data;
@@ -59,18 +58,22 @@ public class EventSessionRequest {
             }
         }
 
-        public EventSession toEntity() {
+        public EventSession toEntity(Event event) {
             return EventSession.builder()
+                    .event(event)
                     .name(this.name)
                     .startsAt(this.startsAt)
                     .endsAt(this.endsAt)
                     .capacity(this.capacity)
+                    .occupiedCount(0)
+                    .nextReceptionNumber(1)
                     .holdDurationSeconds(this.holdDurationSeconds)
                     .pricingType(this.pricingType)
                     .fee(this.fee)
                     .reservationDepositPoints(this.reservationDepositPoints)
                     .minimumParticipants(this.minimumParticipants)
                     .minimumCheckAt(this.minimumCheckAt)
+                    .status(EventSessionStatus.SCHEDULED)
                     .build();
         }
     }
@@ -122,20 +125,6 @@ public class EventSessionRequest {
             if (minimumCheckAt == null) {
                 throw new Exception400("최소 인원 확인 시점은 필수입니다.");
             }
-        }
-        public EventSession toEntity(EventSession eventSession) {
-            eventSession.setName(this.name);
-            eventSession.setCapacity(this.capacity);
-            eventSession.setStartsAt(this.startsAt);
-            eventSession.setEndsAt(this.endsAt);
-            eventSession.setHoldDurationSeconds(this.holdDurationSeconds);
-            eventSession.setPricingType(this.pricingType);
-            eventSession.setFee(this.fee);
-            eventSession.setReservationDepositPoints(this.reservationDepositPoints);
-            eventSession.setMinimumParticipants(this.minimumParticipants);
-            eventSession.setMinimumCheckAt(this.minimumCheckAt);
-
-            return eventSession;
         }
     }
 

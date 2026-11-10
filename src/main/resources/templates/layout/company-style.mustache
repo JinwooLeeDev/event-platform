@@ -1,4 +1,4 @@
-{{>login/style}}
+{{> layout/auth-style}}
 
 <style>
     .company-card {
@@ -274,5 +274,47 @@
         outline: none;
         border-color: #0750d8;
         box-shadow: inset 0 0 0 1px #0750d8;
+    }
+
+    /* 보완 사유 */
+    .company-feedback-notice {
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px solid #f3b4b4;
+        border-radius: 12px;
+        background: #fff4f4;
+        color: #9b1c1c;
+    }
+
+    .company-feedback-notice p {
+        margin: 8px 0 0;
+        line-height: 1.6;
+    }
+
+    /* 파일 입력 오류: 포커스 스타일보다 우선 적용 */
+    .company-card #certificate.certificate-error {
+        border: 2px solid #d92d20;
+        background-color: #fff5f5;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.12);
+        animation: certificate-shake 0.35s ease-in-out;
+    }
+
+    #certificateMessage {
+        color: #b42318;
+    }
+
+    @keyframes certificate-shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-3px); }
+    }
+
+    /* 움직임 최소화 설정을 사용하는 경우 색상으로만 강조 */
+    @media (prefers-reduced-motion: reduce) {
+        .company-card #certificate.certificate-error {
+            animation: none;
+        }
     }
 </style>

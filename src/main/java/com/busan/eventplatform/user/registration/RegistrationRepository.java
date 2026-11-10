@@ -77,4 +77,26 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             """)
     List<Registration> findAllByUserIdAndSessionIds(@Param("userId") Long userId,
                                                     @Param("sessionIds") List<Long> sessionIds);
+
+    // 특정 회원이 특정 행사의 참가 확정 상태인지 확인
+    @Query("""
+    select count(r)
+    from Registration r
+    where r.eventSession.event.id = :eventId
+    and r.user.id = :userId
+    and r.status = :status
+""")
+    long countConfirmedByEventIdAndUserId(
+            @Param("eventId") Long eventId,
+            @Param("userId") Long userId,
+            @Param("status") RegistrationStatus status
+    );
+
+    // 행사 회차별 단일 상태 (확정 or 대기) 인원수 조회 (편의성 메서드)
+    long countByEventSessionIdAndStatus(Long sessionId, RegistrationStatus status);
+
+    // 행사 전체 회차의 특정 상태(확정 or 대기) 인원수 합산
+    // Registration -> session(EventSession) -> event(Event) 로 탐색하여 합산
+    @Query("select count(r) from Registration r where r.eventSession.event.id = :eventId and r.status = :status")
+    long countTotalByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") RegistrationStatus status);
 }

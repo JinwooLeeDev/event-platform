@@ -3,8 +3,8 @@
     .app-header {
         width: 100%;
         height: 70px;
-        background: linear-gradient(90deg, #fdfdff 0%, #d6e8ff 100%);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        background: #ffffff;
+        border-bottom: 1px solid #e8e9ed;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -205,6 +205,26 @@
         padding: 8px 20px;
         border-radius: 20px;
     }
+    .app-header .header-container { max-width: 1600px; gap: 24px; }
+    .app-header .header-left, .app-header .header-right { flex-shrink: 0; }
+    .app-header .header-search { display: flex; flex: 1; align-items: center; max-width: 640px; min-width: 140px; margin: 0 auto; padding: 4px 5px 4px 18px; border: 1px solid #c8daf7; border-radius: 999px; background: white; }
+    .app-header .header-search__input { flex: 1; min-width: 0; width: 100%; padding: 9px 0; border: 0; outline: none; background: transparent; color: #14285f; font: inherit; font-size: 14px; }
+    .app-header .header-search__input::placeholder { color: #8998b7; }
+    .app-header .header-search__button { display: flex; align-items: center; justify-content: center; width: 40px; height: 36px; flex-shrink: 0; border: 0; border-radius: 999px; color: white; background: #0750d8; cursor: pointer; }
+    .app-header .header-search:focus-within { outline: 3px solid #9cbfff; outline-offset: 2px; }
+    .app-header .header-search__button:focus-visible { outline: 2px solid #14285f; outline-offset: 2px; }
+    @media(max-width:1100px) {
+        .app-header { height: auto; min-height: 70px; padding: 12px 0; }
+        .app-header .header-container { flex-wrap: wrap; gap: 14px; padding: 0 24px; }
+        .app-header .header-search { order: 3; flex-basis: 100%; max-width: none; }
+        .app-header .header-left > .vertical-divider { display: none; }
+    }
+    @media(max-width:600px) {
+        .app-header .header-container { padding: 0 16px; }
+        .app-header .header-right { flex-shrink: 1; flex-wrap: wrap; gap: 8px; }
+        .app-header .action-buttons { flex-wrap: wrap; gap: 8px; }
+        .app-header .header-right > .vertical-divider { display: none; }
+    }
 </style>
 
 <header class="app-header">
@@ -219,16 +239,13 @@
             <div class="vertical-divider"></div>
         </div>
 
-        <!-- 중앙: 공통 네비게이션 -->
-        <nav class="header-nav">
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="/events">행사 찾기 <span class="arrow-down"></span></a>
-                </li>
-                <li class="nav-item"><a href="/festivals">축제</a></li>
-                <li class="nav-item"><a href="/guide">이용안내</a></li>
-            </ul>
-        </nav>
+        <!-- 중앙: 공통 행사 검색 -->
+        <form class="header-search" action="/events/list" method="get" role="search" aria-label="행사 검색">
+            <input class="header-search__input" type="search" name="keyword" aria-label="검색할 행사명" placeholder="어떤 행사를 찾고 계신가요?">
+            <button class="header-search__button" type="submit" aria-label="행사 검색">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"></circle><path d="m16 16 5 5"></path></svg>
+            </button>
+        </form>
 
         <!-- 오른쪽: 사용자 정보 및 메뉴 -->
         <div class="header-right">

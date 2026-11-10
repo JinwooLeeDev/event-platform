@@ -1,0 +1,15 @@
+<aside class="account-sidebar" aria-label="마이페이지 메뉴">
+    <a class="account-brand" href="/mypage"><span>MY BUSAN PLAY</span><strong>나의 공간</strong></a>
+    <p class="account-nav-label">내 활동</p>
+    <nav class="account-nav" aria-label="내 계정">
+        <a href="/mypage" data-account-nav="/mypage"><span aria-hidden="true">01</span>내 정보</a>
+        <a href="/myhistory" data-account-nav="/myhistory"><span aria-hidden="true">02</span>내 행사</a>
+        <a href="/mypoint" data-account-nav="/mypoint"><span aria-hidden="true">03</span>포인트 관리</a>
+    </nav>
+    <div class="account-sidebar-bottom"><p>새로운 부산을 만나보세요.</p><a href="/events/list">행사 둘러보기 →</a></div>
+</aside>
+<script>
+document.querySelectorAll('[data-account-nav]').forEach(link => {
+    if (link.dataset.accountNav === window.location.pathname) link.setAttribute('aria-current', 'page');
+});
+</script>
