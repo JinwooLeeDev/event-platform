@@ -296,7 +296,7 @@
                     내 행사
                 </h1>
                 <p class="text-secondary mb-0">
-                    {{#history}}나의 참가 신청과 회차별 진행 상태를 확인하세요.{{/history}}{{^history}}임시 데이터로 살펴보는 참가 신청·대기 현황입니다. 실제 신청 기록이 아닙니다.{{/history}}
+                    나의 행사와 구매내역을 확인하세요.
                 </p>
             </div>
 
@@ -306,7 +306,15 @@
             </a>
         </div>
 
-{{^history}}<div class="alert alert-primary mb-4" role="status"><strong>임시 데이터 안내</strong> · 탭으로 아래 예시 행사를 분류해서 볼 수 있습니다. 집계·검색·취소·페이지 이동은 아직 연결되지 않았습니다.</div>{{/history}}
+<div class="alert alert-primary mb-4" role="status">구매 내역을 기준으로 표시합니다. 조회 목록 전달과 일부 상세·취소 기능은 연결 준비 중입니다.</div>
+        {{#myPoint}}
+        <section class="point-box mb-4" aria-label="보유 포인트">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div><p class="mb-2">현재 보유 포인트</p><strong class="point-value format-point">{{myPoint}}</strong></div>
+                <a class="btn btn-outline-primary" href="/mypoint">포인트 관리</a>
+            </div>
+        </section>
+        {{/myPoint}}
         <!-- 참가 현황 요약 -->
         <section class="row g-3 mb-5">
 
@@ -318,7 +326,7 @@
                             참가 확정
                         </div>
                         <div class="summary-number text-success">
-                            —<small class="fs-6">건</small>
+                            {{#confirmedCount}}{{confirmedCount}}{{/confirmedCount}}{{^confirmedCount}}0{{/confirmedCount}}<small class="fs-6">건</small>
                         </div>
                     </div>
                 </div>
@@ -332,7 +340,7 @@
                             승인 대기
                         </div>
                         <div class="summary-number text-warning">
-                            —<small class="fs-6">건</small>
+                            {{#pendingCount}}{{pendingCount}}{{/pendingCount}}{{^pendingCount}}0{{/pendingCount}}<small class="fs-6">건</small>
                         </div>
                     </div>
                 </div>
@@ -346,7 +354,7 @@
                             대기열 등록
                         </div>
                         <div class="summary-number text-primary">
-                            —<small class="fs-6">건</small>
+                            {{#waitingCount}}{{waitingCount}}{{/waitingCount}}{{^waitingCount}}0{{/waitingCount}}<small class="fs-6">건</small>
                         </div>
                     </div>
                 </div>
@@ -357,10 +365,10 @@
                     <div class="summary-card">
                         <div class="summary-label">
                             <i class="bi bi-receipt me-1"></i>
-                            지난 행사
+                            전체 구매내역
                         </div>
                         <div class="summary-number">
-                            —<small class="fs-6">건</small>
+                            {{#purchaseCount}}{{purchaseCount}}{{/purchaseCount}}{{^purchaseCount}}0{{/purchaseCount}}<small class="fs-6">건</small>
                         </div>
                     </div>
                 </div>
@@ -409,7 +417,7 @@
                                 <input type="search"
                                        class="form-control"
                                        name="keyword"
-                                       value=""
+                                       value="{{#keyword}}{{keyword}}{{/keyword}}"
                                        placeholder="행사명으로 검색">
 
                                 <button type="submit" class="btn btn-outline-secondary">
@@ -433,7 +441,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="small text-secondary" role="status" aria-live="polite" aria-atomic="true">
-                <span id="history-filter-label">전체 내역</span> · {{#history}}현재 조회 내역{{/history}}{{^history}}임시 데이터{{/history}} <strong id="history-result-count" class="text-primary">3</strong>건
+                조회 결과 <strong class="text-primary">{{#totalCount}}{{totalCount}}{{/totalCount}}{{^totalCount}}0{{/totalCount}}</strong>건 · <span id="history-filter-label">전체 내역</span> <strong id="history-result-count">0</strong>건 표시
             </span>
 
             <small class="text-secondary">
@@ -441,85 +449,52 @@
             </small>
         </div>
 
-        {{! 향후 Model 계약: history = { registrations: List<신청 DTO> }.
-            조회 완료 후 0건도 history 객체를 전달해야 임시 데이터로 돌아가지 않습니다.}}
+        {{! Controller 연결 계약: purchaseList = List<PurchaseRes.PurchaseListDto>.
+            null 가능 필드는 반드시 section으로 보호합니다. 미전달 시 임시 내역을 만들지 않습니다. }}
         <div id="history-results">
-        {{#history}}
-            {{#registrations}}
-            <article class="card history-card mb-4" data-history-group="ACTUAL"
-                     data-registration-status="{{status}}"
-                     data-session-ends-at="{{#session.endsAt}}{{session.endsAt}}{{/session.endsAt}}">
-                <div class="row g-0">
-                    <div class="col-md-3"><div class="event-poster poster-ocean" aria-hidden="true"><small>BUSAN PLAY · EVENT</small><h3>MY<br>EVENT</h3><small>대표 이미지 준비 중</small></div></div>
-                    <div class="col-md-9"><div class="event-body">
-                        {{#session.event.category.name}}<span class="badge text-bg-light mb-2">{{session.event.category.name}}</span>{{/session.event.category.name}}
-                        <h3 class="event-title">{{session.event.title}}</h3>
-                        <span class="status-badge status-cancelled" data-registration-label>{{status}}</span>
-                        <p class="event-meta mt-3">{{session.event.summary}}</p>
-                        <dl class="event-meta">
-                            <div><dt>회차</dt><dd>{{session.name}}</dd></div>
-                            <div><dt>개최 일시</dt><dd>{{#session.startsAt}}<time data-history-time>{{session.startsAt}}</time>{{/session.startsAt}}{{^session.startsAt}}일정 준비 중{{/session.startsAt}}{{#session.endsAt}} ~ <time data-history-time>{{session.endsAt}}</time>{{/session.endsAt}}</dd></div>
-                            <div><dt>장소</dt><dd>{{session.event.address}}</dd></div>
-                            {{#queueNumber}}<div><dt>대기번호</dt><dd>{{queueNumber}}번</dd></div>{{/queueNumber}}
-                            <div><dt>신청일</dt><dd>{{#createdAt}}<time data-history-time>{{createdAt}}</time>{{/createdAt}}{{^createdAt}}확인 중{{/createdAt}}</dd></div>
-                            <div><dt>회차 참가비</dt><dd>{{#session.fee}}<span class="format-point">{{session.fee}}</span>{{/session.fee}}{{^session.fee}}무료 또는 참가비 미등록{{/session.fee}}</dd></div>
-                        </dl>
-                        <p class="status-note">신청 상태를 기준으로 표시합니다. 실제 구매 내역은 포인트 관리에서 확인해주세요.</p>
-                        <button type="button" class="btn btn-outline-secondary" disabled>상세·취소 기능 준비 중</button>
-                    </div></div>
-                </div>
-            </article>
-            {{/registrations}}
-            {{^registrations}}<p class="status-note" data-history-no-records>아직 신청한 행사가 없습니다.</p>{{/registrations}}
-        {{/history}}
-
-        {{^history}}
-        <article class="card history-card mb-4" data-history-group="UPCOMING">
+        {{#purchaseList}}
+        <article class="card history-card mb-4" data-history-group="ACTUAL"
+                 data-registration-status="{{#status}}{{status}}{{/status}}"
+                 data-event-date="{{#eventDate}}{{eventDate}}{{/eventDate}}">
             <div class="row g-0">
-                <div class="col-md-3"><div class="event-poster poster-ocean"><small>BUSAN PLAY · SAMPLE</small><h3>ART<br>BY THE SEA</h3><small>임시 데이터</small></div></div>
+                <div class="col-md-3"><div class="event-poster {{#posterClass}}{{posterClass}}{{/posterClass}}{{^posterClass}}poster-ocean{{/posterClass}}"><small>BUSAN PLAY · EVENT</small><h3>{{#posterTitle}}{{posterTitle}}{{/posterTitle}}{{^posterTitle}}BUSAN PLAY{{/posterTitle}}</h3></div></div>
                 <div class="col-md-9"><div class="event-body">
-                    <span class="badge text-bg-light mb-2">전시 · 임시 데이터</span>
-                    <h3 class="event-title">부산 미디어아트 특별전</h3>
-                    <span class="status-badge status-confirmed">신청 확정 예시</span>
-                    <p class="event-meta mt-3 mb-1">일시: 2026.12.05 14:00 ~ 16:00</p><p class="event-meta">장소: 부산시립미술관 · 오후 회차</p>
-                    <div class="status-note">참가가 확정되었을 때 표시할 화면 예시입니다.</div>
-                    <div class="mt-3"><button type="button" class="btn btn-outline-secondary" disabled>상세·취소 기능 준비 중</button></div>
+                    {{#category}}<span class="badge text-bg-light mb-2">{{category}}</span>{{/category}}
+                    <h3 class="event-title">{{#title}}{{title}}{{/title}}{{^title}}행사명 확인 중{{/title}}</h3>
+                    <span class="status-badge {{#status}}{{status}}{{/status}}{{^status}}status-cancelled{{/status}}" data-registration-label data-server-label="{{#}}true{{/}}" data-server-class="{{#status}}true{{/status}}">{{#}}{{}}{{/}}{{^}}{{#statusMessage}}{{statusMessage}}{{/statusMessage}}{{^statusMessage}}신청 상태 확인 중{{/statusMessage}}{{/}}</span><div class="status-note mt-3">{{#statusMessage}}{{statusMessage}}{{/statusMessage}}{{^statusMessage}}참가 상태 안내를 준비 중입니다.{{/statusMessage}}</div>
+                    <dl class="event-meta mt-3">
+                        <div><dt>회차</dt><dd>{{#sessionName}}{{sessionName}}{{/sessionName}}{{^sessionName}}회차 확인 중{{/sessionName}}</dd></div>
+                        <div><dt>개최 일시</dt><dd>{{#eventDate}}<span>{{eventDate}}</span>{{/eventDate}}{{^eventDate}}일정 확인 중{{/eventDate}}</dd></div>
+                        <div><dt>장소</dt><dd>{{#location}}{{location}}{{/location}}{{^location}}장소 확인 중{{/location}}</dd></div>
+                        <div><dt>구매일</dt><dd>{{#purchaseDate}}{{purchaseDate}}{{/purchaseDate}}{{^purchaseDate}}확인 중{{/purchaseDate}}</dd></div>
+                        <div><dt>결제 포인트</dt><dd class="format-point">{{#price}}{{price}}{{/price}}{{^price}}0{{/price}}</dd></div>
+                    </dl>
+                    <div class="event-actions d-flex flex-wrap gap-2">
+                        {{#detailUrl}}<a class="btn btn-primary" href="{{detailUrl}}">행사 상세</a>{{/detailUrl}}
+                        {{^detailUrl}}<button class="btn btn-outline-secondary" type="button" disabled>상세 연결 준비 중</button>{{/detailUrl}}
+                        {{#canCancel}}
+                            {{#cancelUrl}}<form action="{{cancelUrl}}" method="post" onsubmit="return confirm('참가 신청을 취소하시겠습니까?')"><button class="btn btn-outline-danger" type="submit">참가 취소</button></form>{{/cancelUrl}}
+                            {{^cancelUrl}}<button class="btn btn-outline-secondary" type="button" disabled>취소 연결 준비 중</button>{{/cancelUrl}}
+                        {{/canCancel}}
+                        {{^canCancel}}<button class="btn btn-outline-secondary" type="button" disabled>취소 불가 · 상태 확인 필요</button>{{/canCancel}}
+                    </div>
                 </div></div>
             </div>
         </article>
-        <article class="card history-card mb-4" data-history-group="UPCOMING">
-            <div class="row g-0">
-                <div class="col-md-3"><div class="event-poster poster-cinema"><small>BUSAN PLAY · SAMPLE</small><h3>CINEMA<br>NIGHT</h3><small>임시 데이터</small></div></div>
-                <div class="col-md-9"><div class="event-body">
-                    <span class="badge text-bg-light mb-2">영화 · 임시 데이터</span><h3 class="event-title">부산 야외 영화제</h3>
-                    <span class="status-badge status-pending">승인 대기 예시</span>
-                    <p class="event-meta mt-3 mb-1">일시: 2026.12.12 19:00 ~ 21:00</p><p class="event-meta">장소: 영화의전당 · 저녁 회차</p>
-                    <div class="status-note">주최 측의 참가 승인을 기다리는 상태의 예시입니다.</div>
-                    <div class="mt-3"><button type="button" class="btn btn-outline-secondary" disabled>상세·취소 기능 준비 중</button></div>
-                </div></div>
-            </div>
-        </article>
-        <article class="card history-card mb-4" data-history-group="WAITING">
-            <div class="row g-0">
-                <div class="col-md-3"><div class="event-poster poster-market"><small>BUSAN PLAY · SAMPLE</small><h3>LOCAL<br>WEEKEND</h3><small>임시 데이터</small></div></div>
-                <div class="col-md-9"><div class="event-body">
-                    <span class="badge text-bg-light mb-2">체험 · 임시 데이터</span><h3 class="event-title">로컬 크래프트 클래스</h3>
-                    <span class="status-badge status-waiting">대기 중 · 대기번호 3번 예시</span>
-                    <p class="event-meta mt-3 mb-1">일시: 2026.12.19 11:00 ~ 13:00</p><p class="event-meta">장소: 전포공방거리 · 오전 회차</p>
-                    <div class="status-note">빈자리 발생 시 참가 상태가 변경되는 대기 화면 예시입니다.</div>
-                    <div class="mt-3"><button type="button" class="btn btn-outline-secondary" disabled>상세·취소 기능 준비 중</button></div>
-                </div></div>
-            </div>
-        </article>
-        {{/history}}
-        <div id="history-empty" class="card history-card text-center p-5 mb-4" hidden>
-            <h3 class="h5 fw-bold">이 분류에 해당하는 행사가 없습니다.</h3>
-            <p class="text-secondary mb-0">다른 분류를 선택해 확인해주세요.</p>
+        {{/purchaseList}}
+        {{^purchaseList}}<p class="status-note" data-history-no-records>표시할 구매 내역이 없습니다. 목록 조회가 연결되지 않은 경우에도 이 안내가 표시됩니다.</p>{{/purchaseList}}
+        <div id="history-empty" class="card history-card text-center p-5 mb-4" hidden><h3 class="h5 fw-bold">이 분류에 해당하는 내역이 없습니다.</h3><p class="text-secondary mb-0">다른 분류를 선택해 확인해주세요.</p></div>
         </div>
-        </div>
-        <noscript><p class="text-secondary">분류 전환은 JavaScript를 활성화한 뒤 이용해주세요. 현재 전체 예시 내역을 표시합니다.</p></noscript>
-        {{^history}}<nav aria-label="페이지 이동 준비 중" class="mt-4"><ul class="pagination justify-content-center"><li class="page-item disabled"><span class="page-link">이전</span></li><li class="page-item disabled"><span class="page-link">임시 화면</span></li><li class="page-item disabled"><span class="page-link">다음</span></li></ul></nav>
-{{/history}}
+        <noscript><p class="text-secondary">분류 전환은 JavaScript를 활성화한 뒤 이용해주세요.</p></noscript>
+        <nav aria-label="구매내역 페이지" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {{#hasPrevious}}{{#previousUrl}}<li class="page-item"><a class="page-link" href="{{previousUrl}}" aria-label="이전 페이지">이전</a></li>{{/previousUrl}}{{/hasPrevious}}
+                {{^hasPrevious}}<li class="page-item disabled"><span class="page-link">이전</span></li>{{/hasPrevious}}
+                {{#pages}}<li class="page-item {{#activeClass}}{{activeClass}}{{/activeClass}}">{{#url}}<a class="page-link" href="{{url}}">{{#number}}{{number}}{{/number}}</a>{{/url}}{{^url}}<span class="page-link">{{#number}}{{number}}{{/number}}</span>{{/url}}</li>{{/pages}}
+                {{#hasNext}}{{#nextUrl}}<li class="page-item"><a class="page-link" href="{{nextUrl}}" aria-label="다음 페이지">다음</a></li>{{/nextUrl}}{{/hasNext}}
+                {{^hasNext}}<li class="page-item disabled"><span class="page-link">다음</span></li>{{/hasNext}}
+            </ul>
+        </nav>
         <!-- 참가 취소 안내 -->
         <div class="history-notice mt-5">
             <h6 class="fw-bold mb-3">
@@ -559,15 +534,15 @@
     (() => {
         const buttons = Array.from(document.querySelectorAll('[data-history-filter]'));
         const cards = Array.from(document.querySelectorAll('[data-history-group]'));
-        const statusLabels = { HOLD: '처리 중', CONFIRMED: '신청 확정', PENDING_APPROVAL: '승인 대기', WAITING: '대기 중', CANCELLED: '취소됨' };
+        const s = { HOLD: '처리 중', CONFIRMED: '신청 확정', PENDING_APPROVAL: '승인 대기', WAITING: '대기 중', CANCELLED: '취소됨' };
         cards.filter(card => card.dataset.historyGroup === 'ACTUAL').forEach(card => {
             const status = card.dataset.registrationStatus;
-            const endsAt = Date.parse(card.dataset.sessionEndsAt);
-            card.dataset.historyGroup = status === 'CANCELLED' || (Number.isFinite(endsAt) && endsAt <= Date.now())
+            const eventAt = Date.parse(card.dataset.eventDate);
+            card.dataset.historyGroup = status === 'CANCELLED' || (Number.isFinite(eventAt) && eventAt <= Date.now())
                 ? 'HISTORY' : status === 'WAITING' ? 'WAITING' : 'UPCOMING';
             const label = card.querySelector('[data-registration-label]');
-            label.textContent = statusLabels[status] || '상태 확인 중';
-            label.className = 'status-badge ' + ({CONFIRMED:'status-confirmed',PENDING_APPROVAL:'status-pending',WAITING:'status-waiting'}[status] || 'status-cancelled');
+            if (label.dataset.serverLabel !== 'true' && s[status]) label.textContent = s[status];
+            if (label.dataset.serverClass !== 'true') label.className = 'status-badge ' + ({CONFIRMED:'status-confirmed',PENDING_APPROVAL:'status-pending',WAITING:'status-waiting'}[status] || 'status-cancelled');
         });
         document.querySelectorAll('[data-history-time]').forEach(element => {
             const date = new Date(element.textContent.trim());

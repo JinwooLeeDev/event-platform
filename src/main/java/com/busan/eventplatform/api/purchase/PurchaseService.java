@@ -25,6 +25,7 @@ public class PurchaseService {
     private final CompanyRepository companyRepository;
     private final RegistrationRepository registrationRepository;
     private final RegistrationService registrationService;
+    private final RegistrationRepository registrationRepository;
 
     // 결제창에 필요한 행사 결제 포인트와 행사 정보 조회.
     // TODO 추후 eventSession 생성되면 eventRepository에서 쿼리 가져와서 eventSession 조회.

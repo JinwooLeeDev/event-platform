@@ -1,5 +1,6 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
@@ -7,6 +8,7 @@ import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyPageService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public void updatePassword(Long userId, MyPasswordUpdateReqDto request) {
+        request.validate();
+        User user = findActiveUser(userId);
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new Exception400("입력하신 현재 비밀번호가 일치하지 않습니다.");
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash())) {
+            throw new Exception400("변경할 비밀번호는 현재 비밀번호와 달라야합니다.");
+        }
+        String newPassword = passwordEncoder.encode(request.getNewPassword());
+        user.changePassword(newPassword);
+    }
 
     @Transactional(readOnly = true)
     public MyPageResDto getMyPage(Long userId) {
