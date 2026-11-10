@@ -23,7 +23,7 @@
                     <div class="auth-row company-verification-row">
                         <input id="email"
                                name="email"
-                               type="text" inputmode="email"
+                               type="email"
                                maxlength="254"
                                autocomplete="username"
                                placeholder="name@example.com"
@@ -35,14 +35,14 @@
                                 type="button">
                             인증번호 발송
                         </button>
-                    </div>
 
-                    <button id="changeEmailButton"
-                            class="auth-button secondary"
-                            type="button"
-                            hidden>
-                        이메일 다시 입력
-                    </button>
+                        <button id="changeEmailButton"
+                                class="auth-button secondary"
+                                type="button"
+                                hidden>
+                            이메일 다시 입력
+                        </button>
+                    </div>
                 </div>
 
                 <div class="auth-field">
@@ -145,16 +145,24 @@
                            required>
                 </p>
 
-                <p>
-                    <label for="certificate">사업자등록증</label><br>
+                <div class="auth-field">
+                    <label for="certificate">사업자등록증</label>
+
                     <input id="certificate"
                            name="businessCertificate"
                            type="file"
                            accept=".pdf,.jpg,.jpeg,.png"
+                           aria-describedby="certificateMessage"
                            required>
-                    <br>
-                    <small>PDF·JPG·PNG 파일을 최대 10MB까지 첨부할 수 있습니다.</small>
-                </p>
+
+                    <small>
+                        PDF·JPG·JPEG·PNG 파일을 최대 10MB까지 첨부할 수 있습니다.
+                    </small>
+
+                    <p id="certificateMessage"
+                       class="auth-message"
+                       role="alert"></p>
+                </div>
             </fieldset>
 
             <fieldset>
@@ -208,6 +216,73 @@
     const passwordMatchMessage =
         document.getElementById("passwordMatchMessage");
 
+    // 사업자등록증 입력과 전용 오류 메시지
+    const certificateInput = document.getElementById("certificate");
+    const certificateMessage =
+        document.getElementById("certificateMessage");
+
+    // 파일 검사 규칙
+    const certificateMaxSize = 10 * 1024 * 1024;
+    const certificateExtensionPattern = /\.(pdf|jpe?g|png)$/i;
+
+    // 오류 문구·붉은 테두리·강조 애니메이션 표시
+    function showCertificateError(text) {
+        certificateMessage.textContent = text;
+        certificateInput.setAttribute("aria-invalid", "true");
+
+        certificateInput.classList.remove("certificate-error");
+        void certificateInput.offsetWidth;
+        certificateInput.classList.add("certificate-error");
+    }
+
+    // 정상 파일 선택 시 오류 강조 제거
+    function clearCertificateError() {
+        certificateMessage.textContent = "";
+        certificateInput.removeAttribute("aria-invalid");
+        certificateInput.classList.remove("certificate-error");
+    }
+
+    // 파일 검사. 정상이라면 null 반환
+    function validateCertificate() {
+        if (certificateInput.files.length === 0) {
+            return "사업자등록증 파일을 첨부해주세요.";
+        }
+
+        const file = certificateInput.files[0];
+
+        if (file.size === 0) {
+            return "비어 있는 파일은 첨부할 수 없습니다.";
+        }
+
+        if (file.size > certificateMaxSize) {
+            return "파일 크기는 10MB 이하여야 합니다.";
+        }
+
+        if (!certificateExtensionPattern.test(file.name)) {
+            return "PDF·JPG·JPEG·PNG 파일만 첨부할 수 있습니다.";
+        }
+
+        return null;
+    }
+
+    // required 검사로 submit 이벤트 전에 막히는 경우도 강조
+    certificateInput.addEventListener("invalid", () => {
+        if (certificateInput.validity.valueMissing) {
+            showCertificateError("사업자등록증 파일을 첨부해주세요.");
+        }
+    });
+
+    // 파일 선택·취소 직후 검사
+    certificateInput.addEventListener("change", () => {
+        clearCertificateError();
+
+        const error = validateCertificate();
+
+        if (error !== null) {
+            showCertificateError(error);
+        }
+    });
+
     passwordInput.addEventListener("input", checkPasswordMatch);
     passwordConfirm.addEventListener("input", checkPasswordMatch);
 
@@ -215,11 +290,20 @@
     let busy = false;
 
     function updateButtons() {
+        // 발송 후 이메일이 잠기면 같은 위치에 다시 입력 버튼 표시
+        const emailLocked = email.readOnly;
+
+        sendButton.hidden = emailLocked;
+        changeButton.hidden = !emailLocked;
+
         sendButton.disabled = busy || verifiedEmail !== null;
-        confirmButton.disabled =
-            busy || verifiedEmail !== null || !email.readOnly;
         changeButton.disabled = busy;
-        joinButton.disabled = busy || verifiedEmail !== email.value;
+
+        confirmButton.disabled =
+            busy || verifiedEmail !== null || !emailLocked;
+
+        joinButton.disabled =
+            busy || verifiedEmail !== email.value;
     }
 
     async function requestVerification(url, body) {
@@ -275,7 +359,6 @@
             verificationMessage.textContent = error.message;
         } finally {
             busy = false;
-            changeButton.hidden = !email.readOnly;
             updateButtons();
         }
     });
@@ -349,6 +432,16 @@
             return;
         }
 
+        const certificateError = validateCertificate();
+
+        if (certificateError !== null) {
+            event.preventDefault();
+            formMessage.textContent = certificateError;
+            showCertificateError(certificateError);
+            certificateInput.focus();
+            return;
+        }
+
         joinButton.disabled = true;
     });
 
@@ -371,6 +464,12 @@
         passwordMatchMessage.style.color =
             mismatch ? "#b42318" : "#087443";
     }
+
+    // 가입 실패 후 뒤로 돌아왔을 때 버튼과 비밀번호 안내 복원
+    window.addEventListener("pageshow", () => {
+        updateButtons();
+        checkPasswordMatch();
+    });
 
     updateButtons();
 </script>
