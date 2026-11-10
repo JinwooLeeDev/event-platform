@@ -20,4 +20,9 @@ public class PurchaseRes {
             this.predictedPoint = currentPoint - eventPoint;
         }
     }
+
+    @Data
+    public static class PurchaseListDto {
+        private Long id; //
+    }
 }

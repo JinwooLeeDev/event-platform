@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     // 유저의 특정 회차 중복 신청 여부 검증용
-    boolean existsBySessionIdAndUserId(Long sessionId, Long userId);
+    boolean existsBySessionIdAndUserId(Long sessionId , Long userId);
 
     // [동시성 제어] 세션 정보를 비관적 락으로 조회하여 정원 동시 접근 제어
     // 특정 행사에 동시에 몰리는 것을 줄세우기(직렬화)
