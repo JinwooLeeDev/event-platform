@@ -88,6 +88,9 @@ public class EventSession {
 
     // 회차 수정
     public void update(EventSessionRequest.UpdateDto dto) {
+        if (dto.getCapacity() < this.occupiedCount) {
+            throw new Exception400("현재 점유 인원보다 정원을 줄일 수 없습니다.");
+        }
         this.name = dto.getName();
         this.capacity = dto.getCapacity();
         this.startsAt = dto.getStartsAt();

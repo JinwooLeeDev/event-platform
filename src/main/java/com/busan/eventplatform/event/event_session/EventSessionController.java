@@ -36,8 +36,8 @@ public class EventSessionController {
     // GET - http://localhost:8080/event-sessions/{id}
     @GetMapping("/event-sessions/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        EventSession eventSession = eventSessionService.findById(id);
-        model.addAttribute("eventSession", eventSession);
+        EventSessionResponse.DetailDto detailDto = eventSessionService.findById(id);
+        model.addAttribute("eventSession", detailDto);
 
         return "event_Session/detail";
     }
