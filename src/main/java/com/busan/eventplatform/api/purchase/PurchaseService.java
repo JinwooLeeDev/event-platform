@@ -6,6 +6,7 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.global.error.exception.Exception500;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserRepository;
@@ -64,7 +65,7 @@ public class PurchaseService {
 
     // 행사 결제 기능.
     @Transactional
-    public void purchase(Long eventId, LoginIdentity loginIdentity) {
+    public Purchase purchase(Long eventId, LoginIdentity loginIdentity) {
         // 1. 실제 있는 이벤트인지. TODO 나중에 eventSession 구현되면 삭제.
         EventSession eventSession = purchaseRepository.findByIdWithEvent(eventId)
                         .orElseThrow(() -> new Exception404("결제하려는 행사가 존재하지 않습니다"));
@@ -89,6 +90,8 @@ public class PurchaseService {
                     .build();
 
             purchaseRepository.save(purchase);
+
+            return purchase;
         }
 
 
@@ -112,7 +115,9 @@ public class PurchaseService {
                     .build();
 
             purchaseRepository.save(purchase);
+            return purchase;
         }
+        throw new Exception500("서버 내부에 문제가 발생했습니다.");
     }
 
 

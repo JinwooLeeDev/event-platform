@@ -31,7 +31,6 @@ public class PurchaseController {
     public String purchaseAction(@PathVariable(name = "id") Long eventId , HttpSession session) {
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
-        registrationService.apply(eventId , loginIdentity);
 
         purchaseService.purchase(eventId , loginIdentity);
 

@@ -99,4 +99,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // Registration -> session(EventSession) -> event(Event) 로 탐색하여 합산
     @Query("select count(r) from Registration r where r.eventSession.event.id = :eventId and r.status = :status")
     long countTotalByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") RegistrationStatus status);
+
+    /** 신청한 회차 id만 조회 (락을 먼저 잡기 위해 신청 엔티티를 불러오지 않음) */
+    @Query("select r.eventSession.id from Registration r where r.id = :registrationId")
+    Optional<Long> findSessionIdById(@Param("registrationId") Long registrationId);
+
+
+
 }

@@ -80,8 +80,6 @@ public class RegistrationService {
             status = RegistrationStatus.WAITING;
         }
 
-        // 4. 결제 위임 (잔액 부족 / 중복 결제 예외는 PurchaseService 가 던짐 → 점유·접수번호 포함 전체 롤백)
-        purchaseService.purchase(sessionId, loginIdentity);
 
         // 5. 접수 번호 발급 + 신청 저장
         int receptionNumber = session.issueReceptionNumber();
@@ -105,20 +103,24 @@ public class RegistrationService {
             throw new RegistrationForbiddenException("개인 회원만 신청을 취소할 수 있습니다");
         }
 
-        Registration registration = findRegistration(registrationId);
+        // 회차 락 → 신청 조회 순서 (동시 승격과 겹쳐도 최신 상태로 판단)
+        Registration registration = findRegistrationWithSessionLock(registrationId);
+        EventSession session = registration.getEventSession();
+
         if (!registration.isOwnedBy(loginIdentity.getId())) {
             throw new RegistrationForbiddenException("본인의 신청만 취소할 수 있습니다");
         }
 
-        // 승격 로직과 동시 신청이 겹치지 않도록 회차 락
-        EventSession session = lockSession(registration.getEventSession().getId());
+        String blockedReason = getCancelBlockedReason(registration, LocalDateTime.now());
+        if (blockedReason != null) {
+            throw new Exception400(blockedReason);
+        }
 
         boolean releasedSeat = registration.getStatus().isSeatOccupying();
         registration.cancel();
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
 
-        // TODO: 포인트 파트 환불 메서드 완성 후 연결
-        // purchaseService.refund(session.getId(), registration.getUser().getId());
+        // TODO: 포인트 파트 환불 메서드 완성 후 연결 (금액은 RegistrationRefundPolicy로 계산)
 
         if (releasedSeat) {
             session.releaseSeat();
@@ -126,14 +128,16 @@ public class RegistrationService {
         }
     }
 
+
+
     // =========================================================
     // 주최자 반려
     // =========================================================
 
     @Transactional
     public void reject(Long registrationId, LoginIdentity loginIdentity) {
-        Registration registration = findRegistration(registrationId);
-        EventSession session = lockSession(registration.getEventSession().getId());
+        Registration registration = findRegistrationWithSessionLock(registrationId);
+        EventSession session = registration.getEventSession();
 
         validateOrganizer(session, loginIdentity);
 
@@ -283,6 +287,27 @@ public class RegistrationService {
         return null;
     }
 
+    /**
+     * 본인 취소가 불가능한 이유. 취소 가능하면 null.
+     * 조장님 결정: 취소는 시작 전까지 언제든지 가능, 환불 금액만 차등.
+     * [화면 제공] 구매내역의 취소 버튼 표시에도 같은 규칙을 사용한다.
+     */
+    public String getCancelBlockedReason(Registration registration, LocalDateTime now) {
+        if (!registration.getStatus().isActive()) {
+            return "이미 취소되었거나 반려된 신청입니다";
+        }
+        if (!now.isBefore(registration.getEventSession().getStartsAt())) {
+            return "이미 시작된 회차는 취소할 수 없습니다";
+        }
+        return null;
+    }
+
+    public boolean isCancelable(Registration registration, LocalDateTime now) {
+        return getCancelBlockedReason(registration, now) == null;
+    }
+
+
+
     // =========================================================
     // 내부 헬퍼
     // =========================================================
@@ -310,6 +335,14 @@ public class RegistrationService {
     private EventSession lockSession(Long sessionId) {
         return eventSessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new Exception404("행사 회차가 존재하지 않습니다"));
+    }
+
+    /** 회차 락을 먼저 잡고 신청을 조회한다 (락 이후 조회해야 승격 등 최신 상태가 반영됨) */
+    private Registration findRegistrationWithSessionLock(Long registrationId) {
+        Long sessionId = registrationRepository.findSessionIdById(registrationId)
+                .orElseThrow(() -> new Exception404("신청 내역을 찾을 수 없습니다"));
+        lockSession(sessionId);
+        return findRegistration(registrationId);
     }
 
     /**
