@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Table(name = "purchase_tb")
 @Entity
@@ -46,6 +47,5 @@ public class Purchase {
         this.company = company;
         this.eventSession = eventSession;
         this.price = price;
-
     }
 }

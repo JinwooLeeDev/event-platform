@@ -6,13 +6,14 @@ import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.login.LoginIdentity;
-import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -119,9 +120,10 @@ public class PaymentService {
     }
 
 
-//    public PaymentRes.ListDto paymentList(Long userId){
-//
-//
-//    }
+    public List<PaymentRes.ListDto> paymentList(Long userId){
+        List<Payment> payment = paymentRepository.findByUserIdWithPayment(userId);
+
+        return payment.stream().map(PaymentRes.ListDto::new).toList();
+    }
 
 }
