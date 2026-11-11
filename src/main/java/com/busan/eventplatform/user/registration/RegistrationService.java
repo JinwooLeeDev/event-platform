@@ -80,9 +80,6 @@ public class RegistrationService {
             status = RegistrationStatus.WAITING;
         }
 
-        // 4. 결제 위임 (잔액 부족 / 중복 결제 예외는 PurchaseService 가 던짐 → 점유·접수번호 포함 전체 롤백)
-        purchaseService.purchase(sessionId, loginIdentity);
-
         // 5. 접수 번호 발급 + 신청 저장
         int receptionNumber = session.issueReceptionNumber();
         Registration registration = registrationRepository.save(
