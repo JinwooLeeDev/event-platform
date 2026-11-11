@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class EventResponse {
@@ -44,11 +45,15 @@ public class EventResponse {
 
     @Data
     public static class EventDto {
+        private static final DateTimeFormatter APPLICATION_DATE_FORMAT =
+                DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
         private Long id;
         private Long categoryId;
         private String categoryName;
         private String title;
         private String summary;
+        private String applyStartAt;
+        private String applyEndAt;
         private LocalDateTime createdAt;
         private LocalDateTime publishedAt;
         private EventStatus status;
@@ -62,6 +67,10 @@ public class EventResponse {
             }
             this.title = event.getTitle();
             this.summary = event.getSummary();
+            this.applyStartAt = event.getApplyStartAt() == null
+                    ? "일정 확인 중" : event.getApplyStartAt().format(APPLICATION_DATE_FORMAT);
+            this.applyEndAt = event.getApplyEndAt() == null
+                    ? "일정 확인 중" : event.getApplyEndAt().format(APPLICATION_DATE_FORMAT);
             this.createdAt = event.getCreatedAt();
             this.publishedAt = event.getPublishedAt();
             this.status = event.getStatus();
