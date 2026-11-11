@@ -75,7 +75,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             select count(r)
             from Registration r
-            where r.session.event.id = :eventId
+            where r.eventSession.event.id = :eventId
             and r.user.id = :userId
             and r.status = :status
         """)

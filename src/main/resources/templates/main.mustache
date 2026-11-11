@@ -9,7 +9,30 @@
         </div>
     </section>
     <section class="main-events" aria-labelledby="main-events-title">
-        <div class="main-events__heading">
+    </section>
+    <!-- 카테고리 선택 -->
+    <section class="main-category">
+        <details class="main-category__dropdown">
+            <summary class="main-category__button">
+                <span>카테고리 선택</span>
+                <span class="main-category__arrow">⌄</span>
+            </summary>
+            <div class="main-category__list">
+                <a href="/events/list" class="main-category__item">
+                    전체 행사
+                </a>
+                {{#categoryList}}
+                    <a href="/events/list?categoryId={{id}}"
+                    class="main-category__item">
+                    {{name}}
+                    </a>
+                {{/categoryList}}
+            </div>
+        </details>
+    </section>
+    <!-- 최근 등록된 행사 -->
+    <section class="main-events" aria-labelledby="main-events-title">
+    <div class="main-events__heading">
             <div><p class="main-events__eyebrow">DISCOVER BUSAN</p><h2 id="main-events-title">최근 등록된 행사</h2></div>
             <a class="main-events__more" href="/events/list">전체 보기 <span aria-hidden="true">→</span></a>
         </div>
