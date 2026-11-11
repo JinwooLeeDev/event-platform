@@ -2,15 +2,14 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
-import com.busan.eventplatform.global.util.MyDateUtil;
-
 import com.busan.eventplatform.user.registration.Registration;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
 import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PurchaseRes {
     @Data
@@ -51,7 +50,7 @@ public class PurchaseRes {
 
             this.category = session.getEvent().getCategory().getName();
             this.title = event.getTitle();
-            this.eventDate = Timestamp.from(Instant.from(session.getStartsAt()));
+            this.eventDate = Timestamp.valueOf(session.getStartsAt());
             this.sessionName = session.getName();
             this.location = event.getAddress();
             this.price = purchase.getPrice();
@@ -78,7 +77,6 @@ public class PurchaseRes {
             return  status == RegistrationStatus.CONFIRMED ||
                     status == RegistrationStatus.PENDING ||
                     status == RegistrationStatus.WAITING;
-
         }
 
     }
