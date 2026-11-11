@@ -86,8 +86,11 @@ public class EventResponse {
         private LocalDateTime createdAt;
         private boolean applicationClosed;
         private boolean owner;
+        private Long confirmedCount;
+        private Long waitingCount;
+        private boolean chatAvailable; // 채팅 참가 버튼
 
-        public DetailDto(Event event, boolean owner) {
+        public DetailDto(Event event, boolean owner, Long confirmedCount, Long waitingCount, boolean chatAvailable) {
             this.id = event.getId();
             this.title = event.getTitle();
             if (event.getCompany() != null) {
@@ -106,6 +109,9 @@ public class EventResponse {
             this.createdAt = event.getCreatedAt();
             this.applicationClosed = event.isApplicationClosed();
             this.owner = owner;
+            this.confirmedCount = confirmedCount;
+            this.waitingCount = waitingCount;
+            this.chatAvailable = chatAvailable;
         }
     }
 
