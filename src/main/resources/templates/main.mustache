@@ -40,17 +40,22 @@
         <div class="event-grid">
             {{#eventPage.eventList}}
             <article class="event-card">
+                <a class="event-card__link" href="/event/{{id}}">
                 <div class="event-card__visual" data-category="{{#categoryName}}{{categoryName}}{{/categoryName}}" aria-hidden="true">
-                    <span class="event-card__badge">공개 행사</span>
                     <span class="event-card__art">DISCOVER<br>BUSAN</span>
                     <span class="event-card__visual-caption">이미지 준비 중</span>
                 </div>
                 <div class="event-card__body">
                     <h3 class="event-card__title">{{title}}</h3>
                     <p class="event-card__summary">{{summary}}</p>
+                    <div class="event-card__period">
+                        <span>모집 기간</span>
+                        <div>{{applyStartAt}}<br>~ {{applyEndAt}}</div>
+                    </div>
                     {{#categoryName}}<span class="event-card__category">{{categoryName}}</span>{{/categoryName}}
                     {{^categoryName}}<span class="event-card__category">카테고리 준비 중</span>{{/categoryName}}
                 </div>
+                </a>
             </article>
             {{/eventPage.eventList}}
         </div>

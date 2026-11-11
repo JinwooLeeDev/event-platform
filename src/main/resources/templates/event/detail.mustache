@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}행사 상세{{/event.title}} | Busan Play</title>
+</head>
+<body>
+{{> layout/header}}
+{{> event/detail-style}}
+<main class="event-detail-page">
+    <div class="event-detail-wrap">
+        <nav class="detail-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span><span>행사 상세</span></nav>
+        <div class="detail-layout">
+            <div class="detail-content">
+                <div class="detail-poster" aria-label="행사 대표 이미지 준비 중">
+                    <span class="detail-eyebrow">DISCOVER BUSAN</span>
+                    <strong>새로운 경험,<br>부산에서 만나요.</strong>
+                    <span>대표 이미지 준비 중 · {storageKey}</span>
+                </div>
+                <section class="detail-section" aria-labelledby="description-title">
+                    <span class="detail-eyebrow">ABOUT THE EVENT</span>
+                    <h2 id="description-title">행사 소개</h2>
+                    <div class="detail-description">{{#event.description}}{{event.description}}{{/event.description}}{{^event.description}}{description}{{/event.description}}</div>
+                </section>
+                <section class="detail-section" aria-labelledby="location-title">
+                    <h2 id="location-title">찾아오시는 길</h2>
+                    <p>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</p>
+                    <div class="detail-map-placeholder">지도 연결 준비 중</div>
+                </section>
+                <section class="detail-section" aria-labelledby="session-title">
+                    <h2 id="session-title">회차 안내</h2>
+                    <p class="detail-muted">회차 데이터 연결 전 임시 표기입니다. 실제 개최 일정·참가비와 다를 수 있습니다.</p>
+                    <dl class="detail-facts">
+                        <div><dt>회차명</dt><dd>{name}</dd></div>
+                        <div><dt>개최 일시</dt><dd>{startsAt} ~ {endsAt}</dd></div>
+                        <div><dt>참가비</dt><dd>{fee} P</dd></div>
+                        <div><dt>정원</dt><dd>{capacity}명</dd></div>
+                    </dl>
+                </section>
+            </div>
+            <aside class="detail-overview" aria-labelledby="event-title">
+                <span class="detail-category">{{#event.categoryName}}{{event.categoryName}}{{/event.categoryName}}{{^event.categoryName}}{categoryName}{{/event.categoryName}}</span>
+                <h1 id="event-title">{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}{title}{{/event.title}}</h1>
+                <p class="detail-summary">{{#event.summary}}{{event.summary}}{{/event.summary}}{{^event.summary}}{summary}{{/event.summary}}</p>
+                <dl class="detail-facts">
+                    <div><dt>모집 시작</dt><dd>{{#event.applyStartAt}}<span data-detail-date>{{event.applyStartAt}}</span>{{/event.applyStartAt}}{{^event.applyStartAt}}{applyStartAt}{{/event.applyStartAt}}</dd></div>
+                    <div><dt>모집 마감</dt><dd>{{#event.applyEndAt}}<span data-detail-date>{{event.applyEndAt}}</span>{{/event.applyEndAt}}{{^event.applyEndAt}}{applyEndAt}{{/event.applyEndAt}}</dd></div>
+                    <div><dt>장소</dt><dd>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</dd></div>
+                    <div><dt>주최 기업</dt><dd>{company.name}</dd></div>
+                </dl>
+                {{#event.applicationClosed}}<p class="detail-state">모집 기간이 마감되었습니다.</p>{{/event.applicationClosed}}
+                <button class="detail-button" type="button" disabled>참가 신청 연결 준비 중</button>
+                <p class="detail-muted">모집 시작 여부·정원·회차별 신청 기능은 추후 연결됩니다.</p>
+                <a class="detail-back" href="/">메인으로 돌아가기 →</a>
+            </aside>
+        </div>
+    </div>
+</main>
+{{> layout/footer}}
+<script>
+document.querySelectorAll('[data-detail-date]').forEach(element => {
+    // Event의 LocalDateTime은 서버에서 받은 지역 시각을 그대로 표시합니다.
+    const value = element.textContent.trim();
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.');
+});
+</script>
+</body>
+</html>
