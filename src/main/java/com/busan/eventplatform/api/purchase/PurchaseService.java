@@ -7,7 +7,10 @@ import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.login.LoginIdentity;
-import com.busan.eventplatform.user.*;
+import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
+import com.busan.eventplatform.user.registration.Registration;
+import com.busan.eventplatform.user.registration.RegistrationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +27,6 @@ public class PurchaseService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final RegistrationRepository registrationRepository;
-    private final RegistrationService registrationService;
 
     // 결제창에 필요한 행사 결제 포인트와 행사 정보 조회.
     // TODO 추후 eventSession 생성되면 eventRepository에서 쿼리 가져와서 eventSession 조회.
@@ -80,9 +82,6 @@ public class PurchaseService {
             // 3. 통과했다면 포인트 차감 + 결제내역 건 생성.  포인트 부족하다면 deductPoint 내부에서 필터링.
             user.deductPoint(eventSession.getFee());
 
-            // 4. 결제 전 대기열 등록 또는 대기열 등록상태 확인과 상태 갱신.
-            registrationService.applyForEvent(user , eventSession);
-
             Purchase purchase = Purchase.builder()
                     .user(user)
                     .eventSession(eventSession)
@@ -114,6 +113,7 @@ public class PurchaseService {
 
             purchaseRepository.save(purchase);
         }
+
     }
 
 
@@ -128,16 +128,16 @@ public class PurchaseService {
                 .toList();
 
         List<Registration> registrationList =
-                registrationRepository.findByUserIdAndEventSessionIdWithRegistration(userId , sessionIds);
+                registrationRepository.findAllByUserIdAndSessionIds(userId , sessionIds);
 
         Map<Long, Registration> registrationMap = new HashMap<>();
 
         for(Registration r : registrationList) {
-            Long eventSessionId = r.getSession().getId();
+            Long eventSessionId = r.getEventSession().getId();
             Registration savedRegistration = registrationMap.get(eventSessionId);
 
             if(savedRegistration == null || r.getId() > savedRegistration.getId()) {
-                registrationMap.put(r.getSession().getId() , r);
+                registrationMap.put(r.getEventSession().getId() , r);
             }
         }
 

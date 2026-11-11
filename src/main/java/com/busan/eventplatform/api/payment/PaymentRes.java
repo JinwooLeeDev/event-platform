@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Timestamp;
+
 public class PaymentRes {
     // 채널키 , payment_id , store_id
     @Data
@@ -39,5 +41,16 @@ public class PaymentRes {
             private Integer total; // Service계층에서 null인지 검사하기 위해 Integer 설정.
         }
 
+    }
+
+    @Data
+    public static class ListDto {
+        private Timestamp paidAt;
+        private int amount;
+
+        public ListDto(Payment payment) {
+            this.paidAt = payment.getPaidAt();
+            this.amount = payment.getAmount();
+        }
     }
 }

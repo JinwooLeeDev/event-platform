@@ -461,22 +461,15 @@
                 <div class="col-md-9"><div class="event-body">
                     {{#category}}<span class="badge text-bg-light mb-2">{{category}}</span>{{/category}}
                     <h3 class="event-title">{{#title}}{{title}}{{/title}}{{^title}}행사명 확인 중{{/title}}</h3>
-
-            <span class="status-badge" data-registration-label data-server-label="{{#statusMessage}}true{{/statusMessage}}{{^statusMessage}}false{{/statusMessage}}" data-server-class="false">
+                    <span class="status-badge" data-registration-label data-server-label="{{#statusMessage}}true{{/statusMessage}}{{^statusMessage}}false{{/statusMessage}}" data-server-class="false">
                 {{#statusMessage}}
                     {{statusMessage}}
                 {{/statusMessage}}
 
-                {{^statusMessage}}
-                    신청 상태 확인 중
-                {{/statusMessage}}
+                        {{^statusMessage}}
+                            신청 상태 확인 중
+                        {{/statusMessage}}
             </span>
-
-            <!-- 참가 상태 안내 -->
-            <div class="status-note mt-3">
-                참가 상태는 행사 운영 상황에 따라 변경될 수 있습니다.
-            </div>
-
                     <dl class="event-meta mt-3">
                         <div><dt>회차</dt><dd>{{#sessionName}}{{sessionName}}{{/sessionName}}{{^sessionName}}회차 확인 중{{/sessionName}}</dd></div>
                         <div><dt>개최 일시</dt><dd>{{#eventDate}}<span>{{eventDate}}</span>{{/eventDate}}{{^eventDate}}일정 확인 중{{/eventDate}}</dd></div>
@@ -497,7 +490,6 @@
             </div>
         </article>
         {{/purchaseList}}
-
         {{^purchaseList}}<p class="status-note" data-history-no-records>표시할 구매 내역이 없습니다. 목록 조회가 연결되지 않은 경우에도 이 안내가 표시됩니다.</p>{{/purchaseList}}
         <div id="history-empty" class="card history-card text-center p-5 mb-4" hidden><h3 class="h5 fw-bold">이 분류에 해당하는 내역이 없습니다.</h3><p class="text-secondary mb-0">다른 분류를 선택해 확인해주세요.</p></div>
         </div>

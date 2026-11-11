@@ -1,5 +1,6 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.api.payment.PaymentService;
 import com.busan.eventplatform.api.purchase.PurchaseRes;
 import com.busan.eventplatform.api.purchase.PurchaseService;
 import com.busan.eventplatform.global.error.exception.Exception400;
@@ -26,6 +27,7 @@ public class MyPageController {
 
     private final MyPageService myPageService;
     private final PurchaseService purchaseService;
+    private final PaymentService paymentService;
 
     @GetMapping("/mypage")
     public String myPage(@SessionAttribute(name = AuthController.SESSION_USER, required = false) SessionUserDto sessionUser, Model model) {
@@ -79,6 +81,8 @@ public class MyPageController {
                 "purchaseList",
                 purchaseService.purchaseList(sessionUser.getId())
         );
+
+        model.addAttribute("paymentList" , paymentService.paymentList(sessionUser.getId()));
 
         return "user/mypoint";
     }

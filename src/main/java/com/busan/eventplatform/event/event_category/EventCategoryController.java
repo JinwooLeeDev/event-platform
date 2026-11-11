@@ -16,8 +16,8 @@ public class EventCategoryController {
     private final EventCategoryService eventCategoryService;
 
     // TODO - url 수정하기
-    // POST - http://localhost:8080/admin/categories
-    @PostMapping("/admin/categories")
+    // POST - http://localhost:8080/categories
+    @PostMapping("/categories")
     public String save(EventCategoryRequest.SaveDto saveDto) {
         saveDto.validate();
         eventCategoryService.save(saveDto);
@@ -32,18 +32,18 @@ public class EventCategoryController {
         return "categories";
     }
 
-    // POST - http://localhost:8080/admin/categories/1/update
-    @PostMapping("/admin/categories/{id}/update")
+    // POST - http://localhost:8080/categories/update/1
+    @PostMapping("/categories/update/{id}")
     public String update(@PathVariable Long id, EventCategoryRequest.UpdateDto updateDto) {
         updateDto.validate();
         eventCategoryService.update(id, updateDto);
-        return "redirect:/admin/categories/";
+        return "redirect:/categories/";
     }
 
-    // POST - http://localhost:8080/admin/categories/1/delete
-    @PostMapping("/admin/categories/{id}/delete")
+    // POST - http://localhost:8080/categories/delete/1
+    @PostMapping("/categories/delete/{id}")
     public String delete(@PathVariable Long id) {
         eventCategoryService.delete(id);
-        return "redirect:/admin/categories/";
+        return "redirect:/categories/";
     }
 }

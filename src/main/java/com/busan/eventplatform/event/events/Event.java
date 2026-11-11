@@ -2,12 +2,14 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.event_category.EventCategory;
+import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -47,7 +49,6 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EventStatus status;
-
 
     // 행사 설명
     @Column(nullable = false)
