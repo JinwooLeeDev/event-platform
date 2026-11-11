@@ -36,10 +36,12 @@ public class Refund {
     @JoinColumn(name = "purchase_id")
     private Purchase purchase;
 
-    @Column(nullable = false , length = 500)
+    @Column(length = 800) // 유저는 사유 없어도 되고 기업은 필요하므로 null -- true.
     private String reason; // 환불 사유
 
     private int amount; // 환불된 금액
+
+    // TODO 추후) 관리자 승인 컬럼 추가.
 
     @Builder
     public Refund(User user , Company company , Purchase purchase , String reason, int amount) {

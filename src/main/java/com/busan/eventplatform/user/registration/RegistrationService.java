@@ -153,11 +153,11 @@ public class RegistrationService {
     // 대기열 승격 — 결제는 신청 시 이미 완료되었으므로 상태만 변경
     // 호출 전 반드시 회차 락을 잡고 있어야 한다
     // =========================================================
+
     /**
      * [행사 파트 제공] 회차 정원이 늘어났을 때 대기자 승격.
      * 행사 파트에서 회차 수정(정원 증가) 후 호출한다.
      */
-
     @Transactional
     public void promoteWaitingUsers(Long sessionId) {
         EventSession session = lockSession(sessionId);

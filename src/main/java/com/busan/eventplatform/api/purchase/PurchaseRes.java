@@ -72,7 +72,7 @@ public class PurchaseRes {
             }
         }
 
-        // 취소 가능 여부 판단.
+        // 취소 가능 여부 판단. 신청처리중 , 신청취소는 취소 불가능 , 취소는 언제든지 가능 , 대신 환급금은 차등지급.
         public boolean selectCancel() {
             return  status == RegistrationStatus.CONFIRMED ||
                     status == RegistrationStatus.PENDING ||
