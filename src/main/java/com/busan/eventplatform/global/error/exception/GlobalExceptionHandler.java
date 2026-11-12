@@ -81,6 +81,23 @@ public class GlobalExceptionHandler {
                 .body(html);
     }
 
+    /// 행사 중복 결제를 alert창으로 띄워서 막아주기 위해 추가.
+    @ExceptionHandler(NotApproveException.class)
+    public ResponseEntity<String> handleApprove(NotApproveException exception){
+
+        String html = """
+                <script>
+                    alert('아직 관리자에게 승인받지 못했습니다. 승인 받은 후 다시 결제해주세요');
+                    history.back();
+                </script>
+                """   ;
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.parseMediaType("text/html; charset=UTF-8")) // 안쓰면 한글 깨짐.
+                .body(html);
+    }
+
+
     private ModelAndView errorPage(
             HttpStatus status,
             String message

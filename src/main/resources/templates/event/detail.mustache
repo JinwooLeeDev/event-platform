@@ -52,11 +52,24 @@
                 <button class="detail-button" type="button" disabled>참가 신청 연결 준비 중</button>
                 <p class="detail-muted">모집 시작 여부·정원·회차별 신청 기능은 추후 연결됩니다.</p>
                 <a class="detail-back" href="/">메인으로 돌아가기 →</a>
+
+     <!--   테스트를 위해 임시 작성. 추후 기업 행사 신청 페이지가 어느정도 구현되면 사용예정.      -->
+<!--                <form action="/event/deposit/{event.id}" method="post" onsubmit="return confirm('최종 결제하시겠습니까?')">-->
+<!--                    <input type="hidden" name="sessionCount" value="2">-->
+<!--                    <button type="submit">최종 결제하기</button>-->
+<!--                </form>-->
+<!--                {#successMessage}-->
+<!--                    <script>-->
+<!--                        alert('{successMessage}')-->
+<!--                    </script>-->
+<!--                {/successMessage}-->
+
             </aside>
         </div>
     </div>
 </main>
 {{> layout/footer}}
+
 <script>
 document.querySelectorAll('[data-detail-date]').forEach(element => {
     // Event의 LocalDateTime은 서버에서 받은 지역 시각을 그대로 표시합니다.

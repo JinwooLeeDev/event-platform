@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.event_session;
 
 import com.busan.eventplatform.event.EventSession;
 import jakarta.persistence.LockModeType;
+
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -41,4 +42,13 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
     Optional<EventSession> findByIdForUpdate(@Param("sessionId") Long sessionId);
 
 
+    @Query("select count(es) from EventSession es where es.event.id = :eventId")
+    int countEventSessionByEventId(@Param("eventId") Long eventId);
+
+
+    @Query("""
+            select es from EventSession es join fetch es.event e join fetch e.category c
+            where es.id = :eventSessionId
+                        """)
+    Optional<EventSession> findByIdWithEvent(@Param("eventSessionId") Long eventSessionId);
 }
