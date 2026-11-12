@@ -44,7 +44,7 @@ public class EventSession {
     @Column(nullable = false)
     private LocalDateTime applyStartAt;
 
-    // 모집 마감일 --
+    // 모집 마감일
     @Column(nullable = false)
     private LocalDateTime applyEndAt;
 
