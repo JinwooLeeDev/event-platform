@@ -99,27 +99,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("userId") Long userId,
             @Param("status") RegistrationStatus status
     );
-
-    // 행사 목록의 좋아요 수, 현재 회원의 좋아요 여부를 한 번에 조회
-    @Query("""
-        select f.event.id as eventId,
-               count(f.id) as favoriteCount,
-               sum(case when f.user.id = :userId then 1 else 0 end) as userFavoriteCount
-        from EventFavorite f
-        where f.event.id in :eventIds
-        group by f.event.id
-        """)
-    List<FavoriteSummary> findFavoriteSummaries(
-            @Param("eventIds") List<Long> eventIds,
-            @Param("userId") Long userId
-    );
-
-    // 좋아요 조회 결과 담는 인터페이스
-    interface FavoriteSummary {
-        Long getEventId();
-        Long getFavoriteCount();
-        Long getUserFavoriteCount();
-    }
 }
 
 

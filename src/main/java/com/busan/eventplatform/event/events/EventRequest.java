@@ -17,7 +17,8 @@ public class EventRequest {
         private String description; // 상세 페이지에 표시할 설명
         private String address; // 행사 주소
         private Long categoryId; // 선택한 카테고리 ID
-
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public void validate() {
             if (title == null || title.trim().isEmpty()) {
@@ -35,7 +36,15 @@ public class EventRequest {
             if (categoryId == null) {
                 throw new Exception400("카테고리는 필수 입니다.");
             }
-
+            if (applyStartAt == null) {
+                throw new Exception400("모집 시작일은 필수 입니다.");
+            }
+            if (applyEndAt == null) {
+                throw new Exception400("모집 마감일은 필수 입니다.");
+            }
+            if (applyStartAt.isAfter(applyEndAt)) {
+                throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
+            }
         }
 
         public Event toEntity() {
@@ -44,6 +53,8 @@ public class EventRequest {
                     .summary(this.summary)
                     .description(this.description)
                     .address(this.address)
+                    .applyStartAt(this.applyStartAt)
+                    .applyEndAt(this.applyEndAt)
                     .build();
         }
     }
@@ -56,7 +67,8 @@ public class EventRequest {
         private String description;
         private String address;
         private Long categoryId;
-
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public void validate() {
             if (title == null || title.trim().isEmpty()) {
@@ -74,7 +86,15 @@ public class EventRequest {
             if (categoryId == null) {
                 throw new Exception400("카테고리는 필수 입니다.");
             }
-
+            if (applyStartAt == null) {
+                throw new Exception400("모집 시작일은 필수 입니다.");
+            }
+            if (applyEndAt == null) {
+                throw new Exception400("모집 마감일은 필수 입니다.");
+            }
+            if (applyStartAt.isAfter(applyEndAt)) {
+                throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
+            }
         }
 
         // 기존 Event 객체의 값 수정
@@ -84,6 +104,8 @@ public class EventRequest {
             event.setDescription(this.description);
             event.setAddress(this.address);
             event.setCategory(category);
+            event.setApplyStartAt(this.applyStartAt);
+            event.setApplyEndAt(this.applyEndAt);
 
             return event;
         }

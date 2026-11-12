@@ -5,15 +5,9 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
-
 public class RegistrationRes {
 
-    /**
-     * 참가 신청 결과 (detail.mustache 팝업용)
-     */
+    /** 참가 신청 결과 (detail.mustache 팝업용) */
     @Getter
     @Builder
     public static class ApplyDto {
@@ -41,9 +35,7 @@ public class RegistrationRes {
         }
     }
 
-    /**
-     * 마이페이지 신청 내역 한 건
-     */
+    /** 마이페이지 신청 내역 한 건 */
     @Getter
     @Builder
     public static class MyRegistrationDto {
@@ -77,9 +69,7 @@ public class RegistrationRes {
         }
     }
 
-    /**
-     * 주최자 관리 화면 참가자 한 명
-     */
+    /** 주최자 관리 화면 참가자 한 명 */
     @Getter
     @Builder
     public static class ParticipantDto {
@@ -104,51 +94,4 @@ public class RegistrationRes {
                     .build();
         }
     }
-
-    /** 신청 가능 여부 + 포인트 확인 (행사 상세: 충전 / 차감 화면 분기용) */
-    @Getter
-    @Builder
-    public static class CheckDto {
-        private Long sessionId;
-        private int fee;               // 참가비
-        private int currentPoint;      // 보유 포인트
-        private boolean canApply;      // 신청 불가 사유가 없는지 (모집 기간, 중복 신청 등)
-        private boolean enoughPoint;   // 보유 포인트 >= 참가비
-        private boolean waitlist;      // 정원 마감 → 대기 신청으로 접수
-        private String message;        // 신청 불가 사유 (신청 가능하면 빈 문자열)
-
-        public static CheckDto of(Long sessionId, int fee, int currentPoint,
-                                  int remainingSeats, String blockedReason) {
-            return CheckDto.builder()
-                    .sessionId(sessionId)
-                    .fee(fee)
-                    .currentPoint(currentPoint)
-                    .canApply(blockedReason == null)
-                    .enoughPoint(currentPoint >= fee)
-                    .waitlist(remainingSeats <= 0)
-                    .message(blockedReason == null ? "" : blockedReason)
-                    .build();
-        }
-    }
-
-
-    // todo - 아래의 메서드는 임시 상세 화면을 지울 때 삭제 여부 함께 판단하기. 지금 formatSchedule을 쓰는 곳은 다음 단계에서 만들 임시 테스트 상세 화면(/test/events/{id}) 에서만 활용
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy. MM. dd (E) HH:mm", Locale.KOREAN);
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
-
-    /**
-     * 예: 2026. 12. 20 (일) 14:00 ~ 16:00
-     */
-    public static String formatSchedule(LocalDateTime startsAt, LocalDateTime endsAt) {
-        if (startsAt == null) {
-            return "";
-        }
-        String start = startsAt.format(DATE_FORMAT);
-        if (endsAt == null) {
-            return start;
-        }
-        boolean sameDay = startsAt.toLocalDate().equals(endsAt.toLocalDate());
-        return start + " ~ " + (sameDay ? endsAt.format(TIME_FORMAT) : endsAt.format(DATE_FORMAT));
-    }
-
 }
