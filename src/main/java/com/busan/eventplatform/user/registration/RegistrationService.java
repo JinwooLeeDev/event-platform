@@ -42,10 +42,21 @@ public class RegistrationService {
 
     /**
      * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
+     *
      * @param session 비관적 락으로 조회한 회차 (트랜잭션 끝까지 락 유지)
      * @param user    검증을 통과한 신청자
      */
-    public record ApplyContext(EventSession session, User user) {}
+    public record ApplyContext(EventSession session, User user) {
+    }
+
+    /**
+     * 환불 요청 — cancel()/reject() 가 만들어 흐름 클래스로 넘기면, 흐름 클래스가 PurchaseService.refund() 호출
+     *
+     * @param purchaseId   환불할 결제 (신청에 연결된 결제, 연결 전 기존 데이터면 null)
+     * @param refundAmount 환불 규칙(RegistrationRefundPolicy)으로 계산한 금액 (0 가능)
+     */
+    public record RefundRequest(Long purchaseId, int refundAmount) {
+    }
 
 
     // =========================================================
@@ -88,6 +99,7 @@ public class RegistrationService {
 
     /**
      * [흐름 클래스 ③ 단계] 신청 저장 — 결제(②) 성공 후에만 호출
+     *
      * @param purchase PurchaseService.pay() 가 만든 결제 내역 (신청에 purchase_id 로 연결)
      */
     @Transactional
@@ -128,8 +140,14 @@ public class RegistrationService {
     // 유저 본인 취소
     // =========================================================
 
+    /**
+     * 본인 취소. 회차 시작 전이면 언제든지 취소 가능, 환불 금액은 날짜별 차등 (조장님 결정 D3·D5).
+     * 포인트는 여기서 돌려주지 않는다 — 반환된 RefundRequest 로 흐름 클래스가 환불 처리 (진행 순서 8)
+     *
+     * @return 환불 요청 (어느 결제를 얼마 환불할지)
+     */
     @Transactional
-    public void cancel(Long registrationId, LoginIdentity loginIdentity) {
+    public RefundRequest cancel(Long registrationId, LoginIdentity loginIdentity) {
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 신청을 취소할 수 있습니다");
         }
@@ -142,31 +160,44 @@ public class RegistrationService {
             throw new RegistrationForbiddenException("본인의 신청만 취소할 수 있습니다");
         }
 
-        String blockedReason = getCancelBlockedReason(registration, LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        String blockedReason = getCancelBlockedReason(registration, now);
         if (blockedReason != null) {
             throw new Exception400(blockedReason);
         }
 
-        boolean releasedSeat = registration.getStatus().isSeatOccupying();
+        // 취소 전 상태 기억 — 좌석 반납 여부와 환불 규칙(대기 취소 전액)에 사용
+        RegistrationStatus statusBefore = registration.getStatus();
+        boolean releasedSeat = statusBefore.isSeatOccupying();
+
         registration.cancel();
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
-
-        // TODO: 포인트 파트 환불 메서드 완성 후 연결 (금액은 RegistrationRefundPolicy로 계산)
 
         if (releasedSeat) {
             session.releaseSeat();
             promoteWaitingUsersIfAny(session);
         }
-    }
 
+        // 환불 금액 계산 (실제 결제 금액 기준, 날짜 기준 차등)
+        int paidAmount = paidAmountOf(registration);
+        int refundAmount = RegistrationRefundPolicy.forUserCancel(
+                paidAmount, statusBefore, now.toLocalDate(), session.getStartsAt().toLocalDate());
+        return new RefundRequest(purchaseIdOf(registration), refundAmount);
+    }
 
 
     // =========================================================
     // 주최자 반려
     // =========================================================
 
+    /**
+     * 주최 기업의 참가 신청 거절. 기업 거절은 전액 환불 (조장님 결정 D5).
+     * 포인트는 여기서 돌려주지 않는다 — 반환된 RefundRequest 로 흐름 클래스가 환불 처리 (진행 순서 8)
+     *
+     * @return 환불 요청 (결제 금액 전액)
+     */
     @Transactional
-    public void reject(Long registrationId, LoginIdentity loginIdentity) {
+    public RefundRequest reject(Long registrationId, LoginIdentity loginIdentity) {
         Registration registration = findRegistrationWithSessionLock(registrationId);
         EventSession session = registration.getEventSession();
 
@@ -178,13 +209,13 @@ public class RegistrationService {
         recordHistory(registration, RegistrationStatus.REJECTED, null,
                 "주최자 반려 (companyId=" + loginIdentity.getId() + ")");
 
-        // TODO: 포인트 파트 환불 메서드 완성 후 연결 (주최자가 실행하므로 대상 userId 를 넘겨야 함)
-        // purchaseService.refund(session.getId(), registration.getUser().getId());
-
         if (releasedSeat) {
             session.releaseSeat();
             promoteWaitingUsersIfAny(session);
         }
+
+        int refundAmount = RegistrationRefundPolicy.forCompanyReject(paidAmountOf(registration));
+        return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
     // =========================================================
@@ -201,7 +232,9 @@ public class RegistrationService {
         promoteWaitingUsersIfAny(session);
     }
 
-    /** 호출 전 반드시 회차 락을 잡고 있어야 한다 */
+    /**
+     * 호출 전 반드시 회차 락을 잡고 있어야 한다
+     */
     private void promoteWaitingUsersIfAny(EventSession session) {
         while (session.hasRemainingSeat()) {
             Registration next = registrationRepository
@@ -338,7 +371,6 @@ public class RegistrationService {
     }
 
 
-
     // =========================================================
     // 내부 헬퍼
     // =========================================================
@@ -368,7 +400,9 @@ public class RegistrationService {
                 .orElseThrow(() -> new Exception404("행사 회차가 존재하지 않습니다"));
     }
 
-    /** 회차 락을 먼저 잡고 신청을 조회한다 (락 이후 조회해야 승격 등 최신 상태가 반영됨) */
+    /**
+     * 회차 락을 먼저 잡고 신청을 조회한다 (락 이후 조회해야 승격 등 최신 상태가 반영됨)
+     */
     private Registration findRegistrationWithSessionLock(Long registrationId) {
         Long sessionId = registrationRepository.findSessionIdById(registrationId)
                 .orElseThrow(() -> new Exception404("신청 내역을 찾을 수 없습니다"));
@@ -385,12 +419,28 @@ public class RegistrationService {
         return RegistrationStatus.CONFIRMED;
     }
 
-    /** 신청 시 검증 (apply 에서 락을 잡은 뒤 호출) */
+    /**
+     * 신청 시 검증 (apply 에서 락을 잡은 뒤 호출)
+     */
     private void validateApplicable(EventSession session) {
         String closedReason = getClosedReason(session);
         if (closedReason != null) {
             throw new Exception400(closedReason);
         }
+    }
+
+    /**
+     * 신청에 연결된 실제 결제 금액 (결제 연결 전 기존 데이터면 0)
+     */
+    private int paidAmountOf(Registration registration) {
+        return registration.getPurchase() == null ? 0 : registration.getPurchase().getPrice();
+    }
+
+    /**
+     * 신청에 연결된 결제 id (결제 연결 전 기존 데이터면 null → 환불 생략)
+     */
+    private Long purchaseIdOf(Registration registration) {
+        return registration.getPurchase() == null ? null : registration.getPurchase().getId();
     }
 
     private Integer waitingNumberOf(Registration registration) {
