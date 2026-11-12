@@ -23,6 +23,8 @@ import java.util.Map;
 public class RegistrationApiController {
 
     private final RegistrationService registrationService;
+    // 참가 신청은 결제와 함께 처리해야 하므로 흐름 클래스를 통해 호출 (결제 없는 신청 방지)
+    private final RegistrationPurchaseService registrationPurchaseService;
 
     // 1. 신청 가능 여부 + 포인트 확인 (행사 상세: 충전 / 차감 화면 분기용)
     @GetMapping("/check/{sessionId}")
@@ -54,7 +56,8 @@ public class RegistrationApiController {
             return forbidden("개인 회원만 참가 신청이 가능합니다.");
         }
 
-        RegistrationRes.ApplyDto res = registrationService.apply(sessionId, loginIdentity);
+        // 변경 후 — 검증 → 포인트 결제 → 신청 저장 (화면 결제하기와 같은 메서드 → 결제 없는 신청 불가)
+        RegistrationRes.ApplyDto res = registrationPurchaseService.applyWithPayment(sessionId, loginIdentity);
         log.info("참가 신청 성공 - sessionId={}, userId={}, status={}", sessionId, loginIdentity.getId(), res.getStatus());
         return ResponseEntity.ok(res);
     }

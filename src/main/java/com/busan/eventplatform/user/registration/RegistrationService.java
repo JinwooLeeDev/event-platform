@@ -1,6 +1,6 @@
 package com.busan.eventplatform.user.registration;
 
-import com.busan.eventplatform.api.purchase.PurchaseService;
+import com.busan.eventplatform.api.purchase.Purchase;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
@@ -39,39 +39,63 @@ public class RegistrationService {
     private final RegistrationHistoryRepository registrationHistoryRepository;
     private final EventSessionRepository eventSessionRepository;
     private final UserRepository userRepository;
-    private final PurchaseService purchaseService;
+
+    /**
+     * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
+     * @param session 비관적 락으로 조회한 회차 (트랜잭션 끝까지 락 유지)
+     * @param user    검증을 통과한 신청자
+     */
+    public record ApplyContext(EventSession session, User user) {}
+
 
     // =========================================================
     // 참가 신청
     // =========================================================
 
+    /**
+     * [흐름 클래스 ① 단계] 신청 가능 여부 검증 — 돈이 움직이기 전에 확인
+     * 여기서 예외가 나면 결제(②)가 실행되지 않아 포인트가 차감되지 않는다.
+     */
     @Transactional
-    public RegistrationRes.ApplyDto apply(Long sessionId, LoginIdentity loginIdentity) {
-        // 0. 개인 회원만 신청 가능
+    public ApplyContext prepareApply(Long sessionId, LoginIdentity loginIdentity) {
+        // 1. 개인 회원만 신청 가능
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 행사에 참가 신청할 수 있습니다");
         }
 
-        // 1. 회차 조회 + 비관적 락 (정원 확인 ~ 저장까지 동시 신청 직렬화)
+        // 2. 회차 조회 + 비관적 락 (흐름 클래스 트랜잭션이 끝날 때까지 유지)
         EventSession session = eventSessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new Exception404("신청하려는 행사 회차가 존재하지 않습니다"));
 
+        // 3. 모집 가능 여부 (공개·모집 기간·마감·회차 상태·시작 전)
         validateApplicable(session);
 
+        // 4. 계정 상태
         User user = userRepository.findById(loginIdentity.getId())
                 .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
-
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new Exception400("정지되었거나 탈퇴한 계정은 행사에 신청할 수 없습니다");
         }
 
-        // 2. 중복 신청 확인 — 결제보다 먼저 해야 신청 도메인 메시지가 나간다
+        // 5. 중복 신청 — 결제보다 먼저 확인해야 신청 메시지가 나간다 (취소·반려 건은 제외 → 재신청 허용)
         if (registrationRepository.existsByUserAndSessionAndStatusIn(
                 user.getId(), sessionId, RegistrationStatus.ACTIVE)) {
             throw new Exception400("이미 신청한 행사 회차입니다");
         }
 
-        // 3. 잔여 정원으로 상태 결정 + 자리 점유 (occupiedCount 증가)
+        return new ApplyContext(session, user);
+    }
+
+    /**
+     * [흐름 클래스 ③ 단계] 신청 저장 — 결제(②) 성공 후에만 호출
+     * @param purchase PurchaseService.pay() 가 만든 결제 내역 (신청에 purchase_id 로 연결)
+     */
+    @Transactional
+    public RegistrationRes.ApplyDto completeApply(ApplyContext ctx, Purchase purchase) {
+        EventSession session = ctx.session();
+        User user = ctx.user();
+
+        // 1. 잔여 정원으로 상태 결정 + 자리 점유 (결제 성공 후 점유 → 실패 시 되돌릴 자리 없음)
         RegistrationStatus status;
         if (session.hasRemainingSeat()) {
             session.occupySeat();
@@ -80,18 +104,25 @@ public class RegistrationService {
             status = RegistrationStatus.WAITING;
         }
 
-
-        // 5. 접수 번호 발급 + 신청 저장
+        // 2. 접수 번호 발급 + 신청 저장 (결제 연결)
         int receptionNumber = session.issueReceptionNumber();
         Registration registration = registrationRepository.save(
-                Registration.create(user, session, status, receptionNumber));
+                Registration.create(user, session, purchase, status, receptionNumber));
 
-        // 6. 이력 기록
+        // 3. 이력 기록
         recordHistory(registration, status, user, "참가 신청");
 
         Integer waitingNumber = waitingNumberOf(registration);
         return RegistrationRes.ApplyDto.of(registration, waitingNumber);
     }
+
+    /**
+     * 참가 신청 도메인 (신청 규칙만 담당).
+     * - 결제는 직접 호출하지 않는다. 신청 + 결제 순서는 RegistrationPurchaseService 가 조율한다.
+     *   검증(prepareApply) → 결제(PurchaseService.pay) → 저장(completeApply), 하나의 트랜잭션
+     * - 대기열 승격 시에는 추가 결제 없이 상태만 변경 (신청 시점에 이미 결제)
+     * - 취소·반려 시 환불은 포인트 파트 refund() 완성 후 흐름 클래스에서 연결 (TODO)
+     */
 
     // =========================================================
     // 유저 본인 취소
