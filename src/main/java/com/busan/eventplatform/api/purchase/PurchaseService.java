@@ -70,7 +70,7 @@ public class PurchaseService {
                 .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
 
         // 2. 유저가 이미 결제한 행사인지.
-        if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) {
+        if (purchaseRepository.existsEventByUser(user.getId(), eventSession.getId())) {
             throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
         }
 
@@ -91,7 +91,7 @@ public class PurchaseService {
 
     public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId) {
         List<Purchase> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);
-        if(purchaseList == null) return List.of(); // 구매내역 없으면 그냥 빈 목록으로.
+        if (purchaseList == null) return List.of(); // 구매내역 없으면 그냥 빈 목록으로.
 
         // registrationList 조회할때 동일 userId로 조회하므로 이벤트세션ID만 필요. --> map으로
         List<Long> sessionIds =purchaseList.stream()
