@@ -24,6 +24,7 @@ public class EventSession {
     @Column(nullable = false)
     private int capacity;
 
+    // 몇 회차인지 알려주는 컬럼 ex) 1회차, 2회차 ...
     @Column(nullable = false)
     private String name;
 

@@ -25,7 +25,8 @@
                 <section class="detail-section" aria-labelledby="location-title">
                     <h2 id="location-title">찾아오시는 길</h2>
                     <p>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</p>
-                    <div class="detail-map-placeholder">지도 연결 준비 중</div>
+                    <div id="event-map" class="detail-map" data-address="{{event.address}}" data-title="{{event.title}}" data-client-id="{{naverMapClientId}}" aria-label="행사 장소 지도" hidden></div>
+                    <p id="event-map-status" class="detail-map-placeholder" role="status">지도를 불러오는 중입니다.</p>
                 </section>
                 <section class="detail-section" aria-labelledby="session-title">
                     <h2 id="session-title">회차 안내</h2>
@@ -46,9 +47,19 @@
                     <div><dt>모집 시작</dt><dd>{{#event.applyStartAt}}<span data-detail-date>{{event.applyStartAt}}</span>{{/event.applyStartAt}}{{^event.applyStartAt}}{applyStartAt}{{/event.applyStartAt}}</dd></div>
                     <div><dt>모집 마감</dt><dd>{{#event.applyEndAt}}<span data-detail-date>{{event.applyEndAt}}</span>{{/event.applyEndAt}}{{^event.applyEndAt}}{applyEndAt}{{/event.applyEndAt}}</dd></div>
                     <div><dt>장소</dt><dd>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</dd></div>
-                    <div><dt>주최 기업</dt><dd>{company.name}</dd></div>
+                    <div><dt>주최 기업</dt><dd>{{event.companyName}}</dd></div>
                 </dl>
                 {{#event.applicationClosed}}<p class="detail-state">모집 기간이 마감되었습니다.</p>{{/event.applicationClosed}}
+                <div class="detail-session-picker">
+                    <label for="event-session">참가 회차 선택</label>
+                    <select id="event-session" name="eventSessionId" aria-describedby="session-picker-help" {{^hasEventSessions}}disabled{{/hasEventSessions}}>
+                        <option value="" selected disabled>참가할 회차를 선택해주세요</option>
+                        {{#eventSessions}}
+                            <option value="{{id}}" data-session-option>{{name}}{{#startsAt}} · {{startsAt}}{{/startsAt}}</option>
+                        {{/eventSessions}}
+                    </select>
+                    <p id="session-picker-help" class="detail-muted">{{#hasEventSessions}}참가할 회차를 선택해주세요. 신청 기능은 준비 중입니다.{{/hasEventSessions}}{{^hasEventSessions}}등록된 회차가 없습니다.{{/hasEventSessions}}</p>
+                </div>
                 <button class="detail-button" type="button" disabled>참가 신청 연결 준비 중</button>
                 <p class="detail-muted">모집 시작 여부·정원·회차별 신청 기능은 추후 연결됩니다.</p>
                 <a class="detail-back" href="/">메인으로 돌아가기 →</a>
@@ -57,7 +68,12 @@
     </div>
 </main>
 {{> layout/footer}}
+<script src="/js/event-detail-map.js" defer></script>
 <script>
+document.querySelectorAll('[data-session-option]').forEach(option => {
+    option.textContent = option.textContent.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?/, value =>
+        value.slice(0, 16).replace('T', ' ').replaceAll('-', '.'));
+});
 document.querySelectorAll('[data-detail-date]').forEach(element => {
     // Event의 LocalDateTime은 서버에서 받은 지역 시각을 그대로 표시합니다.
     const value = element.textContent.trim();

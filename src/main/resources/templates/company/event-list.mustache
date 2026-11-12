@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>주최 행사 | Busan Play</title>
+</head>
+<body>
+{{> layout/header}}
+{{> layout/account-style}}
+<style>
+    .company-events-page { padding: 40px 24px 60px; background: #f8f9fb; color: #292f3d; font-family: 'Pretendard',sans-serif; }
+    .company-events-description { color: #72757e; font-size: 14px; line-height: 1.75; }
+    .company-event-card { padding: 26px; margin-top: 18px; border: 1px solid #e6e7eb; border-radius: 16px; background: white; }
+    .company-event-card h2 { margin: 12px 0; }
+    .company-event-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .company-event-tag { padding: 5px 10px; border-radius: 999px; background: #f0ede7; color: #64615a; font-size: 12px; }
+    .company-event-state { background: #eef1f6; color: #4a5e7a; }
+    .company-event-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin: 22px 0 0; }
+    .company-event-facts dt { font-size: 12px; color: #72757e; }
+    .company-event-facts dd { margin: 5px 0 0; font-size: 14px; overflow-wrap: anywhere; }
+    .company-event-feedback { padding: 14px; margin-top: 20px; border-radius: 10px; background: #f7f0e5; color: #806333; font-size: 13px; }
+    .company-event-placeholder { padding: 22px; border: 1px dashed #d9dbe1; border-radius: 12px; color: #72757e; background: #f5f5f6; line-height: 1.9; }
+    @media(max-width:650px) { .company-events-page { padding: 28px 16px 40px; } .company-event-facts { grid-template-columns: 1fr; } .company-event-card { padding: 22px; } }
+</style>
+<main class="company-events-page">
+    <div class="account-layout">
+        {{> layout/company-nav}}
+        <section class="account-content" aria-labelledby="company-events-title">
+            <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span>
+            <h1 id="company-events-title">주최 행사</h1>
+            <p class="company-events-description">로그인한 기업이 등록한 행사를 확인하는 공간입니다. 승인 대기·보완 요청 등 공개 전 행사도 포함합니다.</p>
+            {{#eventList}}
+                {{#eventList}}
+                <article class="company-event-card">
+                    <div class="company-event-tags">
+                        <span class="company-event-tag">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}{categoryName}{{/categoryName}}</span>
+                        <span class="company-event-tag company-event-state" data-company-event-status>{{#status}}{{status}}{{/status}}{{^status}}{status}{{/status}}</span>
+                    </div>
+                    <h2>{{#title}}{{title}}{{/title}}{{^title}}{title}{{/title}}</h2>
+                    <p class="company-events-description">{{#summary}}{{summary}}{{/summary}}{{^summary}}{summary}{{/summary}}</p>
+                    <dl class="company-event-facts">
+                        <div><dt>모집 시작</dt><dd>{{#applyStartAt}}{{applyStartAt}}{{/applyStartAt}}{{^applyStartAt}}{applyStartAt}{{/applyStartAt}}</dd></div>
+                        <div><dt>모집 마감</dt><dd>{{#applyEndAt}}{{applyEndAt}}{{/applyEndAt}}{{^applyEndAt}}{applyEndAt}{{/applyEndAt}}</dd></div>
+                        <div><dt>등록일</dt><dd>{{#createdAt}}<span data-company-event-date>{{createdAt}}</span>{{/createdAt}}{{^createdAt}}{createdAt}{{/createdAt}}</dd></div>
+                        <div><dt>공개일</dt><dd>{{#publishedAt}}<span data-company-event-date>{{publishedAt}}</span>{{/publishedAt}}{{^publishedAt}}아직 공개되지 않았습니다.{{/publishedAt}}</dd></div>
+                    </dl>
+                    {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
+                </article>
+                {{/eventList}}
+                {{^eventList}}<div class="company-event-card"><h2>등록한 행사가 없습니다.</h2><p class="company-events-description">기업이 등록한 행사가 생기면 이곳에 표시됩니다.</p></div>{{/eventList}}
+            {{/eventList}}
+            {{^eventList}}
+                <div class="company-event-card">
+                    <h2>행사 목록 연결 준비 중</h2>
+                    <p class="company-events-description">실제 데이터가 전달되기 전 화면 구성 예시입니다.</p>
+                    <div class="company-event-placeholder">{title}<br>{summary}<br>카테고리: {categoryName} · 상태: {status}<br>모집 기간: {applyStartAt} ~ {applyEndAt}</div>
+                </div>
+            {{/eventList}}
+        </section>
+    </div>
+</main>
+{{> layout/footer}}
+<script>
+(() => {
+    const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨'};
+    document.querySelectorAll('[data-company-event-status]').forEach(element => { const value = element.textContent.trim(); element.textContent = labels[value] || value; });
+    document.querySelectorAll('[data-company-event-date]').forEach(element => { const value = element.textContent.trim(); if(/^\d{4}-\d{2}-\d{2}T/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.'); });
+})();
+</script>
+</body>
+</html>
