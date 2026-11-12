@@ -60,6 +60,19 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             """)
     List<Registration> findAllByUserIdWithSession(@Param("userId") Long userId);
 
+    /** [나의 신청 내역 /myhistory] 회차·행사·카테고리·결제를 한 번에 조회 (N+1 방지), 최신 신청순
+     *  결제 없는 신청(예전 데이터)도 나오도록 결제는 left join */
+    @Query("""
+            select r from Registration r
+            join fetch r.eventSession s
+            join fetch s.event e
+            join fetch e.category
+            left join fetch r.purchase
+            where r.user.id = :userId
+            order by r.id desc
+            """)
+    List<Registration> findAllByUserIdForHistory(@Param("userId") Long userId);
+
     /** 주최자 관리 화면: 회차별 참가자 목록 */
     @Query("""
             select r from Registration r

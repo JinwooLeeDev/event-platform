@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -39,6 +40,8 @@ public class RegistrationService {
     private final RegistrationHistoryRepository registrationHistoryRepository;
     private final EventSessionRepository eventSessionRepository;
     private final UserRepository userRepository;
+    // [나의 신청 내역] 결제일 표시 형식
+    private static final DateTimeFormatter HISTORY_DATE = DateTimeFormatter.ofPattern("yyyy. MM. dd");
 
     /**
      * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
@@ -278,9 +281,46 @@ public class RegistrationService {
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 신청 내역을 조회할 수 있습니다");
         }
+        LocalDateTime now = LocalDateTime.now(); // 취소 가능 여부 판단 기준 시각
         return registrationRepository.findAllByUserIdWithSession(loginIdentity.getId()).stream()
-                .map(r -> RegistrationRes.MyRegistrationDto.of(r, waitingNumberOf(r)))
+                .map(r -> RegistrationRes.MyRegistrationDto.of(r, waitingNumberOf(r), isCancelable(r, now)))
                 .toList();
+    }
+
+    // [나의 신청 내역 /myhistory] 요약 카드·탭·목록 데이터 (머스태치는 조장님 담당, 여기서는 값만 계산)
+    @Transactional(readOnly = true)
+    public RegistrationRes.MyHistoryDto getMyHistory(LoginIdentity loginIdentity, String tab, String keyword) {
+        if (!loginIdentity.isUser()) {
+            throw new RegistrationForbiddenException("개인 회원만 신청 내역을 조회할 수 있습니다");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        String currentTab = (tab == null || tab.isBlank()) ? "all" : tab;
+        String currentKeyword = keyword == null ? "" : keyword.trim();
+
+        // 1. 내 신청 전체 → 카드 데이터 (요약 카드·탭 개수는 검색과 관계없이 전체 기준)
+        List<RegistrationRes.MyHistoryItemDto> all = registrationRepository
+                .findAllByUserIdForHistory(loginIdentity.getId()).stream()
+                .map(r -> toHistoryItem(r, now))
+                .toList();
+
+        // 2. 탭 + 행사명 검색 적용
+        List<RegistrationRes.MyHistoryItemDto> items = all.stream()
+                .filter(i -> currentTab.equals("all") || currentTab.equals(i.getTab()))
+                .filter(i -> currentKeyword.isEmpty() || i.getTitle().contains(currentKeyword))
+                .toList();
+
+        int upcoming = countTab(all, "upcoming");
+        return RegistrationRes.MyHistoryDto.builder()
+                .totalCount(all.size())
+                .confirmedCount(upcoming)
+                .waitingCount(countTab(all, "waiting"))
+                .upcomingCount(upcoming)
+                .pastCount(countTab(all, "past"))
+                .currentTab(currentTab)
+                .keyword(currentKeyword)
+                .items(items)
+                .empty(items.isEmpty())
+                .build();
     }
 
     // [주최자용] 회차별 참가자 목록 조회
@@ -449,6 +489,103 @@ public class RegistrationService {
         }
         return (int) registrationRepository.countWaitingAhead(
                 registration.getEventSession().getId(), registration.getReceptionNumber()) + 1;
+    }
+
+    // [나의 신청 내역] 신청 한 건 → 카드 (상태 라벨·상황별 문구·예상 환불액 계산)
+    private RegistrationRes.MyHistoryItemDto toHistoryItem(Registration r, LocalDateTime now) {
+        EventSession session = r.getEventSession();
+        Event event = session.getEvent();
+        RegistrationStatus status = r.getStatus();
+        int paid = paidAmountOf(r);
+        boolean cancelable = isCancelable(r, now);
+
+        // 1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RegistrationRefundPolicy)
+        int expectedRefund = cancelable
+                ? RegistrationRefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
+                : 0;
+
+        // 2. 표시 상태 결정 — 우선순위: 거절 > 취소 > 시작됨(행사 종료) > 대기 > 확정
+        String tab, label, cssClass, message;
+        Integer waitingNumber = null;
+        if (status == RegistrationStatus.REJECTED) {
+            tab = "past";
+            label = "참가 거절";
+            cssClass = "status-rejected";
+            message = "주최자가 참가를 거절했습니다. 결제한 포인트는 전액 환불됩니다.";
+        } else if (status == RegistrationStatus.CANCELLED) {
+            tab = "past";
+            label = "참가 취소";
+            cssClass = "status-cancelled";
+            message = "참가 신청을 취소했습니다.";
+        } else if (!now.isBefore(session.getStartsAt())) {
+            tab = "past";
+            label = "행사 종료";
+            cssClass = "status-ended";
+            message = "회차가 시작되어 더 이상 취소할 수 없습니다.";
+        } else if (status == RegistrationStatus.WAITING) {
+            waitingNumber = waitingNumberOf(r);
+            tab = "waiting";
+            label = "대기열 등록";
+            cssClass = "status-waiting";
+            message = "대기 " + waitingNumber + "번입니다. 앞선 신청이 취소되면 자동으로 참가 확정됩니다."
+                    + (paid > 0 ? " 대기 중에 취소하면 " + point(paid) + "가 전액 환불됩니다." : "");
+        } else {
+            tab = "upcoming";
+            label = "참가 확정";
+            cssClass = "status-confirmed";
+            message = "참가가 확정되었습니다. " + refundGuide(paid, expectedRefund);
+        }
+
+        // 3. 취소 버튼 확인 창 문구 — 환불 예정 금액을 미리 보여줌
+        String cancelConfirm;
+        if (!cancelable) cancelConfirm = "";
+        else if (paid == 0) cancelConfirm = "참가 신청을 취소하시겠습니까?";
+        else if (expectedRefund > 0)
+            cancelConfirm = "참가 신청을 취소하시겠습니까?\n결제한 " + point(paid) + " 중 " + point(expectedRefund) + "가 환불됩니다.";
+        else cancelConfirm = "참가 신청을 취소하시겠습니까?\n회차 1일 전부터는 환불되지 않습니다. (환불 0P)";
+
+        return RegistrationRes.MyHistoryItemDto.builder()
+                .registrationId(r.getId())
+                .eventId(event.getId())
+                .category(event.getCategory().getName())
+                .title(event.getTitle())
+                .sessionName(session.getName())
+                .place(event.getAddress())
+                .scheduleText(RegistrationRes.formatSchedule(session.getStartsAt(), session.getEndsAt()))
+                .tab(tab)
+                .statusLabel(label)
+                .statusClass(cssClass)
+                .statusMessage(message)
+                .waiting(waitingNumber != null)
+                .waitingRank(waitingNumber == null ? 0 : waitingNumber)
+                .paidPointText(point(paid))
+                .purchasedAtText(r.getPurchase() == null || r.getPurchase().getPurchasedAt() == null
+                        ? "" : r.getPurchase().getPurchasedAt().toLocalDateTime().format(HISTORY_DATE))
+                .expectedRefundText(cancelable ? point(expectedRefund) : "")
+                .refundText("") // TODO step 8: 포인트 파트 환불 필드(refundAmount) 연결 → "환불 완료 16,666P"
+                .cancelable(cancelable)
+                .cancelConfirmText(cancelConfirm)
+                .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
+                .detailUrl("/event/" + event.getId())
+                .build();
+    }
+
+    // [나의 신청 내역] 확정 건의 "지금 취소하면" 환불 안내 문구
+    private String refundGuide(int paid, int expectedRefund) {
+        if (paid == 0) return "무료 회차라 취소해도 환불할 금액이 없습니다.";
+        if (expectedRefund == paid) return "지금 취소하면 결제한 " + point(paid) + "가 전액 환불됩니다.";
+        if (expectedRefund > 0) return "지금 취소하면 " + point(paid) + " 중 " + point(expectedRefund) + "만 환불됩니다.";
+        return "회차 1일 전부터는 취소해도 환불되지 않습니다.";
+    }
+
+    // [나의 신청 내역] 탭별 개수
+    private int countTab(List<RegistrationRes.MyHistoryItemDto> items, String tab) {
+        return (int) items.stream().filter(i -> tab.equals(i.getTab())).count();
+    }
+
+    // [나의 신청 내역] 포인트 표시 "25,000P"
+    private static String point(int amount) {
+        return String.format("%,dP", amount);
     }
 
     private void validateOrganizer(EventSession session, LoginIdentity loginIdentity) {
