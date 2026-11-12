@@ -1,9 +1,6 @@
 package com.busan.eventplatform.main;
 
 import com.busan.eventplatform.event.events.EventService;
-import com.busan.eventplatform.global.util.Define;
-import com.busan.eventplatform.login.personallogin.SessionUserDto;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -1,7 +1,5 @@
-
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.event_session.EventSessionService;
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
@@ -30,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class EventController {
 
+    // Todo - return 수정
     private final EventService eventService;
     private final EventCategoryService eventCategoryService;
     private final EventSessionService eventSessionService;
@@ -61,20 +60,20 @@ public class EventController {
     }
 
     // 행사 상세 조회
-    // GET - http://localhost:8080/events/1
-    @GetMapping("/events/{id}")
+    // GET - http://localhost:8080/evets/1
+    @GetMapping("/event/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session) {
+
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-
         Long companyId = (sessionCompanyDto == null) ? null : sessionCompanyDto.getId();
+
         SessionUserDto sessionUserDto =
                 (SessionUserDto) session.getAttribute(Define.SESSION_USER);
         Long userId = (sessionUserDto == null) ? null : sessionUserDto.getId();
 
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
-        model.addAttribute("eventSessions", eventSessionService.findByEventId(id));
         model.addAttribute("event", detailDto);
         var eventSessions = new EventSessionResponse.ListDto(eventSessionService.findByEventId(id))
                 .getEventSessionList();
@@ -97,6 +96,7 @@ public class EventController {
     // POST - http://localhost:8080/events/save
     @PostMapping("/events/save")
     public String save(EventRequest.SaveDto saveDto, HttpSession session) {
+
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
@@ -107,7 +107,7 @@ public class EventController {
 
     // 기업이 등록한 행사 전체 조회
     // GET - http://localhost:8080/events
-    @GetMapping("/events")
+    @GetMapping ("/events")
     public String findAllByCompanyId(HttpSession session, Model model) {
         LoginIdentity identity = LoginSession.requireIdentity(session);
         if (!identity.isCompany()) {
@@ -126,9 +126,10 @@ public class EventController {
     }
 
     // 기업이 보완 요청받은 행사 조회
-    // GET - http://localhost:8080/events/feedback
+    // GET - http://localhost:8080/company/events/feedback
     @GetMapping("/events/feedback")
     public String findAllFeedback(HttpSession session, Model model) {
+
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         model.addAttribute("eventList",
@@ -141,9 +142,11 @@ public class EventController {
     // GET - http://localhost:8080/events/update/1
     @GetMapping("/events/update/{id}")
     public String updateForm(@PathVariable Long id, HttpSession session, Model model) {
+
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        EventResponse.UpdateFormDto updateFormDto = eventService.update(id, sessionCompanyDto.getId());
+        EventResponse.UpdateFormDto updateFormDto =
+                eventService.update(id, sessionCompanyDto.getId());
         model.addAttribute("event", updateFormDto);
 
         return "event/update-form";
@@ -153,6 +156,7 @@ public class EventController {
     // POST - http://localhost:8080/events/update/1
     @PostMapping("/events/update/{id}")
     public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session) {
+
         updateDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
@@ -165,20 +169,19 @@ public class EventController {
     // POST - http://localhost:8080/events/resubmit/1
     @PostMapping("/events/resubmit/{id}")
     public String resubmit(@PathVariable Long id, HttpSession session) {
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         eventService.resubmit(id, sessionCompanyDto.getId());
 
         return "redirect:/events";
     }
 
     // 기업 행사 삭제
-    // POST - http://localhost:8080/events/delete/1
+    // POST - http://localhost:8080/company/events/delete/1
     @PostMapping("/events/delete/{id}")
     public String delete(@PathVariable Long id, HttpSession session) {
+
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-
         eventService.delete(id, sessionCompanyDto.getId());
 
         return "redirect:/events";
@@ -188,6 +191,7 @@ public class EventController {
     // POST - http://localhost:8080/events/approve/1
     @PostMapping("/events/approve/{id}")
     public String approve(@PathVariable Long id) {
+
         eventService.approve(id);
 
         return "redirect:/events";
@@ -196,9 +200,9 @@ public class EventController {
     // 관리자 보완 요청
     // POST - http://localhost:8080/events/feedback/1
     @PostMapping("/events/feedback/{id}")
-    public String requestFeedback(
-            @PathVariable Long id,
-            @RequestParam String feedbackMessage) {
+    public String requestFeedback(@PathVariable Long id,
+                                  @RequestParam String feedbackMessage) {
+
         eventService.requestFeedback(id, feedbackMessage);
 
         return "redirect:/events";
@@ -208,9 +212,13 @@ public class EventController {
     // POST - http://localhost:8080/events/cancel/1
     @PostMapping("/events/cancel/{id}")
     public String cancel(@PathVariable Long id, EventRequest.CancelDto cancelDto) {
+
         cancelDto.validate();
         eventService.cancel(id, cancelDto);
 
         return "redirect:/events";
     }
+
+
+
 }

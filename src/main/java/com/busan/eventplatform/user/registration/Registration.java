@@ -1,23 +1,23 @@
 package com.busan.eventplatform.user.registration;
 
-import com.busan.eventplatform.api.purchase.Purchase;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
  * 행사 회차 참가 신청.
  * 결제 정보(금액, 포인트)는 Purchase 도메인이 관리하므로 이 엔티티에는 두지 않는다.
  */
-
 
 @Entity
 @Table(name = "registrations")
@@ -51,25 +51,19 @@ public class Registration {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // 개인회원의 행사 참가 신청을 위해 생성된 결제 내역 (신청 1건 = 결제 1건, 기존 데이터는 null 가능)
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "purchase_id")
-    private Purchase purchase;
-
-    private Registration(User user, EventSession eventSession, Purchase purchase, RegistrationStatus status, Integer receptionNumber) {
+    private Registration(User user, EventSession eventSession, RegistrationStatus status, Integer receptionNumber) {
         this.user = user;
         this.eventSession = eventSession;
-        this.purchase = purchase;
         this.status = status;
         this.receptionNumber = receptionNumber;
     }
 
-    public static Registration create(User user, EventSession eventSession, Purchase purchase,
+    public static Registration create(User user, EventSession eventSession,
                                       RegistrationStatus status, int receptionNumber) {
         if (!status.isActive()) {
             throw new IllegalArgumentException("신청 생성 시 상태는 CONFIRMED/PENDING/WAITING 중 하나여야 합니다");
         }
-        return new Registration(user, eventSession, purchase, status, receptionNumber);
+        return new Registration(user, eventSession, status, receptionNumber);
     }
 
     // ===== 상태 변경 =====

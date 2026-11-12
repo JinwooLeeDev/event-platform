@@ -50,37 +50,16 @@ public class PurchaseService {
 
         /// Company 분기점
         else if(loginIdentity.isCompany()) {
-            Company company = companyRepository.findById(loginIdentity.getId())
-                    .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다"));
+                Company company = companyRepository.findById(loginIdentity.getId())
+                        .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다"));
 
-            return PurchaseRes.PurchasePointDto.builder()
-                    .id(eventSession.getId())
-                    .currentPoint(company.getPoint())
-                    .eventPoint(eventSession.getFee())
-                    .build();
+                return PurchaseRes.PurchasePointDto.builder()
+                        .id(eventSession.getId())
+                        .currentPoint(company.getPoint())
+                        .eventPoint(eventSession.getFee())
+                        .build();
         }
         else throw new Exception400("행사 결제를 진행할 수 없습니다");
-    }
-
-    // [참가 신청 흐름 전용] 검증이 끝난 회원·회차로 결제만 수행 (RegistrationPurchaseService ② 단계)
-    // 신청 트랜잭션에 합류 → 이후 신청 저장 실패 시 함께 롤백
-    @Transactional
-    public Purchase pay(User user, EventSession eventSession) {
-        // 1. 같은 회차 중복 결제 확인 (TODO 포인트 파트: 환불 건 제외 조건 추가)
-        if (purchaseRepository.existsEventByUser(user.getId(), eventSession.getId())) {
-            throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
-        }
-
-        // 2. 포인트 차감 (잔액 부족 시 예외)
-        user.deductPoint(eventSession.getFee());
-
-        // 3. 결제 내역 저장 후 반환 (신청에 purchase_id로 연결)
-        Purchase purchase = Purchase.builder()
-                .user(user)
-                .eventSession(eventSession)
-                .price(eventSession.getFee())
-                .build();
-        return purchaseRepository.save(purchase);
     }
 
 
@@ -89,9 +68,9 @@ public class PurchaseService {
     public Purchase purchase(Long eventId, LoginIdentity loginIdentity) {
         // 1. 실제 있는 이벤트인지. TODO 나중에 eventSession 구현되면 삭제.
         EventSession eventSession = purchaseRepository.findByIdWithEvent(eventId)
-                .orElseThrow(() -> new Exception404("결제하려는 행사가 존재하지 않습니다"));
+                        .orElseThrow(() -> new Exception404("결제하려는 행사가 존재하지 않습니다"));
 
-        /// USER 분기점 - 개인 결제 로직은 pay() 한 곳에서만 관리
+        /// USER 분기점
         if(loginIdentity.isUser()) {
             User user = userRepository.findById(loginIdentity.getId())
                     .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
@@ -114,6 +93,7 @@ public class PurchaseService {
 
             return purchase;
         }
+
 
         /// Company 분기점
         if(loginIdentity.isCompany()) {
