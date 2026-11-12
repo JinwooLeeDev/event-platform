@@ -30,7 +30,7 @@ public interface EventFavoriteRepository extends JpaRepository<EventFavorite, Lo
             select count(f) from EventFavorite f
             where f.event.id = :eventId
             """)
-    long countByEventId(@Param("eventId") Long eventId);
+    Long countByEventId(@Param("eventId") Long eventId);
 
     // 회원별 좋아요 목록
     @Query("""

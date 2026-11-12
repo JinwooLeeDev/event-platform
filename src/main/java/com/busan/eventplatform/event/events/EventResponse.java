@@ -19,7 +19,7 @@ public class EventResponse {
         private boolean isFirst;
         private boolean isLast;
 
-        public PageDto(Page<Event> eventPage) {
+        public PageDto(Page<Event> eventPage, List<EventDto> eventDtoList) {
             this.eventList = eventPage.getContent().stream()
                     .map(EventDto::new)
                     .toList();
@@ -58,8 +58,14 @@ public class EventResponse {
         private LocalDateTime publishedAt;
         private EventStatus status;
         private String feedbackMessage;
+        private Long favoriteCount;
+        private boolean isFavorite;
 
         public EventDto(Event event) {
+            this(event, 0L, false);
+        }
+
+        public EventDto(Event event, Long favoriteCount, boolean isFavorite) {
             this.id = event.getId();
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
@@ -75,6 +81,8 @@ public class EventResponse {
             this.publishedAt = event.getPublishedAt();
             this.status = event.getStatus();
             this.feedbackMessage = event.getFeedbackMessage();
+            this.favoriteCount = favoriteCount;
+            this.isFavorite = isFavorite;
         }
     }
 
@@ -89,11 +97,9 @@ public class EventResponse {
         private String summary;
         private String description;
         private String address;
-        private LocalDateTime applyStartAt;
-        private LocalDateTime applyEndAt;
+
         private LocalDateTime publishedAt;
         private LocalDateTime createdAt;
-        private boolean applicationClosed;
         private boolean owner;
         private Long confirmedCount;
         private Long waitingCount;
@@ -112,11 +118,8 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
-            this.applyStartAt = event.getApplyStartAt();
-            this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
             this.createdAt = event.getCreatedAt();
-            this.applicationClosed = event.isApplicationClosed();
             this.owner = owner;
             this.confirmedCount = confirmedCount;
             this.waitingCount = waitingCount;
@@ -135,8 +138,6 @@ public class EventResponse {
         private String summary;
         private String description;
         private String address;
-        private LocalDateTime applyStartAt;
-        private LocalDateTime applyEndAt;
         private LocalDateTime publishedAt;
         private String feedbackMessage;
 
@@ -153,8 +154,6 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
-            this.applyStartAt = event.getApplyStartAt();
-            this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
             this.feedbackMessage = event.getFeedbackMessage();
         }

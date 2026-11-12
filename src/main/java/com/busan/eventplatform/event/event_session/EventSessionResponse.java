@@ -31,6 +31,8 @@ public class EventSessionResponse {
         private int fee;
         private String pricingType;
         private EventSessionStatus status;
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public EventSessionDto(EventSession eventSession) {
             this.id = eventSession.getId();
@@ -42,6 +44,8 @@ public class EventSessionResponse {
             this.fee = eventSession.getFee();
             this.pricingType = eventSession.getPricingType();
             this.status = eventSession.getStatus();
+            this.applyStartAt = eventSession.getApplyStartAt();
+            this.applyEndAt = eventSession.getApplyEndAt();
         }
     }
 
@@ -64,6 +68,10 @@ public class EventSessionResponse {
         private LocalDateTime minimumCheckAt;
         private EventSessionStatus status;
         private LocalDateTime createdAt;
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
+        private boolean applicationClosed;
+
 
         public DetailDto(EventSession eventSession) {
             this.id = eventSession.getId();
@@ -84,6 +92,10 @@ public class EventSessionResponse {
             this.minimumCheckAt = eventSession.getMinimumCheckAt();
             this.status = eventSession.getStatus();
             this.createdAt = eventSession.getCreatedAt();
+            this.applyStartAt = eventSession.getApplyStartAt();
+            this.applyEndAt = eventSession.getApplyEndAt();
+            this.applicationClosed = eventSession.isApplicationClosed();
+
         }
     }
 
@@ -100,6 +112,8 @@ public class EventSessionResponse {
         private int reservationDepositPoints;
         private int minimumParticipants;
         private LocalDateTime minimumCheckAt;
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public UpdateFormDto(EventSession eventSession) {
             this.id = eventSession.getId();
@@ -113,6 +127,8 @@ public class EventSessionResponse {
             this.reservationDepositPoints = eventSession.getReservationDepositPoints();
             this.minimumParticipants = eventSession.getMinimumParticipants();
             this.minimumCheckAt = eventSession.getMinimumCheckAt();
+            this.applyStartAt = eventSession.getApplyStartAt();
+            this.applyEndAt = eventSession.getApplyEndAt();
         }
     }
 }
