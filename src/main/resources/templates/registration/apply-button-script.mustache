@@ -1,0 +1,98 @@
+<script>
+    /*
+     * [참가 신청 버튼 공용 스크립트] — 행사 상세 화면 어디서든 재사용
+     *
+ * 사용법 (행사 담당자 안내용) — 머스태치 태그는 주석에 적으면 실제로 실행되므로 말로 적는다
+ *   1) 회차마다 버튼: class="reg-apply-btn", data-session-id 속성에 회차 id
+ *   2) 페이지 맨 아래에 이 partial(registration/apply-button-script)을 한 번만 포함
+ *
+ * 흐름 (조장님 결정: 신청 가능할 때만 확인 창)
+ *   클릭 → GET /api/registrations/check/{sessionId}
+ *     ├─ 401              → 로그인 안내 → /login
+ *     ├─ 403 등 오류      → 서버 메시지 안내
+ *     ├─ canApply=false   → 신청 불가 사유 안내 (모집 전·마감·중복 신청 등)
+ *     ├─ enoughPoint=false→ 포인트 부족 안내 → (확인 시) /charge
+ *     └─ 신청 가능        → 확인 창 (참가비, 대기 신청 여부, 환불 안내)
+ *                          → (확인 시) /event/purchase/{sessionId} 포인트 결제 화면
+ *
+ * 실제 신청·결제는 결제 화면의 [결제하기]에서 서버가 다시 검증한 뒤 처리한다. (여기서는 안내만)
+ */
+    (function () {
+        var LOGIN_URL = "/login";
+        var CHARGE_URL = "/charge";
+        var PURCHASE_URL = "/event/purchase/";
+
+        // 12345 → "12,345P"
+        function formatPoint(value) {
+            return Number(value || 0).toLocaleString("ko-KR") + "P";
+        }
+
+        // 신청 직전 확인 창 문구 — 잔여석 있음 / 정원 마감(대기) 상황별
+        function buildConfirmMessage(check) {
+            var fee = formatPoint(check.fee);
+            if (check.waitlist) {
+                return "정원이 마감되어 대기 신청으로 접수됩니다.\n"
+                        + "참가비 " + fee + "가 먼저 차감되며, 대기 중 취소하면 전액 환불됩니다.\n"
+                        + "신청하시겠습니까?";
+            }
+            return "참가 신청하시겠습니까?\n"
+                    + "참가비 " + fee + "가 차감됩니다.\n"
+                    + "취소 시 환불 금액은 취소 날짜에 따라 달라집니다.";
+        }
+
+        // 포인트 부족 안내 문구
+        function buildChargeMessage(check) {
+            return "포인트가 부족합니다.\n"
+                    + "참가비 " + formatPoint(check.fee) + " / 보유 " + formatPoint(check.currentPoint) + "\n"
+                    + "포인트 충전 화면으로 이동할까요?";
+        }
+
+        // 버튼 클릭을 문서 전체에서 받아 처리 (회차 버튼이 여러 개여도 스크립트는 한 번만)
+        document.addEventListener("click", async function (event) {
+            var button = event.target.closest(".reg-apply-btn");
+            if (!button || button.disabled) return;
+            event.preventDefault();
+
+            var sessionId = button.dataset.sessionId;
+            if (!sessionId) return;
+
+            button.disabled = true; // 연속 클릭 방지
+            try {
+                // 1. 신청 가능 여부·포인트 확인 (조회만, 돈은 움직이지 않음)
+                var response = await fetch("/api/registrations/check/" + sessionId);
+
+                if (response.status === 401) {
+                    alert("로그인이 필요합니다.");
+                    location.href = LOGIN_URL;
+                    return;
+                }
+
+                var check = await response.json();
+
+                if (!response.ok) {               // 403(기업 계정), 404(없는 회차) 등
+                    alert(check.message || "요청을 처리하지 못했습니다.");
+                    return;
+                }
+                if (!check.canApply) {            // 모집 전·마감·이미 신청 등
+                    alert(check.message);
+                    return;
+                }
+                if (!check.enoughPoint) {         // 포인트 부족 → 충전 안내
+                    if (confirm(buildChargeMessage(check))) {
+                        location.href = CHARGE_URL;
+                    }
+                    return;
+                }
+
+                // 2. 신청 가능할 때만 확인 창 → 포인트 결제 화면으로 이동
+                if (confirm(buildConfirmMessage(check))) {
+                    location.href = PURCHASE_URL + sessionId;
+                }
+            } catch (error) {
+                alert("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+            } finally {
+                button.disabled = false;
+            }
+        });
+    })();
+</script>

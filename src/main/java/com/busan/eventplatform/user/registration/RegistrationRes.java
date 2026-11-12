@@ -132,23 +132,21 @@ public class RegistrationRes {
     }
 
 
-// todo - 아래의 메서드는 임시 상세 화면을 지울 때 삭제 여부 함께 판단하기. 지금 formatSchedule을 쓰는 곳은 다음 단계에서 만들 임시 테스트 상세 화면(/test/events/{id}) 에서만 활용
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy. MM. dd (E) HH:mm", Locale.KOREAN);
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    // 일정 표시 형식 (구매내역 시안 기준) — 예: 2026. 11. 21 (토) · 오후 6:00
+    // 사용처: 임시 테스트 상세 화면(/test/events/{id}), 구매내역 카드(MyHistoryItemDto, 10단계 예정)
+    private static final DateTimeFormatter SCHEDULE_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy. MM. dd (E) · a h:mm", Locale.KOREAN);
 
     /**
-     * 예: 2026. 12. 20 (일) 14:00 ~ 16:00
+     * 회차 일정 표시 문자열 (시안에 맞춰 시작 시각만 표시)
+     * - startsAt 이 없으면 빈 문자열 (머스태치 null 방지)
+     * - endsAt 은 시안에서 쓰지 않지만, 호출부를 바꾸지 않도록 파라미터는 유지
      */
     public static String formatSchedule(LocalDateTime startsAt, LocalDateTime endsAt) {
         if (startsAt == null) {
             return "";
         }
-        String start = startsAt.format(DATE_FORMAT);
-        if (endsAt == null) {
-            return start;
-        }
-        boolean sameDay = startsAt.toLocalDate().equals(endsAt.toLocalDate());
-        return start + " ~ " + (sameDay ? endsAt.format(TIME_FORMAT) : endsAt.format(DATE_FORMAT));
+        return startsAt.format(SCHEDULE_FORMAT);
     }
 
 }
