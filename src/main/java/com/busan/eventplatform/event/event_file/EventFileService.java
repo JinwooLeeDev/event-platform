@@ -3,6 +3,7 @@ package com.busan.eventplatform.event.event_file;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
 import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.global.file.FileStorage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class EventFileService {
 
     private final EventRepository eventRepository;
     private final EventFileRepository eventFileRepository;
+    private final FileStorage fileStorage;
 
     // 행사에 파일 연결
     public Long attachFile(Long eventId, String storageKey, Integer displayOrder) {
