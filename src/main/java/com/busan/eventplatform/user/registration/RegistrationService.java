@@ -80,9 +80,6 @@ public class RegistrationService {
             status = RegistrationStatus.WAITING;
         }
 
-        // 4. 결제 위임 (잔액 부족 / 중복 결제 예외는 PurchaseService 가 던짐 → 점유·접수번호 포함 전체 롤백)
-        purchaseService.purchase(sessionId, loginIdentity);
-
         // 5. 접수 번호 발급 + 신청 저장
         int receptionNumber = session.issueReceptionNumber();
         Registration registration = registrationRepository.save(
@@ -156,11 +153,11 @@ public class RegistrationService {
     // 대기열 승격 — 결제는 신청 시 이미 완료되었으므로 상태만 변경
     // 호출 전 반드시 회차 락을 잡고 있어야 한다
     // =========================================================
+
     /**
      * [행사 파트 제공] 회차 정원이 늘어났을 때 대기자 승격.
      * 행사 파트에서 회차 수정(정원 증가) 후 호출한다.
      */
-
     @Transactional
     public void promoteWaitingUsers(Long sessionId) {
         EventSession session = lockSession(sessionId);
