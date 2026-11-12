@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>{{pageTitle}} | Busan Play 관리자</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<a class="admin-skip" href="#admin-main">본문으로 이동</a>
+<div class="admin-shell">
+    {{> admin/layout/sidebar}}
+    <div class="admin-workspace">
+        {{> admin/layout/header}}
+        <main id="admin-main" class="admin-main">
+            <div class="admin-page-heading"><span class="admin-eyebrow">BUSAN PLAY OPERATIONS</span><h1>{{pageTitle}}</h1><p>{{pageDescription}}</p></div>
+            {{#dashboardPage}}
+                <section class="admin-metrics" aria-label="주요 운영 지표">
+                    <a class="admin-card" href="/admin/companies"><span>기업 승인 대기</span><strong>—</strong><small>집계 준비 중</small></a>
+                    <a class="admin-card" href="/admin/events"><span>행사 심사 대기</span><strong>—</strong><small>집계 준비 중</small></a>
+                    <a class="admin-card" href="/admin/sessions"><span>오늘 개최 회차</span><strong>—</strong><small>집계 준비 중</small></a>
+                    <a class="admin-card" href="/admin/sessions"><span>참가 확정 인원</span><strong>—</strong><small>집계 준비 중</small></a>
+                </section>
+                <div class="admin-panels">
+                    <section class="admin-panel"><div class="admin-panel-heading"><h2>처리할 심사</h2><a href="/admin/events">행사 관리 →</a></div><div class="admin-empty"><span class="admin-empty-icon" aria-hidden="true">☰</span><h3>심사 현황 연결 준비 중</h3><p>기업 승인과 행사 심사 요청을 이곳에서 확인할 수 있도록 준비하고 있습니다.</p></div></section>
+                    <section class="admin-panel"><div class="admin-panel-heading"><h2>개최 주의 회차</h2><a href="/admin/sessions">회차 현황 →</a></div><div class="admin-empty"><span class="admin-empty-icon" aria-hidden="true">◷</span><h3>회차 현황 연결 준비 중</h3><p>최소 인원과 개최 일정을 확인해야 할 회차를 안내할 예정입니다.</p></div></section>
+                </div>
+                <section class="admin-panel admin-history"><div class="admin-panel-heading"><h2>최근 운영 이력</h2><span class="admin-badge">준비 중</span></div><p class="admin-history-message">기업·행사 상태 변경과 관리자 처리 내역을 연결할 예정입니다.</p></section>
+            {{/dashboardPage}}
+            {{^dashboardPage}}
+                {{#membersPage}}{{> admin/members}}{{/membersPage}}
+                {{^membersPage}}
+                <section class="admin-panel"><div class="admin-panel-heading"><h2>{{pageTitle}}</h2><span class="admin-badge">준비 중</span></div><div class="admin-empty admin-empty-large"><span class="admin-empty-icon" aria-hidden="true">☰</span><h3>관리 기능을 준비하고 있습니다</h3><p>목록 조회와 상세 관리 기능은 순차적으로 연결됩니다.</p><a class="admin-primary-link" href="/admin/dashboard">대시보드로 이동</a></div></section>
+                {{/membersPage}}
+            {{/dashboardPage}}
+        </main>
+        <footer class="admin-footer">Busan Play · 관리자 운영 공간</footer>
+    </div>
+</div>
+</body>
+</html>
