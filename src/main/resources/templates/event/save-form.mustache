@@ -1,0 +1,79 @@
+{{> layout/header}}
+{{> event/save-form-style}}
+
+<main class="event-save-page">
+    <div class="event-save-container">
+
+        <div class="event-save-navigation">
+            <a href="/events">← 내 행사 목록으로</a>
+        </div>
+
+        <section class="event-save-header">
+            <span class="event-save-label">BUSAN PLAY</span>
+            <h1>행사 등록</h1>
+            <p>부산의 특별한 순간을 등록해 보세요.</p>
+        </section>
+
+        <form action="/events/save"
+              method="post"
+              enctype="multipart/form-data"
+              class="event-save-form">
+
+            <section class="event-save-section">
+                <h2>행사 기본 정보</h2>
+                <p class="section-description">행사에 대한 기본 정보를 입력해 주세요.</p>
+
+                <div class="form-group">
+                    <label>행사 카테고리 <span>*</span></label>
+                    <select name="categoryId" required>
+                        <option value="">카테고리를 선택해 주세요.</option>
+                        {{#categoryList}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/categoryList}}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>행사 제목 <span>*</span></label>
+                    <input type="text" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>한 줄 요약 <span>*</span></label>
+                    <input type="text" name="summary" required>
+                </div>
+
+                <div class="form-group">
+                    <label>행사 주소 <span>*</span></label>
+                    <input type="text" name="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label>상세 설명 <span>*</span></label>
+                    <textarea name="description" rows="8" required></textarea>
+                </div>
+            </section>
+
+            <section class="event-save-section">
+                <h2>대표 이미지</h2>
+                <p class="section-description">행사를 대표하는 포스터 이미지를 등록해 주세요.</p>
+
+                <div class="form-group">
+                    <label>대표 이미지 <span>*</span></label>
+                    <div class="file-upload-box">
+                        <input type="file" name="file"
+                               accept=".jpg,.jpeg,.png" required>
+                        <p>JPG, JPEG, PNG 파일을 등록해 주세요.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="event-save-actions">
+                <a href="/events" class="cancel-button">취소</a>
+                <button type="submit" class="submit-button">행사 등록하기</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+{{> layout/footer}}
