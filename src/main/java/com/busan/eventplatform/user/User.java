@@ -55,8 +55,6 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-
-
     // 객체 생성 시 가독성과 안정성을 높이는 Builder 패턴 적용
     @Builder
     public User(String emailNormalized, String passwordHash, String displayName, Role role, UserStatus status, String preferredLocale) {

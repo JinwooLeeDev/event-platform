@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>기업 심사 대기 목록</title>
+    <style>
+        .verification-badge {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #f0f2f6;
+            color: #5c687c;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .verification-badge[data-verification="MATCHED"] {
+            background: #eaf7ef;
+            color: #087443;
+        }
+
+        .verification-badge[data-verification="ERROR"] {
+            background: #fff4dd;
+            color: #95610a;
+        }
+
+        .verification-badge[data-verification="MISMATCHED"] {
+            background: #fff0ed;
+            color: #b42318;
+        }
+    </style>
+</head>
+<body>
+{{>layout/header}}
+{{>company/style}}
+
+<main class="auth-page">
+    <section class="auth-card company-card">
+        <h1>기업 심사 대기 목록</h1>
+        <p>기업명을 클릭하면 상세 확인 및 심사를 진행할 수 있습니다.</p>
+
+        {{#companies}}
+        <fieldset>
+            <legend>
+                <a href="/admin/companies/{{id}}">{{name}}</a>
+            </legend>
+
+            <p>
+                <strong>사업자등록번호</strong><br>
+                {{businessNumber}}
+            </p>
+
+            <p>
+                <strong>사업자 검증 결과</strong><br>
+                <span class="verification-badge"
+                      data-verification="{{businessVerificationStatus}}">
+                    {{businessVerificationStatus}}
+                </span>
+            </p>
+
+            <a href="/admin/companies/{{id}}">심사 상세 보기</a>
+        </fieldset>
+        {{/companies}}
+
+        {{^companies}}
+        <p class="company-review-notice">
+            현재 심사 대기 중인 기업이 없습니다.
+        </p>
+        {{/companies}}
+
+        <a href="/admin/companies">심사 대기 목록으로</a>
+    </section>
+</main>
+
+{{>layout/footer}}
+
+<script>
+    (() => {
+        // 서버 enum 값은 유지하고 화면 문구만 변환
+        const labels = {
+            NOT_CHECKED: "미검증",
+            MATCHED: "정보 일치",
+            MISMATCHED: "정보 불일치",
+            ERROR: "재확인 필요"
+        };
+
+        document.querySelectorAll(".verification-badge[data-verification]")
+            .forEach(element => {
+                const value = element.dataset.verification;
+                element.textContent = labels[value] || value;
+            });
+    })();
+</script>
+</body>
+</html>
