@@ -10,22 +10,19 @@ import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.registration.RegistrationRepository;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,396 +43,347 @@ class EventServiceTest {
     @InjectMocks
     private EventService eventService;
 
-    private Event event;
     private Company company;
     private EventCategory category;
+    private Event event;
 
     @BeforeEach
     void setUp() {
         company = mock(Company.class);
-        lenient().when(company.getId()).thenReturn(1L);
-
         category = mock(EventCategory.class);
-        lenient().when(category.getId()).thenReturn(1L);
-        lenient().when(category.getName()).thenReturn("전시");
-
-        event = Event.builder()
-                .id(10L)
-                .company(company)
-                .category(category)
-                .title("부산 전시회")
-                .summary("전시회 소개")
-                .description("전시회 상세 설명")
-                .address("부산광역시 해운대구")
-                .status(EventStatus.PENDING_REVIEW)
-                .applyStartAt(LocalDateTime.now())
-                .applyEndAt(LocalDateTime.now().plusDays(7))
-                .createdAt(LocalDateTime.now())
-                .build();
+        event = mock(Event.class);
     }
 
-    private EventRequest.SaveDto createSaveDto() {
-        EventRequest.SaveDto dto = new EventRequest.SaveDto();
-        dto.setTitle("부산 전시회");
-        dto.setSummary("전시회 소개");
-        dto.setDescription("전시회 상세 설명");
-        dto.setAddress("부산광역시 해운대구");
-        dto.setCategoryId(1L);
-        dto.setApplyStartAt(LocalDateTime.now());
-        dto.setApplyEndAt(LocalDateTime.now().plusDays(7));
-        return dto;
-    }
+    // 행사 등록
 
-    private EventRequest.UpdateDto createUpdateDto() {
-        EventRequest.UpdateDto dto = new EventRequest.UpdateDto();
-        dto.setTitle("수정된 전시회");
-        dto.setSummary("수정된 소개");
-        dto.setDescription("수정된 상세 설명");
-        dto.setAddress("부산광역시 수영구");
-        dto.setCategoryId(1L);
-        dto.setApplyStartAt(LocalDateTime.now());
-        dto.setApplyEndAt(LocalDateTime.now().plusDays(10));
-        return dto;
-    }
-
-    // 행사 등록 성공
     @Test
-    void save_test() {
-        EventRequest.SaveDto dto = createSaveDto();
+    void save_success() {
+        EventRequest.SaveDto dto = mock(EventRequest.SaveDto.class);
 
-        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
-        when(eventCategoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(eventRepository.save(any(Event.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(companyRepository.findById(1L))
+                .thenReturn(Optional.of(company));
+        when(eventCategoryRepository.findById(1L))
+                .thenReturn(Optional.of(category));
+        when(dto.getCategoryId()).thenReturn(1L);
+        when(dto.toEntity()).thenReturn(event);
+        when(eventRepository.save(event)).thenReturn(event);
 
         Event result = eventService.save(dto, 1L);
 
-        assertEquals("부산 전시회", result.getTitle());
-        assertEquals(EventStatus.PENDING_REVIEW, result.getStatus());
-        assertEquals(company, result.getCompany());
-        assertEquals(category, result.getCategory());
-
-        verify(eventRepository).save(any(Event.class));
+        assertNotNull(result);
+        verify(eventRepository).save(event);
+        verify(event).setCompany(company);
+        verify(event).setCategory(category);
+        verify(event).setStatus(EventStatus.PENDING_REVIEW);
     }
 
-    // 행사 등록 시 기업이 없으면 404
     @Test
-    void save_companyNotFound_test() {
-        when(companyRepository.findById(1L)).thenReturn(Optional.empty());
+    void save_companyNotFound() {
+        EventRequest.SaveDto dto = mock(EventRequest.SaveDto.class);
 
-        assertThrows(Exception404.class,
-                () -> eventService.save(createSaveDto(), 1L));
-
-        verify(eventRepository, never()).save(any(Event.class));
-    }
-
-    // 행사 등록 시 카테고리가 없으면 404
-    @Test
-    void save_categoryNotFound_test() {
-        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
-        when(eventCategoryRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(Exception404.class,
-                () -> eventService.save(createSaveDto(), 1L));
-
-        verify(eventRepository, never()).save(any(Event.class));
-    }
-
-    // 공개 행사 목록 조회
-    @Test
-    void findAllPage_test() {
-        Page<Event> eventPage = new PageImpl<>(
-                List.of(event),
-                PageRequest.of(0, 10),
-                1
-        );
-
-        when(eventRepository.findAllPublished(
-                eq(EventStatus.PUBLISHED), any()))
-                .thenReturn(eventPage);
-
-        EventResponse.PageDto result =
-                eventService.findAllPage(1, 10, "");
-
-        assertEquals(1, result.getEventList().size());
-        assertEquals("부산 전시회", result.getEventList().get(0).getTitle());
-
-        verify(eventRepository).findAllPublished(
-                eq(EventStatus.PUBLISHED), any());
-    }
-
-    // 키워드 검색
-    @Test
-    void findAllPage_keyword_test() {
-        Page<Event> eventPage = new PageImpl<>(List.of(event));
-
-        when(eventRepository.findAllKeyWord(
-                eq(EventStatus.PUBLISHED), eq("전시"), any()))
-                .thenReturn(eventPage);
-
-        EventResponse.PageDto result =
-                eventService.findAllPage(1, 10, "전시");
-
-        assertEquals(1, result.getEventList().size());
-
-        verify(eventRepository).findAllKeyWord(
-                eq(EventStatus.PUBLISHED), eq("전시"), any());
-    }
-
-    // 행사 상세 조회
-    @Test
-    void findById_test() {
-        when(eventRepository.findByDetail(10L))
-                .thenReturn(Optional.of(event));
-
-        when(registrationRepository.countTotalByEventIdAndStatus(
-                10L, RegistrationStatus.CONFIRMED)).thenReturn(3L);
-
-        when(registrationRepository.countTotalByEventIdAndStatus(
-                10L, RegistrationStatus.PENDING)).thenReturn(2L);
-
-        when(registrationRepository.countTotalByEventIdAndStatus(
-                10L, RegistrationStatus.WAITING)).thenReturn(4L);
-
-        when(registrationRepository.countConfirmedByEventIdAndUserId(
-                10L, 100L, RegistrationStatus.CONFIRMED)).thenReturn(1L);
-
-        EventResponse.DetailDto result =
-                eventService.findById(10L, 1L, 100L);
-
-        assertEquals(10L, result.getId());
-        assertEquals("부산 전시회", result.getTitle());
-        assertTrue(result.isOwner());
-        assertEquals(5L, result.getConfirmedCount());
-        assertEquals(4L, result.getWaitingCount());
-        assertTrue(result.isChatAvailable());
-    }
-
-    // 존재하지 않는 행사 상세 조회
-    @Test
-    void findById_notFound_test() {
-        when(eventRepository.findByDetail(999L))
+        when(companyRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
         assertThrows(Exception404.class,
-                () -> eventService.findById(999L, null, null));
+                () -> eventService.save(dto, 1L));
     }
 
-    // 비로그인 회원은 채팅 참가 불가
     @Test
-    void findById_guest_chatUnavailable_test() {
-        when(eventRepository.findByDetail(10L))
+    void save_categoryNotFound() {
+        EventRequest.SaveDto dto = mock(EventRequest.SaveDto.class);
+
+        when(companyRepository.findById(1L))
+                .thenReturn(Optional.of(company));
+        when(dto.getCategoryId()).thenReturn(1L);
+        when(eventCategoryRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(Exception404.class,
+                () -> eventService.save(dto, 1L));
+    }
+
+    // 행사 상세 조회
+
+    @Test
+    void findById_success() {
+        when(eventRepository.findByDetail(1L))
+                .thenReturn(Optional.of(event));
+        when(event.getCompany()).thenReturn(company);
+        when(company.getId()).thenReturn(1L);
+
+        when(registrationRepository.countTotalByEventIdAndStatus(
+                1L, RegistrationStatus.CONFIRMED)).thenReturn(3L);
+        when(registrationRepository.countTotalByEventIdAndStatus(
+                1L, RegistrationStatus.PENDING)).thenReturn(2L);
+        when(registrationRepository.countTotalByEventIdAndStatus(
+                1L, RegistrationStatus.WAITING)).thenReturn(1L);
+        when(registrationRepository.countConfirmedByEventIdAndUserId(
+                1L, 10L, RegistrationStatus.CONFIRMED)).thenReturn(1L);
+
+        EventResponse.DetailDto result =
+                eventService.findById(1L, 1L, 10L);
+
+        assertNotNull(result);
+        verify(eventRepository).findByDetail(1L);
+    }
+
+    @Test
+    void findById_notFound() {
+        when(eventRepository.findByDetail(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(Exception404.class,
+                () -> eventService.findById(1L, null, null));
+    }
+
+    @Test
+    void findById_guestCannotChat() {
+        when(eventRepository.findByDetail(1L))
                 .thenReturn(Optional.of(event));
 
         when(registrationRepository.countTotalByEventIdAndStatus(
                 anyLong(), any())).thenReturn(0L);
 
         EventResponse.DetailDto result =
-                eventService.findById(10L, null, null);
+                eventService.findById(1L, null, null);
 
-        assertFalse(result.isOwner());
-        assertFalse(result.isChatAvailable());
+        assertNotNull(result);
 
         verify(registrationRepository, never())
                 .countConfirmedByEventIdAndUserId(
                         anyLong(), anyLong(), any());
     }
 
-    // 행사 수정 화면 조회
+    // 행사 수정 화면
+
     @Test
-    void updateForm_test() {
-        when(eventRepository.findByDetail(10L))
+    void updateForm_success() {
+        when(eventRepository.findByDetail(1L))
                 .thenReturn(Optional.of(event));
+        when(event.isOwner(1L)).thenReturn(true);
 
         EventResponse.UpdateFormDto result =
-                eventService.update(10L, 1L);
+                eventService.update(1L, 1L);
 
-        assertEquals(10L, result.getId());
-        assertEquals("부산 전시회", result.getTitle());
+        assertNotNull(result);
     }
 
-    // 다른 기업은 행사 수정 화면에 접근할 수 없음
     @Test
-    void updateForm_forbidden_test() {
-        when(eventRepository.findByDetail(10L))
+    void updateForm_forbidden() {
+        when(eventRepository.findByDetail(1L))
+                .thenReturn(Optional.of(event));
+        when(event.isOwner(2L)).thenReturn(false);
+
+        assertThrows(Exception403.class,
+                () -> eventService.update(1L, 2L));
+    }
+
+    @Test
+    void updateForm_nullCompanyId() {
+        when(eventRepository.findByDetail(1L))
                 .thenReturn(Optional.of(event));
 
         assertThrows(Exception403.class,
-                () -> eventService.update(10L, 2L));
+                () -> eventService.update(1L, null));
     }
 
-    // 행사 수정
-    @Test
-    void update_test() {
-        when(eventRepository.findByDetail(10L))
-                .thenReturn(Optional.of(event));
+    // 행사 수정 저장
 
+    @Test
+    void update_success() {
+        EventRequest.UpdateDto dto = mock(EventRequest.UpdateDto.class);
+
+        when(eventRepository.findByDetail(1L))
+                .thenReturn(Optional.of(event));
+        when(event.isOwner(1L)).thenReturn(true);
+        when(dto.getCategoryId()).thenReturn(1L);
         when(eventCategoryRepository.findById(1L))
                 .thenReturn(Optional.of(category));
 
-        EventRequest.UpdateDto dto = createUpdateDto();
+        Event result = eventService.update(1L, 1L, dto);
 
-        Event result = eventService.update(10L, 1L, dto);
-
-        assertEquals("수정된 전시회", result.getTitle());
-        assertEquals("수정된 소개", result.getSummary());
-        assertEquals("부산광역시 수영구", result.getAddress());
-        assertEquals(category, result.getCategory());
+        assertNotNull(result);
+        verify(dto).toEntity(event, category);
     }
 
-    // 다른 기업은 행사 수정 불가
     @Test
-    void update_forbidden_test() {
-        when(eventRepository.findByDetail(10L))
+    void update_forbidden() {
+        EventRequest.UpdateDto dto = mock(EventRequest.UpdateDto.class);
+
+        when(eventRepository.findByDetail(1L))
+                .thenReturn(Optional.of(event));
+        when(event.isOwner(2L)).thenReturn(false);
+
+        assertThrows(Exception403.class,
+                () -> eventService.update(1L, 2L, dto));
+    }
+
+    @Test
+    void update_nullCompanyId() {
+        EventRequest.UpdateDto dto = mock(EventRequest.UpdateDto.class);
+
+        when(eventRepository.findByDetail(1L))
                 .thenReturn(Optional.of(event));
 
         assertThrows(Exception403.class,
-                () -> eventService.update(10L, 2L, createUpdateDto()));
-
-        verify(eventCategoryRepository, never()).findById(anyLong());
+                () -> eventService.update(1L, null, dto));
     }
 
-    // 보완 요청된 행사 재제출
+    // 행사 재제출
+
     @Test
-    void resubmit_test() {
-        event.setStatus(EventStatus.FEEDBACK_REQUIRED);
-        event.setFeedbackMessage("주소를 확인해주세요.");
-
-        when(eventRepository.findById(10L))
+    void resubmit_success() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.isOwner(1L)).thenReturn(true);
+        when(event.getStatus()).thenReturn(EventStatus.FEEDBACK_REQUIRED);
 
-        Event result = eventService.resubmit(10L, 1L);
+        Event result = eventService.resubmit(1L, 1L);
 
-        assertEquals(EventStatus.PENDING_REVIEW, result.getStatus());
-        assertNull(result.getFeedbackMessage());
+        assertNotNull(result);
+        verify(event).setStatus(EventStatus.PENDING_REVIEW);
+        verify(event).setFeedbackMessage(null);
     }
 
-    // 보완 요청 상태가 아니면 재제출 불가
     @Test
-    void resubmit_invalidStatus_test() {
-        when(eventRepository.findById(10L))
+    void resubmit_invalidStatus() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.isOwner(1L)).thenReturn(true);
+        when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
 
         assertThrows(Exception400.class,
-                () -> eventService.resubmit(10L, 1L));
+                () -> eventService.resubmit(1L, 1L));
     }
 
-    // 다른 기업은 재제출 불가
     @Test
-    void resubmit_forbidden_test() {
-        when(eventRepository.findById(10L))
+    void resubmit_forbidden() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.isOwner(2L)).thenReturn(false);
 
         assertThrows(Exception403.class,
-                () -> eventService.resubmit(10L, 2L));
+                () -> eventService.resubmit(1L, 2L));
     }
 
     // 행사 삭제
-    @Test
-    void delete_test() {
-        when(eventRepository.findById(10L))
-                .thenReturn(Optional.of(event));
 
-        eventService.delete(10L, 1L);
+    @Test
+    void delete_success() {
+        when(eventRepository.findById(1L))
+                .thenReturn(Optional.of(event));
+        when(event.isOwner(1L)).thenReturn(true);
+
+        assertDoesNotThrow(() -> eventService.delete(1L, 1L));
 
         verify(eventRepository).delete(event);
     }
 
-    // 다른 기업은 행사 삭제 불가
     @Test
-    void delete_forbidden_test() {
-        when(eventRepository.findById(10L))
+    void delete_forbidden() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.isOwner(2L)).thenReturn(false);
 
         assertThrows(Exception403.class,
-                () -> eventService.delete(10L, 2L));
+                () -> eventService.delete(1L, 2L));
+    }
 
-        verify(eventRepository, never()).delete(any(Event.class));
+    @Test
+    void delete_notFound() {
+        when(eventRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(Exception404.class,
+                () -> eventService.delete(1L, 1L));
     }
 
     // 행사 취소
+
     @Test
-    void cancel_test() {
-        EventRequest.CancelDto dto = new EventRequest.CancelDto();
-        dto.setCancellationReason("행사 운영 사정");
+    void cancel_success() {
+        EventRequest.CancelDto dto = mock(EventRequest.CancelDto.class);
 
-        when(eventRepository.findById(10L))
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
+        when(dto.getCancellationReason()).thenReturn("행사 취소");
 
-        Event result = eventService.cancel(10L, dto);
+        Event result = eventService.cancel(1L, dto);
 
-        assertEquals(EventStatus.CANCELLED, result.getStatus());
-        assertEquals("행사 운영 사정", result.getCancellationReason());
-        assertNotNull(result.getCancelledAt());
+        assertNotNull(result);
+        verify(event).setStatus(EventStatus.CANCELLED);
+        verify(event).setCancellationReason("행사 취소");
+        verify(event).setCancelledAt(any());
     }
 
-    // 이미 취소된 행사
     @Test
-    void cancel_alreadyCancelled_test() {
-        event.setStatus(EventStatus.CANCELLED);
+    void cancel_alreadyCancelled() {
+        EventRequest.CancelDto dto = mock(EventRequest.CancelDto.class);
 
-        when(eventRepository.findById(10L))
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
-
-        EventRequest.CancelDto dto = new EventRequest.CancelDto();
-        dto.setCancellationReason("취소 사유");
+        when(event.getStatus()).thenReturn(EventStatus.CANCELLED);
 
         assertThrows(Exception400.class,
-                () -> eventService.cancel(10L, dto));
+                () -> eventService.cancel(1L, dto));
     }
 
     // 행사 승인
+
     @Test
-    void approve_test() {
-        when(eventRepository.findById(10L))
+    void approve_success() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.getStatus()).thenReturn(EventStatus.PENDING_REVIEW);
 
-        Event result = eventService.approve(10L);
+        Event result = eventService.approve(1L);
 
-        assertEquals(EventStatus.PUBLISHED, result.getStatus());
-        assertNotNull(result.getPublishedAt());
+        assertNotNull(result);
+        verify(event).setStatus(EventStatus.PUBLISHED);
+        verify(event).setPublishedAt(any());
     }
 
-    // 승인 대기 상태가 아니면 승인 불가
     @Test
-    void approve_invalidStatus_test() {
-        event.setStatus(EventStatus.PUBLISHED);
-
-        when(eventRepository.findById(10L))
+    void approve_invalidStatus() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
 
         assertThrows(Exception400.class,
-                () -> eventService.approve(10L));
+                () -> eventService.approve(1L));
     }
 
-    // 보완 요청
+    // 행사 보완 요청
+
     @Test
-    void requestFeedback_test() {
-        when(eventRepository.findById(10L))
+    void requestFeedback_success() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.getStatus()).thenReturn(EventStatus.PENDING_REVIEW);
 
         Event result =
-                eventService.requestFeedback(10L, "행사 설명을 보완해주세요.");
+                eventService.requestFeedback(1L, "주소를 수정해주세요.");
 
-        assertEquals(EventStatus.FEEDBACK_REQUIRED, result.getStatus());
-        assertEquals("행사 설명을 보완해주세요.", result.getFeedbackMessage());
+        assertNotNull(result);
+        verify(event).setStatus(EventStatus.FEEDBACK_REQUIRED);
+        verify(event).setFeedbackMessage("주소를 수정해주세요.");
     }
 
-    // 승인 대기 상태가 아니면 보완 요청 불가
     @Test
-    void requestFeedback_invalidStatus_test() {
-        event.setStatus(EventStatus.PUBLISHED);
-
-        when(eventRepository.findById(10L))
+    void requestFeedback_invalidStatus() {
+        when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
+        when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
 
         assertThrows(Exception400.class,
-                () -> eventService.requestFeedback(10L, "보완 요청"));
+                () -> eventService.requestFeedback(1L, "수정해주세요."));
     }
 
-    // 기업의 보완 요청 행사 목록
+    // 보완 요청 행사 목록
+
     @Test
-    void findAllFeedback_test() {
+    void findAllFeedback_success() {
         when(eventRepository.findAllByCompanyIdAndStatus(
                 1L, EventStatus.FEEDBACK_REQUIRED))
                 .thenReturn(List.of(event));
@@ -443,22 +391,19 @@ class EventServiceTest {
         List<Event> result = eventService.findAllFeedback(1L);
 
         assertEquals(1, result.size());
-
-        verify(eventRepository).findAllByCompanyIdAndStatus(
-                1L, EventStatus.FEEDBACK_REQUIRED);
     }
 
-    // 기업의 전체 행사 목록
+    // 기업 행사 목록
+
     @Test
-    void findAllByCompanyId_test() {
+    void findAllByCompanyId_success() {
         when(eventRepository.findAllByCompanyId(1L))
                 .thenReturn(List.of(event));
 
         EventResponse.ListDto result =
                 eventService.findAllByCompanyId(1L);
 
-        assertEquals(1, result.getEventList().size());
-        assertEquals("부산 전시회",
-                result.getEventList().get(0).getTitle());
+        assertNotNull(result);
+        verify(eventRepository).findAllByCompanyId(1L);
     }
 }

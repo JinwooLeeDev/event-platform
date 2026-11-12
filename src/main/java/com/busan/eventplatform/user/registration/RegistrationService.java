@@ -1,6 +1,6 @@
 package com.busan.eventplatform.user.registration;
 
-import com.busan.eventplatform.api.purchase.PurchaseService;
+import com.busan.eventplatform.api.purchase.Purchase;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
@@ -39,39 +39,63 @@ public class RegistrationService {
     private final RegistrationHistoryRepository registrationHistoryRepository;
     private final EventSessionRepository eventSessionRepository;
     private final UserRepository userRepository;
-    private final PurchaseService purchaseService;
+
+    /**
+     * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
+     * @param session 비관적 락으로 조회한 회차 (트랜잭션 끝까지 락 유지)
+     * @param user    검증을 통과한 신청자
+     */
+    public record ApplyContext(EventSession session, User user) {}
+
 
     // =========================================================
     // 참가 신청
     // =========================================================
 
+    /**
+     * [흐름 클래스 ① 단계] 신청 가능 여부 검증 — 돈이 움직이기 전에 확인
+     * 여기서 예외가 나면 결제(②)가 실행되지 않아 포인트가 차감되지 않는다.
+     */
     @Transactional
-    public RegistrationRes.ApplyDto apply(Long sessionId, LoginIdentity loginIdentity) {
-        // 0. 개인 회원만 신청 가능
+    public ApplyContext prepareApply(Long sessionId, LoginIdentity loginIdentity) {
+        // 1. 개인 회원만 신청 가능
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 행사에 참가 신청할 수 있습니다");
         }
 
-        // 1. 회차 조회 + 비관적 락 (정원 확인 ~ 저장까지 동시 신청 직렬화)
+        // 2. 회차 조회 + 비관적 락 (흐름 클래스 트랜잭션이 끝날 때까지 유지)
         EventSession session = eventSessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new Exception404("신청하려는 행사 회차가 존재하지 않습니다"));
 
+        // 3. 모집 가능 여부 (공개·모집 기간·마감·회차 상태·시작 전)
         validateApplicable(session);
 
+        // 4. 계정 상태
         User user = userRepository.findById(loginIdentity.getId())
                 .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
-
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new Exception400("정지되었거나 탈퇴한 계정은 행사에 신청할 수 없습니다");
         }
 
-        // 2. 중복 신청 확인 — 결제보다 먼저 해야 신청 도메인 메시지가 나간다
+        // 5. 중복 신청 — 결제보다 먼저 확인해야 신청 메시지가 나간다 (취소·반려 건은 제외 → 재신청 허용)
         if (registrationRepository.existsByUserAndSessionAndStatusIn(
                 user.getId(), sessionId, RegistrationStatus.ACTIVE)) {
             throw new Exception400("이미 신청한 행사 회차입니다");
         }
 
-        // 3. 잔여 정원으로 상태 결정 + 자리 점유 (occupiedCount 증가)
+        return new ApplyContext(session, user);
+    }
+
+    /**
+     * [흐름 클래스 ③ 단계] 신청 저장 — 결제(②) 성공 후에만 호출
+     * @param purchase PurchaseService.pay() 가 만든 결제 내역 (신청에 purchase_id 로 연결)
+     */
+    @Transactional
+    public RegistrationRes.ApplyDto completeApply(ApplyContext ctx, Purchase purchase) {
+        EventSession session = ctx.session();
+        User user = ctx.user();
+
+        // 1. 잔여 정원으로 상태 결정 + 자리 점유 (결제 성공 후 점유 → 실패 시 되돌릴 자리 없음)
         RegistrationStatus status;
         if (session.hasRemainingSeat()) {
             session.occupySeat();
@@ -80,20 +104,25 @@ public class RegistrationService {
             status = RegistrationStatus.WAITING;
         }
 
-        // 4. 결제 위임 (잔액 부족 / 중복 결제 예외는 PurchaseService 가 던짐 → 점유·접수번호 포함 전체 롤백)
-        purchaseService.purchase(sessionId, loginIdentity);
-
-        // 5. 접수 번호 발급 + 신청 저장
+        // 2. 접수 번호 발급 + 신청 저장 (결제 연결)
         int receptionNumber = session.issueReceptionNumber();
         Registration registration = registrationRepository.save(
-                Registration.create(user, session, status, receptionNumber));
+                Registration.create(user, session, purchase, status, receptionNumber));
 
-        // 6. 이력 기록
+        // 3. 이력 기록
         recordHistory(registration, status, user, "참가 신청");
 
         Integer waitingNumber = waitingNumberOf(registration);
         return RegistrationRes.ApplyDto.of(registration, waitingNumber);
     }
+
+    /**
+     * 참가 신청 도메인 (신청 규칙만 담당).
+     * - 결제는 직접 호출하지 않는다. 신청 + 결제 순서는 RegistrationPurchaseService 가 조율한다.
+     *   검증(prepareApply) → 결제(PurchaseService.pay) → 저장(completeApply), 하나의 트랜잭션
+     * - 대기열 승격 시에는 추가 결제 없이 상태만 변경 (신청 시점에 이미 결제)
+     * - 취소·반려 시 환불은 포인트 파트 refund() 완성 후 흐름 클래스에서 연결 (TODO)
+     */
 
     // =========================================================
     // 유저 본인 취소
@@ -105,20 +134,24 @@ public class RegistrationService {
             throw new RegistrationForbiddenException("개인 회원만 신청을 취소할 수 있습니다");
         }
 
-        Registration registration = findRegistration(registrationId);
+        // 회차 락 → 신청 조회 순서 (동시 승격과 겹쳐도 최신 상태로 판단)
+        Registration registration = findRegistrationWithSessionLock(registrationId);
+        EventSession session = registration.getEventSession();
+
         if (!registration.isOwnedBy(loginIdentity.getId())) {
             throw new RegistrationForbiddenException("본인의 신청만 취소할 수 있습니다");
         }
 
-        // 승격 로직과 동시 신청이 겹치지 않도록 회차 락
-        EventSession session = lockSession(registration.getEventSession().getId());
+        String blockedReason = getCancelBlockedReason(registration, LocalDateTime.now());
+        if (blockedReason != null) {
+            throw new Exception400(blockedReason);
+        }
 
         boolean releasedSeat = registration.getStatus().isSeatOccupying();
         registration.cancel();
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
 
-        // TODO: 포인트 파트 환불 메서드 완성 후 연결
-        // purchaseService.refund(session.getId(), registration.getUser().getId());
+        // TODO: 포인트 파트 환불 메서드 완성 후 연결 (금액은 RegistrationRefundPolicy로 계산)
 
         if (releasedSeat) {
             session.releaseSeat();
@@ -126,14 +159,16 @@ public class RegistrationService {
         }
     }
 
+
+
     // =========================================================
     // 주최자 반려
     // =========================================================
 
     @Transactional
     public void reject(Long registrationId, LoginIdentity loginIdentity) {
-        Registration registration = findRegistration(registrationId);
-        EventSession session = lockSession(registration.getEventSession().getId());
+        Registration registration = findRegistrationWithSessionLock(registrationId);
+        EventSession session = registration.getEventSession();
 
         validateOrganizer(session, loginIdentity);
 
@@ -154,20 +189,19 @@ public class RegistrationService {
 
     // =========================================================
     // 대기열 승격 — 결제는 신청 시 이미 완료되었으므로 상태만 변경
-    // 호출 전 반드시 회차 락을 잡고 있어야 한다
     // =========================================================
+
     /**
      * [행사 파트 제공] 회차 정원이 늘어났을 때 대기자 승격.
      * 행사 파트에서 회차 수정(정원 증가) 후 호출한다.
      */
-
     @Transactional
     public void promoteWaitingUsers(Long sessionId) {
         EventSession session = lockSession(sessionId);
         promoteWaitingUsersIfAny(session);
     }
 
-
+    /** 호출 전 반드시 회차 락을 잡고 있어야 한다 */
     private void promoteWaitingUsersIfAny(EventSession session) {
         while (session.hasRemainingSeat()) {
             Registration next = registrationRepository
@@ -187,6 +221,24 @@ public class RegistrationService {
     // =========================================================
     // 조회
     // =========================================================
+
+    // [신청 전 확인] 신청 가능 여부와 포인트 충분 여부 — 조회 전용, 락 없음
+    // (실제 신청 시 apply() 에서 락을 잡고 다시 검증한다)
+    public RegistrationRes.CheckDto check(Long sessionId, LoginIdentity loginIdentity) {
+        EventSession session = eventSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new Exception404("행사 회차가 존재하지 않습니다"));
+        User user = userRepository.findById(loginIdentity.getId())
+                .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
+
+        String blockedReason = getClosedReason(session);
+        if (blockedReason == null && registrationRepository.existsByUserAndSessionAndStatusIn(
+                user.getId(), sessionId, RegistrationStatus.ACTIVE)) {
+            blockedReason = "이미 신청한 행사 회차입니다";
+        }
+
+        int remainingSeats = session.getCapacity() - session.getOccupiedCount();
+        return RegistrationRes.CheckDto.of(sessionId, session.getFee(), user.getPoint(), remainingSeats, blockedReason);
+    }
 
     // [마이페이지용] 유저 본인의 참가 신청 내역 최신순 조회
     public List<RegistrationRes.MyRegistrationDto> getMyRegistrations(LoginIdentity loginIdentity) {
@@ -223,6 +275,70 @@ public class RegistrationService {
         return registrationRepository.countConfirmedByEvent(eventId);
     }
 
+    /**
+     * 회차가 지금 신청 불가능한 이유. 신청 가능하면 null.
+     * [화면 제공] 행사 상세에서 버튼 상태 판단에 사용 (락 없이 조회한 회차로 호출 가능)
+     */
+    public String getClosedReason(EventSession session) {
+        Event event = session.getEvent();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 공개(승인 완료)된 행사만 신청 가능
+        if (event.getStatus() != EventStatus.PUBLISHED) {
+            return switch (event.getStatus()) {
+                case CANCELLED -> "취소된 행사입니다";
+                case COMPLETED -> "이미 종료된 행사입니다";
+                default -> "아직 공개되지 않은 행사입니다"; // PENDING_REVIEW, FEEDBACK_REQUIRED
+            };
+        }
+        if (event.getCancelledAt() != null) { // 상태값과 취소일이 어긋난 데이터 방어
+            return "취소된 행사입니다";
+        }
+        // 행사 모집 기간 (Event.applyStartAt ~ applyEndAt)
+        if (now.isBefore(session.getApplyStartAt())) {
+            return "아직 모집 기간이 아닙니다";
+        }
+        if (session.isApplicationClosed()) {
+            return "모집이 마감된 행사입니다";
+        }
+        // 회차 상태: 진행 예정(SCHEDULED) 회차만 신청 가능 (상태가 비어 있는 데이터는 허용)
+        EventSessionStatus sessionStatus = session.getStatus();
+        if (sessionStatus != null && sessionStatus != EventSessionStatus.SCHEDULED) {
+            return switch (sessionStatus) {
+                case IN_PROGRESS -> "이미 진행 중인 회차입니다";
+                case COMPLETED -> "이미 종료된 회차입니다";
+                case CANCELLED -> "취소된 회차입니다";
+                default -> "신청할 수 없는 회차입니다";
+            };
+        }
+        // 회차 시작 시각이 지났으면 신청 불가 (상태값이 아직 갱신되지 않은 경우 방어)
+        if (!now.isBefore(session.getStartsAt())) {
+            return "이미 시작된 회차입니다";
+        }
+        return null;
+    }
+
+    /**
+     * 본인 취소가 불가능한 이유. 취소 가능하면 null.
+     * 조장님 결정: 취소는 시작 전까지 언제든지 가능, 환불 금액만 차등.
+     * [화면 제공] 구매내역의 취소 버튼 표시에도 같은 규칙을 사용한다.
+     */
+    public String getCancelBlockedReason(Registration registration, LocalDateTime now) {
+        if (!registration.getStatus().isActive()) {
+            return "이미 취소되었거나 반려된 신청입니다";
+        }
+        if (!now.isBefore(registration.getEventSession().getStartsAt())) {
+            return "이미 시작된 회차는 취소할 수 없습니다";
+        }
+        return null;
+    }
+
+    public boolean isCancelable(Registration registration, LocalDateTime now) {
+        return getCancelBlockedReason(registration, now) == null;
+    }
+
+
+
     // =========================================================
     // 내부 헬퍼
     // =========================================================
@@ -252,6 +368,14 @@ public class RegistrationService {
                 .orElseThrow(() -> new Exception404("행사 회차가 존재하지 않습니다"));
     }
 
+    /** 회차 락을 먼저 잡고 신청을 조회한다 (락 이후 조회해야 승격 등 최신 상태가 반영됨) */
+    private Registration findRegistrationWithSessionLock(Long registrationId) {
+        Long sessionId = registrationRepository.findSessionIdById(registrationId)
+                .orElseThrow(() -> new Exception404("신청 내역을 찾을 수 없습니다"));
+        lockSession(sessionId);
+        return findRegistration(registrationId);
+    }
+
     /**
      * 자리가 있을 때 들어갈 상태.
      * 현재 Event 에 승인제 여부 필드가 없으므로 항상 CONFIRMED.
@@ -261,62 +385,27 @@ public class RegistrationService {
         return RegistrationStatus.CONFIRMED;
     }
 
-    /**
-     * 행사·회차 단위 신청 가능 여부 검증
-     */
+    /** 신청 시 검증 (apply 에서 락을 잡은 뒤 호출) */
     private void validateApplicable(EventSession session) {
-        Event event = session.getEvent();
-        LocalDateTime now = LocalDateTime.now();
-
-        // 공개(승인 완료)된 행사만 신청 가능
-        if (event.getStatus() != EventStatus.PUBLISHED) {
-            String message = switch (event.getStatus()) {
-                case CANCELLED -> "취소된 행사입니다";
-                case COMPLETED -> "이미 종료된 행사입니다";
-                default -> "아직 공개되지 않은 행사입니다"; // PENDING_REVIEW, FEEDBACK_REQUIRED
-            };
-            throw new Exception400(message);
-        }
-        if (event.getCancelledAt() != null) { // 상태값과 취소일이 어긋난 데이터 방어
-            throw new Exception400("취소된 행사입니다");
-        }
-        // 행사 모집 기간 (Event.applyStartAt ~ applyEndAt)
-        if (now.isBefore(event.getApplyStartAt())) {
-            throw new Exception400("아직 모집 기간이 아닙니다");
-        }
-        if (event.isApplicationClosed()) {
-            throw new Exception400("모집이 마감된 행사입니다");   // ← 추가
-        }
-        // 회차 상태: 진행 예정(SCHEDULED) 회차만 신청 가능 (상태가 비어 있는 데이터는 허용)
-            EventSessionStatus sessionStatus = session.getStatus();
-            if (sessionStatus != null && sessionStatus != EventSessionStatus.SCHEDULED) {
-                String message = switch (sessionStatus) {
-                    case IN_PROGRESS -> "이미 진행 중인 회차입니다";
-                    case COMPLETED -> "이미 종료된 회차입니다";
-                    case CANCELLED -> "취소된 회차입니다";
-                    default -> "신청할 수 없는 회차입니다";
-                };
-                throw new Exception400(message);
-            }
-            // 회차 시작 시각이 지났으면 신청 불가 (상태값이 아직 갱신되지 않은 경우 방어)
-            if (!now.isBefore(session.getStartsAt())) {
-                throw new Exception400("이미 시작된 회차입니다");
-            }
-        }
-
-        private Integer waitingNumberOf (Registration registration){
-            if (registration.getStatus() != RegistrationStatus.WAITING) {
-                return null;
-            }
-            return (int) registrationRepository.countWaitingAhead(
-                    registration.getEventSession().getId(), registration.getReceptionNumber()) + 1;
-        }
-
-        private void validateOrganizer (EventSession session, LoginIdentity loginIdentity){
-            boolean isOrganizer = loginIdentity.isCompany()
-                    && session.getEvent().isOwner(loginIdentity.getId());
-            if (!isOrganizer) {
-                throw new RegistrationForbiddenException("행사 주최자만 처리할 수 있습니다");
-            }
+        String closedReason = getClosedReason(session);
+        if (closedReason != null) {
+            throw new Exception400(closedReason);
         }
     }
+
+    private Integer waitingNumberOf(Registration registration) {
+        if (registration.getStatus() != RegistrationStatus.WAITING) {
+            return null;
+        }
+        return (int) registrationRepository.countWaitingAhead(
+                registration.getEventSession().getId(), registration.getReceptionNumber()) + 1;
+    }
+
+    private void validateOrganizer(EventSession session, LoginIdentity loginIdentity) {
+        boolean isOrganizer = loginIdentity.isCompany()
+                && session.getEvent().isOwner(loginIdentity.getId());
+        if (!isOrganizer) {
+            throw new RegistrationForbiddenException("행사 주최자만 처리할 수 있습니다");
+        }
+    }
+}

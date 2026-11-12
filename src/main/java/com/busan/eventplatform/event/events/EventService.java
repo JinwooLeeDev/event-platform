@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,13 +51,13 @@ public class EventService {
     }
 
     // 행사 목록 조회 기능
-    public EventResponse.PageDto findAllPage(int page, int size, String keyword) {
+    public EventResponse.PageDto findAllPage(int page, int size, String keyword, Long userId) {
 
         // 페이지 번호 0부터 시작하도록 반환
         int pageIndex = Math.max(0, page - 1);
         // 페이지 크기 1 ~ 50
         int validSize = Math.max(1, Math.min(50, size));
-        // 최신 글 먼저 오도록 id 내림차순 정렬
+        // 최신 행사 먼저 오도록 id 내림차순 정렬
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
         // 행사 조회
         Page<Event> eventPage;
@@ -65,7 +67,39 @@ public class EventService {
             eventPage = eventRepository.findAllKeyWord(EventStatus.PUBLISHED, keyword.trim(), pageable);
         }
 
-        return new EventResponse.PageDto(eventPage);
+        // 현재 페이지에 포함된 행사 ID 목록 -- 행사 ID만 추출 (좋아요 정보만 한꺼번에 조회하기 위함)
+        List<Long> eventIds = eventPage.getContent().stream()
+                .map(Event::getId)
+                .toList();
+
+        // 행사별 좋아요 조회 결과 저장
+        Map<Long, EventRepository.FavoriteSummary> favoriteMap = new HashMap<>();
+        if (!eventIds.isEmpty()) {
+            List<EventRepository.FavoriteSummary> favoriteList =
+                    eventRepository.findFavoriteSummaries(eventIds, userId);
+            for (EventRepository.FavoriteSummary favorite : favoriteList) {
+                favoriteMap.put(favorite.getEventId(), favorite);
+            }
+        }
+
+        // 행사 정보 + 좋아요 정보를 DTO로 변환
+        List<EventResponse.EventDto> eventDtoList = eventPage.getContent().stream()
+                // 현재 행사 ID로 Map에서 좋아요 정보 찾기
+                .map(event -> {
+                    EventRepository.FavoriteSummary favorite = favoriteMap.get(event.getId());
+                    Long favoriteCount = 0L;
+                    boolean isFavorite = false;
+                    // 실제 좋아요 정보가 있으면 값 변경
+                    if (favorite != null) {
+                        favoriteCount = favorite.getFavoriteCount();
+                        isFavorite = favorite.getUserFavoriteCount() > 0;
+                    }
+                    return new EventResponse.EventDto(
+                            event, favoriteCount, isFavorite);
+                })
+                .toList();
+
+        return new EventResponse.PageDto(eventPage, eventDtoList);
     }
 
     // 행사 상세 조회 기능

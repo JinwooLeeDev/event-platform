@@ -1,0 +1,278 @@
+
+<style>
+    .event-detail-page {
+        background: #f5f7fb;
+        min-height: 100vh;
+        padding: 55px 24px 80px;
+        color: #263247;
+    }
+
+    .event-detail-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        grid-template-areas:
+        "nav nav"
+        "header header"
+        "description info"
+        "description participants"
+        "description chat"
+        "description closed"
+        "description owner"
+        "footer footer";
+        gap: 22px;
+    }
+
+    /* 상단 이동 */
+    .event-detail-navigation {
+        grid-area: nav;
+    }
+
+    .event-detail-navigation a {
+        color: #718096;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .event-detail-navigation a:hover {
+        color: #2864dc;
+    }
+
+    /* 행사 제목 영역 */
+    .event-detail-header {
+        grid-area: header;
+        background: linear-gradient(120deg, #244fbd, #4385ed);
+        color: white;
+        padding: 42px 48px;
+        border-radius: 22px;
+        box-shadow: 0 12px 30px rgba(39, 91, 190, 0.15);
+    }
+
+    .event-detail-category {
+        display: inline-block;
+        padding: 7px 14px;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.18);
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .event-detail-title {
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0 0 14px;
+        line-height: 1.4;
+    }
+
+    .event-detail-summary {
+        font-size: 16px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.88);
+        margin: 0;
+    }
+
+    /* 행사 소개 - 왼쪽 */
+    .event-detail-description {
+        grid-area: description;
+        background: white;
+        padding: 34px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(30, 50, 80, 0.05);
+        min-height: 350px;
+    }
+
+    .event-detail-description h2,
+    .event-detail-info h2,
+    .event-detail-participants h2 {
+        font-size: 19px;
+        margin: 0 0 24px;
+        font-weight: 800;
+    }
+
+    .event-detail-description-content {
+        font-size: 15px;
+        line-height: 2;
+        color: #596579;
+        white-space: pre-line;
+    }
+
+    /* 행사 정보 - 오른쪽 */
+    .event-detail-info {
+        grid-area: info;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(30, 50, 80, 0.05);
+    }
+
+    .event-detail-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .event-detail-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .event-detail-info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .event-detail-info-item span {
+        color: #8993a5;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .event-detail-info-item strong {
+        color: #344158;
+        font-size: 14px;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    /* 참가 현황 */
+    .event-detail-participants {
+        grid-area: participants;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(30, 50, 80, 0.05);
+    }
+
+    .event-detail-counts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .event-detail-counts > div {
+        background: #f3f6fc;
+        padding: 20px 12px;
+        border-radius: 14px;
+        text-align: center;
+    }
+
+    .event-detail-counts span {
+        display: block;
+        color: #7d899d;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .event-detail-counts strong {
+        color: #2864dc;
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    /* 안내 영역 */
+    .event-detail-chat,
+    .event-detail-closed,
+    .event-detail-owner {
+        padding: 20px 24px;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 5px 20px rgba(30, 50, 80, 0.05);
+    }
+
+    .event-detail-chat {
+        grid-area: chat;
+        background: #edf5ff;
+        color: #2864dc;
+    }
+
+    .event-detail-chat p {
+        margin: 0;
+    }
+
+    .event-detail-closed {
+        grid-area: closed;
+        color: #d05b5b;
+    }
+
+    .event-detail-owner {
+        grid-area: owner;
+    }
+
+    /* 버튼 */
+    .event-detail-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 13px 22px;
+        border-radius: 10px;
+        background: #2864dc;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        transition: 0.2s;
+    }
+
+    .event-detail-button:hover {
+        background: #194eb8;
+        transform: translateY(-2px);
+    }
+
+    .event-detail-button.secondary {
+        background: white;
+        color: #526078;
+        border: 1px solid #dce2ec;
+    }
+
+    .event-detail-button.secondary:hover {
+        background: #f1f4f9;
+    }
+
+    .event-detail-footer {
+        grid-area: footer;
+        display: flex;
+        justify-content: center;
+        padding-top: 8px;
+    }
+
+    /* 모바일 */
+    @media (max-width: 768px) {
+        .event-detail-page {
+            padding: 30px 16px 50px;
+        }
+
+        .event-detail-container {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+            "nav"
+            "header"
+            "info"
+            "participants"
+            "description"
+            "chat"
+            "closed"
+            "owner"
+            "footer";
+            gap: 16px;
+        }
+
+        .event-detail-header {
+            padding: 30px 25px;
+        }
+
+        .event-detail-title {
+            font-size: 25px;
+        }
+
+        .event-detail-description,
+        .event-detail-info,
+        .event-detail-participants {
+            padding: 25px;
+        }
+    }
+</style>

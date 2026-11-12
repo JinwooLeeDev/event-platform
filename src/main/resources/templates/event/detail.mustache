@@ -1,0 +1,113 @@
+
+{{> layout/header}}
+{{> event/detail-style}}
+
+<main class="event-detail-page">
+    <div class="event-detail-container">
+
+        <!-- 상단 이동 -->
+        <div class="event-detail-navigation">
+            <a href="/events/list">← 메인으로</a>
+        </div>
+
+        <!-- 행사 기본 정보 -->
+        <section class="event-detail-header">
+            <div class="event-detail-category">
+                {{event.categoryName}}
+            </div>
+
+            <h1 class="event-detail-title">
+                {{event.title}}
+            </h1>
+
+            <p class="event-detail-summary">
+                {{event.summary}}
+            </p>
+        </section>
+
+        <!-- 행사 정보 -->
+        <section class="event-detail-info">
+            <h2>행사 정보</h2>
+
+            <div class="event-detail-info-list">
+                <div class="event-detail-info-item">
+                    <span>행사 장소</span>
+                    <strong>{{event.address}}</strong>
+                </div>
+
+                <div class="event-detail-info-item">
+                    <span>신청 시작</span>
+                    <strong>{{event.applyStartAt}}</strong>
+                </div>
+
+                <div class="event-detail-info-item">
+                    <span>신청 마감</span>
+                    <strong>{{event.applyEndAt}}</strong>
+                </div>
+
+                <div class="event-detail-info-item">
+                    <span>행사 공개일</span>
+                    <strong>{{event.publishedAt}}</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- 행사 상세 설명 -->
+        <section class="event-detail-description">
+            <h2>행사 소개</h2>
+            <div class="event-detail-description-content">
+                {{event.description}}
+            </div>
+        </section>
+
+        <!-- 참가 현황 -->
+        <section class="event-detail-participants">
+            <h2>참가 현황</h2>
+
+            <div class="event-detail-counts">
+                <div>
+                    <span>확정 인원</span>
+                    <strong>{{event.confirmedCount}}명</strong>
+                </div>
+
+                <div>
+                    <span>대기 인원</span>
+                    <strong>{{event.waitingCount}}명</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- 채팅 -->
+        {{#event.chatAvailable}}
+            <div class="event-detail-chat">
+                <p>이 행사에 참가 확정되어 채팅에 참여할 수 있습니다.</p>
+            </div>
+        {{/event.chatAvailable}}
+
+        <!-- 신청 마감 여부 -->
+        {{#event.applicationClosed}}
+            <div class="event-detail-closed">
+                신청이 마감된 행사입니다.
+            </div>
+        {{/event.applicationClosed}}
+
+        <!-- 기업 회원 본인 행사일 때 -->
+        {{#event.owner}}
+            <div class="event-detail-owner">
+                <a href="/events/update/{{event.id}}" class="event-detail-button">
+                    행사 수정
+                </a>
+            </div>
+        {{/event.owner}}
+
+<!--        &lt;!&ndash; 하단 이동 &ndash;&gt;-->
+<!--        <div class="event-detail-footer">-->
+<!--            <a href="/events/list" class="event-detail-button secondary">-->
+<!--                목록으로 돌아가기-->
+<!--            </a>-->
+<!--        </div>-->
+
+    </div>
+</main>
+
+{{> layout/footer}}

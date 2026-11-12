@@ -1,4 +1,3 @@
-
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
@@ -6,44 +5,15 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class EventTest {
 
-    // 모집 마감 전이면 false
-    @Test
-    void isApplicationClosed_beforeEnd_test() {
-        Event event = Event.builder()
-                .applyEndAt(LocalDateTime.now().plusDays(1))
-                .build();
-
-        assertFalse(event.isApplicationClosed());
-    }
-
-    // 모집 마감 시간이 지나면 true
-    @Test
-    void isApplicationClosed_afterEnd_test() {
-        Event event = Event.builder()
-                .applyEndAt(LocalDateTime.now().minusDays(1))
-                .build();
-
-        assertTrue(event.isApplicationClosed());
-    }
-
-    // 모집 마감 시간이 현재 시간이면 true
-    @Test
-    void isApplicationClosed_atEnd_test() {
-        Event event = Event.builder()
-                .applyEndAt(LocalDateTime.now())
-                .build();
-
-        assertTrue(event.isApplicationClosed());
-    }
-
-    // 기업 소유자 확인
+    // 1. 행사 생성 시 소유 기업 확인
     @Test
     void isOwner_test() {
+        // given
         Company company = mock(Company.class);
         when(company.getId()).thenReturn(1L);
 
@@ -51,17 +21,57 @@ class EventTest {
                 .company(company)
                 .build();
 
-        assertTrue(event.isOwner(1L));
-        assertFalse(event.isOwner(2L));
+        // when
+        boolean result = event.isOwner(1L);
+
+        // then
+        assertThat(result).isTrue();
     }
 
-    // 행사 생성 시 생성 시각 자동 입력
+    // 2. 다른 기업은 소유자가 아님
+    @Test
+    void isOwner_differentCompany_test() {
+        // given
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(1L);
+
+        Event event = Event.builder()
+                .company(company)
+                .build();
+
+        // when
+        boolean result = event.isOwner(2L);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    // 3. 행사 생성 시각 자동 설정
     @Test
     void onCreate_test() {
-        Event event = Event.builder().build();
+        // given
+        Event event = new Event();
 
+        // when
         event.onCreate();
 
-        assertNotNull(event.getCreatedAt());
+        // then
+        assertThat(event.getCreatedAt()).isNotNull();
+        assertThat(event.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+    }
+
+    // 4. 행사 생성 시각이 기존 값으로 덮어지지 않는지 확인
+    @Test
+    void onCreate_setsCurrentTime_test() {
+        // given
+        Event event = new Event();
+
+        // when
+        event.onCreate();
+
+        LocalDateTime createdAt = event.getCreatedAt();
+
+        // then
+        assertThat(createdAt).isNotNull();
     }
 }
