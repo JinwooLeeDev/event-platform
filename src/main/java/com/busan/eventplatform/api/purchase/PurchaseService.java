@@ -95,7 +95,24 @@ public class PurchaseService {
         if(loginIdentity.isUser()) {
             User user = userRepository.findById(loginIdentity.getId())
                     .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
-            return pay(user, eventSession);
+
+            // 2. 유저가 이미 결제한 행사인지.
+            if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) {
+                throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
+            }
+
+            // 3. 통과했다면 포인트 차감 + 결제내역 건 생성.  포인트 부족하다면 deductPoint 내부에서 필터링.
+            user.deductPoint(eventSession.getFee());
+
+            Purchase purchase = Purchase.builder()
+                    .user(user)
+                    .eventSession(eventSession)
+                    .price(eventSession.getFee())
+                    .build();
+
+            purchaseRepository.save(purchase);
+
+            return purchase;
         }
 
         /// Company 분기점
@@ -120,7 +137,8 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
             return purchase;
         }
-        throw new Exception500("서버 내부에 문제가 발생했습니다.");
+
+        throw new Exception500("내부에 문제가 생겼습니다");
     }
 
 

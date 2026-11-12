@@ -14,7 +14,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("eventPage", eventService.findAllPage(1, 12, ""));
+        model.addAttribute("eventPage", eventService.findAllPage(1, 8, ""));
         return "main";
     }
 }
