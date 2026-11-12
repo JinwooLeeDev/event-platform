@@ -1,8 +1,8 @@
 package com.busan.eventplatform.api.payment;
 
 public enum PaymentStatus {
-    READY("결제 대기") ,
-    PAID("결제 완료") ,
+    READY("충전 대기") ,
+    PAID("충전 완료") ,
     CANCELED("결제 취소");
 
     private final String displayName;

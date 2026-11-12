@@ -51,7 +51,11 @@ public class EventService {
     }
 
     // 행사 목록 조회 기능
-    public EventResponse.PageDto findAllPage(int page, int size, String keyword, Long userId) {
+    public EventResponse.PageDto findAllPage(int page, int size, String keyword) {
+        return findAllPage(page, size, keyword, null);
+    }
+
+    public EventResponse.PageDto findAllPage(int page, int size, String keyword, Long categoryId) {
 
         // 페이지 번호 0부터 시작하도록 반환
         int pageIndex = Math.max(0, page - 1);
@@ -61,11 +65,8 @@ public class EventService {
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
         // 행사 조회
         Page<Event> eventPage;
-        if (keyword == null || keyword.isBlank()) {
-            eventPage = eventRepository.findAllPublished(EventStatus.PUBLISHED, pageable);
-        } else {
-            eventPage = eventRepository.findAllKeyWord(EventStatus.PUBLISHED, keyword.trim(), pageable);
-        }
+        eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
+                keyword == null ? "" : keyword.trim(), pageable);
 
         // 현재 페이지에 포함된 행사 ID 목록 -- 행사 ID만 추출 (좋아요 정보만 한꺼번에 조회하기 위함)
         List<Long> eventIds = eventPage.getContent().stream()

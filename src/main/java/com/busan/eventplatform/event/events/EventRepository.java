@@ -12,6 +12,21 @@ import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
+    @Query(value = """
+            select e from Event e left join fetch e.category
+            where e.status = :status
+              and (:categoryId is null or e.category.id = :categoryId)
+              and (:keyword = '' or lower(e.title) like lower(concat('%', :keyword, '%'))
+                   or lower(e.summary) like lower(concat('%', :keyword, '%')))
+            """, countQuery = """
+            select count(e) from Event e where e.status = :status
+              and (:categoryId is null or e.category.id = :categoryId)
+              and (:keyword = '' or lower(e.title) like lower(concat('%', :keyword, '%'))
+                   or lower(e.summary) like lower(concat('%', :keyword, '%')))
+            """)
+    Page<Event> findPublishedFiltered(@Param("status") EventStatus status,
+            @Param("categoryId") Long categoryId, @Param("keyword") String keyword, Pageable pageable);
+
     // 공개된 행사 조회 (eventStatus가 PUBLISHED일 때)
     @Query(value = """
                 select e from Event e left join fetch e.category

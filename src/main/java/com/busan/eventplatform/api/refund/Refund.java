@@ -1,6 +1,8 @@
 package com.busan.eventplatform.api.refund;
 
 
+import com.busan.eventplatform.api.purchase.Purchase;
+import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +14,6 @@ import java.sql.Timestamp;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Refund {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,16 +22,34 @@ public class Refund {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private int amount; // 환불된 금액
-    private String reason; // 환불 사유
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @CreationTimestamp
     private Timestamp createdAt;
 
+    @Enumerated(EnumType.STRING)   @Column(nullable = false)
+    private RefundStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_id")
+    private Purchase purchase;
+
+    @Column(length = 800) // 유저는 사유 없어도 되고 기업은 필요하므로 null -- true.
+    private String reason; // 환불 사유
+
+    private int amount; // 환불된 금액
+
+    // TODO 추후) 관리자 승인 컬럼 추가.
+
     @Builder
-    public Refund(User user, int amount, String reason) {
+    public Refund(User user , Company company , Purchase purchase , String reason, int amount) {
         this.user = user;
-        this.amount = amount;
+        this.company = company;
+        this.purchase = purchase;
+        this.status = RefundStatus.READY;
         this.reason = reason;
+        this.amount = amount;
     }
 }
