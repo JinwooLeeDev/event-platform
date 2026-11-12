@@ -50,6 +50,10 @@ public class EventService {
 
     // 행사 목록 조회 기능
     public EventResponse.PageDto findAllPage(int page, int size, String keyword) {
+        return findAllPage(page, size, keyword, null);
+    }
+
+    public EventResponse.PageDto findAllPage(int page, int size, String keyword, Long categoryId) {
 
         // 페이지 번호 0부터 시작하도록 반환
         int pageIndex = Math.max(0, page - 1);
@@ -59,11 +63,8 @@ public class EventService {
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
         // 행사 조회
         Page<Event> eventPage;
-        if (keyword == null || keyword.isBlank()) {
-            eventPage = eventRepository.findAllPublished(EventStatus.PUBLISHED, pageable);
-        } else {
-            eventPage = eventRepository.findAllKeyWord(EventStatus.PUBLISHED, keyword.trim(), pageable);
-        }
+        eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
+                keyword == null ? "" : keyword.trim(), pageable);
 
         return new EventResponse.PageDto(eventPage);
     }

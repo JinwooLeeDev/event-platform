@@ -83,7 +83,7 @@ public class EventResponse {
     public static class DetailDto {
         private Long id;
         private String title;
-        private Long companyId;
+        private String companyName;
         private Long categoryId;
         private String categoryName;
         private String summary;
@@ -103,7 +103,7 @@ public class EventResponse {
             this.id = event.getId();
             this.title = event.getTitle();
             if (event.getCompany() != null) {
-                this.companyId = event.getCompany().getId();
+                this.companyName = event.getCompany().getName();
             }
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
@@ -159,5 +159,4 @@ public class EventResponse {
             this.feedbackMessage = event.getFeedbackMessage();
         }
     }
-
 }

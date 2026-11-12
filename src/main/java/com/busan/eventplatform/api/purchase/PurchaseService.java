@@ -38,33 +38,54 @@ public class PurchaseService {
                     .build();
     }
 
+    // [참가 신청 흐름 전용] 검증이 끝난 회원·회차로 결제만 수행 (RegistrationPurchaseService ② 단계)
+    // 신청 트랜잭션에 합류 → 이후 신청 저장 실패 시 함께 롤백
+    @Transactional
+    public Purchase pay(User user, EventSession eventSession) {
+        // 1. 같은 회차 중복 결제 확인 (TODO 포인트 파트: 환불 건 제외 조건 추가)
+        if (purchaseRepository.existsEventByUser(user.getId(), eventSession.getId())) {
+            throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
+        }
+
+        // 2. 포인트 차감 (잔액 부족 시 예외)
+        user.deductPoint(eventSession.getFee());
+
+        // 3. 결제 내역 저장 후 반환 (신청에 purchase_id로 연결)
+        Purchase purchase = Purchase.builder()
+                .user(user)
+                .eventSession(eventSession)
+                .price(eventSession.getFee())
+                .build();
+        return purchaseRepository.save(purchase);
+    }
+
 
     // 행사 결제 기능.
     @Transactional
     public Purchase purchase(Long eventSessionId, Long userId) {
         EventSession eventSession = eventSessionRepository.findById(eventSessionId)
-                        .orElseThrow(() -> new Exception404("결제하려는 행사가 존재하지 않습니다"));
+                .orElseThrow(() -> new Exception404("결제하려는 행사가 존재하지 않습니다"));
 
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
 
-            // 2. 유저가 이미 결제한 행사인지.
-            if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) {
-                throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
-            }
+        // 2. 유저가 이미 결제한 행사인지.
+        if(purchaseRepository.existsEventByUser(user.getId() , eventSession.getId())) {
+            throw new AlreadyPurchaseException("이미 결제처리된 행사입니다");
+        }
 
-            // 3. 통과했다면 포인트 차감 + 결제내역 건 생성.  포인트 부족하다면 deductPoint 내부에서 필터링.
-            user.deductPoint(eventSession.getFee());
+        // 3. 통과했다면 포인트 차감 + 결제내역 건 생성.  포인트 부족하다면 deductPoint 내부에서 필터링.
+        user.deductPoint(eventSession.getFee());
 
-            Purchase purchase = Purchase.builder()
-                    .user(user)
-                    .eventSession(eventSession)
-                    .price(eventSession.getFee())
-                    .build();
+        Purchase purchase = Purchase.builder()
+                .user(user)
+                .eventSession(eventSession)
+                .price(eventSession.getFee())
+                .build();
 
-            purchaseRepository.save(purchase);
+        purchaseRepository.save(purchase);
 
-            return purchase;
+        return purchase;
     }
 
 

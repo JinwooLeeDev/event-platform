@@ -1,12 +1,22 @@
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.global.util.Define;
+import com.busan.eventplatform.global.error.exception.Exception401;
+import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.login.LoginIdentity;
+import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.event.event_category.EventCategoryService;
+import com.busan.eventplatform.event.event_session.EventSessionService;
+import com.busan.eventplatform.event.event_session.EventSessionResponse;
+import java.util.Map;
+import java.util.Objects;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +30,11 @@ public class EventController {
 
     // Todo - return 수정
     private final EventService eventService;
+    private final EventCategoryService eventCategoryService;
+    private final EventSessionService eventSessionService;
+
+    @Value("${naver-map.client-id:}")
+    private String naverMapClientId;
 
     // 행사 목록 조회
     // GET - http://localhost:8080/events/list
@@ -28,9 +43,15 @@ public class EventController {
         @RequestParam(name = "page", defaultValue = "1") int page,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "keyword", defaultValue = "") String keyword,
+        @RequestParam(name = "categoryId", required = false) Long categoryId,
         Model model) {
 
-        EventResponse.PageDto pageDto = eventService.findAllPage(page, size, keyword);
+        EventResponse.PageDto pageDto = eventService.findAllPage(page, size, keyword, categoryId);
+        model.addAttribute("categoryId", categoryId == null ? "" : categoryId.toString());
+        model.addAttribute("allCategories", categoryId == null);
+        model.addAttribute("categories", eventCategoryService.findAllList().getCategoryList().stream()
+                .map(category -> Map.of("id", category.getId(), "name", category.getName(),
+                        "selected", Objects.equals(category.getId(), categoryId))).toList());
         model.addAttribute("eventPage", pageDto);
         model.addAttribute("keyword", keyword);
         model.addAttribute("isSearch", !keyword.isBlank());
@@ -54,6 +75,11 @@ public class EventController {
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
+        var eventSessions = new EventSessionResponse.ListDto(eventSessionService.findByEventId(id))
+                .getEventSessionList();
+        model.addAttribute("eventSessions", eventSessions);
+        model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
+        model.addAttribute("naverMapClientId", naverMapClientId);
 
         return "event/detail";
     }
@@ -83,9 +109,15 @@ public class EventController {
     // GET - http://localhost:8080/events
     @GetMapping ("/events")
     public String findAllByCompanyId(HttpSession session, Model model) {
-
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        LoginIdentity identity = LoginSession.requireIdentity(session);
+        if (!identity.isCompany()) {
+            throw new Exception403("기업 계정만 주최 행사를 조회할 수 있습니다.");
+        }
+        Object value = session.getAttribute(LoginSession.COMPANY);
+        if (!(value instanceof SessionCompanyDto sessionCompanyDto)
+                || !java.util.Objects.equals(identity.getId(), sessionCompanyDto.getId())) {
+            throw new Exception401("기업 계정으로 다시 로그인해주세요.");
+        }
         EventResponse.ListDto response =
                 eventService.findAllByCompanyId(sessionCompanyDto.getId());
         model.addAttribute("eventList", response);
