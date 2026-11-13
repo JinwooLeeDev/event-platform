@@ -318,8 +318,7 @@ VALUES (36001, '팝업'),
        (36006, '봉사'),
        (36007, '교류');
 
-
--- 04 events: 상태 5종. 모집 전/중/마감, 회차 없는 행사, 보완/취소 사유, 실제 검색 가능한 장소 주소.
+-- 05 event_sessions: 상태 4종, 무료/유료, 여유/만석/빈 회차, 최소 인원 미달/일치, 당일 개최, 예약금. 점유 수는 확정+승인 대기와 일치.
 INSERT INTO events (id, company_id, category_id, address, title, summary, status, description, apply_start_at,
                     apply_end_at, published_at, cancelled_at, cancellation_reason, feedback_message, created_at)
 VALUES (36001, 36002, 36002, '부산광역시 수영구 광안해변로 219', '모집 중 무료·유료 복합 행사', '[예시36-01] 모집 중 무료·유료 복합 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.
@@ -381,7 +380,7 @@ VALUES (36001, 36002, 36002, '부산광역시 수영구 광안해변로 219', '�
         TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP));
 
 
--- 05 event_sessions: 상태 4종, 무료/유료, 여유/만석/빈 회차, 최소 인원 미달/일치, 당일 개최, 예약금. 점유 수는 확정+승인 대기와 일치.
+-- 04 events: 상태 5종. 모집 전/중/마감, 회차 없는 행사, 보완/취소 사유, 실제 검색 가능한 장소 주소.
 INSERT INTO event_sessions (id, event_id, name, starts_at, ends_at, capacity, occupied_count, next_reception_number,
                             hold_duration_seconds, pricing_type, fee, reservation_deposit_points, minimum_participants,
                             minimum_check_at, status, created_at)
@@ -613,3 +612,59 @@ VALUES (36001, 36001, 'seed36/events/1/poster.png', 0),
        (36002, 36012, 'seed36/events/12/poster.png', 0),
        (36003, 36012, 'seed36/events/12/guide.png', 1),
        (36004, 36012, 'seed36/events/12/location.png', 2);
+
+
+
+
+
+-----------------------------------------------------테스트용 더미데이터-------------------------------------------------------------------------------------------------------------------------------------------
+
+INSERT INTO events (
+    id, company_id, category_id, address, title, summary,
+    status, description, apply_start_at, apply_end_at,
+    published_at, cancelled_at, cancellation_reason,
+    feedback_message, created_at
+)
+VALUES (
+           36015,
+           36002,
+           36002,
+           '부산광역시 해운대구 APEC로 55',
+           '기업 보증금 결제 테스트 행사',
+           '관리자 승인 완료 · 기업 보증금 결제 대기',
+           'PAID_READY',
+           '기업 보증금 결제 기능 테스트를 위한 행사입니다.',
+           TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP),
+           TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP),
+           NULL,
+           NULL,
+           NULL,
+           NULL,
+           CURRENT_TIMESTAMP
+       );
+
+INSERT INTO event_sessions (
+    id, event_id, name, starts_at, ends_at,
+    capacity, occupied_count, next_reception_number,
+    hold_duration_seconds, pricing_type, fee,
+    reservation_deposit_points, minimum_participants,
+    minimum_check_at, status, created_at
+)
+VALUES (
+           36017,
+           36015,
+           '보증금 결제 테스트 1회차',
+           TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP),
+           TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP),
+           30,
+           0,
+           1,
+           300,
+           'PAID',
+           5000,
+           0,
+           5,
+           TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP),
+           'SCHEDULED',
+           CURRENT_TIMESTAMP
+       );
