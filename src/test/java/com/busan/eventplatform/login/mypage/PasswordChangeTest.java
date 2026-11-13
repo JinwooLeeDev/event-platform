@@ -65,7 +65,7 @@ class PasswordChangeTest {
     @Test
     void successfulChangeInvalidatesSessionAndRedirectsToLogin() {
         MyPageService service = mock(MyPageService.class);
-        MyPageController controller = new MyPageController(service, mock(PurchaseService.class));
+        MyPageController controller = new MyPageController(service, mock(PurchaseService.class), mock(com.busan.eventplatform.api.payment.PaymentService.class), mock(com.busan.eventplatform.user.registration.RegistrationService.class));
         MockHttpSession session = new MockHttpSession();
         RedirectAttributesModelMap flash = new RedirectAttributesModelMap();
         MyPasswordUpdateReqDto dto = request("old-password", "new-password", "new-password");
@@ -79,7 +79,7 @@ class PasswordChangeTest {
     @Test
     void validationFailureKeepsSessionAndAnonymousRequestIsRejected() {
         MyPageService service = mock(MyPageService.class);
-        MyPageController controller = new MyPageController(service, mock(PurchaseService.class));
+        MyPageController controller = new MyPageController(service, mock(PurchaseService.class), mock(com.busan.eventplatform.api.payment.PaymentService.class), mock(com.busan.eventplatform.user.registration.RegistrationService.class));
         MockHttpSession session = new MockHttpSession();
         RedirectAttributesModelMap flash = new RedirectAttributesModelMap();
         MyPasswordUpdateReqDto dto = request("wrong", "new-password", "new-password");
