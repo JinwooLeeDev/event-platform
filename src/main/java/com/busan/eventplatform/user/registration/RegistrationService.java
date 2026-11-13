@@ -368,10 +368,10 @@ public class RegistrationService {
             return "취소된 행사입니다";
         }
         // 행사 모집 기간 (Event.applyStartAt ~ applyEndAt)
-        if (now.isBefore(event.getApplyStartAt())) {
+        if (now.isBefore(session.getApplyStartAt())) {
             return "아직 모집 기간이 아닙니다";
         }
-        if (event.isApplicationClosed()) {
+        if (session.isApplicationClosed()) {
             return "모집이 마감된 행사입니다";
         }
         // 회차 상태: 진행 예정(SCHEDULED) 회차만 신청 가능 (상태가 비어 있는 데이터는 허용)

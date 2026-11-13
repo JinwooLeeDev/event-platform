@@ -45,15 +45,11 @@ public class EventResponse {
 
     @Data
     public static class EventDto {
-        private static final DateTimeFormatter APPLICATION_DATE_FORMAT =
-                DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
         private Long id;
         private Long categoryId;
         private String categoryName;
         private String title;
         private String summary;
-        private String applyStartAt;
-        private String applyEndAt;
         private LocalDateTime createdAt;
         private LocalDateTime publishedAt;
         private EventStatus status;
@@ -69,10 +65,6 @@ public class EventResponse {
             }
             this.title = event.getTitle();
             this.summary = event.getSummary();
-            this.applyStartAt = event.getApplyStartAt() == null
-                    ? "일정 확인 중" : event.getApplyStartAt().format(APPLICATION_DATE_FORMAT);
-            this.applyEndAt = event.getApplyEndAt() == null
-                    ? "일정 확인 중" : event.getApplyEndAt().format(APPLICATION_DATE_FORMAT);
             this.createdAt = event.getCreatedAt();
             this.publishedAt = event.getPublishedAt();
             this.status = event.getStatus();
@@ -92,11 +84,8 @@ public class EventResponse {
         private String summary;
         private String description;
         private String address;
-        private LocalDateTime applyStartAt;
-        private LocalDateTime applyEndAt;
         private LocalDateTime publishedAt;
         private LocalDateTime createdAt;
-        private boolean applicationClosed;
         private boolean owner;
         private Long confirmedCount;
         private Long waitingCount;
@@ -115,11 +104,8 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
-            this.applyStartAt = event.getApplyStartAt();
-            this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
             this.createdAt = event.getCreatedAt();
-            this.applicationClosed = event.isApplicationClosed();
             this.owner = owner;
             this.confirmedCount = confirmedCount;
             this.waitingCount = waitingCount;
@@ -138,8 +124,6 @@ public class EventResponse {
         private String summary;
         private String description;
         private String address;
-        private LocalDateTime applyStartAt;
-        private LocalDateTime applyEndAt;
         private LocalDateTime publishedAt;
         private String feedbackMessage;
 
@@ -156,8 +140,6 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
-            this.applyStartAt = event.getApplyStartAt();
-            this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
             this.feedbackMessage = event.getFeedbackMessage();
         }

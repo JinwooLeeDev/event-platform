@@ -83,8 +83,8 @@ public class EventController {
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
-        var eventSessions = new EventSessionResponse.ListDto(eventSessionService.findByEventId(id))
-                .getEventSessionList();
+        var eventSessions = eventSessionService.findByEventId(id);
+
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
         model.addAttribute("naverMapClientId", naverMapClientId);
