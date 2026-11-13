@@ -1,4 +1,4 @@
-package com.busan.eventplatform;
+package com.busan.eventplatform.point;
 
 import com.busan.eventplatform.api.payment.Payment;
 import com.busan.eventplatform.api.payment.PaymentRepository;

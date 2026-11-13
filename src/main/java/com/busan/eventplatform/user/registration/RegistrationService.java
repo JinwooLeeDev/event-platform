@@ -1,6 +1,7 @@
 package com.busan.eventplatform.user.registration;
 
 import com.busan.eventplatform.api.purchase.Purchase;
+import com.busan.eventplatform.api.refund.RefundPolicy;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
@@ -152,7 +153,7 @@ public class RegistrationService {
      * @return 환불 요청 (어느 결제를 얼마 환불할지)
      */
     @Transactional
-    public RefundRequest cancel(Long registrationId, LoginIdentity loginIdentity) {
+    public void cancel(Long registrationId, LoginIdentity loginIdentity) {
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 신청을 취소할 수 있습니다");
         }
@@ -160,6 +161,7 @@ public class RegistrationService {
         // 회차 락 → 신청 조회 순서 (동시 승격과 겹쳐도 최신 상태로 판단)
         Registration registration = findRegistrationWithSessionLock(registrationId);
         EventSession session = registration.getEventSession();
+
 
         if (!registration.isOwnedBy(loginIdentity.getId())) {
             throw new RegistrationForbiddenException("본인의 신청만 취소할 수 있습니다");
@@ -175,19 +177,15 @@ public class RegistrationService {
         RegistrationStatus statusBefore = registration.getStatus();
         boolean releasedSeat = statusBefore.isSeatOccupying();
 
-        registration.cancel();
+        registration.cancel(); // 상태가 바뀜
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
+
 
         if (releasedSeat) {
             session.releaseSeat();
             promoteWaitingUsersIfAny(session);
         }
 
-        // 환불 금액 계산 (실제 결제 금액 기준, 날짜 기준 차등)
-        int paidAmount = paidAmountOf(registration);
-        int refundAmount = RegistrationRefundPolicy.forUserCancel(
-                paidAmount, statusBefore, now.toLocalDate(), session.getStartsAt().toLocalDate());
-        return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
 
@@ -219,7 +217,7 @@ public class RegistrationService {
             promoteWaitingUsersIfAny(session);
         }
 
-        int refundAmount = RegistrationRefundPolicy.forCompanyReject(paidAmountOf(registration));
+        int refundAmount = RefundPolicy.forCompanyReject(paidAmountOf(registration));
         return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
@@ -518,7 +516,7 @@ public class RegistrationService {
 
         // 1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RegistrationRefundPolicy)
         int expectedRefund = cancelable
-                ? RegistrationRefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
+                ? RefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
                 : 0;
 
         // 2. 표시 상태 결정 — 우선순위: 거절 > 취소 > 시작됨(행사 종료) > 대기 > 확정
@@ -582,7 +580,7 @@ public class RegistrationService {
                 .refundText("") // TODO step 8: 포인트 파트 환불 필드(refundAmount) 연결 → "환불 완료 16,666P"
                 .cancelable(cancelable)
                 .cancelConfirmText(cancelConfirm)
-                .refundPolicyText(cancelable && paid > 0 ? RegistrationRefundPolicy.POLICY_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
+                .refundPolicyText(cancelable && paid > 0 ? RefundPolicy.POLICY_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
                 .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
                 .build();
