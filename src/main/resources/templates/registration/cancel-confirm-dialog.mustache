@@ -1,0 +1,66 @@
+<!-- [참가 취소 확인 창 공용 partial] 취소 버튼 클릭 → 확인 창 (환불 정책 보기 / 닫기 / 참가 취소)
+     사용법: 취소 버튼에 class="reg-cancel-btn" 과 data-cancel-url, data-confirm, data-refund-policy 속성,
+     페이지 맨 아래에 이 partial(registration/cancel-confirm-dialog)을 한 번만 포함
+     주의: 머스태치 태그는 주석 안에서도 실행되므로 주석에는 말로만 적는다 -->
+<dialog id="reg-cancel-dialog" class="reg-cancel-dialog" aria-labelledby="reg-cancel-message">
+    <form method="post" id="reg-cancel-form">
+        <p id="reg-cancel-message" class="reg-cancel-message"></p>
+        <div class="reg-cancel-actions">
+            <button type="button" id="reg-cancel-policy-btn" class="reg-cancel-btn-policy">환불 정책 보기</button>
+            <button type="button" id="reg-cancel-close-btn" class="reg-cancel-btn-close">닫기</button>
+            <button type="submit" id="reg-cancel-submit-btn" class="reg-cancel-btn-submit">참가 취소</button>
+        </div>
+    </form>
+</dialog>
+
+<style>
+    .reg-cancel-dialog { border: none; border-radius: 16px; padding: 28px 24px 20px; width: min(420px, 90vw); box-shadow: 0 20px 50px rgba(15, 23, 42, .25); }
+    .reg-cancel-dialog::backdrop { background: rgba(15, 23, 42, .45); }
+    .reg-cancel-message { white-space: pre-line; margin: 0 0 20px; line-height: 1.6; color: #111827; }
+    .reg-cancel-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .reg-cancel-actions button { border-radius: 10px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+    .reg-cancel-btn-policy { margin-right: auto; border: 1px solid #2563eb; background: #fff; color: #2563eb; }
+    .reg-cancel-btn-close { border: 1px solid #d1d5db; background: #fff; color: #374151; }
+    .reg-cancel-btn-submit { border: none; background: #dc2626; color: #fff; }
+</style>
+
+<script>
+    (function () {
+        var dialog = document.getElementById("reg-cancel-dialog");
+        var form = document.getElementById("reg-cancel-form");
+        var message = document.getElementById("reg-cancel-message");
+        var policyBtn = document.getElementById("reg-cancel-policy-btn");
+        var closeBtn = document.getElementById("reg-cancel-close-btn");
+        var submitBtn = document.getElementById("reg-cancel-submit-btn");
+        var policyText = "";
+
+        // 1. 취소 버튼 클릭 → 그 신청의 취소 주소·확인 문구·환불 정책을 확인 창에 채우고 열기
+        document.addEventListener("click", function (event) {
+            var button = event.target.closest(".reg-cancel-btn");
+            if (!button) return;
+            event.preventDefault();
+
+            form.action = button.dataset.cancelUrl;
+            message.textContent = button.dataset.confirm || "참가 신청을 취소하시겠습니까?";
+            policyText = button.dataset.refundPolicy || "";
+            policyBtn.hidden = !policyText;          // 무료 회차는 환불 정책 버튼 숨김
+            submitBtn.disabled = false;
+            dialog.showModal();
+        });
+
+        // 2. [환불 정책 보기] → 정책 안내 (확인 누르면 확인 창으로 돌아옴)
+        policyBtn.addEventListener("click", function () {
+            alert(policyText);
+        });
+
+        // 3. [닫기] → 아무 일 없이 닫기
+        closeBtn.addEventListener("click", function () {
+            dialog.close();
+        });
+
+        // 4. [참가 취소] → 취소 주소로 POST (연속 클릭 방지)
+        form.addEventListener("submit", function () {
+            submitBtn.disabled = true;
+        });
+    })();
+</script>

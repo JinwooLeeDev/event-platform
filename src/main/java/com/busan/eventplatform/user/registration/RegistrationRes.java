@@ -118,6 +118,7 @@ public class RegistrationRes {
         private String cancelConfirmText;  // 취소 버튼 확인 창 문구 (환불 예정 금액 포함)
         private String cancelUrl;          // /registrations/cancel/{id} (취소 불가면 "")
         private String detailUrl;          // /event/{eventId}
+        private String refundPolicyText;   // [환불 정책 보기] 문구 (유료·취소 가능할 때만, 아니면 "" → 버튼 숨김)
     }
 
 
