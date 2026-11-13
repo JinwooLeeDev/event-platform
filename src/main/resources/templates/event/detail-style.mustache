@@ -23,7 +23,10 @@
     .detail-facts div { display: grid; grid-template-columns: 80px minmax(0,1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid #ececef; }
     .detail-facts dt { color: #72757e; font-size: 13px; }
     .detail-facts dd { margin: 0; overflow-wrap: anywhere; }
-    .detail-button { width: 100%; min-height: 48px; border: 0; border-radius: 10px; background: #e9eaee; color: #626772; font: inherit; font-weight: 700; cursor: not-allowed; }
+    .detail-button { width: 100%; min-height: 48px; border: 0; border-radius: 10px; background: #0750d8; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    .detail-button:hover:not(:disabled) { background: #0642b3; }
+    .detail-button:disabled { background: #e9eaee; color: #626772; cursor: not-allowed; }
+    .detail-button:focus-visible { outline: 3px solid #9cbfff; outline-offset: 3px; }
     .detail-session-picker { margin: 24px 0 18px; }
     .detail-session-picker label { display: block; margin-bottom: 8px; font-weight: 700; }
     .detail-session-picker select { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid #d9dce3; border-radius: 10px; background: white; color: #292f3d; font: inherit; }

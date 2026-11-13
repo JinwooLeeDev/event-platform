@@ -14,6 +14,8 @@ public class EventSessionRequest {
         private String name;
         private LocalDateTime startsAt;
         private LocalDateTime endsAt;
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
         private int capacity;
         private int holdDurationSeconds;
         private String pricingType;
@@ -35,6 +37,12 @@ public class EventSessionRequest {
             }
             if (startsAt.isAfter(endsAt)) {
                 throw new Exception400("행사 시작일은 종료일보다 늦을 수 없습니다.");
+            }
+            if (applyStartAt == null || applyEndAt == null) {
+                throw new Exception400("회차 모집 시작일과 마감일은 필수입니다.");
+            }
+            if (applyStartAt.isAfter(applyEndAt)) {
+                throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
             }
             if (capacity < 1) {
                 throw new Exception400("정원은 1명 이상이어야 합니다.");
@@ -65,6 +73,8 @@ public class EventSessionRequest {
                     .name(this.name)
                     .startsAt(this.startsAt)
                     .endsAt(this.endsAt)
+                    .applyStartAt(this.applyStartAt)
+                    .applyEndAt(this.applyEndAt)
                     .capacity(this.capacity)
                     .occupiedCount(0)
                     .nextReceptionNumber(1)

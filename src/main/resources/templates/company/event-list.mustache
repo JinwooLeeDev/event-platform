@@ -39,8 +39,7 @@
                     <h2>{{#title}}{{title}} - 총 {{sessionCount}}회차 예정{{/title}}{{^title}}{title}{{/title}}</h2>
                     <p class="company-events-description">{{#summary}}{{summary}}{{/summary}}{{^summary}}{summary}{{/summary}}</p>
                     <dl class="company-event-facts">
-                        <div><dt>모집 시작</dt><dd>{{#applyStartAt}}{{applyStartAt}}{{/applyStartAt}}{{^applyStartAt}}{applyStartAt}{{/applyStartAt}}</dd></div>
-                        <div><dt>모집 마감</dt><dd>{{#applyEndAt}}{{applyEndAt}}{{/applyEndAt}}{{^applyEndAt}}{applyEndAt}{{/applyEndAt}}</dd></div>
+                        <div><dt>회차별 모집 기간</dt><dd>{{#sessionPeriods}}<div><strong>{{name}}</strong><br>{{applyStartAt}} ~ {{applyEndAt}}</div>{{/sessionPeriods}}{{^sessionPeriods}}등록된 회차가 없습니다.{{/sessionPeriods}}</dd></div>
                         <div><dt>등록일</dt><dd>{{#createdAt}}<span data-company-event-date>{{createdAt}}</span>{{/createdAt}}{{^createdAt}}{createdAt}{{/createdAt}}</dd></div>
                         <div><dt>공개일</dt><dd>{{#publishedAt}}<span data-company-event-date>{{publishedAt}}</span>{{/publishedAt}}{{^publishedAt}}아직 공개되지 않았습니다.{{/publishedAt}}</dd></div>
                     </dl>
