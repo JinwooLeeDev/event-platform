@@ -29,6 +29,6 @@ public class DepositController {
         depositService.payDeposit(loginIdentity.getId() , eventId , sessionCount);
         redirectAttributes.addFlashAttribute("successMessage" , "결제가 완료되었습니다. 해당 행사가 최종 확정됩니다.");
 
-        return "redirect:/event/" + eventId;
+        return "redirect:/events";
     }
 }

@@ -9,27 +9,114 @@
 {{> layout/company-style}}
 {{> layout/account-style}}
 <style>
-    .company-home { padding: 40px 24px 60px; background: #f8f9fb; color: #292f3d; font-family: 'Pretendard',sans-serif; }
-    .company-home .company-card { max-width: none; width: 100%; padding: 30px; background: white; border: 1px solid #e6e7eb; border-radius: 18px; box-shadow: 0 3px 16px rgba(30,35,45,.025); }
-    .company-home .company-card h1 { margin: 0 0 10px; }
-    .company-home .company-card h2 { margin: 26px 0 16px; font-size: 24px; }
-    .company-home .company-card dl { display: grid; grid-template-columns: 140px minmax(0,1fr); margin: 0; }
-    .company-home .company-card dt,.company-home .company-card dd { margin: 0; padding: 15px 0; border-bottom: 1px solid #ececef; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
-    .company-home .company-card dt { color: #72757e; font-weight: 500; }
-    .company-home .company-card > p { color: #72757e; font-size: 14px; line-height: 1.75; }
-    .company-home .company-note { padding: 18px; border-radius: 12px; background: #f3efe8; color: #64615a; font-size: 13px; line-height: 1.8; margin: 24px 0; }
-    .company-home .company-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-    .company-home .company-link { display: inline-flex; padding: 12px 20px; border: 1px solid #0750d8; border-radius: 10px; background: #0750d8; color: white; text-decoration: none; font-size: 14px; font-weight: 600; }
-    .company-home .company-link.secondary { background: white; color: #555c68; border-color: #d9dbe1; }
-    @media(max-width:600px) { .company-home { padding: 28px 16px 40px; } .company-home .company-card { padding: 22px; } .company-home .company-card dl { grid-template-columns: 110px minmax(0,1fr); } }
+    .company-home {
+        padding: 40px 24px 60px;
+        background: #f8f9fb;
+        color: #292f3d;
+        font-family: 'Pretendard', sans-serif;
+    }
+
+    .company-home .company-card {
+        max-width: none;
+        width: 100%;
+        padding: 30px;
+        background: white;
+        border: 1px solid #e6e7eb;
+        border-radius: 18px;
+        box-shadow: 0 3px 16px rgba(30, 35, 45, .025);
+    }
+
+    .company-home .company-card h1 {
+        margin: 0 0 10px;
+    }
+
+    .company-home .company-card h2 {
+        margin: 26px 0 16px;
+        font-size: 24px;
+    }
+
+    .company-home .company-card dl {
+        display: grid;
+        grid-template-columns: 140px minmax(0, 1fr);
+        margin: 0;
+    }
+
+    .company-home .company-card dt, .company-home .company-card dd {
+        margin: 0;
+        padding: 15px 0;
+        border-bottom: 1px solid #ececef;
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .company-home .company-card dt {
+        color: #72757e;
+        font-weight: 500;
+    }
+
+    .company-home .company-card > p {
+        color: #72757e;
+        font-size: 14px;
+        line-height: 1.75;
+    }
+
+    .company-home .company-note {
+        padding: 18px;
+        border-radius: 12px;
+        background: #f3efe8;
+        color: #64615a;
+        font-size: 13px;
+        line-height: 1.8;
+        margin: 24px 0;
+    }
+
+    .company-home .company-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .company-home .company-link {
+        display: inline-flex;
+        padding: 12px 20px;
+        border: 1px solid #0750d8;
+        border-radius: 10px;
+        background: #0750d8;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .company-home .company-link.secondary {
+        background: white;
+        color: #555c68;
+        border-color: #d9dbe1;
+    }
+
+    @media (max-width: 600px) {
+        .company-home {
+            padding: 28px 16px 40px;
+        }
+
+        .company-home .company-card {
+            padding: 22px;
+        }
+
+        .company-home .company-card dl {
+            grid-template-columns: 110px minmax(0, 1fr);
+        }
+    }
 </style>
-<main class="company-home"><div class="account-layout">
-    {{> layout/company-nav}}
-    <section class="company-card account-content">
+<main class="company-home">
+<div class="account-layout">
+{{> layout/company-nav}}
+<section class="company-card account-content">
 
-        <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span><h1>기업 정보</h1><p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
+    <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span><h1>기업 정보</h1><p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
 
-        {{#company}}
+{{#company}}
         <div class="bp-heading">
             <div>
                 <p class="bp-eyebrow">PARTNER REVIEW</p>
@@ -134,224 +221,227 @@
                     </strong>
 
                     {{#verificationError}}
-                    <p>
-                        국세청 정보를 확인하지 못했습니다.
-                        재검증으로 정보 일치를 확인한 후 승인할 수 있습니다.
-                    </p>
+                        <p>
+                            국세청 정보를 확인하지 못했습니다.
+                            재검증으로 정보 일치를 확인한 후 승인할 수 있습니다.
+                        </p>
                     {{/verificationError}}
                 </div>
 
                 {{#reviewFeedback}}
-                <div class="bp-feedback">
-                    <strong>최근 관리자 보완 사유</strong>
-                    <p>{{reviewFeedback}}</p>
-                </div>
+                    <div class="bp-feedback">
+                        <strong>최근 관리자 보완 사유</strong>
+                        <p>{{reviewFeedback}}</p>
+                    </div>
                 {{/reviewFeedback}}
 
                 {{#reviewable}}
-                <div class="bp-actions">
-                    {{#approvable}}
-                    <form id="approveForm"
-                          action="/admin/companies/{{id}}/approve"
-                          method="post">
-                        <button type="submit"
-                                class="bp-button bp-button-primary bp-button-full">
-                            기업 승인
-                        </button>
-                    </form>
-                    {{/approvable}}
+                    <div class="bp-actions">
+                        {{#approvable}}
+                            <form id="approveForm"
+                                  action="/admin/companies/{{id}}/approve"
+                                  method="post">
+                                <button type="submit"
+                                        class="bp-button bp-button-primary bp-button-full">
+                                    기업 승인
+                                </button>
+                            </form>
+                        {{/approvable}}
 
-                    <button id="openCorrectionButton"
-                            type="button"
-                            class="bp-button bp-button-secondary bp-button-full">
-                        보완 요청
-                    </button>
-                </div>
+                        <button id="openCorrectionButton"
+                                type="button"
+                                class="bp-button bp-button-secondary bp-button-full">
+                            보완 요청
+                        </button>
+                    </div>
                 {{/reviewable}}
 
                 {{^reviewable}}
-                <p class="bp-hint">
-                    현재 상태에서는 승인·보완 요청을 처리할 수 없습니다.
-                </p>
+                    <p class="bp-hint">
+                        현재 상태에서는 승인·보완 요청을 처리할 수 없습니다.
+                    </p>
                 {{/reviewable}}
             </aside>
         </div>
 
-        {{#reviewable}}
-        <!-- 별도 브라우저 창이 아니라 현재 페이지 위에 뜨는 모달 -->
+    {{#reviewable}}
+            <!-- 별도 브라우저 창이 아니라 현재 페이지 위에 뜨는 모달 -->
         <dialog id="correctionDialog"
                 class="bp-dialog"
                 aria-labelledby="correctionTitle"
                 aria-describedby="correctionDescription">
 
-        <div class="company-note">이메일·비밀번호와 담당자 정보를 수정할 수 있습니다.<br>기업명·사업자등록번호 등 기업 인증정보는 수정 대상이 아닙니다.</div>
-        <div class="company-actions"><a class="company-link" href="/company/update">계정·담당자 정보 수정</a><a class="company-link secondary" href="/">메인으로 이동</a></div>
-    </section>
-</div></main>
+            <div class="company-note">이메일·비밀번호와 담당자 정보를 수정할 수 있습니다.<br>기업명·사업자등록번호 등 기업 인증정보는 수정 대상이 아닙니다.</div>
+            <div class="company-actions"><a class="company-link" href="/company/update">계정·담당자 정보 수정</a><a
+                    class="company-link secondary" href="/">메인으로 이동</a></div>
+    {{/reviewable}}
+{{/company}}
 
-{{>layout/footer}}
 
-<script>
-    (() => {
-        // 이 페이지 안에서만 요소를 찾고 다른 페이지 JS와 변수 충돌 방지
-        const page = document.getElementById("companyReviewPage");
+    {{>layout/footer}}
 
-        // 서버 enum은 그대로 받고, 표시 문구만 한글로 변경
-        const statusLabels = {
-            PENDING: "검토 중",
-            APPROVED: "승인",
-            FEEDBACK_NEEDED: "보완 필요",
-            REJECTED: "반려",
-            SUSPENDED: "이용 정지"
-        };
 
-        const verificationLabels = {
-            NOT_CHECKED: "사업자 정보 미검증",
-            MATCHED: "사업자 정보 일치",
-            MISMATCHED: "사업자 정보 불일치",
-            ERROR: "사업자 정보 재확인 필요"
-        };
+    <script>
+        (() => {
+            // 이 페이지 안에서만 요소를 찾고 다른 페이지 JS와 변수 충돌 방지
+            const page = document.getElementById("companyReviewPage");
 
-        page.querySelectorAll("[data-status]").forEach(element => {
-            const value = element.dataset.status;
-            element.textContent = statusLabels[value] || value;
-        });
+            // 서버 enum은 그대로 받고, 표시 문구만 한글로 변경
+            const statusLabels = {
+                PENDING: "검토 중",
+                APPROVED: "승인",
+                FEEDBACK_NEEDED: "보완 필요",
+                REJECTED: "반려",
+                SUSPENDED: "이용 정지"
+            };
 
-        page.querySelectorAll("[data-verification-label]")
-            .forEach(element => {
-                const value = element.dataset.verificationLabel;
-                element.textContent =
-                    verificationLabels[value] || value;
+            const verificationLabels = {
+                NOT_CHECKED: "사업자 정보 미검증",
+                MATCHED: "사업자 정보 일치",
+                MISMATCHED: "사업자 정보 불일치",
+                ERROR: "사업자 정보 재확인 필요"
+            };
+
+            page.querySelectorAll("[data-status]").forEach(element => {
+                const value = element.dataset.status;
+                element.textContent = statusLabels[value] || value;
             });
 
-        // 승인 폼은 승인 가능한 기업에서만 존재
-        const approveForm = document.getElementById("approveForm");
+            page.querySelectorAll("[data-verification-label]")
+                    .forEach(element => {
+                        const value = element.dataset.verificationLabel;
+                        element.textContent =
+                                verificationLabels[value] || value;
+                    });
 
-        // 승인·보완 요청의 중복 제출 방지
-        let submitting = false;
+            // 승인 폼은 승인 가능한 기업에서만 존재
+            const approveForm = document.getElementById("approveForm");
 
-        if (approveForm) {
-            approveForm.addEventListener("submit", event => {
-                if (submitting) {
-                    event.preventDefault();
-                    return;
-                }
+            // 승인·보완 요청의 중복 제출 방지
+            let submitting = false;
 
-                if (!window.confirm("이 기업을 승인할까요?")) {
-                    event.preventDefault();
-                    return;
-                }
+            if (approveForm) {
+                approveForm.addEventListener("submit", event => {
+                    if (submitting) {
+                        event.preventDefault();
+                        return;
+                    }
 
-                submitting = true;
-                lockActions();
-            });
-        }
+                    if (!window.confirm("이 기업을 승인할까요?")) {
+                        event.preventDefault();
+                        return;
+                    }
 
-        // 보완 요청 모달. 심사 불가능한 기업에는 생성되지 않음.
-        const dialog = document.getElementById("correctionDialog");
-        const openButton = document.getElementById("openCorrectionButton");
-        const correctionForm = document.getElementById("correctionForm");
-        const feedback = document.getElementById("feedback");
-        const errorMessage = document.getElementById("correctionError");
-
-        // 심사 처리 버튼을 잠그거나 복원
-        function lockActions() {
-            page.querySelectorAll(
-                '.bp-actions button, #correctionForm button'
-            ).forEach(button => {
-                button.disabled = submitting;
-            });
-        }
-
-        if (dialog && openButton && correctionForm) {
-            const closeButton =
-                document.getElementById("closeCorrectionButton");
-
-            const cancelButton =
-                document.getElementById("cancelCorrectionButton");
-
-            // 모달을 열면 사유 입력으로 포커스 이동
-            openButton.addEventListener("click", () => {
-                if (submitting) return;
-
-                errorMessage.textContent = "";
-                feedback.setCustomValidity("");
-
-                if (!dialog.open) {
-                    dialog.showModal();
-                }
-
-                feedback.focus();
-            });
-
-            // 취소 시 입력값은 유지. 다시 열어 이어서 작성 가능.
-            function closeDialog() {
-                if (!submitting) {
-                    dialog.close();
-                }
+                    submitting = true;
+                    lockActions();
+                });
             }
 
-            closeButton.addEventListener("click", closeDialog);
-            cancelButton.addEventListener("click", closeDialog);
+            // 보완 요청 모달. 심사 불가능한 기업에는 생성되지 않음.
+            const dialog = document.getElementById("correctionDialog");
+            const openButton = document.getElementById("openCorrectionButton");
+            const correctionForm = document.getElementById("correctionForm");
+            const feedback = document.getElementById("feedback");
+            const errorMessage = document.getElementById("correctionError");
 
-            // ESC로 닫기. 제출 중에는 닫지 않음.
-            dialog.addEventListener("cancel", event => {
-                if (submitting) {
-                    event.preventDefault();
-                }
-            });
+            // 심사 처리 버튼을 잠그거나 복원
+            function lockActions() {
+                page.querySelectorAll(
+                        '.bp-actions button, #correctionForm button'
+                ).forEach(button => {
+                    button.disabled = submitting;
+                });
+            }
 
-            // 모달 종료 후 원래 버튼으로 포커스 복원
-            dialog.addEventListener("close", () => {
-                if (!submitting) {
-                    openButton.focus();
-                }
-            });
+            if (dialog && openButton && correctionForm) {
+                const closeButton =
+                        document.getElementById("closeCorrectionButton");
 
-            // 공백 오류 후 입력을 수정하면 브라우저 오류 상태 초기화
-            feedback.addEventListener("input", () => {
-                feedback.setCustomValidity("");
-                errorMessage.textContent = "";
-            });
+                const cancelButton =
+                        document.getElementById("cancelCorrectionButton");
 
-            correctionForm.addEventListener("submit", event => {
-                if (submitting) {
-                    event.preventDefault();
-                    return;
-                }
+                // 모달을 열면 사유 입력으로 포커스 이동
+                openButton.addEventListener("click", () => {
+                    if (submitting) return;
 
-                const value = feedback.value.trim();
+                    errorMessage.textContent = "";
+                    feedback.setCustomValidity("");
 
-                if (value === "") {
-                    event.preventDefault();
+                    if (!dialog.open) {
+                        dialog.showModal();
+                    }
 
-                    errorMessage.textContent = "보완 사유를 입력해주세요.";
-                    feedback.setCustomValidity("보완 사유를 입력해주세요.");
-                    feedback.reportValidity();
-                    return;
-                }
-
-                if (value.length > 2000) {
-                    event.preventDefault();
-                    errorMessage.textContent =
-                        "보완 사유는 2,000자 이하여야 합니다.";
                     feedback.focus();
-                    return;
+                });
+
+                // 취소 시 입력값은 유지. 다시 열어 이어서 작성 가능.
+                function closeDialog() {
+                    if (!submitting) {
+                        dialog.close();
+                    }
                 }
 
-                // 기존 폼으로 POST 전송. fetch나 Controller 변경 불필요.
-                feedback.value = value;
-                submitting = true;
+                closeButton.addEventListener("click", closeDialog);
+                cancelButton.addEventListener("click", closeDialog);
+
+                // ESC로 닫기. 제출 중에는 닫지 않음.
+                dialog.addEventListener("cancel", event => {
+                    if (submitting) {
+                        event.preventDefault();
+                    }
+                });
+
+                // 모달 종료 후 원래 버튼으로 포커스 복원
+                dialog.addEventListener("close", () => {
+                    if (!submitting) {
+                        openButton.focus();
+                    }
+                });
+
+                // 공백 오류 후 입력을 수정하면 브라우저 오류 상태 초기화
+                feedback.addEventListener("input", () => {
+                    feedback.setCustomValidity("");
+                    errorMessage.textContent = "";
+                });
+
+                correctionForm.addEventListener("submit", event => {
+                    if (submitting) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    const value = feedback.value.trim();
+
+                    if (value === "") {
+                        event.preventDefault();
+
+                        errorMessage.textContent = "보완 사유를 입력해주세요.";
+                        feedback.setCustomValidity("보완 사유를 입력해주세요.");
+                        feedback.reportValidity();
+                        return;
+                    }
+
+                    if (value.length > 2000) {
+                        event.preventDefault();
+                        errorMessage.textContent =
+                                "보완 사유는 2,000자 이하여야 합니다.";
+                        feedback.focus();
+                        return;
+                    }
+
+                    // 기존 폼으로 POST 전송. fetch나 Controller 변경 불필요.
+                    feedback.value = value;
+                    submitting = true;
+                    lockActions();
+                });
+            }
+
+            // 서버 오류 후 뒤로 돌아온 경우 제출 버튼 복원
+            window.addEventListener("pageshow", () => {
+                submitting = false;
                 lockActions();
             });
-        }
-
-        // 서버 오류 후 뒤로 돌아온 경우 제출 버튼 복원
-        window.addEventListener("pageshow", () => {
-            submitting = false;
-            lockActions();
-        });
-    })();
-</script>
+        })();
+    </script>
 </body>
 </html>

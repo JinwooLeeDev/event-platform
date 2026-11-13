@@ -58,6 +58,8 @@ public class EventResponse {
         private LocalDateTime publishedAt;
         private EventStatus status;
         private String feedbackMessage;
+        private boolean paidReadyEvent; /// 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
+        private int sessionCount; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
 
         public EventDto(Event event) {
             this.id = event.getId();
@@ -75,6 +77,7 @@ public class EventResponse {
             this.publishedAt = event.getPublishedAt();
             this.status = event.getStatus();
             this.feedbackMessage = event.getFeedbackMessage();
+            this.paidReadyEvent = event.getStatus() == EventStatus.PAID_READY;
         }
     }
 

@@ -44,6 +44,20 @@
                         <div><dt>등록일</dt><dd>{{#createdAt}}<span data-company-event-date>{{createdAt}}</span>{{/createdAt}}{{^createdAt}}{createdAt}{{/createdAt}}</dd></div>
                         <div><dt>공개일</dt><dd>{{#publishedAt}}<span data-company-event-date>{{publishedAt}}</span>{{/publishedAt}}{{^publishedAt}}아직 공개되지 않았습니다.{{/publishedAt}}</dd></div>
                     </dl>
+
+                    <!--   "결제대기" 상태인 행사를 나타내려고 추가.      -->
+                    {{#paidReadyEvent}}
+                              <form action="/event/deposit/{{id}}" method="post" onsubmit="return confirm('최종 결제하시겠습니까?')">
+                                  <input type="hidden" name="sessionCount" value={{sessionCount}}>
+                                  <button type="submit">최종 결제하기</button>
+                              </form>
+                        {{#successMessage}}
+                            <script>
+                                alert('{{successMessage}}')
+                            </script>
+                        {{/successMessage}}
+                    {{/paidReadyEvent}}
+
                     {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
                 </article>
                 {{/eventList}}
@@ -62,7 +76,7 @@
 {{> layout/footer}}
 <script>
 (() => {
-    const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨'};
+    const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨',PAID_READY:'결제 대기중'};
     document.querySelectorAll('[data-company-event-status]').forEach(element => { const value = element.textContent.trim(); element.textContent = labels[value] || value; });
     document.querySelectorAll('[data-company-event-date]').forEach(element => { const value = element.textContent.trim(); if(/^\d{4}-\d{2}-\d{2}T/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.'); });
 })();

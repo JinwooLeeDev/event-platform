@@ -4,6 +4,7 @@ import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository;
+import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
@@ -31,6 +32,7 @@ public class EventService {
     private final EventCategoryRepository eventCategoryRepository;
     private final CompanyRepository companyRepository;
     private final RegistrationRepository registrationRepository;
+    private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
 
     // 행사 등록 기능
     @Transactional
@@ -200,8 +202,15 @@ public class EventService {
     }
 
     // 기업이 등록한 행사 전체 내역 조회
+    /// 각 행사마다 갖고있는 회차 수 추가.
     public EventResponse.ListDto findAllByCompanyId(Long companyId) {
         List<Event> eventList = eventRepository.findAllByCompanyId(companyId);
-        return new EventResponse.ListDto(eventList);
+
+        EventResponse.ListDto listDto = new EventResponse.ListDto(eventList);
+
+        listDto.getEventList().forEach(e ->
+                e.setSessionCount(eventSessionRepository.countEventSessionByEventId(e.getId())));
+
+        return listDto;
     }
 }

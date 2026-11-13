@@ -53,7 +53,7 @@ public class Company {
     private String address;
 
     //    사업자 등록증 파일 제출
-    @Column(name = "business_certificate_file_name", nullable = false)
+    @Column(name = "business_certificate_file_name", nullable = true    )
     private String businessCertificateFileName;
 
     //    담당자 이름

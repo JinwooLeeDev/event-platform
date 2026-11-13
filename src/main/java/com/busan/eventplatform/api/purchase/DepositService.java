@@ -37,10 +37,10 @@ public class DepositService {
         if(!event.isOwner(companyId)) throw new Exception400("해당 이벤트 신청은 타기업 신청 이벤트입니다");
 
         // 3. 이벤트 현재 상태가 '결제대기' 인지 + req의 이벤트 회차 수와 저장된 회차수가 일치하는지.
-
         if(event.isPendingStatus()) throw new NotApproveException("아직 관리자에게 승인받지 못했습니다. 승인 받은 후 다시 결제해주세요"); // 결제대기?
         else if(!event.isPaidStatus()) throw new AlreadyPurchaseException("이미 결제되었거나 그 외 오류로 결제를 진행할 수 없습니다");
 
+        //
         int selectedSessionCount = eventSessionRepository.countEventSessionByEventId(event.getId());
         if(selectedSessionCount != sessionCount) throw new Exception400("신청된 이벤트 회차수가 일치하지 않습니다");
 

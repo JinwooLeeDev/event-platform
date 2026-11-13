@@ -318,8 +318,7 @@ VALUES (36001, '팝업'),
        (36006, '봉사'),
        (36007, '교류');
 
-
--- 04 events: 상태 5종. 모집 전/중/마감, 회차 없는 행사, 보완/취소 사유, 실제 검색 가능한 장소 주소.
+-- 05 event_sessions: 상태 4종, 무료/유료, 여유/만석/빈 회차, 최소 인원 미달/일치, 당일 개최, 예약금. 점유 수는 확정+승인 대기와 일치.
 INSERT INTO events (id, company_id, category_id, address, title, summary, status, description, apply_start_at,
                     apply_end_at, published_at, cancelled_at, cancellation_reason, feedback_message, created_at)
 VALUES (36001, 36002, 36002, '부산광역시 수영구 광안해변로 219', '모집 중 무료·유료 복합 행사', '[예시36-01] 모집 중 무료·유료 복합 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.
@@ -375,13 +374,13 @@ VALUES (36001, 36002, 36002, '부산광역시 수영구 광안해변로 219', '�
 일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP),
         TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL,
         TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
-       (36014, 36003, 36003, '부산광역시 부산진구 중앙대로 708', '신청 마감·회차 미등록 행사', '[예시36-14] 신청 마감·회차 미등록 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.
+       (36014, 36003, 36003, '부산광역시 부산진구 중앙대로 708', '신청 마감·회차 미등록 행사', '[예시36-14] 신청 마감·회차 미등록 행사', 'PAID_READY', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.
 일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP),
         TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL,
         TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP));
 
 
--- 05 event_sessions: 상태 4종, 무료/유료, 여유/만석/빈 회차, 최소 인원 미달/일치, 당일 개최, 예약금. 점유 수는 확정+승인 대기와 일치.
+-- 04 events: 상태 5종. 모집 전/중/마감, 회차 없는 행사, 보완/취소 사유, 실제 검색 가능한 장소 주소.
 INSERT INTO event_sessions (id, event_id, name, starts_at, ends_at, capacity, occupied_count, next_reception_number,
                             hold_duration_seconds, pricing_type, fee, reservation_deposit_points, minimum_participants,
                             minimum_check_at, status, created_at)
@@ -570,23 +569,22 @@ VALUES (36001, 36021, NULL, 'READY', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TI
 
 
 -- 10 purchase_tb: 개인 유료 신청의 차감 스냅샷, 기업 차감 예시. user/company 중 한 주체만 사용. 잔액은 현재 스냅샷이며 원장 없음.
-INSERT INTO purchase_tb (id, user_id, company_id, event_session_id, purchased_at, price)
-VALUES (36001, 36004, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000),
-       (36002, 36005, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000),
-       (36003, 36010, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000),
-       (36004, 36011, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000),
-       (36005, 36012, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000),
-       (36006, 36013, NULL, 36006, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 3000),
-       (36007, 36005, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000),
-       (36008, 36006, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000),
-       (36009, 36007, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000),
-       (36010, 36008, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000),
-       (36011, 36015, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000),
-       (36012, 36016, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000),
-       (36013, NULL, 36001, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000),
-       (36014, NULL, 36002, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000),
-       (36015, NULL, 36003, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000);
-
+INSERT INTO purchase_tb (id, user_id, company_id, event_session_id, purchased_at, price , status)
+VALUES (36001, 36004, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+       (36002, 36005, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+       (36003, 36010, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
+       (36004, 36011, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
+       (36005, 36012, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
+       (36006, 36013, NULL, 36006, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 3000, 'PURCHASED'),
+       (36007, 36005, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000, 'PURCHASED'),
+       (36008, 36006, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000, 'PURCHASED'),
+       (36009, 36007, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'PURCHASED'),
+       (36010, 36008, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'PURCHASED'),
+       (36011, 36015, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+       (36012, 36016, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+       (36013, NULL, 36001, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000, 'PURCHASED'),
+       (36014, NULL, 36002, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000, 'PURCHASED'),
+       (36015, NULL, 36003, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000, 'PURCHASED');
 
 -- 11 refund_tb: 개인/기업 × READY/PENDING/REFUND, 사유 NULL/입력. 원구매자와 반환 주체 일치, 원구매 한도 이하.
 INSERT INTO refund_tb (id, user_id, company_id, purchase_id, status, reason, amount, created_at)
