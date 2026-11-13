@@ -58,11 +58,12 @@ public class RefundService {
         registration.getUser().addPoint(refundAmount);
         refundRepository.save(refund);
         purchase.setStatus(PurchaseStatus.CANCELED);
-
     }
 
 
+    @Transactional
     // Company의 환불.
     public void refundCompany(LoginIdentity loginIdentity, Long eventSessionId) {
+
     }
 }
