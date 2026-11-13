@@ -1,4 +1,6 @@
-package com.busan.eventplatform.user.registration;
+package com.busan.eventplatform.api.refund;
+
+import com.busan.eventplatform.user.registration.RegistrationStatus;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -15,9 +17,8 @@ import java.time.temporal.ChronoUnit;
  *
  * "N일 전"은 시각이 아닌 날짜 기준 (11/21 행사를 11/18에 취소 = 3일 전), 소수점은 내림.
  */
-public final class RegistrationRefundPolicy {
-
-    private RegistrationRefundPolicy() {}  // 계산 전용 — 객체 생성 불필요
+public final class RefundPolicy {
+    private RefundPolicy() {}  // 계산 전용 — 객체 생성 불필요
 
     // [환불 정책 안내 문구] 취소 확인 창의 [환불 정책 보기]에 표시 — 아래 계산 규칙과 반드시 같은 내용으로 유지
     public static final String POLICY_TEXT = """
@@ -67,4 +68,27 @@ public final class RegistrationRefundPolicy {
     public static int forCompanyReject(int paidAmount) {
         return Math.max(paidAmount, 0);
     }
+
+    // ── 안내 문구 ──────────────────────────────────────
+    // 공통 날짜별 규칙 (기업 화면 등)
+    public static final String COMMON_TEXT = """
+            · 시작 4일 이상 전 취소: 전액 환불
+            · 3일 전 취소: 결제 금액의 2/3 환불
+            · 2일 전 취소: 결제 금액의 1/2 환불
+            · 1일 전·당일 취소: 환불 불가
+            ※ 날짜 기준으로 계산하며, 1P 미만은 버립니다.""";
+
+    // 개인 참가 취소 확인 창 [환불 정책 보기]용
+    public static final String REGISTRATION_TEXT = """
+            [환불 정책]
+            · 회차 시작 4일 이상 전 취소: 전액 환불
+            · 3일 전 취소: 결제 금액의 2/3 환불
+            · 2일 전 취소: 결제 금액의 1/2 환불
+            · 1일 전·당일 취소: 환불 불가
+            · 대기 중 취소: 전액 환불
+            · 주최자 거절: 전액 환불
+
+            ※ 날짜 기준으로 계산하며, 1P 미만은 버립니다.
+            ※ 회차가 시작된 뒤에는 취소할 수 없습니다.""";
+
 }
