@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
                 .body(html);
     }
 
-    /// 행사 중복 결제를 alert창으로 띄워서 막아주기 위해 추가.
+    /// 관리자에게 행사 등록 승인을 못받은 상태
     @ExceptionHandler(NotApproveException.class)
     public ResponseEntity<String> handleApprove(NotApproveException exception){
 

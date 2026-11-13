@@ -9,10 +9,13 @@ import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.global.error.exception.NotApproveException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -35,8 +38,8 @@ public class DepositService {
 
         // 3. 이벤트 현재 상태가 '결제대기' 인지 + req의 이벤트 회차 수와 저장된 회차수가 일치하는지.
 
-        if(!event.isPaidStatus()) throw new AlreadyPurchaseException("해당 이벤트는 이미 결제처리되었습니다"); // 결제대기?
-        else if(event.isPendingStatus()) throw new Exception400("아직 관리자에게 승인받지 못했습니다. 승인 받은 후 다시 결제해주세요");
+        if(event.isPendingStatus()) throw new NotApproveException("아직 관리자에게 승인받지 못했습니다. 승인 받은 후 다시 결제해주세요"); // 결제대기?
+        else if(!event.isPaidStatus()) throw new AlreadyPurchaseException("이미 결제되었거나 그 외 오류로 결제를 진행할 수 없습니다");
 
         int selectedSessionCount = eventSessionRepository.countEventSessionByEventId(event.getId());
         if(selectedSessionCount != sessionCount) throw new Exception400("신청된 이벤트 회차수가 일치하지 않습니다");
@@ -55,7 +58,8 @@ public class DepositService {
         // 5. '최종확정'으로 상태 변경 후 보증금 결제 DB 반영.
         deposit.setStatus(DepositStatus.PAID);
         event.setStatus(EventStatus.PUBLISHED);
-        depositRepository.save(deposit);
+        event.setPublishedAt(LocalDateTime.now()); // 확정 시간 저장.
 
+        depositRepository.save(deposit);
     }
 }

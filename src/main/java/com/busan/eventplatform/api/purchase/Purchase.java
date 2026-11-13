@@ -20,6 +20,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 public class Purchase {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,9 +30,6 @@ public class Purchase {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eventSession_id" , nullable = false)
@@ -42,9 +41,8 @@ public class Purchase {
     private int price; // 이 결제내역에 저장될 결제한 포인트액.
 
     @Builder
-    public Purchase(User user, Company company, EventSession eventSession , int price) {
+    public Purchase(User user , EventSession eventSession , int price) {
         this.user = user;
-        this.company = company;
         this.eventSession = eventSession;
         this.price = price;
     }

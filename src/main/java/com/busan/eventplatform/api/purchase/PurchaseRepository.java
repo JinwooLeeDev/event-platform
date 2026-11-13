@@ -21,15 +21,6 @@ public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
     boolean existsEventByUser (@Param("userId") Long userId , @Param("eventId") Long eventId);
 
 
-    // 해당 이벤트를 이미 구매 결제한 기업이 있는지?
-    @Query("""
-            select case when count(p.company) > 0 then true else false end
-            from Purchase p 
-            where p.company.id = :companyId and p.eventSession.id = :eventId
-            """
-    )
-    boolean existsEventByCompany (@Param("companyId") Long companyId , @Param("eventId") Long eventId);
-
     // purchase , event , eventSession 가져오기.
     @Query("""
     select p from Purchase p join fetch p.eventSession es join fetch es.event e 
