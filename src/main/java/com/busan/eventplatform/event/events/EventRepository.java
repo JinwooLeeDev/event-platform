@@ -1,5 +1,6 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.user.registration.RegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,21 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
+
+    @Query(value = """
+            select e from Event e left join fetch e.category
+            where e.status = :status
+              and (:categoryId is null or e.category.id = :categoryId)
+              and (:keyword = '' or lower(e.title) like lower(concat('%', :keyword, '%'))
+                   or lower(e.summary) like lower(concat('%', :keyword, '%')))
+            """, countQuery = """
+            select count(e) from Event e where e.status = :status
+              and (:categoryId is null or e.category.id = :categoryId)
+              and (:keyword = '' or lower(e.title) like lower(concat('%', :keyword, '%'))
+                   or lower(e.summary) like lower(concat('%', :keyword, '%')))
+            """)
+    Page<Event> findPublishedFiltered(@Param("status") EventStatus status,
+            @Param("categoryId") Long categoryId, @Param("keyword") String keyword, Pageable pageable);
 
     // 공개된 행사 조회 (eventStatus가 PUBLISHED일 때)
     @Query(value = """
@@ -69,6 +85,20 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                 order by e.id desc
             """)
     List<Event> findAllByCompanyId(@Param("companyId") Long companyId);
+
+    // 특정 회원이 특정 행사의 참가 확정 상태인지 확인 -- 채팅 버튼 관련
+    @Query("""
+            select count(r)
+            from Registration r
+            where r.eventSession.event.id = :eventId
+            and r.user.id = :userId
+            and r.status = :status
+        """)
+    long countConfirmedByEventIdAndUserId(
+            @Param("eventId") Long eventId,
+            @Param("userId") Long userId,
+            @Param("status") RegistrationStatus status
+    );
 }
 
 

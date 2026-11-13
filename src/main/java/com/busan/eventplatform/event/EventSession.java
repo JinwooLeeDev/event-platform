@@ -9,14 +9,13 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "event_sessions")
 public class EventSession {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,6 +24,7 @@ public class EventSession {
     @Column(nullable = false)
     private int capacity;
 
+    // 몇 회차인지 알려주는 컬럼 ex) 1회차, 2회차 ...
     @Column(nullable = false)
     private String name;
 
@@ -74,7 +74,7 @@ public class EventSession {
 
     // 회차 상태
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false)
     private EventSessionStatus status;
 
     // 생성일
@@ -89,6 +89,9 @@ public class EventSession {
 
     // 회차 수정
     public void update(EventSessionRequest.UpdateDto dto) {
+        if (dto.getCapacity() < this.occupiedCount) {
+            throw new Exception400("현재 점유 인원보다 정원을 줄일 수 없습니다.");
+        }
         this.name = dto.getName();
         this.capacity = dto.getCapacity();
         this.startsAt = dto.getStartsAt();
@@ -131,5 +134,4 @@ public class EventSession {
     public int issueReceptionNumber() {
         return this.nextReceptionNumber++;
     }
-
 }
