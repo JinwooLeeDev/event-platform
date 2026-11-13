@@ -150,7 +150,7 @@ public class RegistrationService {
      * @return 환불 요청 (어느 결제를 얼마 환불할지)
      */
     @Transactional
-    public RefundRequest cancel(Long registrationId, LoginIdentity loginIdentity) {
+    public void cancel(Long registrationId, LoginIdentity loginIdentity) {
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 신청을 취소할 수 있습니다");
         }
@@ -158,6 +158,7 @@ public class RegistrationService {
         // 회차 락 → 신청 조회 순서 (동시 승격과 겹쳐도 최신 상태로 판단)
         Registration registration = findRegistrationWithSessionLock(registrationId);
         EventSession session = registration.getEventSession();
+
 
         if (!registration.isOwnedBy(loginIdentity.getId())) {
             throw new RegistrationForbiddenException("본인의 신청만 취소할 수 있습니다");
@@ -173,19 +174,15 @@ public class RegistrationService {
         RegistrationStatus statusBefore = registration.getStatus();
         boolean releasedSeat = statusBefore.isSeatOccupying();
 
-        registration.cancel();
+        registration.cancel(); // 상태가 바뀜
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
+
 
         if (releasedSeat) {
             session.releaseSeat();
             promoteWaitingUsersIfAny(session);
         }
 
-        // 환불 금액 계산 (실제 결제 금액 기준, 날짜 기준 차등)
-        int paidAmount = paidAmountOf(registration);
-        int refundAmount = RegistrationRefundPolicy.forUserCancel(
-                paidAmount, statusBefore, now.toLocalDate(), session.getStartsAt().toLocalDate());
-        return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
 
