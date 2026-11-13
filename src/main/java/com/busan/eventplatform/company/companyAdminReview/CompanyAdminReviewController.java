@@ -1,6 +1,7 @@
 package com.busan.eventplatform.company.companyAdminReview;
 
 import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.admin.AdminCompanyView;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -18,19 +19,12 @@ public class CompanyAdminReviewController {
 
     @GetMapping
     public String list(@SessionAttribute(LoginSession.USER) SessionUserDto admin, Model model) {
-        model.addAttribute("companies", companyReviewService.findReviewTargets(admin.getId()));
-
-        return "admin/company-list";
+        return AdminCompanyView.list(model, companyReviewService.findReviewTargets(admin.getId()));
     }
 
     @GetMapping("/{companyId}")
     public String detail(@PathVariable Long companyId, @SessionAttribute(LoginSession.USER) SessionUserDto admin, Model model) {
-        model.addAttribute(
-                "company",
-                companyReviewService.findDetail(companyId, admin.getId())
-        );
-
-        return "admin/company-detail";
+        return AdminCompanyView.detail(model, companyReviewService.findDetail(companyId, admin.getId()));
     }
 
 //    기업 승인

@@ -3,22 +3,27 @@ package com.busan.eventplatform.admin;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import com.busan.eventplatform.company.companyAdminReview.CompanyReviewService;
+import com.busan.eventplatform.login.LoginSession;
+import com.busan.eventplatform.login.personallogin.SessionUserDto;
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequiredArgsConstructor
 public class AdminController {
+    private final CompanyReviewService companyReviewService;
     @GetMapping({"/admin", "/admin/"})
     public String index() {
         return "redirect:/admin/dashboard";
     }
 
     @GetMapping("/admin/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(@SessionAttribute(LoginSession.USER) SessionUserDto admin, Model model) {
+        var companies = companyReviewService.findReviewTargets(admin.getId());
+        model.addAttribute("companyReviewCount", companies.size());
+        model.addAttribute("companyReviewItems", AdminCompanyView.rows(companies.stream().limit(5).toList()));
         return page(model, "운영 대시보드", "플랫폼 운영 현황과 처리할 업무를 확인하세요.", "dashboard");
-    }
-
-    @GetMapping("/admin/companies")
-    public String companies(Model model) {
-        return page(model, "기업 관리", "기업 가입 정보와 사업자 증빙을 검토하는 공간입니다.", "companies");
     }
 
     @GetMapping("/admin/events")
@@ -32,13 +37,6 @@ public class AdminController {
     }
 
     static String page(Model model, String title, String description, String section) {
-        model.addAttribute("pageTitle", title);
-        model.addAttribute("pageDescription", description);
-        model.addAttribute("dashboardPage", section.equals("dashboard"));
-        model.addAttribute("companiesPage", section.equals("companies"));
-        model.addAttribute("eventsPage", section.equals("events"));
-        model.addAttribute("sessionsPage", section.equals("sessions"));
-        model.addAttribute("membersPage", section.equals("members"));
-        return "admin/page";
+        return AdminPageView.prepare(model, title, description, section);
     }
 }

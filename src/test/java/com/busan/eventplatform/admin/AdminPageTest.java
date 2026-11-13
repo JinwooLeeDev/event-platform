@@ -66,14 +66,13 @@ class AdminPageTest {
 
     @Test
     void rendersEveryAdminPageWithSharedNavigationAndEscapedAccountName() throws Exception {
-        var controller = new AdminController();
-        for (String section : List.of("dashboard", "companies", "events", "sessions")) {
+        var controller = new AdminController(org.mockito.Mockito.mock(com.busan.eventplatform.company.companyAdminReview.CompanyReviewService.class));
+        for (String section : List.of("dashboard", "events", "sessions")) {
             var model = new ExtendedModelMap();
             String view = switch (section) {
-                case "companies" -> controller.companies(model);
                 case "events" -> controller.events(model);
                 case "sessions" -> controller.sessions(model);
-                default -> controller.dashboard(model);
+                default -> controller.dashboard(com.busan.eventplatform.login.personallogin.SessionUserDto.builder().id(1L).build(), model);
             };
             model.addAttribute("loginUser", Map.of("displayName", "<script>admin</script>"));
             var compiler = Mustache.compiler().withLoader(name -> new InputStreamReader(
