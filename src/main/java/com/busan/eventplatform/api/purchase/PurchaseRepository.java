@@ -34,6 +34,11 @@ public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
     )
     boolean existsEventByCompany (@Param("companyId") Long companyId , @Param("eventId") Long eventId);
 
-//    @Query("select ")
-//    List<PurchaseRes.PurchaseListDto> findByUserIdWithPurchaseList(Long userId);
+    // purchase , event , eventSession 가져오기.
+    @Query("""
+    select p from Purchase p join fetch p.eventSession es join fetch es.event e 
+    where p.user.id = :userId order by p.purchasedAt desc
+    """)
+    List<Purchase> findByUserIdWithPurchaseList(@Param("userId") Long userId);
+
 }

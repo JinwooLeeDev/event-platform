@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>기업 심사 상세 | Busan Play</title>
-    {{>admin/style}}
+    {{> layout/head-meta}}
+    <title>기업 마이페이지</title>
 </head>
 <body>
 {{>layout/header}}
+{{> layout/company-style}}
+{{> layout/account-style}}
+<style>
+    .company-home { padding: 40px 24px 60px; background: #f8f9fb; color: #292f3d; font-family: 'Pretendard',sans-serif; }
+    .company-home .company-card { max-width: none; width: 100%; padding: 30px; background: white; border: 1px solid #e6e7eb; border-radius: 18px; box-shadow: 0 3px 16px rgba(30,35,45,.025); }
+    .company-home .company-card h1 { margin: 0 0 10px; }
+    .company-home .company-card h2 { margin: 26px 0 16px; font-size: 24px; }
+    .company-home .company-card dl { display: grid; grid-template-columns: 140px minmax(0,1fr); margin: 0; }
+    .company-home .company-card dt,.company-home .company-card dd { margin: 0; padding: 15px 0; border-bottom: 1px solid #ececef; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+    .company-home .company-card dt { color: #72757e; font-weight: 500; }
+    .company-home .company-card > p { color: #72757e; font-size: 14px; line-height: 1.75; }
+    .company-home .company-note { padding: 18px; border-radius: 12px; background: #f3efe8; color: #64615a; font-size: 13px; line-height: 1.8; margin: 24px 0; }
+    .company-home .company-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .company-home .company-link { display: inline-flex; padding: 12px 20px; border: 1px solid #0750d8; border-radius: 10px; background: #0750d8; color: white; text-decoration: none; font-size: 14px; font-weight: 600; }
+    .company-home .company-link.secondary { background: white; color: #555c68; border-color: #d9dbe1; }
+    @media(max-width:600px) { .company-home { padding: 28px 16px 40px; } .company-home .company-card { padding: 22px; } .company-home .company-card dl { grid-template-columns: 110px minmax(0,1fr); } }
+</style>
+<main class="company-home"><div class="account-layout">
+    {{> layout/company-nav}}
+    <section class="company-card account-content">
 
-<main class="bp-admin" id="companyReviewPage">
-    <div class="bp-container">
-        <a href="/admin/companies" class="bp-back">
-            ← 심사 대기 목록
-        </a>
+        <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span><h1>기업 정보</h1><p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
 
         {{#company}}
         <div class="bp-heading">
@@ -170,68 +184,10 @@
                 aria-labelledby="correctionTitle"
                 aria-describedby="correctionDescription">
 
-            <!-- 기존 Controller가 받는 주소·필드 이름 그대로 사용 -->
-            <form id="correctionForm"
-                  action="/admin/companies/{{id}}/correction"
-                  method="post">
-
-                <div class="bp-dialog-heading">
-                    <div>
-                        <p class="bp-eyebrow">기업 심사</p>
-                        <h2 id="correctionTitle">보완 요청</h2>
-                    </div>
-
-                    <button type="button"
-                            class="bp-close"
-                            id="closeCorrectionButton"
-                            aria-label="보완 요청 창 닫기">
-                        ×
-                    </button>
-                </div>
-
-                <p class="bp-description" id="correctionDescription">
-                    <strong>{{name}}</strong>에 전달할
-                    보완 사유를 입력해주세요.
-                </p>
-
-                <div class="bp-field">
-                    <label for="feedback">보완 사유</label>
-                    <textarea id="feedback"
-                              name="feedback"
-                              rows="5"
-                              maxlength="2000"
-                              required
-                              aria-describedby="feedbackHint correctionError"
-                              placeholder="예: 등록증이 흐릿합니다. 선명한 파일로 다시 제출해주세요."></textarea>
-
-                    <p class="bp-hint" id="feedbackHint">
-                        입력한 사유는 기업의 보완 안내에 표시됩니다.
-                        최대 2,000자까지 입력할 수 있습니다.
-                    </p>
-                </div>
-
-                <p id="correctionError"
-                   class="bp-error"
-                   role="alert"></p>
-
-                <div class="bp-modal-actions">
-                    <button id="cancelCorrectionButton"
-                            type="button"
-                            class="bp-button">
-                        취소
-                    </button>
-
-                    <button type="submit"
-                            class="bp-button bp-button-primary">
-                        보완 요청 보내기
-                    </button>
-                </div>
-            </form>
-        </dialog>
-        {{/reviewable}}
-        {{/company}}
-    </div>
-</main>
+        <div class="company-note">이메일·비밀번호와 담당자 정보를 수정할 수 있습니다.<br>기업명·사업자등록번호 등 기업 인증정보는 수정 대상이 아닙니다.</div>
+        <div class="company-actions"><a class="company-link" href="/company/update">계정·담당자 정보 수정</a><a class="company-link secondary" href="/">메인으로 이동</a></div>
+    </section>
+</div></main>
 
 {{>layout/footer}}
 
