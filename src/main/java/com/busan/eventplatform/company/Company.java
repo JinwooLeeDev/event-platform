@@ -53,7 +53,7 @@ public class Company {
     private String address;
 
     //    사업자 등록증 파일 제출
-    @Column(name = "business_certificate_file_name", nullable = true) // TODO 일단 true, 파일 처리로직이 구현되면 false로 사업자 등록증을 무조건 제출해야 함.
+    @Column(name = "business_certificate_file_name", nullable = false)
     private String businessCertificateFileName;
 
     //    담당자 이름
@@ -85,8 +85,13 @@ public class Company {
     @ColumnDefault("'NOT_CHECKED'")
     private BusinessVerificationStatus businessVerificationStatus;
 
+//    이메일 인증 시간
     @Column(name = "email_verified_at")
     private Instant emailVerifiedAt;
+
+//    관리자가 작성한 최근 기업 심사 사유
+    @Column(name = "review_feedback", columnDefinition = "TEXT")
+    private String reviewFeedback;
 
     @Builder
     public Company(String name,
@@ -172,13 +177,37 @@ public class Company {
         this.status = CompanyStatus.PENDING;
     }
 
+//    API판정에서 사용
     public void requestCorrection() {
         this.status = CompanyStatus.FEEDBACK_NEEDED;
+    }
+
+//    관리자 사유에서 사용
+    public void requestCorrection(String feedback) {
+        if (feedback == null || feedback.isBlank()) {
+            throw new IllegalArgumentException("보완 사유는 필수입니다.");
+        }
+
+        this.status = CompanyStatus.FEEDBACK_NEEDED;
+        this.reviewFeedback = feedback.strip();
     }
 
     public void verifyEmail(Instant verifiedAt) {
         this.emailVerifiedAt =
                 java.util.Objects.requireNonNull(verifiedAt);
+    }
+
+    public void approve() {
+        if (this.status != CompanyStatus.PENDING) {
+            throw new IllegalArgumentException("심사 대기중인 기업만 승인할 수 있습니다.");
+        }
+
+        if (this.businessVerificationStatus != BusinessVerificationStatus.MATCHED) {
+            throw new IllegalArgumentException("사업자 정보확인이 완료된 기업만 승인할 수 있습니다.");
+        }
+
+        this.status = CompanyStatus.APPROVED;
+        this.reviewFeedback = null;
     }
 
     // 기업이 포인트 충전시 사용할 메서드.

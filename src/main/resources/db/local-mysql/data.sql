@@ -1,6 +1,8 @@
------------------------------- Company테이블----------------------------------------
--- Company 테이블: 개발용 더미 데이터
--- 로컬 확인용 비밀번호는 1234이며 BCrypt 해시로 저장합니다.
+------------------------------ Company 테이블 --------------------------------
+-- 개발용 더미 데이터
+-- 비밀번호: 1234
+-- 사업자 검증 상태는 관리자 기능 테스트를 위해 직접 지정한 값입니다.
+
 INSERT INTO company_tb (
     name,
     email,
@@ -13,10 +15,13 @@ INSERT INTO company_tb (
     contact_person_name,
     contact_person_phone,
     status,
+    business_verification_status,
+    review_feedback,
     point,
     created_at
 )
 VALUES
+-- 1. 심사 대기 + API 일치: 승인·보완 요청 가능
 (
     '부산문화재단',
     'company1@example.test',
@@ -28,10 +33,13 @@ VALUES
     NULL,
     '더미담당1',
     '010-0000-0001',
-    'APPROVED',
+    'PENDING',
+    'MATCHED',
+    NULL,
     500000,
     CURRENT_TIMESTAMP
 ),
+-- 2. 심사 대기 + API 오류: 승인 불가, 보완 요청 가능
 (
     '해운대이벤트',
     'company2@example.test',
@@ -44,9 +52,12 @@ VALUES
     '더미담당2',
     '010-0000-0002',
     'PENDING',
+    'ERROR',
+    NULL,
     100000,
     CURRENT_TIMESTAMP
 ),
+-- 3. 승인 완료: 추가 심사 처리 불가
 (
     '부산페스티벌',
     'company3@example.test',
@@ -59,9 +70,12 @@ VALUES
     '더미담당3',
     '010-0000-0003',
     'APPROVED',
+    'MATCHED',
+    NULL,
     300000,
     CURRENT_TIMESTAMP
 ),
+-- 4. 관리자 보완 요청: 최근 보완 사유 표시
 (
     '광안리축제기획',
     'company4@example.test',
@@ -73,10 +87,13 @@ VALUES
     NULL,
     '더미담당4',
     '010-0000-0004',
-    'APPROVED',
+    'FEEDBACK_NEEDED',
+    'MATCHED',
+    '사업자등록증의 글자가 흐릿합니다. 선명한 파일로 다시 제출해주세요.',
     400000,
     CURRENT_TIMESTAMP
 ),
+-- 5. API 불일치: 관리자 심사 대상 제외
 (
     '부산공연기획사',
     'company5@example.test',
@@ -88,8 +105,64 @@ VALUES
     NULL,
     '더미담당5',
     '010-0000-0005',
-    'PENDING',
+    'FEEDBACK_NEEDED',
+    'MISMATCHED',
+    NULL,
     150000,
+    CURRENT_TIMESTAMP
+),
+-- 6. 최종 반려: 심사 처리 불가
+(
+    '반려테스트기업',
+    'company6@example.test',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
+    '0000000006',
+    '가상대표6',
+    '2020-06-01',
+    '부산광역시 가상로 6',
+    NULL,
+    '더미담당6',
+    '010-0000-0006',
+    'REJECTED',
+    'MATCHED',
+    '테스트용 최종 반려 사유입니다.',
+    0,
+    CURRENT_TIMESTAMP
+),
+-- 7. 이용 정지: 심사 처리 불가
+(
+    '정지테스트기업',
+    'company7@example.test',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
+    '0000000007',
+    '가상대표7',
+    '2020-07-01',
+    '부산광역시 가상로 7',
+    NULL,
+    '더미담당7',
+    '010-0000-0007',
+    'SUSPENDED',
+    'MATCHED',
+    NULL,
+    0,
+    CURRENT_TIMESTAMP
+),
+-- 8. 미검증: 관리자 심사 대상 제외
+(
+    '미검증테스트기업',
+    'company8@example.test',
+    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
+    '0000000008',
+    '가상대표8',
+    '2020-08-01',
+    '부산광역시 가상로 8',
+    NULL,
+    '더미담당8',
+    '010-0000-0008',
+    'PENDING',
+    'NOT_CHECKED',
+    NULL,
+    0,
     CURRENT_TIMESTAMP
 );
 
