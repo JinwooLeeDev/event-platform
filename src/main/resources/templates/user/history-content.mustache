@@ -1,0 +1,70 @@
+<section class="point-box mb-4" aria-label="보유 포인트">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div><p class="mb-2">현재 보유 포인트</p><strong class="point-value format-point">{{myPoint}}</strong></div>
+        <a class="btn btn-outline-primary" href="/mypoint">포인트 관리</a>
+    </div>
+</section>
+{{#history}}
+<section class="row g-3 mb-5" aria-label="참가 현황 요약">
+    <div class="col-6 col-lg-3"><div class="card history-card h-100"><div class="summary-card"><div class="summary-label">전체 신청</div><div class="summary-number">{{totalCount}}<small class="fs-6">건</small></div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card history-card h-100"><div class="summary-card"><div class="summary-label">참가 확정</div><div class="summary-number text-success">{{confirmedCount}}<small class="fs-6">건</small></div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card history-card h-100"><div class="summary-card"><div class="summary-label">대기열 등록</div><div class="summary-number text-primary">{{waitingCount}}<small class="fs-6">건</small></div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card history-card h-100"><div class="summary-card"><div class="summary-label">지난 · 취소</div><div class="summary-number">{{pastCount}}<small class="fs-6">건</small></div></div></div></div>
+</section>
+<div class="mb-3"><h2 class="h5 fw-bold">나의 행사</h2><p class="text-secondary small mb-0">신청한 행사와 회차별 참가 상태를 확인할 수 있습니다.</p></div>
+<section class="card history-card mb-4">
+    <div class="card-body p-4">
+        <nav class="history-tabs nav mb-4" aria-label="나의 행사 분류">
+            {{#historyTabs}}<a class="nav-link {{#active}}active{{/active}}" href="{{url}}" {{#active}}aria-current="page"{{/active}}>{{label}} <span>{{count}}</span></a>{{/historyTabs}}
+        </nav>
+        <form action="/myhistory" method="get" role="search" aria-label="신청 행사 검색">
+            <input type="hidden" name="tab" value="{{currentTab}}">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-9"><div class="input-group"><label class="input-group-text bg-light" for="history-keyword"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">행사명 검색</span></label><input id="history-keyword" class="form-control" type="search" name="keyword" value="{{keyword}}" placeholder="행사명으로 검색"><button type="submit" class="btn btn-outline-secondary">검색</button></div></div>
+                <div class="col-md-3 text-md-end"><span class="small text-secondary">최신 신청순</span></div>
+            </div>
+        </form>
+    </div>
+</section>
+<div class="d-flex justify-content-between align-items-center mb-3 gap-3">
+    <span class="small text-secondary" role="status">전체 신청 {{totalCount}}건 · 조회 결과 <strong class="text-primary">{{resultCount}}</strong>건</span>
+    <small class="text-secondary">참가 상태는 변경될 수 있습니다.</small>
+</div>
+<div id="history-results">
+    {{#items}}
+    <article class="card history-card mb-4">
+        <div class="row g-0">
+            <div class="col-md-3"><div class="event-poster poster-ocean"><small>BUSAN PLAY · EVENT</small><h3>BUSAN<br>PLAY</h3></div></div>
+            <div class="col-md-9"><div class="event-body">
+                {{#category}}<span class="badge text-bg-light mb-2">{{category}}</span>{{/category}}
+                <h3 class="event-title"><a class="text-reset text-decoration-none" href="{{detailUrl}}">{{title}}</a></h3>
+                <span class="status-badge {{statusClass}}">{{statusLabel}}</span>
+                <dl class="event-meta mt-3">
+                    <div><dt>회차</dt><dd>{{sessionName}}</dd></div>
+                    <div><dt>개최 일시</dt><dd>{{scheduleText}}</dd></div>
+                    <div><dt>장소</dt><dd>{{place}}</dd></div>
+                    {{#waiting}}<div><dt>대기 순번</dt><dd>{{waitingRank}}번</dd></div>{{/waiting}}
+                    {{#purchasedAtText}}<div><dt>결제일</dt><dd>{{purchasedAtText}}</dd></div>{{/purchasedAtText}}
+                    <div><dt>결제 포인트</dt><dd class="purchase-price">{{paidPointText}}</dd></div>
+                    {{#expectedRefundText}}<div><dt>취소 시 예상 환불</dt><dd>{{expectedRefundText}}</dd></div>{{/expectedRefundText}}
+                    {{#refundText}}<div><dt>환불 내역</dt><dd>{{refundText}}</dd></div>{{/refundText}}
+                </dl>
+                <p class="status-note">{{statusMessage}}</p>
+                <div class="event-actions d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary" href="{{detailUrl}}">행사 상세</a>
+                    {{#cancelable}}<form action="{{cancelUrl}}" method="post" data-confirm="{{cancelConfirmText}}" onsubmit="return confirm(this.dataset.confirm);"><button class="btn btn-outline-danger" type="submit">참가 취소</button></form>{{/cancelable}}
+                    {{^cancelable}}<button class="btn btn-outline-secondary" type="button" disabled>취소 불가</button>{{/cancelable}}
+                </div>
+            </div></div>
+        </div>
+    </article>
+    {{/items}}
+    {{#empty}}<div class="card history-card text-center p-5 mb-4"><h3 class="h5 fw-bold">조건에 맞는 신청 내역이 없습니다.</h3><p class="text-secondary mb-3">다른 분류나 검색어로 확인해주세요.</p><a href="/myhistory" class="text-primary">전체 신청 내역 보기</a></div>{{/empty}}
+</div>
+{{/history}}
+<div class="history-notice mt-5">
+    <h2 class="h6 fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2" aria-hidden="true"></i>신청 내역 안내</h2>
+    <p class="small text-secondary mb-2">요약 숫자와 탭의 건수는 검색 조건과 관계없이 전체 신청을 기준으로 표시합니다.</p>
+    <p class="small text-secondary mb-2">포인트 충전·구매 내역은 포인트 관리 화면에서 확인할 수 있습니다.</p>
+    <p class="small text-secondary mb-0">취소 시 표시되는 금액은 예상 환불액이며, 실제 포인트 반환 기능은 연결 준비 중입니다.</p>
+</div>
