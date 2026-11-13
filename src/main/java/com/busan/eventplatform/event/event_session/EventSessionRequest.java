@@ -22,6 +22,7 @@ public class EventSessionRequest {
         private int minimumParticipants;
         private LocalDateTime minimumCheckAt;
 
+
         public void validate() {
             if (name == null || name.trim().isEmpty()) {
                 throw new Exception400("회차 이름은 필수입니다.");

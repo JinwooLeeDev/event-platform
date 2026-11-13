@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -33,6 +32,7 @@ public class EventSessionService {
         if (!event.getCompany().getId().equals(companyId)) {
             throw new Exception403("해당 행사에 회차를 등록할 권한이 없습니다.");
         }
+        saveDto.validate();
         EventSession eventSession = saveDto.toEntity(event);
 
         return eventSessionRepository.save(eventSession);
