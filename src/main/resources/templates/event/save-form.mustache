@@ -347,6 +347,13 @@
         <input type="hidden" data-field="endsAt">
         <input type="hidden" data-field="applyStartAt">
         <input type="hidden" data-field="applyEndAt">
+        <input type="hidden" data-field="minimumParticipants" value="1">
+        <input type="hidden" data-field="minimumCheckAt">
+
+        <div class="form-group">
+            <label>정원 <span>*</span></label>
+            <input type="number" data-field="capacity" min="1" required>
+        </div>
 
 
         <!-- 참가비 -->
@@ -691,6 +698,8 @@
 
                     values[field] = combined;
                 });
+
+                item.querySelector('[data-field="minimumCheckAt"]').value = values.startsAt;
 
                 if (values.startsAt > values.endsAt) {
                     event.preventDefault();
