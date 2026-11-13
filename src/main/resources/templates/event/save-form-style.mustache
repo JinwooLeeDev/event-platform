@@ -97,6 +97,13 @@
         font-weight: 800;
     }
 
+    .event-save-section h3 {
+        margin: 25px 0 18px;
+        color: #344158;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
     .section-description {
         margin: 0 0 25px;
         color: #8993a5;
@@ -110,6 +117,7 @@
         flex-direction: column;
         gap: 10px;
         margin-bottom: 24px;
+        min-width: 0;
     }
 
     .event-save-page .form-group:last-child {
@@ -130,6 +138,7 @@
     .event-save-page .form-group select,
     .event-save-page .form-group textarea {
         width: 100%;
+        min-height: 48px;
         padding: 14px 16px;
         border: 1px solid #dce2ec;
         border-radius: 10px;
@@ -148,9 +157,67 @@
         box-shadow: 0 0 0 3px rgba(67, 133, 237, 0.1);
     }
 
+    .event-save-page .form-group input:disabled,
+    .event-save-page .form-group select:disabled {
+        background: #f1f4f8;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
     .event-save-page .form-group textarea {
         resize: vertical;
         line-height: 1.8;
+    }
+
+    /* 날짜와 시간 나란히 배치 */
+    .date-time-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .date-time-group .form-group {
+        min-width: 0;
+    }
+
+    /* 날짜와 시간 입력 */
+    .event-save-form input[type="date"],
+    .event-save-form input[type="time"] {
+        width: 100%;
+        min-height: 52px;
+        padding: 0 16px;
+        border: 1px solid #dce3ec;
+        border-radius: 10px;
+        background-color: #fff;
+        color: #26364a;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .event-save-form input[type="date"]:focus,
+    .event-save-form input[type="time"]:focus {
+        outline: none;
+        border-color: #477dcc;
+        box-shadow: 0 0 0 3px rgba(71, 125, 204, 0.12);
+    }
+
+    /* 참가비 입력 */
+    .fee-area {
+        padding: 18px;
+        border: 1px solid #e5eaf1;
+        border-radius: 12px;
+        background: #f8faff;
+    }
+
+    .fee-area[hidden],
+    #no-session-area[hidden],
+    #session-area[hidden] {
+        display: none !important;
     }
 
     /* 대표 이미지 */
@@ -218,34 +285,7 @@
         transform: translateY(-2px);
     }
 
-    /* 모바일 */
-    @media (max-width: 600px) {
-        .event-save-page {
-            padding: 30px 16px 50px;
-        }
-
-        .event-save-header {
-            padding: 30px 25px;
-        }
-
-        .event-save-header h1 {
-            font-size: 25px;
-        }
-
-        .event-save-section {
-            padding: 25px 20px;
-        }
-
-        .event-save-actions {
-            flex-direction: column-reverse;
-        }
-
-        .event-save-actions .cancel-button,
-        .event-save-actions .submit-button {
-            width: 100%;
-        }
-    }
-    /* 회차 선택 버튼 */
+    /* 회차 선택 */
     .session-choice {
         display: flex;
         gap: 24px;
@@ -259,29 +299,26 @@
         cursor: pointer;
     }
 
-    /* 기본 라디오 버튼 모양 제거 */
+    /* 라디오 버튼 */
     .session-choice input[type="radio"] {
         appearance: none;
         -webkit-appearance: none;
-
         width: 18px;
         height: 18px;
+        min-height: 18px;
         margin: 0;
-
+        padding: 0;
         border: 1px solid #cbd5e1;
         border-radius: 50%;
         background: #fff;
-
         cursor: pointer;
     }
 
-    /* 선택된 버튼 */
     .session-choice input[type="radio"]:checked {
         border: 5px solid #2563eb;
         background: #fff;
     }
 
-    /* 포커스 효과 제거 */
     .session-choice input[type="radio"]:focus {
         outline: none;
         box-shadow: none;
@@ -297,7 +334,6 @@
         background: #fafbfd;
     }
 
-    /* 회차 제목과 삭제 버튼 */
     .session-item-header {
         display: flex;
         align-items: center;
@@ -346,48 +382,47 @@
         background: #edf4ff;
     }
 
-    /* 날짜 및 시간 입력 */
-    .event-save-form input[type="date"],
-    .event-save-form input[type="datetime-local"] {
-        width: 100%;
-        min-height: 52px;
-        padding: 0 16px;
+    /* 모바일 */
+    @media (max-width: 600px) {
 
-        border: 1px solid #dce3ec;
-        border-radius: 10px;
+        .event-save-page {
+            padding: 30px 16px 50px;
+        }
 
-        background-color: #fff;
-        color: #26364a;
+        .event-save-header {
+            padding: 30px 25px;
+        }
 
-        font-family: inherit;
-        font-size: 15px;
-        font-weight: 500;
+        .event-save-header h1 {
+            font-size: 25px;
+        }
 
-        cursor: pointer;
-        box-sizing: border-box;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
+        .event-save-section {
+            padding: 25px 20px;
+        }
 
-    /* 입력칸 선택 시 */
-    .event-save-form input[type="date"]:focus,
-    .event-save-form input[type="datetime-local"]:focus {
-        outline: none;
-        border-color: #477dcc;
-        box-shadow: 0 0 0 3px rgba(71, 125, 204, 0.12);
-    }
+        .date-time-group {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
 
-    /* 달력 아이콘 */
-    .event-save-form input[type="date"]::-webkit-calendar-picker-indicator,
-    .event-save-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        opacity: 0.7;
-    }
+        .session-choice {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
 
-    /* 날짜 입력 영역 간격 */
-    .event-save-form input[type="date"]::-webkit-datetime-edit,
-    .event-save-form input[type="datetime-local"]::-webkit-datetime-edit {
-        padding: 4px 0;
+        .session-item {
+            padding: 18px;
+        }
+
+        .event-save-actions {
+            flex-direction: column-reverse;
+        }
+
+        .event-save-actions .cancel-button,
+        .event-save-actions .submit-button {
+            width: 100%;
+        }
     }
 </style>

@@ -94,7 +94,12 @@ public class EventController {
     @PostMapping("/events/save")
     public String save(EventRequest.SaveDto saveDto,
                        @RequestParam("file") MultipartFile file, HttpSession session) {
+        System.out.println("1. 행사 등록 컨트롤러 진입");
+
         saveDto.validate();
+
+        System.out.println("2. DTO 검증 통과");
+
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         if (sessionCompanyDto == null) {
@@ -106,7 +111,7 @@ public class EventController {
         Event event = eventService.save(saveDto, sessionCompanyDto.getId());
         eventFileService.attachFile(event.getId(), file);
 
-        return "redirect:/events";
+        return "redirect:/";
     }
 
     // 기업이 등록한 행사 전체 조회

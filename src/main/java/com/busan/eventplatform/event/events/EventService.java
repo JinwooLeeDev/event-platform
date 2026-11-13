@@ -2,8 +2,11 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
+import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository;
+import com.busan.eventplatform.event.event_session.EventSessionRequest;
+import com.busan.eventplatform.event.event_session.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
@@ -32,6 +35,7 @@ public class EventService {
     private final EventCategoryRepository eventCategoryRepository;
     private final CompanyRepository companyRepository;
     private final RegistrationRepository registrationRepository;
+    private final EventSessionService eventSessionService;
 
     // 행사 등록 기능
     @Transactional
@@ -45,8 +49,36 @@ public class EventService {
         event.setCompany(company);
         event.setCategory(category);
         event.setStatus(EventStatus.PENDING_REVIEW);
+        eventRepository.save(event);
 
-        return eventRepository.save(event);
+        if (saveDto.isHasSessions()) {
+            for (EventSessionRequest.SaveDto sessionDto : saveDto.getSessions()) {
+                eventSessionService.save(event.getId(), companyId, sessionDto);
+            }
+        } else {
+            // 회차가 없는 행사: 기본 회차 자동 생성
+            EventSessionRequest.SaveDto sessionDto = new EventSessionRequest.SaveDto();
+            sessionDto.setName("기본 회차");
+            sessionDto.setStartsAt(saveDto.getStartDate().atStartOfDay());
+            sessionDto.setEndsAt(saveDto.getEndDate().atTime(23, 59, 59));
+            sessionDto.setCapacity(Integer.MAX_VALUE);
+            // 신청 인원 제한 -- 무제한
+            sessionDto.setHoldDurationSeconds(0);
+            // 좌석 임시 점유 시간 0초 설정
+            sessionDto.setPricingType(saveDto.getPricingType());
+            sessionDto.setFee(saveDto.getFee());
+            // 행사 유료/무료 여부와 참가비 기본 회차에도 적용
+            sessionDto.setReservationDepositPoints(0);
+            sessionDto.setMinimumParticipants(1);
+            sessionDto.setMinimumCheckAt(sessionDto.getEndsAt());
+
+            sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
+            sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
+
+            eventSessionService.save(event.getId(), companyId, sessionDto);
+        }
+
+        return event;
     }
 
     // 행사 목록 조회 기능
@@ -124,7 +156,7 @@ public class EventService {
     }
 
     // 행사 수정 화면 데이터 조회
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public EventResponse.UpdateFormDto update(Long id, Long companyId) {
         Event event = eventRepository.findByDetail(id)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
