@@ -4,6 +4,7 @@ import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.user.registration.RegistrationPurchaseService;
+import com.busan.eventplatform.user.registration.RegistrationRes;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -41,10 +42,11 @@ public class PurchaseController {
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
         if(!loginIdentity.isUser()) throw new Exception403("유저 전용 결제 페이지입니다");
 
-        purchaseService.purchase(eventSessionId , loginIdentity.getId());
+        // [참가 신청 파트] 검증 → 포인트 결제(pay) → 신청 저장 (한 트랜잭션, 실패 시 포인트도 롤백)
+        RegistrationRes.ApplyDto result = registrationPurchaseService.applyWithPayment(eventSessionId, loginIdentity);
 
-        redirect.addFlashAttribute("purchaseSuccessMsg",
-                "결제완료 되었습니다. 결제 행사확인은 포인트관리 페이지에서 확인 가능합니다");
+        // 확정 / 대기 N번 등 신청 결과를 상황별 문구로 안내
+        redirect.addFlashAttribute("purchaseSuccessMsg", result.getMessage());
 
         return "redirect:/mypage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
     }
