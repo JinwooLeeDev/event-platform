@@ -51,6 +51,7 @@ public class CompanyAuthService {
             throw new Exception400("이미 등록되어 있는 사업자 번호입니다.");
         });
 
+//        국세청 API 연동. 사업자 정보 등록여부 확인
         BusinessVerificationStatus verificationStatus = businessVerificationService.verify(
                 request.getBusinessNumber(),
                 request.getRepresentativeName(),
@@ -64,8 +65,6 @@ public class CompanyAuthService {
             );
         }
 
-        // TODO: 외부 사업자 진위 확인 모듈을 파일 저장 전에 연결합니다.
-        // 현재는 외부 검증 완료로 간주하지 않으며 관리자 승인 대기로 저장합니다.
         String passwordHash = passwordEncoder.encode(request.getPassword());
         FileStorageResult storedFile = fileStorage.upload(request.getBusinessCertificate());
 
