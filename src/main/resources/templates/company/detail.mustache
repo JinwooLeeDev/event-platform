@@ -7,67 +7,169 @@
 <body>
 {{>layout/header}}
 {{> layout/company-style}}
-<main class="auth-page">
-    <section class="auth-card company-card">
+{{> layout/account-style}}
+<style>
+    .company-home {
+        padding: 40px 24px 60px;
+        background: #f8f9fb;
+        color: #292f3d;
+        font-family: 'Pretendard', sans-serif;
+    }
 
-        <h1>기업 마이페이지</h1>
+    .company-home .company-card {
+        max-width: none;
+        width: 100%;
+        padding: 30px;
+        background: white;
+        border: 1px solid #e6e7eb;
+        border-radius: 18px;
+        box-shadow: 0 3px 16px rgba(30, 35, 45, .025);
+    }
 
-        {{#company}}
-        <h2>{{name}}</h2>
+    .company-home .company-card h1 {
+        margin: 0 0 10px;
+    }
 
-        <dl>
-            <dt>이메일</dt>
-            <dd>{{email}}</dd>
+    .company-home .company-card h2 {
+        margin: 26px 0 16px;
+        font-size: 24px;
+    }
 
-            <dt>사업자등록번호</dt>
-            <dd>{{businessNumber}}</dd>
+    .company-home .company-card dl {
+        display: grid;
+        grid-template-columns: 140px minmax(0, 1fr);
+        margin: 0;
+    }
 
-            <dt>대표자명</dt>
-            <dd>{{representativeName}}</dd>
+    .company-home .company-card dt, .company-home .company-card dd {
+        margin: 0;
+        padding: 15px 0;
+        border-bottom: 1px solid #ececef;
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
 
-            <dt>기업 주소</dt>
-            <dd>{{address}}</dd>
+    .company-home .company-card dt {
+        color: #72757e;
+        font-weight: 500;
+    }
 
-            <dt>담당자 이름</dt>
-            <dd>{{contactPersonName}}</dd>
+    .company-home .company-card > p {
+        color: #72757e;
+        font-size: 14px;
+        line-height: 1.75;
+    }
 
-            <dt>담당자 연락처</dt>
-            <dd>{{contactPersonPhone}}</dd>
+    .company-home .company-note {
+        padding: 18px;
+        border-radius: 12px;
+        background: #f3efe8;
+        color: #64615a;
+        font-size: 13px;
+        line-height: 1.8;
+        margin: 24px 0;
+    }
 
-            <dt>기업 심사 상태</dt>
-            <dd>
-                {{#pending}}
-                <span class="review-badge review-badge--pending">검토 중</span>
-                {{/pending}}
+    .company-home .company-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
 
-                {{#approved}}
-                <span class="review-badge review-badge--approved">승인</span>
-                {{/approved}}
+    .company-home .company-link {
+        display: inline-flex;
+        padding: 12px 20px;
+        border: 1px solid #0750d8;
+        border-radius: 10px;
+        background: #0750d8;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
 
-                {{#feedbackNeeded}}
-                <span class="review-badge review-badge--danger">보완 필요</span>
-                {{/feedbackNeeded}}
+    .company-home .company-link.secondary {
+        background: white;
+        color: #555c68;
+        border-color: #d9dbe1;
+    }
 
-                {{#rejected}}
-                <span class="review-badge review-badge--danger">반려</span>
-                {{/rejected}}
+    @media (max-width: 600px) {
+        .company-home {
+            padding: 28px 16px 40px;
+        }
 
-                {{#suspended}}
-                <span class="review-badge review-badge--danger">이용 정지</span>
-                {{/suspended}}
-            </dd>
-        </dl>
-        {{/company}}
+        .company-home .company-card {
+            padding: 22px;
+        }
 
-        <p>
-            기업 인증 정보 수정 시 심사 대기로 전환됩니다.
-            담당자 이름·연락처만 변경하면 기존 심사 상태를 유지합니다.
-        </p>
+        .company-home .company-card dl {
+            grid-template-columns: 110px minmax(0, 1fr);
+        }
+    }
+</style>
+<main class="company-home">
+    <div class="account-layout">
+        {{> layout/company-nav}}
+        <section class="company-card account-content">
 
-        <a href="/company/update">기업 정보 수정</a>
-        |
-        <a href="/">메인으로 이동</a>
-    </section>
+            <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span>
+            <h1>기업 정보</h1>
+            <p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
+
+            {{#company}}
+                <h2>{{name}}</h2>
+
+                <dl>
+                    <dt>이메일</dt>
+                    <dd>{{email}}</dd>
+
+                    <dt>사업자등록번호</dt>
+                    <dd>{{businessNumber}}</dd>
+
+                    <dt>대표자명</dt>
+                    <dd>{{representativeName}}</dd>
+
+                    <dt>기업 주소</dt>
+                    <dd>{{address}}</dd>
+
+                    <dt>담당자 이름</dt>
+                    <dd>{{contactPersonName}}</dd>
+
+                    <dt>담당자 연락처</dt>
+                    <dd>{{contactPersonPhone}}</dd>
+
+                    <dt>기업 심사 상태</dt>
+                    <dd>
+                        {{#pending}}
+                            <span class="review-badge review-badge--pending">검토 중</span>
+                        {{/pending}}
+
+                        {{#approved}}
+                            <span class="review-badge review-badge--approved">승인</span>
+                        {{/approved}}
+
+                        {{#feedbackNeeded}}
+                            <span class="review-badge review-badge--danger">보완 필요</span>
+                        {{/feedbackNeeded}}
+
+                        {{#rejected}}
+                            <span class="review-badge review-badge--danger">반려</span>
+                        {{/rejected}}
+
+                        {{#suspended}}
+                            <span class="review-badge review-badge--danger">이용 정지</span>
+                        {{/suspended}}
+                    </dd>
+                </dl>
+            {{/company}}
+
+            <div class="company-note">등록된 기업 정보와 담당자 정보를 수정할 수 있습니다.<br>기업 인증 정보를 변경하면 새 사업자등록증 제출과 재심사가 필요합니다.</div>
+            <div class="company-actions"><a class="company-link" href="/company/update">기업 정보 수정</a><a
+                    class="company-link secondary" href="/">메인으로 이동</a></div>
+        </section>
+    </div>
 </main>
 
 {{>layout/footer}}

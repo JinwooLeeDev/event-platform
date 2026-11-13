@@ -7,6 +7,7 @@ import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository;
 import com.busan.eventplatform.event.event_session.EventSessionRequest;
 import com.busan.eventplatform.event.event_session.EventSessionService;
+import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
@@ -22,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -36,6 +35,7 @@ public class EventService {
     private final CompanyRepository companyRepository;
     private final RegistrationRepository registrationRepository;
     private final EventSessionService eventSessionService;
+    private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
 
     // 행사 등록 기능
     @Transactional
@@ -72,8 +72,8 @@ public class EventService {
             sessionDto.setMinimumParticipants(1);
             sessionDto.setMinimumCheckAt(sessionDto.getEndsAt());
 
-            sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
-            sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
+            sessionDto.setStartsAt(saveDto.getApplyStartAt());
+            sessionDto.setEndsAt(saveDto.getApplyEndAt());
 
             eventSessionService.save(event.getId(), companyId, sessionDto);
         }
@@ -82,7 +82,11 @@ public class EventService {
     }
 
     // 행사 목록 조회 기능
-    public EventResponse.PageDto findAllPage(int page, int size, String keyword, Long userId) {
+    public EventResponse.PageDto findAllPage(int page, int size, String keyword) {
+        return findAllPage(page, size, keyword, null);
+    }
+
+    public EventResponse.PageDto findAllPage(int page, int size, String keyword, Long categoryId) {
 
         // 페이지 번호 0부터 시작하도록 반환
         int pageIndex = Math.max(0, page - 1);
@@ -92,45 +96,10 @@ public class EventService {
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
         // 행사 조회
         Page<Event> eventPage;
-        if (keyword == null || keyword.isBlank()) {
-            eventPage = eventRepository.findAllPublished(EventStatus.PUBLISHED, pageable);
-        } else {
-            eventPage = eventRepository.findAllKeyWord(EventStatus.PUBLISHED, keyword.trim(), pageable);
-        }
+        eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
+                keyword == null ? "" : keyword.trim(), pageable);
 
-        // 현재 페이지에 포함된 행사 ID 목록 -- 행사 ID만 추출 (좋아요 정보만 한꺼번에 조회하기 위함)
-        List<Long> eventIds = eventPage.getContent().stream()
-                .map(Event::getId)
-                .toList();
-
-        // 행사별 좋아요 조회 결과 저장
-        Map<Long, EventRepository.FavoriteSummary> favoriteMap = new HashMap<>();
-        if (!eventIds.isEmpty()) {
-            List<EventRepository.FavoriteSummary> favoriteList =
-                    eventRepository.findFavoriteSummaries(eventIds, userId);
-            for (EventRepository.FavoriteSummary favorite : favoriteList) {
-                favoriteMap.put(favorite.getEventId(), favorite);
-            }
-        }
-
-        // 행사 정보 + 좋아요 정보를 DTO로 변환
-        List<EventResponse.EventDto> eventDtoList = eventPage.getContent().stream()
-                // 현재 행사 ID로 Map에서 좋아요 정보 찾기
-                .map(event -> {
-                    EventRepository.FavoriteSummary favorite = favoriteMap.get(event.getId());
-                    Long favoriteCount = 0L;
-                    boolean isFavorite = false;
-                    // 실제 좋아요 정보가 있으면 값 변경
-                    if (favorite != null) {
-                        favoriteCount = favorite.getFavoriteCount();
-                        isFavorite = favorite.getUserFavoriteCount() > 0;
-                    }
-                    return new EventResponse.EventDto(
-                            event, favoriteCount, isFavorite);
-                })
-                .toList();
-
-        return new EventResponse.PageDto(eventPage, eventDtoList);
+        return new EventResponse.PageDto(eventPage);
     }
 
     // 행사 상세 조회 기능
@@ -242,8 +211,7 @@ public class EventService {
         if (!EventStatus.PENDING_REVIEW.equals(event.getStatus())) {
             throw new Exception400("승인 대기 중인 행사만 승인할 수 있습니다.");
         }
-        event.setStatus(EventStatus.PUBLISHED);
-        event.setPublishedAt(LocalDateTime.now());
+        event.setStatus(EventStatus.PAID_READY); // 관리자가 승인했다면 '결제대기'로 변경.
 
         return event;
     }
@@ -271,6 +239,7 @@ public class EventService {
     }
 
     // 기업이 등록한 행사 전체 내역 조회
+    /// 각 행사마다 갖고있는 회차 수 추가.
     public EventResponse.ListDto findAllByCompanyId(Long companyId) {
         List<Event> eventList = eventRepository.findAllByCompanyId(companyId);
         return new EventResponse.ListDto(eventList);

@@ -24,6 +24,7 @@ public class EventSession {
     @Column(nullable = false)
     private int capacity;
 
+    // 몇 회차인지 알려주는 컬럼 ex) 1회차, 2회차 ...
     @Column(nullable = false)
     private String name;
 
@@ -38,19 +39,6 @@ public class EventSession {
     // 행사 종료일
     @Column(nullable = false)
     private LocalDateTime endsAt;
-
-
-    // 모집 시작일
-    @Column(nullable = false)
-    private LocalDateTime applyStartAt;
-
-    // 모집 마감일
-    @Column(nullable = false)
-    private LocalDateTime applyEndAt;
-
-    public boolean isApplicationClosed() {
-        return applyEndAt != null && !LocalDateTime.now().isBefore(applyEndAt);
-    }
 
     // 현재 정원 점유 인원
     @Column(nullable = false)
@@ -114,8 +102,6 @@ public class EventSession {
         this.reservationDepositPoints = dto.getReservationDepositPoints();
         this.minimumParticipants = dto.getMinimumParticipants();
         this.minimumCheckAt = dto.getMinimumCheckAt();
-        this.applyStartAt = dto.getApplyStartAt();
-        this.applyEndAt = dto.getApplyEndAt();
     }
 
     // =========================================================

@@ -1,477 +1,85 @@
-
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}행사 상세{{/event.title}} | Busan Play</title>
+</head>
+<body>
 {{> layout/header}}
 {{> event/detail-style}}
-
 <main class="event-detail-page">
-    <div class="event-detail-container">
-
-        <!-- 왼쪽: 행사 대표 이미지 -->
-        <section class="event-image-section">
-            <div class="event-main-image">
-                {{#event.imageUrl}}
-                    <img src="{{event.imageUrl}}" alt="{{event.title}} 대표 이미지">
-                {{/event.imageUrl}}
-
-                {{^event.imageUrl}}
-                    <span>행사 대표 이미지</span>
-                {{/event.imageUrl}}
-            </div>
-        </section>
-
-        <!-- 오른쪽: 행사 상세 정보 -->
-        <section class="event-info-section">
-
-            <div class="event-title-area">
-                <div>
-                    <span class="event-category">{{event.categoryName}}</span>
-                    <h1>{{event.title}}</h1>
-                    <p>{{event.summary}}</p>
+    <div class="event-detail-wrap">
+        <nav class="detail-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span><span>행사 상세</span></nav>
+        <div class="detail-layout">
+            <div class="detail-content">
+                <div class="detail-poster" aria-label="행사 대표 이미지 준비 중">
+                    <span class="detail-eyebrow">DISCOVER BUSAN</span>
+                    <strong>새로운 경험,<br>부산에서 만나요.</strong>
+                    <span>대표 이미지 준비 중 · {storageKey}</span>
                 </div>
-
-                <button type="button"
-                        id="favoriteBtn"
-                        class="favorite-btn">
-                    ♡ 찜하기
-                </button>
+                <section class="detail-section" aria-labelledby="description-title">
+                    <span class="detail-eyebrow">ABOUT THE EVENT</span>
+                    <h2 id="description-title">행사 소개</h2>
+                    <div class="detail-description">{{#event.description}}{{event.description}}{{/event.description}}{{^event.description}}{description}{{/event.description}}</div>
+                </section>
+                <section class="detail-section" aria-labelledby="location-title">
+                    <h2 id="location-title">찾아오시는 길</h2>
+                    <p>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</p>
+                    <div id="event-map" class="detail-map" data-address="{{event.address}}" data-title="{{event.title}}" data-client-id="{{naverMapClientId}}" aria-label="행사 장소 지도" hidden></div>
+                    <p id="event-map-status" class="detail-map-placeholder" role="status">지도를 불러오는 중입니다.</p>
+                </section>
+                <section class="detail-section" aria-labelledby="session-title">
+                    <h2 id="session-title">회차 안내</h2>
+                    <p class="detail-muted">회차 데이터 연결 전 임시 표기입니다. 실제 개최 일정·참가비와 다를 수 있습니다.</p>
+                    <dl class="detail-facts">
+                        <div><dt>회차명</dt><dd>{name}</dd></div>
+                        <div><dt>개최 일시</dt><dd>{startsAt} ~ {endsAt}</dd></div>
+                        <div><dt>참가비</dt><dd>{fee} P</dd></div>
+                        <div><dt>정원</dt><dd>{capacity}명</dd></div>
+                    </dl>
+                </section>
             </div>
-
-            <!-- 행사 정보 -->
-            <div class="event-info-box">
-                <h2>행사 정보</h2>
-
-                <div class="event-info-row">
-                    <strong>장소</strong>
-                    <span>{{event.address}}</span>
+            <aside class="detail-overview" aria-labelledby="event-title">
+                <span class="detail-category">{{#event.categoryName}}{{event.categoryName}}{{/event.categoryName}}{{^event.categoryName}}{categoryName}{{/event.categoryName}}</span>
+                <h1 id="event-title">{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}{title}{{/event.title}}</h1>
+                <p class="detail-summary">{{#event.summary}}{{event.summary}}{{/event.summary}}{{^event.summary}}{summary}{{/event.summary}}</p>
+                <dl class="detail-facts">
+                    <div><dt>모집 시작</dt><dd>{{#event.applyStartAt}}<span data-detail-date>{{event.applyStartAt}}</span>{{/event.applyStartAt}}{{^event.applyStartAt}}{applyStartAt}{{/event.applyStartAt}}</dd></div>
+                    <div><dt>모집 마감</dt><dd>{{#event.applyEndAt}}<span data-detail-date>{{event.applyEndAt}}</span>{{/event.applyEndAt}}{{^event.applyEndAt}}{applyEndAt}{{/event.applyEndAt}}</dd></div>
+                    <div><dt>장소</dt><dd>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</dd></div>
+                    <div><dt>주최 기업</dt><dd>{{event.companyName}}</dd></div>
+                </dl>
+                {{#event.applicationClosed}}<p class="detail-state">모집 기간이 마감되었습니다.</p>{{/event.applicationClosed}}
+                <div class="detail-session-picker">
+                    <label for="event-session">참가 회차 선택</label>
+                    <select id="event-session" name="eventSessionId" aria-describedby="session-picker-help" {{^hasEventSessions}}disabled{{/hasEventSessions}}>
+                        <option value="" selected disabled>참가할 회차를 선택해주세요</option>
+                        {{#eventSessions}}
+                            <option value="{{id}}" data-session-option>{{name}}{{#startsAt}} · {{startsAt}}{{/startsAt}}</option>
+                        {{/eventSessions}}
+                    </select>
+                    <p id="session-picker-help" class="detail-muted">{{#hasEventSessions}}참가할 회차를 선택해주세요. 신청 기능은 준비 중입니다.{{/hasEventSessions}}{{^hasEventSessions}}등록된 회차가 없습니다.{{/hasEventSessions}}</p>
                 </div>
+                <button class="detail-button" type="button" disabled>참가 신청 연결 준비 중</button>
+                <p class="detail-muted">모집 시작 여부·정원·회차별 신청 기능은 추후 연결됩니다.</p>
+                <a class="detail-back" href="/">메인으로 돌아가기 →</a>
 
-                <div class="event-info-row">
-                    <strong>카테고리</strong>
-                    <span>{{event.categoryName}}</span>
-                </div>
-
-                <div class="event-description">
-                    <h3>행사 소개</h3>
-                    <p>{{event.description}}</p>
-                </div>
-            </div>
-
-            <!-- 참가 신청 -->
-            <div class="event-apply-section">
-                <h2>참가 신청</h2>
-
-                {{#hasEventSessions}}
-                    <button type="button"
-                            id="openSessionModalBtn"
-                            class="apply-btn">
-                        회차 선택 후 신청하기
-                    </button>
-                {{/hasEventSessions}}
-
-                {{^hasEventSessions}}
-                    <button type="button"
-                            id="applyEventBtn"
-                            class="apply-btn"
-                            data-event-id="{{event.id}}">
-                        신청하기
-                    </button>
-                {{/hasEventSessions}}
-            </div>
-
-        </section>
-    </div>
-</main>
-
-<!-- 회차가 있는 행사만 모달 표시 -->
-{{#hasEventSessions}}
-    <div id="sessionModal" class="modal-overlay">
-        <div class="session-modal">
-
-            <div class="modal-header">
-                <div>
-                    <h2>회차 선택</h2>
-                    <p>참가할 회차를 선택해주세요.</p>
-                </div>
-
-                <button type="button"
-                        id="closeSessionModalBtn"
-                        class="modal-close">
-                    ×
-                </button>
-            </div>
-
-            <div class="session-list">
-
-                {{#eventSessions}}
-                    <div class="session-item"
-                         data-session-id="{{id}}"
-                         data-session-name="{{name}}"
-                         data-apply-start="{{applyStartAt}}"
-                         data-apply-end="{{applyEndAt}}"
-                         data-session-status="{{status}}">
-
-                        <div class="session-item-header">
-                            <h3>{{name}}</h3>
-                            <span class="session-status"></span>
-                        </div>
-
-                        <div class="session-detail-info">
-
-                            <div class="session-info-row">
-                                <span>행사 일시</span>
-                                <strong>{{startsAt}} ~ {{endsAt}}</strong>
-                            </div>
-
-                            <div class="session-info-row">
-                                <span>모집 기간</span>
-                                <strong>{{applyStartAt}} ~ {{applyEndAt}}</strong>
-                            </div>
-
-                            <div class="session-info-row">
-                                <span>모집 정원</span>
-                                <strong>{{occupiedCount}} / {{capacity}}명</strong>
-                            </div>
-
-                        </div>
-
-                        <!-- 참가비 및 예약 보증금 -->
-                        <div class="session-price-box">
-                            <div class="price-row">
-                                <span>참가비</span>
-                                <strong class="session-fee"
-                                        data-fee="{{fee}}"></strong>
-                            </div>
-
-                            <div class="price-row">
-                                <span>예약 보증금</span>
-                                <strong class="session-deposit"
-                                        data-deposit="{{reservationDepositPoints}}"></strong>
-                            </div>
-                        </div>
-
-                        <button type="button"
-                                class="session-select-btn">
-                            선택하기
-                        </button>
-
-                    </div>
-                {{/eventSessions}}
-
-            </div>
+            </aside>
         </div>
     </div>
-{{/hasEventSessions}}
-
+</main>
 {{> layout/footer}}
-
+<script src="/js/event-detail-map.js" defer></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        // =====================================
-        // 1. 회차 선택 모달
-        // =====================================
-
-        const modal = document.getElementById("sessionModal");
-        const openModalBtn = document.getElementById("openSessionModalBtn");
-        const closeModalBtn = document.getElementById("closeSessionModalBtn");
-
-        if (openModalBtn && modal) {
-            openModalBtn.addEventListener("click", function () {
-                updateSessionStatus();
-                modal.classList.add("show");
-            });
-        }
-
-        if (closeModalBtn && modal) {
-            closeModalBtn.addEventListener("click", function () {
-                modal.classList.remove("show");
-            });
-        }
-
-        if (modal) {
-            modal.addEventListener("click", function (e) {
-                if (e.target === modal) {
-                    modal.classList.remove("show");
-                }
-            });
-        }
-
-        // =====================================
-        // 2. 참가비 및 예약 보증금 표시
-        // =====================================
-
-        function updateSessionPrice(item) {
-            const feeElement = item.querySelector(".session-fee");
-            const depositElement = item.querySelector(".session-deposit");
-
-            const fee = Number(feeElement.dataset.fee);
-            const deposit = Number(depositElement.dataset.deposit);
-
-            feeElement.textContent = fee === 0
-                    ? "무료"
-                    : fee.toLocaleString("ko-KR") + " P";
-
-            depositElement.textContent = deposit === 0
-                    ? "없음"
-                    : deposit.toLocaleString("ko-KR") + " P";
-        }
-
-        // =====================================
-        // 3. 회차 모집 상태 확인
-        // =====================================
-
-        function parseLocalDate(value) {
-            if (!value) {
-                return new Date(NaN);
-            }
-
-            return new Date(value.replace(" ", "T"));
-        }
-
-        function updateSessionStatus() {
-            const now = new Date();
-
-            document.querySelectorAll(".session-item").forEach(function (item) {
-
-                updateSessionPrice(item);
-
-                const applyStart = parseLocalDate(item.dataset.applyStart);
-                const applyEnd = parseLocalDate(item.dataset.applyEnd);
-                const sessionStatus = item.dataset.sessionStatus;
-
-                const statusText = item.querySelector(".session-status");
-                const selectBtn = item.querySelector(".session-select-btn");
-
-                if (sessionStatus === "CANCELLED") {
-                    statusText.textContent = "회차 취소";
-                    statusText.className = "session-status cancelled";
-                    selectBtn.disabled = true;
-                    selectBtn.textContent = "신청 불가";
-                    return;
-                }
-
-                if (now < applyStart) {
-                    statusText.textContent = "모집 예정";
-                    statusText.className = "session-status upcoming";
-                    selectBtn.disabled = true;
-                    selectBtn.textContent = "모집 예정";
-                    return;
-                }
-
-                if (now >= applyEnd) {
-                    statusText.textContent = "모집 마감";
-                    statusText.className = "session-status closed";
-                    selectBtn.disabled = true;
-                    selectBtn.textContent = "모집 마감";
-                    return;
-                }
-
-                if (sessionStatus !== "SCHEDULED") {
-                    statusText.textContent = "신청 불가";
-                    statusText.className = "session-status closed";
-                    selectBtn.disabled = true;
-                    selectBtn.textContent = "신청 불가";
-                    return;
-                }
-
-                statusText.textContent = "모집 중";
-                statusText.className = "session-status open";
-
-                selectBtn.disabled = false;
-                selectBtn.textContent = "이 회차 신청하기";
-            });
-        }
-
-        // =====================================
-        // 4. 공통 신청 요청 처리
-        // =====================================
-
-        async function submitApplication(url, button, confirmMessage) {
-
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-
-            button.disabled = true;
-
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    credentials: "same-origin"
-                });
-
-                const responseText = await response.text();
-                let data = {};
-
-                if (responseText) {
-                    try {
-                        data = JSON.parse(responseText);
-                    } catch (error) {
-                        console.error("응답 JSON 파싱 실패:", responseText);
-                    }
-                }
-
-                if (response.status === 401) {
-                    alert("로그인이 필요합니다.");
-                    button.disabled = false;
-                    return;
-                }
-
-                if (response.status === 403) {
-                    alert(data.message || "개인 회원만 참가 신청이 가능합니다.");
-                    button.disabled = false;
-                    return;
-                }
-
-                if (!response.ok) {
-                    alert(data.message || "참가 신청에 실패했습니다.");
-                    button.disabled = false;
-                    return;
-                }
-
-                alert(data.message || "참가 신청이 처리되었습니다.");
-
-                if (modal) {
-                    modal.classList.remove("show");
-                }
-
-            } catch (error) {
-                console.error("참가 신청 오류:", error);
-                alert("서버와 통신할 수 없습니다.");
-                button.disabled = false;
-            }
-        }
-
-        // =====================================
-        // 5. 회차가 없는 행사 바로 신청
-        // =====================================
-
-        const applyEventBtn = document.getElementById("applyEventBtn");
-
-        if (applyEventBtn) {
-            applyEventBtn.addEventListener("click", function () {
-
-                const eventId = applyEventBtn.dataset.eventId;
-
-                submitApplication(
-                        "/api/registrations/apply/event/" + eventId,
-                        applyEventBtn,
-                        "이 행사에 신청하시겠습니까?"
-                );
-            });
-        }
-
-        // =====================================
-        // 6. 회차 선택 후 신청
-        // =====================================
-
-        document.querySelectorAll(".session-select-btn").forEach(function (button) {
-
-            button.addEventListener("click", function () {
-
-                const sessionItem = button.closest(".session-item");
-
-                const sessionId = sessionItem.dataset.sessionId;
-                const sessionName = sessionItem.dataset.sessionName;
-
-                submitApplication(
-                        "/api/registrations/apply/" + sessionId,
-                        button,
-                        sessionName + " 회차에 신청하시겠습니까?"
-                );
-            });
-        });
-
-        // =====================================
-        // 7. 찜하기
-        // =====================================
-
-        const favoriteBtn = document.getElementById("favoriteBtn");
-        const eventId = "{{event.id}}";
-
-        if (favoriteBtn) {
-
-            let isFavorite = false;
-
-            async function loadFavorite() {
-                try {
-                    const response = await fetch(
-                            "/events/favorite/" + eventId,
-                            {
-                                method: "GET",
-                                credentials: "same-origin"
-                            }
-                    );
-
-                    if (!response.ok) {
-                        console.error("찜 상태 조회 실패:", response.status);
-                        return;
-                    }
-
-                    const data = await response.json();
-
-                    isFavorite = data.isFavorite ?? data.favorite ?? false;
-
-                    updateFavoriteButton();
-
-                } catch (error) {
-                    console.error("찜 상태 조회 실패:", error);
-                }
-            }
-
-            function updateFavoriteButton() {
-                favoriteBtn.textContent = isFavorite
-                        ? "♥ 찜 완료"
-                        : "♡ 찜하기";
-
-                favoriteBtn.classList.toggle("active", isFavorite);
-            }
-
-            favoriteBtn.addEventListener("click", async function () {
-
-                const method = isFavorite ? "DELETE" : "POST";
-
-                try {
-                    const response = await fetch(
-                            "/events/favorite/" + eventId,
-                            {
-                                method: method,
-                                credentials: "same-origin"
-                            }
-                    );
-
-                    const responseText = await response.text();
-                    let data = {};
-
-                    if (responseText) {
-                        try {
-                            data = JSON.parse(responseText);
-                        } catch (error) {
-                            console.error("응답 JSON 파싱 실패:", responseText);
-                        }
-                    }
-
-                    if (response.status === 401) {
-                        alert("로그인이 필요합니다.");
-                        return;
-                    }
-
-                    if (!response.ok) {
-                        alert(data.message || "찜 처리에 실패했습니다.");
-                        return;
-                    }
-
-                    isFavorite = data.isFavorite ?? data.favorite ?? !isFavorite;
-
-                    updateFavoriteButton();
-
-                } catch (error) {
-                    console.error("찜 처리 실패:", error);
-                    alert("서버와 통신할 수 없습니다.");
-                }
-            });
-
-            loadFavorite();
-        }
-
-    });
+document.querySelectorAll('[data-session-option]').forEach(option => {
+    option.textContent = option.textContent.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?/, value =>
+        value.slice(0, 16).replace('T', ' ').replaceAll('-', '.'));
+});
+document.querySelectorAll('[data-detail-date]').forEach(element => {
+    // Event의 LocalDateTime은 서버에서 받은 지역 시각을 그대로 표시합니다.
+    const value = element.textContent.trim();
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.');
+});
 </script>
+</body>
+</html>

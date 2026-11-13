@@ -1,0 +1,13 @@
+{{#canSuspend}}
+<form class="admin-status-form" action="/admin/members/{{id}}/status" method="post">
+    <input type="hidden" name="status" value="SUSPENDED">
+    <button class="admin-status-button admin-status-button-danger" type="submit" aria-label="{{displayName}} 회원 정지">회원 정지</button>
+</form>
+{{/canSuspend}}
+{{#canActivate}}
+<form class="admin-status-form" action="/admin/members/{{id}}/status" method="post">
+    <input type="hidden" name="status" value="ACTIVE">
+    <button class="admin-status-button admin-status-button-activate" type="submit" aria-label="{{displayName}} 정지 해제">정지 해제</button>
+</form>
+{{/canActivate}}
+{{^canSuspend}}{{^canActivate}}<span class="admin-status-locked">상태 변경 불가</span>{{/canActivate}}{{/canSuspend}}

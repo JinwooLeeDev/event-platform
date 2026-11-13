@@ -1,0 +1,62 @@
+{{#memberListPage}}
+{{#memberPage}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>회원 목록 <span class="admin-badge">{{totalElements}}명</span></h2></div>
+    <form class="admin-member-search" action="/admin/members" method="get">
+        <label for="member-keyword">회원 검색</label>
+        <input id="member-keyword" name="keyword" type="search" value="{{keyword}}" placeholder="닉네임 또는 이메일">
+        <label for="member-status">계정 상태</label>
+        <select id="member-status" name="status">
+            <option value="" {{#allSelected}}selected{{/allSelected}}>전체</option>
+            <option value="ACTIVE" {{#activeSelected}}selected{{/activeSelected}}>활성</option>
+            <option value="SUSPENDED" {{#suspendedSelected}}selected{{/suspendedSelected}}>정지</option>
+            <option value="WITHDRAWN" {{#withdrawnSelected}}selected{{/withdrawnSelected}}>탈퇴</option>
+        </select>
+        <button type="submit">검색</button><a href="/admin/members">초기화</a>
+    </form>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <caption class="admin-sr-only">회원 검색 결과</caption>
+        <thead><tr><th scope="col">번호</th><th scope="col">닉네임</th><th scope="col">이메일</th><th scope="col">권한</th><th scope="col">상태</th><th scope="col">가입일 (한국 시각)</th><th scope="col">관리</th></tr></thead>
+        <tbody>
+        {{#members}}
+        <tr>
+            <td>{{id}}</td><td>{{displayName}}</td><td>{{email}}</td><td>{{roleName}}</td>
+            <td><span class="admin-badge {{#canSuspend}}admin-status-active{{/canSuspend}}{{#canActivate}}admin-status-suspended{{/canActivate}}">{{statusName}}</span></td>
+            <td>{{createdAt}}</td>
+            <td><div class="admin-member-actions"><a href="/admin/members/{{id}}" aria-label="{{displayName}} 회원 상세">상세 보기 →</a>{{> admin/member-status-actions}}</div></td>
+        </tr>
+        {{/members}}
+        {{^members}}<tr><td colspan="7" class="admin-member-empty">조건에 맞는 회원이 없습니다.</td></tr>{{/members}}
+        </tbody>
+    </table></div>
+    <nav class="admin-pagination" aria-label="회원 목록 페이지">
+        {{#previousUrl}}<a href="{{previousUrl}}">← 이전</a>{{/previousUrl}}
+        <span>{{currentPage}} / {{totalPages}} 페이지</span>
+        {{#nextUrl}}<a href="{{nextUrl}}">다음 →</a>{{/nextUrl}}
+    </nav>
+</section>
+{{/memberPage}}
+{{/memberListPage}}
+{{#memberDetailPage}}
+{{#member}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>회원 기본 정보</h2><a href="/admin/members">회원 목록 →</a></div>
+    <dl class="admin-member-facts">
+        <div><dt>회원 번호</dt><dd>{{id}}</dd></div>
+        <div><dt>닉네임</dt><dd>{{displayName}}</dd></div>
+        <div><dt>이메일</dt><dd>{{email}}</dd></div>
+        <div><dt>권한</dt><dd>{{roleName}}</dd></div>
+        <div><dt>계정 상태</dt><dd><span class="admin-badge {{#canSuspend}}admin-status-active{{/canSuspend}}{{#canActivate}}admin-status-suspended{{/canActivate}}">{{statusName}}</span></dd></div>
+        <div><dt>보유 포인트</dt><dd>{{point}} P</dd></div>
+        <div><dt>선호 언어</dt><dd>{{preferredLocale}}</dd></div>
+        <div><dt>가입일 (한국 시각)</dt><dd>{{createdAt}}</dd></div>
+        <div><dt>이메일 인증일</dt><dd>{{emailVerifiedAt}}</dd></div>
+        <div><dt>탈퇴일</dt><dd>{{withdrawnAt}}</dd></div>
+    </dl>
+    <div class="admin-member-status-panel">
+        <div><h3>계정 상태 관리</h3><p>활성 회원을 정지하거나 정지된 회원을 다시 활성화할 수 있습니다.</p></div>
+        <div class="admin-member-actions">{{> admin/member-status-actions}}</div>
+    </div>
+</section>
+{{/member}}
+{{/memberDetailPage}}

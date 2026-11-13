@@ -1,0 +1,7 @@
+<header class="admin-header">
+    <span>운영 관리 <span class="admin-header-divider">/</span> {{pageTitle}}</span>
+    <div class="admin-account">
+        {{#loginUser}}<span class="admin-avatar" aria-hidden="true">A</span><span>{{displayName}} <small>관리자</small></span>{{/loginUser}}
+        <form action="/logout" method="post"><button type="submit">로그아웃</button></form>
+    </div>
+</header>

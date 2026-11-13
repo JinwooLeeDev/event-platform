@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Table(name = "purchase_tb")
 @Entity
@@ -31,6 +32,7 @@ public class Purchase {
     @JoinColumn(name = "company_id")
     private Company company;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eventSession_id" , nullable = false)
     private EventSession eventSession;
@@ -38,14 +40,18 @@ public class Purchase {
     @CreationTimestamp
     private Timestamp purchasedAt;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PurchaseStatus status;
+
     private int price; // 이 결제내역에 저장될 결제한 포인트액.
 
     @Builder
-    public Purchase(User user, Company company, EventSession eventSession , int price) {
+    public Purchase(User user , EventSession eventSession , int price) {
         this.user = user;
-        this.company = company;
         this.eventSession = eventSession;
         this.price = price;
-
+        this.status = PurchaseStatus.PURCHASED;
     }
+
 }

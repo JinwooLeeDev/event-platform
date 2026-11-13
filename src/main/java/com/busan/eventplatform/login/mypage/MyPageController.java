@@ -1,9 +1,12 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.api.payment.PaymentService;
 import com.busan.eventplatform.api.purchase.PurchaseRes;
 import com.busan.eventplatform.api.purchase.PurchaseService;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
+import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.personallogin.AuthController;
@@ -16,9 +19,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 @RequiredArgsConstructor
@@ -26,6 +34,8 @@ public class MyPageController {
 
     private final MyPageService myPageService;
     private final PurchaseService purchaseService;
+    private final PaymentService paymentService;
+    private final RegistrationService registrationService;
 
     @GetMapping("/mypage")
     public String myPage(@SessionAttribute(name = AuthController.SESSION_USER, required = false) SessionUserDto sessionUser, Model model) {
@@ -39,22 +49,28 @@ public class MyPageController {
 
     @GetMapping("/myhistory")
     public String myHistory(
-            @SessionAttribute(
-                    name = AuthController.SESSION_USER,
-                    required = false
-            ) SessionUserDto sessionUser,
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity identity,
+            @RequestParam(defaultValue = "all") String tab,
+            @RequestParam(defaultValue = "") String keyword,
             Model model
     ) {
-        if (sessionUser == null) {
+        if (identity == null || identity.getId() == null || identity.getLoginType() == null) {
             throw new Exception401("로그인 후 이용해주세요.");
         }
-
-        model.addAttribute(
-                "purchaseList",
-                // 회차별 조회 구현 전까지 사용하지 않는 EventSession 인자는 null로 전달
-                purchaseService.purchaseList(sessionUser.getId())
-        );
-
+        if (!identity.isUser()) {
+            throw new Exception403("개인 회원만 신청 내역을 조회할 수 있습니다.");
+        }
+        String currentTab = tab != null && Set.of("all", "upcoming", "waiting", "past").contains(tab) ? tab : "all";
+        var history = registrationService.getMyHistory(identity, currentTab, keyword);
+        model.addAttribute("history", history);
+        model.addAttribute("myPoint", myPageService.getMyPage(identity.getId()).getPoint());
+        model.addAttribute("resultCount", history.getItems().size());
+        String search = "&keyword=" + URLEncoder.encode(history.getKeyword(), StandardCharsets.UTF_8);
+        model.addAttribute("historyTabs", List.of(
+                Map.of("url", "/myhistory?tab=all" + search, "label", "전체 내역", "count", history.getTotalCount(), "active", currentTab.equals("all")),
+                Map.of("url", "/myhistory?tab=upcoming" + search, "label", "예정 행사", "count", history.getUpcomingCount(), "active", currentTab.equals("upcoming")),
+                Map.of("url", "/myhistory?tab=waiting" + search, "label", "대기 중", "count", history.getWaitingCount(), "active", currentTab.equals("waiting")),
+                Map.of("url", "/myhistory?tab=past" + search, "label", "지난 · 취소 내역", "count", history.getPastCount(), "active", currentTab.equals("past"))));
         return "user/myhistory";
     }
 
@@ -79,6 +95,8 @@ public class MyPageController {
                 "purchaseList",
                 purchaseService.purchaseList(sessionUser.getId())
         );
+
+        model.addAttribute("paymentList" , paymentService.paymentList(sessionUser.getId()));
 
         return "user/mypoint";
     }
