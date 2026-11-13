@@ -1,3 +1,4 @@
+
 {{> layout/header}}
 {{> event/save-form-style}}
 
@@ -17,11 +18,15 @@
         <form action="/events/save"
               method="post"
               enctype="multipart/form-data"
-              class="event-save-form">
+              class="event-save-form"
+              id="event-save-form">
 
+            <!-- 행사 기본 정보 -->
             <section class="event-save-section">
                 <h2>행사 기본 정보</h2>
-                <p class="section-description">행사에 대한 기본 정보를 입력해 주세요.</p>
+                <p class="section-description">
+                    행사에 대한 기본 정보를 입력해 주세요.
+                </p>
 
                 <div class="form-group">
                     <label>행사 카테고리 <span>*</span></label>
@@ -50,30 +55,426 @@
 
                 <div class="form-group">
                     <label>상세 설명 <span>*</span></label>
-                    <textarea name="description" rows="8" required></textarea>
+                    <textarea name="description"
+                              rows="8"
+                              required></textarea>
                 </div>
             </section>
 
+
+            <!-- 행사 일정 -->
+            <section class="event-save-section">
+                <h2>행사 일정</h2>
+                <p class="section-description">
+                    회차별로 운영하는 행사인지 선택해 주세요.
+                </p>
+
+                <div class="form-group">
+                    <label>회차가 있나요? <span>*</span></label>
+
+                    <div class="session-choice">
+                        <label>
+                            <input type="radio"
+                                   name="hasSessions"
+                                   value="true"
+                                   required>
+                            회차가 있어요
+                        </label>
+
+                        <label>
+                            <input type="radio"
+                                   name="hasSessions"
+                                   value="false"
+                                   required>
+                            회차가 없어요
+                        </label>
+                    </div>
+                </div>
+
+
+                <!-- 회차가 없는 경우 -->
+                <div id="no-session-area" hidden>
+
+                    <h3>행사 전체 일정</h3>
+
+                    <div class="form-group">
+                        <label>행사 시작일 <span>*</span></label>
+                        <input type="date"
+                               name="startDate"
+                               id="startDate"
+                               disabled
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>행사 종료일 <span>*</span></label>
+                        <input type="date"
+                               name="endDate"
+                               id="endDate"
+                               disabled
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>모집 시작일 <span>*</span></label>
+                        <input type="datetime-local"
+                               name="applyStartAt"
+                               id="applyStartAt"
+                               disabled
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>모집 마감일 <span>*</span></label>
+                        <input type="datetime-local"
+                               name="applyEndAt"
+                               id="applyEndAt"
+                               disabled
+                               required>
+                    </div>
+
+                </div>
+
+
+                <!-- 회차가 있는 경우 -->
+                <div id="session-area" hidden>
+
+                    <h3>회차별 일정</h3>
+
+                    <p class="section-description">
+                        회차별 행사 일정과 모집 기간을 입력해 주세요.
+                    </p>
+
+                    <div id="session-list"></div>
+
+                    <button type="button"
+                            id="add-session-button">
+                        + 회차 추가
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- 대표 이미지 -->
             <section class="event-save-section">
                 <h2>대표 이미지</h2>
-                <p class="section-description">행사를 대표하는 포스터 이미지를 등록해 주세요.</p>
+                <p class="section-description">
+                    행사를 대표하는 포스터 이미지를 등록해 주세요.
+                </p>
 
                 <div class="form-group">
                     <label>대표 이미지 <span>*</span></label>
+
                     <div class="file-upload-box">
-                        <input type="file" name="file"
-                               accept=".jpg,.jpeg,.png" required>
+                        <input type="file"
+                               name="file"
+                               accept=".jpg,.jpeg,.png"
+                               required>
+
                         <p>JPG, JPEG, PNG 파일을 등록해 주세요.</p>
                     </div>
                 </div>
             </section>
 
+
+            <!-- 등록 버튼 -->
             <div class="event-save-actions">
                 <a href="/events" class="cancel-button">취소</a>
-                <button type="submit" class="submit-button">행사 등록하기</button>
+
+                <button type="submit" class="submit-button">
+                    행사 등록하기
+                </button>
             </div>
+
         </form>
     </div>
 </main>
+
+
+<!-- 회차 입력 템플릿 -->
+<template id="session-template">
+
+    <div class="session-item">
+
+        <div class="session-item-header">
+            <h3 class="session-title"></h3>
+
+            <button type="button"
+                    class="remove-session-button">
+                삭제
+            </button>
+        </div>
+
+        <div class="form-group">
+            <label>회차명 <span>*</span></label>
+            <input type="text"
+                   data-field="name"
+                   placeholder="예: 1회차"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>행사 시작 일시 <span>*</span></label>
+            <input type="datetime-local"
+                   data-field="startsAt"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>행사 종료 일시 <span>*</span></label>
+            <input type="datetime-local"
+                   data-field="endsAt"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>모집 시작 일시 <span>*</span></label>
+            <input type="datetime-local"
+                   data-field="applyStartAt"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>모집 마감 일시 <span>*</span></label>
+            <input type="datetime-local"
+                   data-field="applyEndAt"
+                   required>
+        </div>
+
+    </div>
+
+</template>
+
+
+<script>
+    const form = document.getElementById("event-save-form");
+
+    const sessionArea = document.getElementById("session-area");
+    const noSessionArea = document.getElementById("no-session-area");
+
+    const sessionList = document.getElementById("session-list");
+    const sessionTemplate = document.getElementById("session-template");
+
+    const addSessionButton = document.getElementById("add-session-button");
+
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+
+    const applyStartAt = document.getElementById("applyStartAt");
+    const applyEndAt = document.getElementById("applyEndAt");
+
+
+    // 회차가 없는 경우 입력란 활성화
+    function setNoSessionInputs(enabled) {
+
+        const inputs = [
+            startDate,
+            endDate,
+            applyStartAt,
+            applyEndAt
+        ];
+
+        inputs.forEach(input => {
+            input.disabled = !enabled;
+            input.required = enabled;
+        });
+
+    }
+
+
+    // 회차 입력란 활성화 / 비활성화
+    function setSessionInputs(enabled) {
+
+        const inputs = sessionList.querySelectorAll("input");
+
+        inputs.forEach(input => {
+            input.disabled = !enabled;
+            input.required = enabled;
+        });
+
+    }
+
+
+    // 회차 여부 선택
+    document.querySelectorAll('input[name="hasSessions"]')
+            .forEach(radio => {
+
+                radio.addEventListener("change", function () {
+
+                    if (this.value === "true") {
+
+                        // 회차가 있는 행사
+                        sessionArea.hidden = false;
+                        noSessionArea.hidden = true;
+
+                        setNoSessionInputs(false);
+
+                        // 첫 회차 자동 생성
+                        if (sessionList.children.length === 0) {
+                            addSession();
+                        }
+
+                        setSessionInputs(true);
+
+                    } else {
+
+                        // 회차가 없는 행사
+                        sessionArea.hidden = true;
+                        noSessionArea.hidden = false;
+
+                        setNoSessionInputs(true);
+                        setSessionInputs(false);
+
+                    }
+
+                });
+
+            });
+
+
+    // 회차 추가
+    function addSession() {
+
+        const fragment = sessionTemplate.content.cloneNode(true);
+        const sessionItem = fragment.querySelector(".session-item");
+
+        sessionList.appendChild(fragment);
+
+        // 입력 이름과 회차 번호 재정리
+        updateSessionNames();
+
+        // 현재 회차 입력 활성화
+        sessionItem.querySelectorAll("input").forEach(input => {
+            input.disabled = false;
+            input.required = true;
+        });
+
+        // 회차 삭제
+        sessionItem.querySelector(".remove-session-button")
+                .addEventListener("click", function () {
+
+                    // 마지막 회차는 삭제하지 못하도록 처리
+                    if (sessionList.children.length <= 1) {
+                        alert("최소 한 개의 회차는 필요합니다.");
+                        return;
+                    }
+
+                    sessionItem.remove();
+
+                    updateSessionNames();
+
+                });
+
+    }
+
+
+    // 회차 추가 버튼
+    addSessionButton.addEventListener("click", function () {
+        addSession();
+    });
+
+
+    // 회차 삭제 후 번호와 name 재정리
+    function updateSessionNames() {
+
+        const sessionItems =
+                sessionList.querySelectorAll(".session-item");
+
+        sessionItems.forEach((item, index) => {
+
+            // 회차 제목
+            item.querySelector(".session-title").textContent =
+                    `${index + 1}회차`;
+
+            // Spring DTO 바인딩 이름
+            item.querySelectorAll("[data-field]").forEach(input => {
+
+                const fieldName = input.dataset.field;
+
+                input.name = `sessions[${index}].${fieldName}`;
+
+            });
+
+        });
+
+    }
+
+
+    // 날짜 입력값 검증
+    form.addEventListener("submit", function (event) {
+
+        const selectedType =
+                document.querySelector('input[name="hasSessions"]:checked');
+
+        if (!selectedType) {
+            event.preventDefault();
+            alert("회차 운영 여부를 선택해 주세요.");
+            return;
+        }
+
+        // 회차가 없는 행사
+        if (selectedType.value === "false") {
+
+            if (startDate.value > endDate.value) {
+                event.preventDefault();
+                alert("행사 종료일은 시작일보다 빠를 수 없습니다.");
+                return;
+            }
+
+            if (applyStartAt.value > applyEndAt.value) {
+                event.preventDefault();
+                alert("모집 마감일은 모집 시작일보다 빠를 수 없습니다.");
+                return;
+            }
+
+        }
+
+        // 회차가 있는 행사
+        if (selectedType.value === "true") {
+
+            const sessionItems =
+                    sessionList.querySelectorAll(".session-item");
+
+            if (sessionItems.length === 0) {
+                event.preventDefault();
+                alert("최소 한 개의 회차를 추가해 주세요.");
+                return;
+            }
+
+            for (const item of sessionItems) {
+
+                const startsAt =
+                        item.querySelector('[data-field="startsAt"]').value;
+
+                const endsAt =
+                        item.querySelector('[data-field="endsAt"]').value;
+
+                const applyStart =
+                        item.querySelector('[data-field="applyStartAt"]').value;
+
+                const applyEnd =
+                        item.querySelector('[data-field="applyEndAt"]').value;
+
+                if (startsAt > endsAt) {
+                    event.preventDefault();
+                    alert("회차 종료 일시는 시작 일시보다 빠를 수 없습니다.");
+                    return;
+                }
+
+                if (applyStart > applyEnd) {
+                    event.preventDefault();
+                    alert("모집 마감 일시는 모집 시작일보다 빠를 수 없습니다.");
+                    return;
+                }
+
+            }
+
+        }
+
+    });
+
+</script>
 
 {{> layout/footer}}

@@ -245,4 +245,149 @@
             width: 100%;
         }
     }
+    /* 회차 선택 버튼 */
+    .session-choice {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .session-choice label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    /* 기본 라디오 버튼 모양 제거 */
+    .session-choice input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+
+        width: 18px;
+        height: 18px;
+        margin: 0;
+
+        border: 1px solid #cbd5e1;
+        border-radius: 50%;
+        background: #fff;
+
+        cursor: pointer;
+    }
+
+    /* 선택된 버튼 */
+    .session-choice input[type="radio"]:checked {
+        border: 5px solid #2563eb;
+        background: #fff;
+    }
+
+    /* 포커스 효과 제거 */
+    .session-choice input[type="radio"]:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* 회차 입력 영역 */
+    .session-item {
+        position: relative;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #e5eaf1;
+        border-radius: 12px;
+        background: #fafbfd;
+    }
+
+    /* 회차 제목과 삭제 버튼 */
+    .session-item-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .session-item-header h3 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #26364a;
+    }
+
+    /* 회차 삭제 */
+    .remove-session-button {
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 6px 0;
+        transition: color 0.2s;
+    }
+
+    .remove-session-button:hover {
+        color: #dc5656;
+    }
+
+    /* 회차 추가 */
+    #add-session-button {
+        width: 100%;
+        padding: 14px;
+        border: 1px dashed #a8b9d0;
+        border-radius: 10px;
+        background: #f7faff;
+        color: #3869a8;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    #add-session-button:hover {
+        border-color: #3869a8;
+        background: #edf4ff;
+    }
+
+    /* 날짜 및 시간 입력 */
+    .event-save-form input[type="date"],
+    .event-save-form input[type="datetime-local"] {
+        width: 100%;
+        min-height: 52px;
+        padding: 0 16px;
+
+        border: 1px solid #dce3ec;
+        border-radius: 10px;
+
+        background-color: #fff;
+        color: #26364a;
+
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 500;
+
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* 입력칸 선택 시 */
+    .event-save-form input[type="date"]:focus,
+    .event-save-form input[type="datetime-local"]:focus {
+        outline: none;
+        border-color: #477dcc;
+        box-shadow: 0 0 0 3px rgba(71, 125, 204, 0.12);
+    }
+
+    /* 달력 아이콘 */
+    .event-save-form input[type="date"]::-webkit-calendar-picker-indicator,
+    .event-save-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    /* 날짜 입력 영역 간격 */
+    .event-save-form input[type="date"]::-webkit-datetime-edit,
+    .event-save-form input[type="datetime-local"]::-webkit-datetime-edit {
+        padding: 4px 0;
+    }
 </style>

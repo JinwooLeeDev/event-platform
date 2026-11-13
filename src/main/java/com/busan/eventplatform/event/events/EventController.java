@@ -5,6 +5,8 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategoryService;
 import com.busan.eventplatform.event.event_file.EventFileService;
 import com.busan.eventplatform.event.event_session.EventSessionService;
+import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
@@ -95,6 +97,12 @@ public class EventController {
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        if (sessionCompanyDto == null) {
+            throw new Exception403("기업 회원만 행사 등록이 가능합니다.");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new Exception400("대표 이미지를 등록해주세요.");
+        }
         Event event = eventService.save(saveDto, sessionCompanyDto.getId());
         eventFileService.attachFile(event.getId(), file);
 
