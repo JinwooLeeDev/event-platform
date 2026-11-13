@@ -75,8 +75,9 @@
             if (button.dataset.sessionId) {
                 return {id: button.dataset.sessionId, name: button.dataset.sessionName || ""};
             }
-            var picked = document.querySelector('input[name="sessionId"]:checked')
-                    || document.querySelector('select[name="sessionId"] option:checked');
+            // 회차 선택 요소 이름: sessionId (신청 파트 기본) / eventSessionId (행사 상세 화면) 둘 다 지원
+            var picked = document.querySelector('input[name="sessionId"]:checked, input[name="eventSessionId"]:checked')
+                    || document.querySelector('select[name="sessionId"] option:checked, select[name="eventSessionId"] option:checked');
             if (!picked || !picked.value) return null;
             return {id: picked.value, name: picked.dataset.sessionName || ""};
         }
