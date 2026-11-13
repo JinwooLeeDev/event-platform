@@ -172,8 +172,7 @@ public class EventService {
         if (!EventStatus.PENDING_REVIEW.equals(event.getStatus())) {
             throw new Exception400("승인 대기 중인 행사만 승인할 수 있습니다.");
         }
-        event.setStatus(EventStatus.PUBLISHED);
-        event.setPublishedAt(LocalDateTime.now());
+        event.setStatus(EventStatus.PAID_READY); // 관리자가 승인했다면 '결제대기'로 변경.
 
         return event;
     }
