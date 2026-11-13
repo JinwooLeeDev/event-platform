@@ -1,11 +1,12 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.event.EventSession;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 public class EventResponse {
 
@@ -20,8 +21,15 @@ public class EventResponse {
         private boolean isLast;
 
         public PageDto(Page<Event> eventPage) {
+            this(eventPage, null);
+        }
+
+        public PageDto(Page<Event> eventPage, Map<Long, EventSession> sessionMap) {
             this.eventList = eventPage.getContent().stream()
-                    .map(EventDto::new)
+                    .map(event -> new EventDto(
+                            event,
+                            sessionMap == null ? null : sessionMap.get(event.getId())
+                    ))
                     .toList();
             this.currentPage = eventPage.getNumber() + 1;
             this.totalPages = eventPage.getTotalPages();
@@ -54,10 +62,16 @@ public class EventResponse {
         private LocalDateTime publishedAt;
         private EventStatus status;
         private String feedbackMessage;
-        private boolean paidReadyEvent; /// 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
-        private int sessionCount; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private boolean paidReadyEvent; // 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
+        private int sessionCount; // 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public EventDto(Event event) {
+            this(event, null);
+        }
+
+        public EventDto(Event event, EventSession session) {
             this.id = event.getId();
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
@@ -70,6 +84,10 @@ public class EventResponse {
             this.status = event.getStatus();
             this.feedbackMessage = event.getFeedbackMessage();
             this.paidReadyEvent = event.getStatus() == EventStatus.PAID_READY;
+            if (session != null) {
+                this.applyStartAt = session.getApplyStartAt();
+                this.applyEndAt = session.getApplyEndAt();
+            }
         }
     }
 

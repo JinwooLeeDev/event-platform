@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -103,7 +105,28 @@ public class EventService {
         eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
                 keyword == null ? "" : keyword.trim(), pageable);
 
-        return new EventResponse.PageDto(eventPage);
+        // 현재 페이지에 있는 행사 ID 추출
+        List<Long> eventIds = eventPage.getContent().stream()
+                .map(Event::getId)
+                .toList();
+
+        // 행사별 첫 번째 회차 저장
+        Map<Long, EventSession> firstSessionByEventId = new HashMap<>();
+
+        if (!eventIds.isEmpty()) {
+            List<EventSession> sessions =
+                    eventSessionRepository.findAllByEventIds(eventIds);
+
+            for (EventSession session : sessions) {
+                firstSessionByEventId.putIfAbsent(
+                        session.getEvent().getId(),
+                        session
+                );
+            }
+        }
+
+// 행사와 회차 정보를 DTO에 전달
+        return new EventResponse.PageDto(eventPage, firstSessionByEventId);
     }
 
     // 행사 상세 조회 기능
