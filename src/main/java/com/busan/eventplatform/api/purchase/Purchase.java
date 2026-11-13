@@ -20,8 +20,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 public class Purchase {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,6 +36,10 @@ public class Purchase {
     @CreationTimestamp
     private Timestamp purchasedAt;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PurchaseStatus status;
+
     private int price; // 이 결제내역에 저장될 결제한 포인트액.
 
     @Builder
@@ -45,5 +47,7 @@ public class Purchase {
         this.user = user;
         this.eventSession = eventSession;
         this.price = price;
+        this.status = PurchaseStatus.PURCHASED;
     }
+
 }
