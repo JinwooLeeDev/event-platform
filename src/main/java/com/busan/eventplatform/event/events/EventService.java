@@ -72,8 +72,8 @@ public class EventService {
             sessionDto.setMinimumParticipants(1);
             sessionDto.setMinimumCheckAt(sessionDto.getEndsAt());
 
-            sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
-            sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
+            sessionDto.setStartsAt(saveDto.getApplyStartAt());
+            sessionDto.setEndsAt(saveDto.getApplyEndAt());
 
             eventSessionService.save(event.getId(), companyId, sessionDto);
         }
