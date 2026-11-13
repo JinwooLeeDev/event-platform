@@ -36,7 +36,7 @@
                         <span class="company-event-tag">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}{categoryName}{{/categoryName}}</span>
                         <span class="company-event-tag company-event-state" data-company-event-status>{{#status}}{{status}}{{/status}}{{^status}}{status}{{/status}}</span>
                     </div>
-                    <h2>{{#title}}{{title}}{{/title}}{{^title}}{title}{{/title}}</h2>
+                    <h2>{{#title}}{{title}} - 총 {{sessionCount}}회차 예정{{/title}}{{^title}}{title}{{/title}}</h2>
                     <p class="company-events-description">{{#summary}}{{summary}}{{/summary}}{{^summary}}{summary}{{/summary}}</p>
                     <dl class="company-event-facts">
                         <div><dt>모집 시작</dt><dd>{{#applyStartAt}}{{applyStartAt}}{{/applyStartAt}}{{^applyStartAt}}{applyStartAt}{{/applyStartAt}}</dd></div>
@@ -51,11 +51,6 @@
                                   <input type="hidden" name="sessionCount" value={{sessionCount}}>
                                   <button type="submit">최종 결제하기</button>
                               </form>
-                        {{#successMessage}}
-                            <script>
-                                alert('{{successMessage}}')
-                            </script>
-                        {{/successMessage}}
                     {{/paidReadyEvent}}
 
                     {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
@@ -70,6 +65,12 @@
                     <div class="company-event-placeholder">{title}<br>{summary}<br>카테고리: {categoryName} · 상태: {status}<br>모집 기간: {applyStartAt} ~ {applyEndAt}</div>
                 </div>
             {{/eventList}}
+
+            {{#successMessage}}
+                <script>
+                    alert('{{successMessage}}')
+                </script>
+            {{/successMessage}}
         </section>
     </div>
 </main>

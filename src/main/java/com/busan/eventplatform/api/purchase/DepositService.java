@@ -43,6 +43,11 @@ public class DepositService {
         //
         int selectedSessionCount = eventSessionRepository.countEventSessionByEventId(event.getId());
         if(selectedSessionCount != sessionCount) throw new Exception400("신청된 이벤트 회차수가 일치하지 않습니다");
+        else if (selectedSessionCount <= 0) throw new Exception400("이벤트 회차수가 없습니다");
+
+        log.info("요청 회차 수: {}", sessionCount);
+        log.info("실제 DB 회차 수: {}", selectedSessionCount);
+        log.info("결제 행사 ID: {}", eventId);
 
         // 4. 통과되면 결제 진행.
         Company company = companyRepository.findById(companyId).orElseThrow(() -> new Exception404("존재하지 않는 기업세션입니다"));
