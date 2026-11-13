@@ -227,22 +227,23 @@
                                     </div>
                                 </div>
 
+                {{#view}}
                                 <div class="col-md-8">
                                     <div class="event-info h-100">
 
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill mb-3">
-                                            공연 · 페스티벌
+                                            {{category}}
                                         </span>
 
                                         <h5 class="fw-bold mb-3">
-                                            부산 오션 뮤직 페스티벌 2026
+                                            {{title}}
                                         </h5>
                                         <p>
-                                            <i class="bi bi-calendar-event me-2"></i>2026. 11. 21 (토) · 오후 6:00
+                                            <i class="bi bi-calendar-event me-2"></i>{{startsAt}} (토) · 오후 6:00
                                         </p>
 
                                         <p>
-                                            <i class="bi bi-geo-alt me-2"></i>부산 벡스코 제1전시장
+                                            <i class="bi bi-geo-alt me-2"></i>{{location}}
                                         </p>
 
                                         <p class="mb-0">
@@ -269,7 +270,7 @@
                             </div>
 
                             <div class="text-end">
-                                <h5 class="fw-bold mb-0">25,000P</h5>
+                                <h5 class="fw-bold mb-0">{{eventPoint}}P</h5>
                                 <small class="text-secondary">/ 1매</small>
                             </div>
                         </div>
@@ -297,7 +298,7 @@
                         </small>
                     </div>
 
-                    {{#viewPoint}}
+
                     <div class="card-body">
                         <div class="point-balance d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -349,7 +350,7 @@
                             <span class="format-point">{{eventPoint}}</span> 결제하기
                         </button>
                     </form>
-                    {{/viewPoint}}
+                    {{/view}}
 
                         <p class="text-center small text-secondary mt-3">
                             <i class="bi bi-shield-lock me-1"></i>

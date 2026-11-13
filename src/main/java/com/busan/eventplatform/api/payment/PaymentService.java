@@ -121,7 +121,8 @@ public class PaymentService {
 
 
     public List<PaymentRes.ListDto> paymentList(Long userId){
-        List<Payment> payment = paymentRepository.findByUserIdWithPayment(userId);
+        // 충전 결제완료된 내역만 조회해야하므로 status.PAID
+        List<Payment> payment = paymentRepository.findByUserIdWithPayment(userId , PaymentStatus.PAID);
 
         return payment.stream().map(PaymentRes.ListDto::new).toList();
     }

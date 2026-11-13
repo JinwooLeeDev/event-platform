@@ -1,6 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.user.registration.Registration;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
@@ -14,18 +15,25 @@ import java.time.LocalDateTime;
 public class PurchaseRes {
     @Data
     public static class PurchasePointDto {
-        private Long id; // 현재 이벤트회차 id.
+        private Long id; // 현재 이벤트회차 sessionId.
         private int currentPoint; // 현재 보유 포인트.
         private int eventPoint; // 행사 결제 포인트.(참여에 필요한 포인트)
         private int predictedPoint;  // 결제 후 예상 포인트.
-
+        private String category;
+        private String title;
+        private LocalDateTime startsAt;
+        private String location;
 
         @Builder
-        public PurchasePointDto(Long id , int currentPoint , int eventPoint) {
-            this.id = id;
+        public PurchasePointDto(EventSession eventSession , int currentPoint) {
+            this.id = eventSession.getId();
             this.currentPoint = currentPoint;
-            this.eventPoint = eventPoint;
-            this.predictedPoint = currentPoint - eventPoint;
+            this.eventPoint = eventSession.getFee();
+            this.predictedPoint = this.currentPoint - this.eventPoint;
+            this.category = eventSession.getEvent().getCategory().getName();
+            this.title = eventSession.getEvent().getTitle();
+            this.startsAt = eventSession.getStartsAt();
+            this.location = eventSession.getEvent().getAddress();
         }
     }
 
