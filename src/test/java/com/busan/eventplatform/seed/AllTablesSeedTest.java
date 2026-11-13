@@ -9,10 +9,13 @@ import com.busan.eventplatform.user.Role;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
 import com.busan.eventplatform.api.payment.PaymentStatus;
 import com.busan.eventplatform.api.refund.RefundStatus;
+import com.busan.eventplatform.api.purchase.PurchaseStatus;
+import com.busan.eventplatform.api.purchase.DepositStatus;
 import jakarta.persistence.Table;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl;
 import org.hibernate.cfg.Configuration;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,12 +32,13 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AllTablesSeedTest {
-    @Test
-    void executesAgainstCurrentJpaSchemaAndCoversStatesWithoutBrokenRelations() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"", ";MODE=MySQL"})
+    void executesAgainstCurrentJpaSchemaAndCoversStatesWithoutBrokenRelations(String mode) throws Exception {
         var configuration = new Configuration()
                 .setPhysicalNamingStrategy(new PhysicalNamingStrategySnakeCaseImpl())
                 .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
-                .setProperty("hibernate.connection.url", "jdbc:h2:mem:scenario-seed;MODE=MySQL;DB_CLOSE_DELAY=-1")
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:scenario-seed" + mode + ";DB_CLOSE_DELAY=-1")
                 .setProperty("hibernate.hbm2ddl.auto", "create-drop");
         Set<String> tables = new HashSet<>();
         // 엔티티 추가 시 예시 데이터가 빠진 테이블도 검출합니다.
@@ -51,8 +55,8 @@ class AllTablesSeedTest {
         try (var factory = configuration.buildSessionFactory(); var session = factory.openSession()) {
             session.beginTransaction();
             session.doWork(connection -> {
-                ScriptUtils.executeSqlScript(connection, new FileSystemResource("db/scenarios/all-tables-seed.sql"));
-                assertEquals(13, tables.size());
+                ScriptUtils.executeSqlScript(connection, new FileSystemResource("src/main/resources/db/local-mysql/data.sql"));
+                assertEquals(15, tables.size());
                 for (String table : tables) assertTrue(count(connection, "select count(*) from " + table) > 0, table);
                 assertStates(connection,"users","status",UserStatus.values());
                 assertStates(connection,"users","role",Role.values());
@@ -62,9 +66,25 @@ class AllTablesSeedTest {
                 assertStates(connection,"event_sessions","status",EventSessionStatus.values());
                 assertStates(connection,"registrations","status",RegistrationStatus.values());
                 assertStates(connection,"registration_history","changed_status",RegistrationStatus.values());
+                assertStates(connection,"purchase_tb","status",PurchaseStatus.values());
+                assertStates(connection,"deposit_tb","status",DepositStatus.values());
+                assertStates(connection,"refund_tb","status",RefundStatus.values());
+                assertEquals(0,count(connection,"""
+                        select count(*) from registrations r left join purchase_tb p on p.id=r.purchase_id
+                        join event_sessions s on s.id=r.event_session_id
+                        where p.id is null or p.user_id!=r.user_id or p.event_session_id!=r.event_session_id or p.price!=s.fee
+                        """));
+                assertEquals(0,count(connection,"""
+                        select count(*) from deposit_tb d join events e on e.id=d.event_id
+                        where d.company_id!=e.company_id or d.amount!=150000*
+                        (select count(*) from event_sessions s where s.event_id=e.id)
+                        """));
+                assertEquals(0,count(connection,"""
+                        select count(*) from company_review_history h join users u on u.id=h.reviewer_id
+                        where u.role!='ADMIN'
+                        """));
                 for (String owner : Set.of("user_id", "company_id")) {
                     assertStates(connection,"payment_tb where " + owner + " is not null","status",PaymentStatus.values());
-                    assertStates(connection,"refund_tb where " + owner + " is not null","status",RefundStatus.values());
                 }
                 assertEquals(0, count(connection,"""
                         select count(*) from event_sessions s where s.occupied_count !=
