@@ -1,0 +1,713 @@
+
+{{> layout/header}}
+{{> event/save-form-style}}
+
+<main class="event-save-page">
+    <div class="event-save-container">
+
+        <div class="event-save-navigation">
+            <a href="/events">← 내 행사 목록으로</a>
+        </div>
+
+        <section class="event-save-header">
+            <span class="event-save-label">BUSAN PLAY</span>
+            <h1>행사 등록</h1>
+            <p>부산의 특별한 순간을 등록해 보세요.</p>
+        </section>
+
+        <form action="/events/save"
+              method="post"
+              enctype="multipart/form-data"
+              class="event-save-form"
+              id="event-save-form">
+
+            <!-- 행사 기본 정보 -->
+            <section class="event-save-section">
+                <h2>행사 기본 정보</h2>
+                <p class="section-description">
+                    행사에 대한 기본 정보를 입력해 주세요.
+                </p>
+
+                <div class="form-group">
+                    <label>행사 카테고리 <span>*</span></label>
+                    <select name="categoryId" required>
+                        <option value="">카테고리를 선택해 주세요.</option>
+                        {{#categoryList}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/categoryList}}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>행사 제목 <span>*</span></label>
+                    <input type="text" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>한 줄 요약 <span>*</span></label>
+                    <input type="text" name="summary" required>
+                </div>
+
+                <div class="form-group">
+                    <label>행사 주소 <span>*</span></label>
+                    <input type="text" name="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label>상세 설명 <span>*</span></label>
+                    <textarea name="description"
+                              rows="8"
+                              required></textarea>
+                </div>
+            </section>
+
+
+            <!-- 행사 일정 -->
+            <section class="event-save-section">
+                <h2>행사 일정</h2>
+                <p class="section-description">
+                    회차별로 운영하는 행사인지 선택해 주세요.
+                </p>
+
+                <div class="form-group">
+                    <label>회차가 있나요? <span>*</span></label>
+
+                    <div class="session-choice">
+                        <label>
+                            <input type="radio"
+                                   name="hasSessions"
+                                   value="true"
+                                   required>
+                            회차가 있어요
+                        </label>
+
+                        <label>
+                            <input type="radio"
+                                   name="hasSessions"
+                                   value="false"
+                                   required>
+                            회차가 없어요
+                        </label>
+                    </div>
+                </div>
+
+
+                <!-- 회차가 없는 행사 -->
+                <div id="no-session-area" hidden>
+
+                    <h3>행사 전체 일정</h3>
+
+                    <div class="form-group">
+                        <label>행사 시작일 <span>*</span></label>
+                        <input type="date"
+                               name="startDate"
+                               id="startDate"
+                               disabled
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>행사 종료일 <span>*</span></label>
+                        <input type="date"
+                               name="endDate"
+                               id="endDate"
+                               disabled
+                               required>
+                    </div>
+
+                    <div class="date-time-group">
+                        <div class="form-group">
+                            <label>모집 시작일 <span>*</span></label>
+                            <input type="date"
+                                   id="applyStartDate"
+                                   disabled
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>모집 시작 시간 <span>*</span></label>
+                            <input type="time"
+                                   id="applyStartTime"
+                                   disabled
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="date-time-group">
+                        <div class="form-group">
+                            <label>모집 마감일 <span>*</span></label>
+                            <input type="date"
+                                   id="applyEndDate"
+                                   disabled
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>모집 마감 시간 <span>*</span></label>
+                            <input type="time"
+                                   id="applyEndTime"
+                                   disabled
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- 서버에 전달할 LocalDateTime -->
+                    <input type="hidden"
+                           name="applyStartAt"
+                           id="applyStartAt"
+                           disabled>
+
+                    <input type="hidden"
+                           name="applyEndAt"
+                           id="applyEndAt"
+                           disabled>
+
+
+                    <!-- 참가비 -->
+                    <div class="form-group">
+                        <label>참가비 유형 <span>*</span></label>
+                        <select name="pricingType"
+                                id="pricingType"
+                                disabled
+                                required>
+                            <option value="">참가비 유형을 선택해 주세요.</option>
+                            <option value="FREE">무료</option>
+                            <option value="PAID">유료</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group fee-area"
+                         id="fee-area"
+                         hidden>
+                        <label>참가비 <span>*</span></label>
+                        <input type="number"
+                               name="fee"
+                               id="fee"
+                               min="1"
+                               disabled>
+                    </div>
+
+                </div>
+
+
+                <!-- 회차가 있는 행사 -->
+                <div id="session-area" hidden>
+
+                    <h3>회차별 일정</h3>
+
+                    <p class="section-description">
+                        회차별 행사 일정과 모집 기간을 입력해 주세요.
+                    </p>
+
+                    <div id="session-list"></div>
+
+                    <button type="button"
+                            id="add-session-button">
+                        + 회차 추가
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- 대표 이미지 -->
+            <section class="event-save-section">
+                <h2>대표 이미지</h2>
+                <p class="section-description">
+                    행사를 대표하는 포스터 이미지를 등록해 주세요.
+                </p>
+
+                <div class="form-group">
+                    <label>대표 이미지 <span>*</span></label>
+
+                    <div class="file-upload-box">
+                        <input type="file"
+                               name="file"
+                               accept=".jpg,.jpeg,.png"
+                               required>
+
+                        <p>JPG, JPEG, PNG 파일을 등록해 주세요.</p>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 등록 버튼 -->
+            <div class="event-save-actions">
+                <a href="/events" class="cancel-button">취소</a>
+
+                <button type="submit" class="submit-button">
+                    행사 등록하기
+                </button>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+
+<!-- 회차 입력 템플릿 -->
+<template id="session-template">
+
+    <div class="session-item">
+
+        <div class="session-item-header">
+            <h3 class="session-title"></h3>
+
+            <button type="button"
+                    class="remove-session-button">
+                삭제
+            </button>
+        </div>
+
+        <div class="form-group">
+            <label>회차명 <span>*</span></label>
+            <input type="text"
+                   data-field="name"
+                   placeholder="예: 1회차"
+                   required>
+        </div>
+
+
+        <!-- 행사 시작 -->
+        <div class="date-time-group">
+            <div class="form-group">
+                <label>행사 시작 날짜 <span>*</span></label>
+                <input type="date"
+                       data-date-field="startsAt"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>행사 시작 시간 <span>*</span></label>
+                <input type="time"
+                       data-time-field="startsAt"
+                       required>
+            </div>
+        </div>
+
+
+        <!-- 행사 종료 -->
+        <div class="date-time-group">
+            <div class="form-group">
+                <label>행사 종료 날짜 <span>*</span></label>
+                <input type="date"
+                       data-date-field="endsAt"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>행사 종료 시간 <span>*</span></label>
+                <input type="time"
+                       data-time-field="endsAt"
+                       required>
+            </div>
+        </div>
+
+
+        <!-- 모집 시작 -->
+        <div class="date-time-group">
+            <div class="form-group">
+                <label>모집 시작 날짜 <span>*</span></label>
+                <input type="date"
+                       data-date-field="applyStartAt"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>모집 시작 시간 <span>*</span></label>
+                <input type="time"
+                       data-time-field="applyStartAt"
+                       required>
+            </div>
+        </div>
+
+
+        <!-- 모집 마감 -->
+        <div class="date-time-group">
+            <div class="form-group">
+                <label>모집 마감 날짜 <span>*</span></label>
+                <input type="date"
+                       data-date-field="applyEndAt"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>모집 마감 시간 <span>*</span></label>
+                <input type="time"
+                       data-time-field="applyEndAt"
+                       required>
+            </div>
+        </div>
+
+
+        <!-- 서버에 전달할 날짜 -->
+        <input type="hidden" data-field="startsAt">
+        <input type="hidden" data-field="endsAt">
+        <input type="hidden" data-field="applyStartAt">
+        <input type="hidden" data-field="applyEndAt">
+
+
+        <!-- 참가비 -->
+        <div class="form-group">
+            <label>참가비 유형 <span>*</span></label>
+            <select data-field="pricingType" required>
+                <option value="">참가비 유형을 선택해 주세요.</option>
+                <option value="FREE">무료</option>
+                <option value="PAID">유료</option>
+            </select>
+        </div>
+
+        <div class="form-group session-fee-area fee-area" hidden>
+            <label>참가비 <span>*</span></label>
+            <input type="number"
+                   data-field="fee"
+                   min="1"
+                   disabled>
+        </div>
+
+    </div>
+
+</template>
+
+
+<script>
+    const form = document.getElementById("event-save-form");
+
+    const sessionArea = document.getElementById("session-area");
+    const noSessionArea = document.getElementById("no-session-area");
+
+    const sessionList = document.getElementById("session-list");
+    const sessionTemplate = document.getElementById("session-template");
+
+    const addSessionButton = document.getElementById("add-session-button");
+
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+
+    const applyStartDate = document.getElementById("applyStartDate");
+    const applyStartTime = document.getElementById("applyStartTime");
+    const applyEndDate = document.getElementById("applyEndDate");
+    const applyEndTime = document.getElementById("applyEndTime");
+
+    const applyStartAt = document.getElementById("applyStartAt");
+    const applyEndAt = document.getElementById("applyEndAt");
+
+    const pricingType = document.getElementById("pricingType");
+    const feeArea = document.getElementById("fee-area");
+    const fee = document.getElementById("fee");
+
+
+    // 날짜와 시간을 합쳐 LocalDateTime 문자열 생성
+    function combineDateTime(date, time) {
+        return `${date}T${time}`;
+    }
+
+
+    // 회차가 없는 행사 참가비 처리
+    function updateNoSessionFee() {
+
+        const isPaid = pricingType.value === "PAID";
+
+        feeArea.hidden = !isPaid;
+        fee.disabled = !isPaid || pricingType.disabled;
+        fee.required = isPaid && !pricingType.disabled;
+
+        if (!isPaid) {
+            fee.value = "";
+        }
+    }
+
+    pricingType.addEventListener("change", updateNoSessionFee);
+
+
+    // 회차가 없는 행사 입력란 활성화
+    function setNoSessionInputs(enabled) {
+
+        const inputs = [
+            startDate,
+            endDate,
+            applyStartDate,
+            applyStartTime,
+            applyEndDate,
+            applyEndTime,
+            pricingType
+        ];
+
+        inputs.forEach(input => {
+            input.disabled = !enabled;
+            input.required = enabled;
+        });
+
+        // 서버 전달용 hidden 필드
+        applyStartAt.disabled = !enabled;
+        applyEndAt.disabled = !enabled;
+
+        updateNoSessionFee();
+    }
+
+
+    // 회차별 참가비 처리
+    function updateSessionFee(sessionItem, enabled) {
+
+        const typeSelect =
+                sessionItem.querySelector('[data-field="pricingType"]');
+
+        const feeInput =
+                sessionItem.querySelector('[data-field="fee"]');
+
+        const feeArea =
+                sessionItem.querySelector(".session-fee-area");
+
+        const isPaid = typeSelect.value === "PAID";
+
+        feeArea.hidden = !isPaid;
+        feeInput.disabled = !enabled || !isPaid;
+        feeInput.required = enabled && isPaid;
+
+        if (!isPaid) {
+            feeInput.value = "";
+        }
+    }
+
+
+    // 회차 입력란 활성화 / 비활성화
+    function setSessionInputs(enabled) {
+
+        const sessionItems =
+                sessionList.querySelectorAll(".session-item");
+
+        sessionItems.forEach(item => {
+
+            // 화면에 보이는 입력란만 필수 입력으로 설정
+            item.querySelectorAll("input:not([type='hidden']), select")
+                    .forEach(input => {
+                        input.disabled = !enabled;
+                        input.required = enabled;
+                    });
+
+            // hidden 값은 제출 가능하게 활성화하되 required는 사용하지 않음
+            item.querySelectorAll('input[type="hidden"]')
+                    .forEach(input => {
+                        input.disabled = !enabled;
+                        input.required = false;
+                    });
+
+            updateSessionFee(item, enabled);
+        });
+    }
+
+
+    // 회차 여부 선택
+    document.querySelectorAll('input[name="hasSessions"]')
+            .forEach(radio => {
+
+                radio.addEventListener("change", function () {
+
+                    if (this.value === "true") {
+
+                        // 회차가 있는 행사
+                        sessionArea.hidden = false;
+                        noSessionArea.hidden = true;
+
+                        setNoSessionInputs(false);
+
+                        // 첫 회차 자동 생성
+                        if (sessionList.children.length === 0) {
+                            addSession();
+                        }
+
+                        setSessionInputs(true);
+
+                    } else {
+
+                        // 회차가 없는 행사
+                        sessionArea.hidden = true;
+                        noSessionArea.hidden = false;
+
+                        setNoSessionInputs(true);
+                        setSessionInputs(false);
+                    }
+
+                });
+
+            });
+
+
+    // 회차 추가
+    function addSession() {
+
+        const fragment = sessionTemplate.content.cloneNode(true);
+        const sessionItem = fragment.querySelector(".session-item");
+
+        sessionList.appendChild(fragment);
+
+        updateSessionNames();
+
+        // 화면 입력란 활성화
+        sessionItem.querySelectorAll("input:not([type='hidden']), select")
+                .forEach(input => {
+                    input.disabled = false;
+                    input.required = true;
+                });
+
+        // hidden 입력란은 required 없이 제출 가능하도록 설정
+        sessionItem.querySelectorAll('input[type="hidden"]')
+                .forEach(input => {
+                    input.disabled = false;
+                    input.required = false;
+                });
+
+        // 참가비 유형 변경
+        const sessionPricingType =
+                sessionItem.querySelector('[data-field="pricingType"]');
+
+        sessionPricingType.addEventListener("change", function () {
+            updateSessionFee(sessionItem, true);
+        });
+
+        updateSessionFee(sessionItem, true);
+
+        // 회차 삭제
+        sessionItem.querySelector(".remove-session-button")
+                .addEventListener("click", function () {
+
+                    if (sessionList.children.length <= 1) {
+                        alert("최소 한 개의 회차는 필요합니다.");
+                        return;
+                    }
+
+                    sessionItem.remove();
+                    updateSessionNames();
+                });
+    }
+
+
+    // 회차 추가 버튼
+    addSessionButton.addEventListener("click", function () {
+        addSession();
+    });
+
+
+    // 회차 번호와 DTO 바인딩 이름 재정리
+    function updateSessionNames() {
+
+        const sessionItems =
+                sessionList.querySelectorAll(".session-item");
+
+        sessionItems.forEach((item, index) => {
+
+            item.querySelector(".session-title").textContent =
+                    `${index + 1}회차`;
+
+            item.querySelectorAll("[data-field]").forEach(input => {
+
+                const fieldName = input.dataset.field;
+
+                input.name = `sessions[${index}].${fieldName}`;
+            });
+        });
+    }
+
+
+    // 폼 제출
+    form.addEventListener("submit", function (event) {
+
+        const selectedType =
+                document.querySelector('input[name="hasSessions"]:checked');
+
+        if (!selectedType) {
+            event.preventDefault();
+            alert("회차 운영 여부를 선택해 주세요.");
+            return;
+        }
+
+
+        // 회차가 없는 행사
+        if (selectedType.value === "false") {
+
+            if (startDate.value > endDate.value) {
+                event.preventDefault();
+                alert("행사 종료일은 시작일보다 빠를 수 없습니다.");
+                return;
+            }
+
+            // 모집 날짜 + 시간 합치기
+            applyStartAt.value =
+                    combineDateTime(applyStartDate.value, applyStartTime.value);
+
+            applyEndAt.value =
+                    combineDateTime(applyEndDate.value, applyEndTime.value);
+
+            if (applyStartAt.value > applyEndAt.value) {
+                event.preventDefault();
+                alert("모집 마감일시는 모집 시작일시보다 빠를 수 없습니다.");
+                return;
+            }
+        }
+
+
+        // 회차가 있는 행사
+        if (selectedType.value === "true") {
+
+            const sessionItems =
+                    sessionList.querySelectorAll(".session-item");
+
+            if (sessionItems.length === 0) {
+                event.preventDefault();
+                alert("최소 한 개의 회차를 추가해 주세요.");
+                return;
+            }
+
+            for (const item of sessionItems) {
+
+                const fields = [
+                    "startsAt",
+                    "endsAt",
+                    "applyStartAt",
+                    "applyEndAt"
+                ];
+
+                const values = {};
+
+                fields.forEach(field => {
+
+                    const date =
+                            item.querySelector(
+                                    `[data-date-field="${field}"]`
+                            ).value;
+
+                    const time =
+                            item.querySelector(
+                                    `[data-time-field="${field}"]`
+                            ).value;
+
+                    const combined = combineDateTime(date, time);
+
+                    item.querySelector(
+                            `[data-field="${field}"]`
+                    ).value = combined;
+
+                    values[field] = combined;
+                });
+
+                if (values.startsAt > values.endsAt) {
+                    event.preventDefault();
+                    alert("회차 종료 일시는 시작 일시보다 빠를 수 없습니다.");
+                    return;
+                }
+
+                if (values.applyStartAt > values.applyEndAt) {
+                    event.preventDefault();
+                    alert("모집 마감 일시는 모집 시작일시보다 빠를 수 없습니다.");
+                    return;
+                }
+            }
+        }
+
+    });
+
+</script>
+
+{{> layout/footer}}

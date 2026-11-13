@@ -2,17 +2,16 @@ package com.busan.eventplatform.event.event_file;
 
 import com.busan.eventplatform.event.events.Event;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "event_files")
+@Table(name = "event_files",
+        uniqueConstraints = {@UniqueConstraint(name = "uk_event_file_event_id",
+                columnNames = "event_id")}) // 행사 하나당 대표 이미지 하나만 등록되도록 제한
 public class EventFile {
 
     @Id
@@ -28,7 +27,8 @@ public class EventFile {
     @Column(name = "storage_key", nullable = false)
     private String storageKey;
 
-    // 행사 화면에 파일을 보여줄 순서
-    @Column(name = "display_order", nullable = false)
-    private Integer displayOrder;
+    // 대표 이미지 교체
+    public void changeStorageKey(String storageKey) {
+        this.storageKey = storageKey;
+    }
 }

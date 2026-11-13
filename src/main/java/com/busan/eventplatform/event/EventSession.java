@@ -40,6 +40,18 @@ public class EventSession {
     @Column(nullable = false)
     private LocalDateTime endsAt;
 
+    // 모집 시작일
+    @Column(nullable = false)
+    private LocalDateTime applyStartAt;
+
+    // 모집 마감일
+    @Column(nullable = false)
+    private LocalDateTime applyEndAt;
+
+    public boolean isApplicationClosed() {
+        return applyEndAt != null && !LocalDateTime.now().isBefore(applyEndAt);
+    }
+
     // 현재 정원 점유 인원
     @Column(nullable = false)
     private int occupiedCount;

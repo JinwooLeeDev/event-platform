@@ -1,8 +1,8 @@
 package com.busan.eventplatform.global.util;
 
 public class Define {
-    public static final String SESSION_COMPANY = "sessionCompanyDto";
-    public static final String SESSION_USER = "sessionUserDto";
+    public static final String SESSION_COMPANY = "sessionCompany";
+    public static final String SESSION_USER = "sessionUser";
 
     public static final int EMAIL_CODE_EXPIRE_MINUTES = 5;
 

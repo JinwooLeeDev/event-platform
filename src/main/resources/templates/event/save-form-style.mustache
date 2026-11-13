@@ -1,0 +1,428 @@
+
+<style>
+    .event-save-page {
+        min-height: 100vh;
+        padding: 45px 24px 80px;
+        background: #f5f7fb;
+        color: #263247;
+        font-family: Pretendard, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+        box-sizing: border-box;
+    }
+
+    .event-save-page *,
+    .event-save-page *::before,
+    .event-save-page *::after {
+        box-sizing: border-box;
+    }
+
+    .event-save-container {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* 행사 목록 이동 */
+    .event-save-navigation {
+        margin-bottom: 18px;
+    }
+
+    .event-save-navigation a {
+        display: inline-flex;
+        align-items: center;
+        color: #718096;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .event-save-navigation a:hover {
+        color: #2864dc;
+    }
+
+    /* 상단 행사 등록 헤더 */
+    .event-save-header {
+        padding: 38px 42px;
+        margin-bottom: 24px;
+        color: #fff;
+        background: linear-gradient(120deg, #244fbd, #4385ed);
+        border-radius: 20px;
+        box-shadow: 0 12px 30px rgba(39, 91, 190, 0.15);
+    }
+
+    .event-save-label {
+        display: inline-block;
+        margin-bottom: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    .event-save-header h1 {
+        margin: 0 0 12px;
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .event-save-header p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    /* 등록 폼 */
+    .event-save-form {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .event-save-section {
+        padding: 34px;
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(30, 50, 80, 0.05);
+    }
+
+    .event-save-section h2 {
+        margin: 0 0 12px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e8edf5;
+        color: #263247;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .event-save-section h3 {
+        margin: 25px 0 18px;
+        color: #344158;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .section-description {
+        margin: 0 0 25px;
+        color: #8993a5;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* 입력 항목 */
+    .event-save-page .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 24px;
+        min-width: 0;
+    }
+
+    .event-save-page .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .event-save-page .form-group label {
+        color: #344158;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .event-save-page .form-group label span {
+        color: #e05252;
+    }
+
+    .event-save-page .form-group input,
+    .event-save-page .form-group select,
+    .event-save-page .form-group textarea {
+        width: 100%;
+        min-height: 48px;
+        padding: 14px 16px;
+        border: 1px solid #dce2ec;
+        border-radius: 10px;
+        background: #fff;
+        color: #344158;
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .event-save-page .form-group input:focus,
+    .event-save-page .form-group select:focus,
+    .event-save-page .form-group textarea:focus {
+        border-color: #4385ed;
+        box-shadow: 0 0 0 3px rgba(67, 133, 237, 0.1);
+    }
+
+    .event-save-page .form-group input:disabled,
+    .event-save-page .form-group select:disabled {
+        background: #f1f4f8;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .event-save-page .form-group textarea {
+        resize: vertical;
+        line-height: 1.8;
+    }
+
+    /* 날짜와 시간 나란히 배치 */
+    .date-time-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .date-time-group .form-group {
+        min-width: 0;
+    }
+
+    /* 날짜와 시간 입력 */
+    .event-save-form input[type="date"],
+    .event-save-form input[type="time"] {
+        width: 100%;
+        min-height: 52px;
+        padding: 0 16px;
+        border: 1px solid #dce3ec;
+        border-radius: 10px;
+        background-color: #fff;
+        color: #26364a;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .event-save-form input[type="date"]:focus,
+    .event-save-form input[type="time"]:focus {
+        outline: none;
+        border-color: #477dcc;
+        box-shadow: 0 0 0 3px rgba(71, 125, 204, 0.12);
+    }
+
+    /* 참가비 입력 */
+    .fee-area {
+        padding: 18px;
+        border: 1px solid #e5eaf1;
+        border-radius: 12px;
+        background: #f8faff;
+    }
+
+    .fee-area[hidden],
+    #no-session-area[hidden],
+    #session-area[hidden] {
+        display: none !important;
+    }
+
+    /* 대표 이미지 */
+    .file-upload-box {
+        padding: 25px;
+        border: 1px dashed #b8c8e3;
+        border-radius: 14px;
+        background: #f8faff;
+    }
+
+    .file-upload-box input[type="file"] {
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .file-upload-box p {
+        margin: 12px 0 0;
+        color: #8993a5;
+        font-size: 13px;
+    }
+
+    /* 하단 버튼 */
+    .event-save-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 5px;
+    }
+
+    .event-save-actions .cancel-button,
+    .event-save-actions .submit-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        padding: 14px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .event-save-actions .cancel-button {
+        border: 1px solid #dce2ec;
+        background: #fff;
+        color: #526078;
+    }
+
+    .event-save-actions .cancel-button:hover {
+        background: #f1f4f9;
+    }
+
+    .event-save-actions .submit-button {
+        border: none;
+        background: #2864dc;
+        color: #fff;
+    }
+
+    .event-save-actions .submit-button:hover {
+        background: #194eb8;
+        transform: translateY(-2px);
+    }
+
+    /* 회차 선택 */
+    .session-choice {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .session-choice label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    /* 라디오 버튼 */
+    .session-choice input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        min-height: 18px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid #cbd5e1;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .session-choice input[type="radio"]:checked {
+        border: 5px solid #2563eb;
+        background: #fff;
+    }
+
+    .session-choice input[type="radio"]:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* 회차 입력 영역 */
+    .session-item {
+        position: relative;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #e5eaf1;
+        border-radius: 12px;
+        background: #fafbfd;
+    }
+
+    .session-item-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .session-item-header h3 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #26364a;
+    }
+
+    /* 회차 삭제 */
+    .remove-session-button {
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 6px 0;
+        transition: color 0.2s;
+    }
+
+    .remove-session-button:hover {
+        color: #dc5656;
+    }
+
+    /* 회차 추가 */
+    #add-session-button {
+        width: 100%;
+        padding: 14px;
+        border: 1px dashed #a8b9d0;
+        border-radius: 10px;
+        background: #f7faff;
+        color: #3869a8;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    #add-session-button:hover {
+        border-color: #3869a8;
+        background: #edf4ff;
+    }
+
+    /* 모바일 */
+    @media (max-width: 600px) {
+
+        .event-save-page {
+            padding: 30px 16px 50px;
+        }
+
+        .event-save-header {
+            padding: 30px 25px;
+        }
+
+        .event-save-header h1 {
+            font-size: 25px;
+        }
+
+        .event-save-section {
+            padding: 25px 20px;
+        }
+
+        .date-time-group {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .session-choice {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .session-item {
+            padding: 18px;
+        }
+
+        .event-save-actions {
+            flex-direction: column-reverse;
+        }
+
+        .event-save-actions .cancel-button,
+        .event-save-actions .submit-button {
+            width: 100%;
+        }
+    }
+</style>

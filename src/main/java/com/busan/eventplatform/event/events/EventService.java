@@ -2,8 +2,11 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
+import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository;
+import com.busan.eventplatform.event.event_session.EventSessionRequest;
+import com.busan.eventplatform.event.event_session.EventSessionService;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
@@ -22,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -32,6 +34,7 @@ public class EventService {
     private final EventCategoryRepository eventCategoryRepository;
     private final CompanyRepository companyRepository;
     private final RegistrationRepository registrationRepository;
+    private final EventSessionService eventSessionService;
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
 
     // 행사 등록 기능
@@ -46,8 +49,36 @@ public class EventService {
         event.setCompany(company);
         event.setCategory(category);
         event.setStatus(EventStatus.PENDING_REVIEW);
+        eventRepository.save(event);
 
-        return eventRepository.save(event);
+        if (saveDto.isHasSessions()) {
+            for (EventSessionRequest.SaveDto sessionDto : saveDto.getSessions()) {
+                eventSessionService.save(event.getId(), companyId, sessionDto);
+            }
+        } else {
+            // 회차가 없는 행사: 기본 회차 자동 생성
+            EventSessionRequest.SaveDto sessionDto = new EventSessionRequest.SaveDto();
+            sessionDto.setName("기본 회차");
+            sessionDto.setStartsAt(saveDto.getStartDate().atStartOfDay());
+            sessionDto.setEndsAt(saveDto.getEndDate().atTime(23, 59, 59));
+            sessionDto.setCapacity(Integer.MAX_VALUE);
+            // 신청 인원 제한 -- 무제한
+            sessionDto.setHoldDurationSeconds(0);
+            // 좌석 임시 점유 시간 0초 설정
+            sessionDto.setPricingType(saveDto.getPricingType());
+            sessionDto.setFee(saveDto.getFee());
+            // 행사 유료/무료 여부와 참가비 기본 회차에도 적용
+            sessionDto.setReservationDepositPoints(0);
+            sessionDto.setMinimumParticipants(1);
+            sessionDto.setMinimumCheckAt(sessionDto.getEndsAt());
+
+            sessionDto.setStartsAt(saveDto.getApplyStartAt());
+            sessionDto.setEndsAt(saveDto.getApplyEndAt());
+
+            eventSessionService.save(event.getId(), companyId, sessionDto);
+        }
+
+        return event;
     }
 
     // 행사 목록 조회 기능
@@ -61,7 +92,7 @@ public class EventService {
         int pageIndex = Math.max(0, page - 1);
         // 페이지 크기 1 ~ 50
         int validSize = Math.max(1, Math.min(50, size));
-        // 최신 글 먼저 오도록 id 내림차순 정렬
+        // 최신 행사 먼저 오도록 id 내림차순 정렬
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
         // 행사 조회
         Page<Event> eventPage;
@@ -94,12 +125,15 @@ public class EventService {
     }
 
     // 행사 수정 화면 데이터 조회
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public EventResponse.UpdateFormDto update(Long id, Long companyId) {
         Event event = eventRepository.findByDetail(id)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("행사 수정 권한이 없습니다.");
+        }
+        if (EventStatus.PUBLISHED.equals(event.getStatus())) {
+            throw new Exception400("승인된 행사는 수정할 수 없습니다.");
         }
         return new EventResponse.UpdateFormDto(event);
     }
@@ -111,6 +145,9 @@ public class EventService {
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("행사 수정 권한이 없습니다.");
+        }
+        if (EventStatus.PUBLISHED.equals(event.getStatus())) {
+            throw new Exception400("승인된 행사는 수정할 수 없습니다.");
         }
         EventCategory category = eventCategoryRepository.findById(updateDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
@@ -205,12 +242,6 @@ public class EventService {
     /// 각 행사마다 갖고있는 회차 수 추가.
     public EventResponse.ListDto findAllByCompanyId(Long companyId) {
         List<Event> eventList = eventRepository.findAllByCompanyId(companyId);
-
-        EventResponse.ListDto listDto = new EventResponse.ListDto(eventList);
-
-        listDto.getEventList().forEach(e ->
-                e.setSessionCount(eventSessionRepository.countEventSessionByEventId(e.getId())));
-
-        return listDto;
+        return new EventResponse.ListDto(eventList);
     }
 }

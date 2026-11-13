@@ -1,5 +1,11 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.event_category.EventCategoryService;
+import com.busan.eventplatform.event.event_file.EventFileService;
+import com.busan.eventplatform.event.event_session.EventSessionService;
+import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
@@ -14,7 +20,6 @@ import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
@@ -22,8 +27,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
-@Slf4j
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class EventController {
@@ -32,6 +39,7 @@ public class EventController {
     private final EventService eventService;
     private final EventCategoryService eventCategoryService;
     private final EventSessionService eventSessionService;
+    private final EventFileService eventFileService;
 
     @Value("${naver-map.client-id:}")
     private String naverMapClientId;
@@ -60,7 +68,7 @@ public class EventController {
     }
 
     // 행사 상세 조회
-    // GET - http://localhost:8080/evets/1
+    // GET - http://localhost:8080/event/1
     @GetMapping("/event/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session) {
 
@@ -75,8 +83,8 @@ public class EventController {
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
-        var eventSessions = new EventSessionResponse.ListDto(eventSessionService.findByEventId(id))
-                .getEventSessionList();
+        var eventSessions = eventSessionService.findByEventId(id);
+
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
         model.addAttribute("naverMapClientId", naverMapClientId);
@@ -87,27 +95,34 @@ public class EventController {
     // 행사 등록 화면
     // GET - http://localhost:8080/events/save
     @GetMapping("/events/save")
-    public String saveForm() {
-
+    public String saveForm(Model model) {
+        model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
         return "event/save-form";
     }
 
     // 행사 등록
     // POST - http://localhost:8080/events/save
     @PostMapping("/events/save")
-    public String save(EventRequest.SaveDto saveDto, HttpSession session) {
-
+    public String save(EventRequest.SaveDto saveDto,
+                       @RequestParam("file") MultipartFile file, HttpSession session) {
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        eventService.save(saveDto, sessionCompanyDto.getId());
+        if (sessionCompanyDto == null) {
+            throw new Exception403("기업 회원만 행사 등록이 가능합니다.");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new Exception400("대표 이미지를 등록해주세요.");
+        }
+        Event event = eventService.save(saveDto, sessionCompanyDto.getId());
+        eventFileService.attachFile(event.getId(), file);
 
-        return "redirect:/events";
+        return "redirect:/";
     }
 
     // 기업이 등록한 행사 전체 조회
     // GET - http://localhost:8080/events
-    @GetMapping ("/events")
+    @GetMapping("/events")
     public String findAllByCompanyId(HttpSession session, Model model) {
         LoginIdentity identity = LoginSession.requireIdentity(session);
         if (!identity.isCompany()) {

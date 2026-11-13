@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -33,6 +32,7 @@ public class EventSessionService {
         if (!event.getCompany().getId().equals(companyId)) {
             throw new Exception403("해당 행사에 회차를 등록할 권한이 없습니다.");
         }
+        saveDto.validate();
         EventSession eventSession = saveDto.toEntity(event);
 
         return eventSessionRepository.save(eventSession);
@@ -47,8 +47,14 @@ public class EventSessionService {
     }
 
     // 행사별 회차 목록 조회
-    public List<EventSession> findByEventId(Long eventId) {
-        return eventSessionRepository.findByEventId(eventId);
+    public List<EventSessionResponse.EventSessionDto> findByEventId(Long eventId) {
+        return eventSessionRepository.findByEventId(eventId)
+                .stream()
+                .map(session -> {
+                    String closedReason = registrationService.getClosedReason(session);
+                    return new EventSessionResponse.EventSessionDto(session, closedReason);
+                })
+                .toList();
     }
 
     // 행사별 상태별 회차 조회
