@@ -33,8 +33,14 @@ public class EventSessionResponse {
         private EventSessionStatus status;
         private LocalDateTime applyStartAt;
         private LocalDateTime applyEndAt;
+        private boolean canApply;
+        private String closedReason;
 
         public EventSessionDto(EventSession eventSession) {
+            this(eventSession, null);
+        }
+
+        public EventSessionDto(EventSession eventSession, String closedReason) {
             this.id = eventSession.getId();
             this.name = eventSession.getName();
             this.startsAt = eventSession.getStartsAt();
@@ -46,6 +52,8 @@ public class EventSessionResponse {
             this.status = eventSession.getStatus();
             this.applyStartAt = eventSession.getApplyStartAt();
             this.applyEndAt = eventSession.getApplyEndAt();
+            this.closedReason = closedReason;
+            this.canApply = (closedReason == null);
         }
     }
 

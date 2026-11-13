@@ -163,6 +163,9 @@ public class EventService {
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("행사 수정 권한이 없습니다.");
         }
+        if (EventStatus.PUBLISHED.equals(event.getStatus())) {
+            throw new Exception400("승인된 행사는 수정할 수 없습니다.");
+        }
         return new EventResponse.UpdateFormDto(event);
     }
 
@@ -173,6 +176,9 @@ public class EventService {
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("행사 수정 권한이 없습니다.");
+        }
+        if (EventStatus.PUBLISHED.equals(event.getStatus())) {
+            throw new Exception400("승인된 행사는 수정할 수 없습니다.");
         }
         EventCategory category = eventCategoryRepository.findById(updateDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));

@@ -1,4 +1,3 @@
-
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.event.EventSession;
@@ -12,7 +11,6 @@ import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,8 +55,8 @@ public class EventController {
     }
 
     // 행사 상세 조회
-    // GET - http://localhost:8080/events/1
-    @GetMapping("/events/{id}")
+    // GET - http://localhost:8080/event/1
+    @GetMapping("/event/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session) {
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
