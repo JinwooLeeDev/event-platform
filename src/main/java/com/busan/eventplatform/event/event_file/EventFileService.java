@@ -85,4 +85,18 @@ public class EventFileService {
         fileStorage.delete(eventFile.getStorageKey());
         eventFileRepository.deleteByEventIdAndStorageKey(eventId,storageKey);
     }
+
+    // 행사 대표 이미지 연결 정보 조회
+    @Transactional(readOnly = true)
+    public EventFile getFile(Long eventId) {
+        return eventFileRepository.findByEventId(eventId)
+                .orElseThrow(() -> new Exception404("대표 이미지를 찾을 수 없습니다."));
+    }
+
+    // 실제 이미지 파일 조회
+    @Transactional(readOnly = true)
+    public Resource loadFile(String storageKey) {
+        return fileStorage.load(storageKey);
+    }
+
 }

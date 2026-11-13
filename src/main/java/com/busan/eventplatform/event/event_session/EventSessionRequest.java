@@ -21,6 +21,8 @@ public class EventSessionRequest {
         private int reservationDepositPoints;
         private int minimumParticipants;
         private LocalDateTime minimumCheckAt;
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
 
         public void validate() {
@@ -57,6 +59,15 @@ public class EventSessionRequest {
             if (minimumCheckAt == null) {
                 throw new Exception400("최소 인원 확인 시점은 필수입니다.");
             }
+            if (applyStartAt == null) {
+                throw new Exception400("모집 시작일은 필수입니다.");
+            }
+            if (applyEndAt == null) {
+                throw new Exception400("모집 마감일은 필수입니다.");
+            }
+            if (applyStartAt.isAfter(applyEndAt)) {
+                throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
+            }
         }
 
         public EventSession toEntity(Event event) {
@@ -75,6 +86,8 @@ public class EventSessionRequest {
                     .minimumParticipants(this.minimumParticipants)
                     .minimumCheckAt(this.minimumCheckAt)
                     .status(EventSessionStatus.SCHEDULED)
+                    .applyStartAt(this.applyStartAt)
+                    .applyEndAt(this.applyEndAt)
                     .build();
         }
     }

@@ -53,6 +53,10 @@ public class EventService {
 
         if (saveDto.isHasSessions()) {
             for (EventSessionRequest.SaveDto sessionDto : saveDto.getSessions()) {
+
+                sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
+                sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
+
                 eventSessionService.save(event.getId(), companyId, sessionDto);
             }
         } else {
@@ -72,8 +76,8 @@ public class EventService {
             sessionDto.setMinimumParticipants(1);
             sessionDto.setMinimumCheckAt(sessionDto.getEndsAt());
 
-            sessionDto.setStartsAt(saveDto.getApplyStartAt());
-            sessionDto.setEndsAt(saveDto.getApplyEndAt());
+            sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
+            sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
 
             eventSessionService.save(event.getId(), companyId, sessionDto);
         }
@@ -135,6 +139,9 @@ public class EventService {
         if (EventStatus.PUBLISHED.equals(event.getStatus())) {
             throw new Exception400("승인된 행사는 수정할 수 없습니다.");
         }
+        if (!EventStatus.FEEDBACK_REQUIRED.equals(event.getStatus())) {
+            throw new Exception400("보완 요청된 행사만 수정할 수 있습니다.");
+        }
         return new EventResponse.UpdateFormDto(event);
     }
 
@@ -148,6 +155,9 @@ public class EventService {
         }
         if (EventStatus.PUBLISHED.equals(event.getStatus())) {
             throw new Exception400("승인된 행사는 수정할 수 없습니다.");
+        }
+        if (!EventStatus.FEEDBACK_REQUIRED.equals(event.getStatus())) {
+            throw new Exception400("보완 요청된 행사만 수정할 수 있습니다.");
         }
         EventCategory category = eventCategoryRepository.findById(updateDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
