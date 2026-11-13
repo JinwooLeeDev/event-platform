@@ -32,6 +32,7 @@ public class EventSessionService {
         if (!event.getCompany().getId().equals(companyId)) {
             throw new Exception403("해당 행사에 회차를 등록할 권한이 없습니다.");
         }
+        saveDto.validate();
         EventSession eventSession = saveDto.toEntity(event);
 
         return eventSessionRepository.save(eventSession);
