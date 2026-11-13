@@ -76,6 +76,22 @@ public class RegistrationApiController {
         return ResponseEntity.ok(registrationService.getMyRegistrations(loginIdentity));
     }
 
+    // [나의 신청 내역 /myhistory 데이터] tab: all/upcoming/waiting/past, keyword: 행사명 검색
+    // /myhistory 컨트롤러 연결 전까지 이 주소로 데이터 확인 (조장님 머스태치 작업 시에도 참고)
+    @GetMapping("/history")
+    public ResponseEntity<?> myHistory(
+            @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity loginIdentity,
+            @RequestParam(defaultValue = "all") String tab,
+            @RequestParam(defaultValue = "") String keyword) {
+        if (loginIdentity == null) {
+            return unauthorized();
+        }
+        if (!loginIdentity.isUser()) {
+            return forbidden("개인 회원만 신청 내역을 조회할 수 있습니다.");
+        }
+        return ResponseEntity.ok(registrationService.getMyHistory(loginIdentity, tab, keyword));
+    }
+
     // 4. 신청 취소
     @PostMapping("/cancel/{registrationId}")
     public ResponseEntity<?> cancel(
