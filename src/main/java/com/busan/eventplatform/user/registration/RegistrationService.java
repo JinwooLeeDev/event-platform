@@ -566,7 +566,7 @@ public class RegistrationService {
                 .cancelable(cancelable)
                 .cancelConfirmText(cancelConfirm)
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
-                .detailUrl("/event/" + event.getId())
+                .detailUrl("/events/" + event.getId()) // 행사 상세 주소 (행사 담당자 확정: /events/{id})
                 .build();
     }
 
