@@ -47,8 +47,14 @@ public class EventSessionService {
     }
 
     // 행사별 회차 목록 조회
-    public List<EventSession> findByEventId(Long eventId) {
-        return eventSessionRepository.findByEventId(eventId);
+    public List<EventSessionResponse.EventSessionDto> findByEventId(Long eventId) {
+        return eventSessionRepository.findByEventId(eventId)
+                .stream()
+                .map(session -> {
+                    String closedReason = registrationService.getClosedReason(session);
+                    return new EventSessionResponse.EventSessionDto(session, closedReason);
+                })
+                .toList();
     }
 
     // 행사별 상태별 회차 조회

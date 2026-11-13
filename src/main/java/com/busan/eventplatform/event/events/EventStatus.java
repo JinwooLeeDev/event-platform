@@ -6,5 +6,5 @@ public enum EventStatus {
     PUBLISHED,	// 공개 및 승인 완료. 최종 확정.
     PAID_READY ,   // 결제 대기
     COMPLETED,	// 행사 종료
-    CANCELLED // 행사 취소
+    CANCELLED // 행사 취소``
 }
