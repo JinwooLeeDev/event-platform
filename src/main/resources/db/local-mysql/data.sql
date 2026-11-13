@@ -569,7 +569,7 @@ VALUES (36001, 36021, NULL, 'READY', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TI
 
 
 -- 10 purchase_tb: 개인 유료 신청의 차감 스냅샷, 기업 차감 예시. user/company 중 한 주체만 사용. 잔액은 현재 스냅샷이며 원장 없음.
-INSERT INTO purchase_tb (id, user_id, company_id, event_session_id, purchased_at, price , status)
+INSERT INTO purchase_tb (id, user_id, company_id, event_session_id, purchased_at, price, status)
 VALUES (36001, 36004, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
        (36002, 36005, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
        (36003, 36010, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
@@ -585,6 +585,7 @@ VALUES (36001, 36004, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 
        (36013, NULL, 36001, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000, 'PURCHASED'),
        (36014, NULL, 36002, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000, 'PURCHASED'),
        (36015, NULL, 36003, 36014, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 10000, 'PURCHASED');
+
 
 -- 11 refund_tb: 개인/기업 × READY/PENDING/REFUND, 사유 NULL/입력. 원구매자와 반환 주체 일치, 원구매 한도 이하.
 INSERT INTO refund_tb (id, user_id, company_id, purchase_id, status, reason, amount, created_at)

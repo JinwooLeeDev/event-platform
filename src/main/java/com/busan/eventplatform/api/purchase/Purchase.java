@@ -32,6 +32,7 @@ public class Purchase {
     @JoinColumn(name = "company_id")
     private Company company;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eventSession_id" , nullable = false)
     private EventSession eventSession;
