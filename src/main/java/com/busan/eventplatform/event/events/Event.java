@@ -54,18 +54,6 @@ public class Event {
     @Column(nullable = false)
     private String description;
 
-    // 모집 시작일
-    @Column(nullable = false)
-    private LocalDateTime applyStartAt;
-
-    // 모집 마감일
-    @Column(nullable = false)
-    private LocalDateTime applyEndAt;
-
-    public boolean isApplicationClosed() {
-        return applyEndAt != null && !LocalDateTime.now().isBefore(applyEndAt);
-    }
-
     // 행사 정보가 공개된 시각 -- 목록 정렬 유용
     @Column
     private LocalDateTime publishedAt; // 공개 전에는 null

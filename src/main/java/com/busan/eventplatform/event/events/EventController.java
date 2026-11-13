@@ -20,7 +20,6 @@ import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
@@ -69,7 +68,7 @@ public class EventController {
     }
 
     // 행사 상세 조회
-    // GET - http://localhost:8080/evets/1
+    // GET - http://localhost:8080/event/1
     @GetMapping("/event/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session) {
 
@@ -84,8 +83,8 @@ public class EventController {
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
-        var eventSessions = new EventSessionResponse.ListDto(eventSessionService.findByEventId(id))
-                .getEventSessionList();
+        var eventSessions = eventSessionService.findByEventId(id);
+
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
         model.addAttribute("naverMapClientId", naverMapClientId);
@@ -106,8 +105,6 @@ public class EventController {
     @PostMapping("/events/save")
     public String save(EventRequest.SaveDto saveDto,
                        @RequestParam("file") MultipartFile file, HttpSession session) {
-        System.out.println("1. 행사 등록 컨트롤러 진입");
-
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
@@ -125,7 +122,7 @@ public class EventController {
 
     // 기업이 등록한 행사 전체 조회
     // GET - http://localhost:8080/events
-    @GetMapping ("/events")
+    @GetMapping("/events")
     public String findAllByCompanyId(HttpSession session, Model model) {
         LoginIdentity identity = LoginSession.requireIdentity(session);
         if (!identity.isCompany()) {
