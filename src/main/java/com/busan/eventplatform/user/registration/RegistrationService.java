@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 참가 신청 도메인.
@@ -391,6 +393,21 @@ public class RegistrationService {
         return null;
     }
 
+    // [행사 상세 화면용] 행사의 회차별 신청 불가 사유 — key: 회차 id, value: 사유 (신청 가능하면 "")
+    // 회차의 행사(LAZY) 정보를 읽으므로 트랜잭션 안에서 계산해 결과만 넘김 (컨트롤러에서 직접 부르면 LazyInitializationException)
+    @Transactional(readOnly = true)
+    public Map<Long, String> getClosedReasonsByEventId(Long eventId) {
+        Map<Long, String> reasons = new HashMap<>();
+        for (EventSession session : eventSessionRepository.findByEventId(eventId)) {
+            String reason = getClosedReason(session);
+            reasons.put(session.getId(), reason == null ? "" : reason);
+        }
+        return reasons;
+    }
+
+
+
+
     /**
      * 본인 취소가 불가능한 이유. 취소 가능하면 null.
      * 조장님 결정: 취소는 시작 전까지 언제든지 가능, 환불 금액만 차등.
@@ -565,8 +582,9 @@ public class RegistrationService {
                 .refundText("") // TODO step 8: 포인트 파트 환불 필드(refundAmount) 연결 → "환불 완료 16,666P"
                 .cancelable(cancelable)
                 .cancelConfirmText(cancelConfirm)
+                .refundPolicyText(cancelable && paid > 0 ? RegistrationRefundPolicy.POLICY_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
-                .detailUrl("/events/" + event.getId()) // 행사 상세 주소 (행사 담당자 확정: /events/{id})
+                .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
                 .build();
     }
 
