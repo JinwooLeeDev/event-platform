@@ -11,16 +11,18 @@ import com.busan.eventplatform.user.registration.Registration;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RefundService {
     private final PurchaseRepository purchaseRepository;
     private final RefundRepository refundRepository;
 
-
+    @Transactional
     // User의 환불. --> User 검증 , 환불할 Registration내역 검증받고 들어오므로 User , registration 그대로 사용가능.
     public void refundUser(Long userId , Registration registration , RegistrationStatus beforeStatus) {
         // 1. 전달받은 행사가 이 유저가 실제 결제한 구매행사가 맞는지.
