@@ -1,6 +1,7 @@
 package com.busan.eventplatform.user.registration;
 
 import com.busan.eventplatform.api.purchase.Purchase;
+import com.busan.eventplatform.api.refund.RefundPolicy;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
@@ -214,7 +215,7 @@ public class RegistrationService {
             promoteWaitingUsersIfAny(session);
         }
 
-        int refundAmount = RegistrationRefundPolicy.forCompanyReject(paidAmountOf(registration));
+        int refundAmount = RefundPolicy.forCompanyReject(paidAmountOf(registration));
         return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
@@ -498,7 +499,7 @@ public class RegistrationService {
 
         // 1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RegistrationRefundPolicy)
         int expectedRefund = cancelable
-                ? RegistrationRefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
+                ? RefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
                 : 0;
 
         // 2. 표시 상태 결정 — 우선순위: 거절 > 취소 > 시작됨(행사 종료) > 대기 > 확정
