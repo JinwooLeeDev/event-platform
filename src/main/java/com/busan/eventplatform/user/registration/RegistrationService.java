@@ -18,6 +18,7 @@ import com.busan.eventplatform.user.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.busan.eventplatform.user.community.CommunityPolicy;   // ★ [f/40] 커뮤니티 운영 기간 규칙
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -52,6 +53,7 @@ public class RegistrationService {
     private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
 
     private final ApplicationEventPublisher eventPublisher;   // ★ [f/40] 상태 변경 알림 → 커뮤니티 입장·퇴장
+
     /**
      * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
      *
@@ -644,6 +646,10 @@ public class RegistrationService {
                 .refundPolicyText(cancelable && paid > 0 ? RefundPolicy.REGISTRATION_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
                 .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
+                // ★ [f/40] 참가 확정 + 커뮤니티 운영 중(회차 종료일 24시 전)일 때만 입장 주소, 아니면 null → 버튼 숨김
+                .communityUrl(status == RegistrationStatus.CONFIRMED
+                        && CommunityPolicy.isOpen(session.getEndsAt(), now)
+                        ? "/community/" + session.getId() : null)
                 .build();
     }
 

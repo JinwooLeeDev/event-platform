@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko"><head>{{> layout/head-meta}}<title>커뮤니티 | Busan Play</title></head><body>
+{{> layout/header}}
+
+{{> layout/bootstrap}}
+
+<style>
+    .community-page { min-height: 85vh; background: #f8f9fb; color: #1a2340; }
+    .community-container { max-width: 860px; }
+    .community-card { background: #fff; border: 1px solid #e6e7eb; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,.04); overflow: hidden; }
+    .community-head { padding: 20px 24px; border-bottom: 1px solid #edf0f5; }
+    .community-eyebrow { color: #0750d8; font-weight: 800; font-size: 12px; letter-spacing: 2px; }
+    .community-title { font-size: 20px; font-weight: 800; margin: 6px 0 4px; }
+    .community-sub { color: #72757e; font-size: 13px; }
+    .community-status { font-size: 12px; color: #72757e; }
+    .community-status.is-live { color: #3d725c; }
+    .community-status.is-off { color: #a34b4b; }
+    .community-messages { height: 55vh; overflow-y: auto; padding: 20px 24px; margin: 0; list-style: none; background: #fbfbfc; }
+    .community-msg { margin-bottom: 14px; max-width: 75%; }
+    .community-msg.mine { margin-left: auto; text-align: right; }
+    .community-msg .meta { font-size: 12px; color: #72757e; margin-bottom: 4px; }
+    .community-msg .meta strong { color: #292f3d; margin-right: 6px; }
+    .community-msg .bubble { display: inline-block; padding: 10px 14px; border-radius: 14px; background: #fff; border: 1px solid #e6e7eb; white-space: pre-wrap; word-break: break-word; text-align: left; }
+    .community-msg.mine .bubble { background: #0750d8; border-color: #0750d8; color: #fff; }
+    .community-system { text-align: center; font-size: 12px; color: #8a8f99; margin: 10px 0; }
+    .community-form { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid #edf0f5; }
+    .community-form input { flex: 1; }
+</style>
+
+<main class="community-page py-5">
+    <div class="container community-container">
+        {{#room}}
+            <nav class="mb-4 small text-secondary">
+                <a href="/" class="text-secondary text-decoration-none">홈</a>
+                <i class="bi bi-chevron-right mx-2"></i>
+                <a href="/community" class="text-secondary text-decoration-none">내 커뮤니티</a>
+                <i class="bi bi-chevron-right mx-2"></i>
+                <strong class="text-dark">{{eventTitle}}</strong>
+            </nav>
+
+            <section class="community-card" aria-labelledby="community-title">
+                <div class="community-head">
+                    <div class="community-eyebrow">BUSAN PLAY · COMMUNITY</div>
+                    <h1 id="community-title" class="community-title">{{eventTitle}}</h1>
+                    <div class="community-sub">{{sessionName}} · {{closeText}}</div>
+                    <div id="community-status" class="community-status mt-2" role="status">연결 중…</div>
+                </div>
+
+                <ul id="community-messages" class="community-messages" aria-live="polite"
+                    data-session-id="{{sessionId}}" data-my-user-id="{{myUserId}}">
+                    {{#empty}}<li class="community-system">아직 메시지가 없습니다. 첫 인사를 남겨 보세요!</li>{{/empty}}
+                    {{#messages}}
+                        <li class="community-msg {{#mine}}mine{{/mine}}">
+                            <div class="meta"><strong>{{nickname}}</strong><span>{{sentAt}}</span></div>
+                            <div class="bubble">{{content}}</div>
+                        </li>
+                    {{/messages}}
+                </ul>
+
+                <form id="community-form" class="community-form" autocomplete="off">
+                    <label for="community-input" class="visually-hidden">메시지</label>
+                    <input id="community-input" class="form-control" type="text" maxlength="500"
+                           placeholder="메시지를 입력하세요 (최대 500자)" disabled>
+                    <button id="community-send" class="btn btn-primary" type="submit" disabled>보내기</button>
+                </form>
+            </section>
+        {{/room}}
+    </div>
+</main>
+
+{{> layout/footer}}
+
+<!-- 채팅용 라이브러리: 레이아웃과 같은 jsDelivr CDN, 이 화면에서만 로드 (Q5) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+<script>
+    (() => {
+        const list = document.getElementById('community-messages');
+        if (!list) return;
+        const sessionId = list.dataset.sessionId;
+        const myUserId = Number(list.dataset.myUserId);
+        const statusEl = document.getElementById('community-status');
+        const form = document.getElementById('community-form');
+        const input = document.getElementById('community-input');
+        const sendBtn = document.getElementById('community-send');
+        let ended = false;
+
+        const scrollToBottom = () => { list.scrollTop = list.scrollHeight; };
+        const setStatus = (text, cls) => { statusEl.textContent = text; statusEl.className = 'community-status mt-2 ' + (cls || ''); };
+        const setFormEnabled = enabled => { input.disabled = !enabled; sendBtn.disabled = !enabled; };
+
+        // 메시지는 반드시 textContent 로 넣는다 → 사용자가 <script> 를 보내도 글자로만 보임 (XSS 방지)
+        function appendChat(m) {
+            list.querySelector('.community-system.empty')?.remove();
+            const li = document.createElement('li');
+            li.className = 'community-msg' + (m.userId === myUserId ? ' mine' : '');
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const name = document.createElement('strong');
+            name.textContent = m.nickname;
+            const time = document.createElement('span');
+            time.textContent = m.sentAt;
+            meta.append(name, time);
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = m.content;
+            li.append(meta, bubble);
+            list.appendChild(li);
+            scrollToBottom();
+        }
+
+        function appendSystem(text) {
+            const li = document.createElement('li');
+            li.className = 'community-system';
+            li.textContent = text;
+            list.appendChild(li);
+            scrollToBottom();
+        }
+
+        // 퇴장(KICKED)·종료(CLOSED)·권한 거부 → 연결을 끊고 더 이상 받지 않음
+        function end(text, goBack) {
+            if (ended) return;
+            ended = true;
+            setFormEnabled(false);
+            setStatus('연결 종료', 'is-off');
+            appendSystem(text);
+            client.deactivate();
+            if (goBack) setTimeout(() => { location.href = '/myhistory'; }, 3000);
+        }
+
+        const client = new StompJs.Client({
+            webSocketFactory: () => new SockJS('/ws'),
+            reconnectDelay: 5000   // 네트워크가 잠깐 끊기면 5초 뒤 다시 연결 (퇴장·종료 후에는 deactivate 로 멈춤)
+        });
+
+        client.onConnect = () => {
+            setStatus('실시간 연결됨', 'is-live');
+            setFormEnabled(true);
+
+            client.subscribe('/topic/community/' + sessionId, frame => {
+                const m = JSON.parse(frame.body);
+                if (m.type === 'CHAT') appendChat(m);
+                else if (m.type === 'JOIN' || m.type === 'LEAVE') appendSystem(m.content);
+                else if (m.type === 'CLOSED') end(m.content, true);
+            });
+
+            client.subscribe('/user/queue/community', frame => {
+                const m = JSON.parse(frame.body);
+                if (m.type === 'KICKED' && String(m.sessionId) === sessionId) end(m.content + ' 잠시 후 내 행사로 이동합니다.', true);
+                else if (m.type === 'ERROR') appendSystem('⚠ ' + m.content);
+            });
+        };
+
+        client.onStompError = frame => end(frame.headers.message || '커뮤니티에 연결할 수 없습니다.', false);
+        client.onWebSocketClose = () => { if (!ended) { setStatus('연결이 끊겼습니다. 다시 연결하는 중…', 'is-off'); setFormEnabled(false); } };
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            const content = input.value.trim();
+            if (!content || !client.connected) return;
+            client.publish({
+                destination: '/app/community/' + sessionId + '/messages',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            input.value = '';
+            input.focus();
+        });
+
+        // 처음 메시지가 없을 때의 안내 문구 표시용 클래스
+        list.querySelector('.community-system')?.classList.add('empty');
+        scrollToBottom();
+        client.activate();
+    })();
+</script>
+</body></html>

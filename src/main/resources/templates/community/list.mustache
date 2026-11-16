@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko"><head>{{> layout/head-meta}}<title>내 커뮤니티 | Busan Play</title></head><body>
+{{> layout/header}}
+
+{{> layout/bootstrap}}
+
+<style>
+    .community-page { min-height: 85vh; background: #f8f9fb; color: #1a2340; }
+    .community-container { max-width: 860px; }
+    .community-eyebrow { color: #0750d8; font-weight: 800; font-size: 12px; letter-spacing: 2px; }
+    .community-item { background: #fff; border: 1px solid #e6e7eb; border-radius: 16px; padding: 20px 24px; box-shadow: 0 5px 20px rgba(0,0,0,.04); }
+    .community-item h2 { font-size: 18px; font-weight: 800; margin: 0 0 4px; color: #292f3d; }
+    .community-item .sub { color: #72757e; font-size: 13px; }
+</style>
+
+<main class="community-page py-5">
+    <div class="container community-container">
+        <nav class="mb-4 small text-secondary">
+            <a href="/" class="text-secondary text-decoration-none">홈</a>
+            <i class="bi bi-chevron-right mx-2"></i>
+            <a href="/mypage" class="text-secondary text-decoration-none">마이페이지</a>
+            <i class="bi bi-chevron-right mx-2"></i>
+            <strong class="text-dark">내 커뮤니티</strong>
+        </nav>
+
+        <div class="mb-4">
+            <div class="community-eyebrow mb-2">BUSAN PLAY · COMMUNITY</div>
+            <h1 class="h3 fw-bold">내 커뮤니티</h1>
+            <p class="text-secondary mb-0">참가가 확정된 회차의 참가자들과 이야기를 나눌 수 있어요. 커뮤니티는 회차 종료일 24시에 닫힙니다.</p>
+        </div>
+
+        {{#communities}}
+            <article class="community-item mb-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h2>{{eventTitle}}</h2>
+                    <div class="sub">{{sessionName}} · {{closeText}}</div>
+                </div>
+                <a class="btn btn-primary" href="{{url}}">입장하기</a>
+            </article>
+        {{/communities}}
+
+        {{#empty}}
+            <div class="community-item text-center p-5">
+                <h2 class="h5 fw-bold">입장할 수 있는 커뮤니티가 없습니다.</h2>
+                <p class="text-secondary mb-3">행사 참가가 확정되면 해당 회차의 커뮤니티에 자동으로 입장됩니다.</p>
+                <a class="btn btn-outline-primary" href="/myhistory">내 행사 보기</a>
+            </div>
+        {{/empty}}
+    </div>
+</main>
+
+{{> layout/footer}}
+</body></html>
