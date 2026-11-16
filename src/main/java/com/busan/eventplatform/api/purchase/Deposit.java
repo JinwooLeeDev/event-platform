@@ -42,7 +42,7 @@ public class Deposit {
     private Company company;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eventSession_id" , nullable = false , unique = true)
+    @JoinColumn(name = "event_session_id" , nullable = false , unique = true)
     private EventSession eventSession;
 
     @CreationTimestamp
@@ -52,11 +52,11 @@ public class Deposit {
     private int amount;
 
     @Builder
-    public Deposit(Company company, EventSession eventSession , int sessionCount) {
+    public Deposit(Company company, EventSession eventSession) {
         this.status = DepositStatus.READY;
         this.company = company;
         this.eventSession = eventSession;
-        this.amount = sessionCount * SESSION_DEPOSIT;
+        this.amount = SESSION_DEPOSIT;
     }
 
 

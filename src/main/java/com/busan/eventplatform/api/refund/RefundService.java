@@ -77,13 +77,13 @@ public class RefundService {
     /// Company의 환불 + User 전액 환불(User의 등록상태가 REJECTED 전? 후? --> 언제 환불해줄까?).
     public void refundCompany(Company company , Long eventSessionId , LocalDate cancelReqTime) {
         // 1. 이 행사가 관리자에게 "승인취소" 받았는지
-        EventSession eventSession = eventSessionRepository.findByIdForUpdate(eventSessionId)
+        EventSession eventSession = eventSessionRepository.findByCompanyIdAndSessionId(company.getId() , eventSessionId)
                 .orElseThrow(() -> new Exception400("해당 행사를 찾을 수 없습니다"));
-        if(eventSession.isCanceled()) throw new Exception400("승인 취소받은 행사가 아닙니다");
+        if(!eventSession.isCanceled()) throw new Exception400("승인 취소받은 행사가 아닙니다");
 
 
         // 2. 이 기업이 실제 갖고있는 행사가 맞는지 + 이 행사 상태가 "결제완료"가 맞는지 한번 더 검증.
-        Deposit deposit = depositRepository.findByCompanyIdAndEventId(company.getId() , eventSession.getEvent().getId())
+        Deposit deposit = depositRepository.findByCompanyIdAndSessionId(company.getId() , eventSession.getId())
                 .orElseThrow(() -> new Exception400("해당 행사를 개최한 이력이 없습니다"));
 
         if(deposit.getStatus() != DepositStatus.PAID) throw new Exception400("이 행사는 환불을 진행할 수 없습니다");
@@ -132,7 +132,7 @@ public class RefundService {
      * 행사 정상 종료시 기업에게 보증금 자동환급.
      * 외부에서 필요한 값 : eventSession 상태값이 "행사 종료"
      */
-
+    @Transactional
     public void refundEventCompleted(Long companyId , Long eventSessionId) {
         // 1. 이 행사를 개최한 기업과 전달받은 기업이 일치하는지.
         EventSession eventSession = eventSessionRepository.findByCompanyIdAndSessionId(companyId , eventSessionId)
@@ -148,7 +148,7 @@ public class RefundService {
 
         // 최종. 기업에게 보증금 돌려주고 DB반영.
         eventSession.getEvent().getCompany().chargePoint(deposit.getAmount());
+
         deposit.setDepositReturned();
     }
-
 }

@@ -148,7 +148,7 @@ INSERT INTO event_sessions (id, event_id, name, starts_at, ends_at, apply_start_
 
 -- 07 기업 보증금
 -- 결제 대기 행사(36015, 36018)에는 아직 보증금 행을 넣지 않습니다. 결제 성공 시 애플리케이션에서 생성합니다.
-INSERT INTO deposit_tb (id, company_id, event_id, status, amount, paid_at) VALUES
+INSERT INTO deposit_tb (id, company_id, event_session_id, status, amount, paid_at) VALUES
 (36001, 36002, 36001, 'PAID', 750000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
 (36002, 36003, 36002, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
 (36003, 36001, 36003, 'PAID', 300000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
@@ -193,19 +193,19 @@ INSERT INTO purchase_tb (id, user_id, company_id, event_session_id, purchased_at
                                                                                                      (36016, 36005, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000, 'PURCHASED'),
                                                                                                      (36017, 36006, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000, 'PURCHASED'),
                                                                                                      (36018, 36007, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'PURCHASED'),
-                                                                                                     (36019, 36008, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'CANCELED'),
+                                                                                                     (36019, 36008, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'REFUNDED'),
                                                                                                      (36020, 36009, NULL, 36010, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
                                                                                                      (36021, 36010, NULL, 36010, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
                                                                                                      (36022, 36011, NULL, 36011, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
                                                                                                      (36023, 36012, NULL, 36012, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
                                                                                                      (36024, 36013, NULL, 36012, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
-                                                                                                     (36025, 36014, NULL, 36013, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'CANCELED'),
+                                                                                                     (36025, 36014, NULL, 36013, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'REFUNDED'),
                                                                                                      (36026, 36014, NULL, 36015, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
                                                                                                      (36027, 36015, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
-                                                                                                     (36028, 36016, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'CANCELED'),
-                                                                                                     (36029, 36017, NULL, 36001, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'CANCELED'),
+                                                                                                     (36028, 36016, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'REFUNDED'),
+                                                                                                     (36029, 36017, NULL, 36001, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'REFUNDED'),
                                                                                                      (36030, 36017, NULL, 36001, TIMESTAMPADD(HOUR, -23, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
-                                                                                                     (36031, 36018, NULL, 36018, TIMESTAMPADD(HOUR, -100, CURRENT_TIMESTAMP), 9000, 'CANCELED');
+                                                                                                     (36031, 36018, NULL, 36018, TIMESTAMPADD(HOUR, -100, CURRENT_TIMESTAMP), 9000, 'REFUNDED');
 
 
 -- 10 신청
