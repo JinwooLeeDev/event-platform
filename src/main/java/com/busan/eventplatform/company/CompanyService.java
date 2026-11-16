@@ -1,6 +1,7 @@
 package com.busan.eventplatform.company;
 
 import com.busan.eventplatform.company.businessverification.BusinessVerificationService;
+import com.busan.eventplatform.company.businessverification.BusinessVerificationSessionService;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
@@ -32,7 +33,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
-    private final BusinessVerificationService businessVerificationService;
+    private final BusinessVerificationSessionService businessVerificationSessionService;
     private final FileStorage fileStorage;
     private final PlatformTransactionManager platformTransactionManager;
 
@@ -69,7 +70,6 @@ public class CompanyService {
             return transactionTemplate.execute(transactionStatus -> {
                 Company company = companyRepository.findById(id).orElseThrow(() -> new Exception404("해당 기업을 찾을 수 없습니다."));
 
-//        TODO 리펙터링 후보
 //        새 사업자 등록증을 첨부했는지
                 boolean certificateUpload = updateDTO.hasBusinessCertificate();
 //        기업인증정보가 변경되었는지
@@ -82,12 +82,17 @@ public class CompanyService {
                 boolean representativeNameChanged = updateDTO.getRepresentativeName() != null && !company.getRepresentativeName().equals(updateDTO.getRepresentativeName());
 //        개업일 변경 판단
                 boolean openedOnChanged = updateDTO.getOpenedOn() != null && !company.getOpenedOn().equals(updateDTO.getOpenedOn());
+
+                // TODO: 기존 DB에 API 검증 상태가 ERROR인 기업이 남아 있다면,
+                //  사업자 정보 변경 없이도 재검증 결과를 DB에 반영할 수 있는 흐름 검토.
+                //  현재 신규 가입은 MATCHED만 허용하므로 기존 데이터 지원 여부에 따라 진행.
+                //  PENDING 상태의 재검증 허용 여부도 함께 결정 필요.
 //        사업자 인증이 필요한지 판단
                 boolean requiresBusinessVerification = businessNumberChanged || representativeNameChanged || openedOnChanged;
 //        정보변경 또는 사업자등록증 업로드시 관리자 재심사 필요
                 boolean requiresReview = companyInformationChanged || certificateUpload;
 
-//        PENDING 상태에서는 기업 수정 불가
+//        PENDING 상태에서는 기업 인증 정보 변경과 등록증 교체 불가
                 if (company.getStatus() == CompanyStatus.PENDING && requiresReview) {
                     throw new Exception400("검토 중에는 기업 인증 정보 수정이 불가합니다.");
                 }
@@ -117,17 +122,35 @@ public class CompanyService {
                             });
                 }
 
-//        현재 사업자번호 상태를 불러옴
+//        현재 사업자 인증 상태를 불러옴
                 BusinessVerificationStatus verificationStatus = company.getBusinessVerificationStatus();
 
-//        사업자 등록 정보가 변경될 시 API를 호출함
+//        사업자 정보가 변경되면 해당 정보의 검증 성공 기록 확인
                 if (requiresBusinessVerification) {
                     String businessNumber = updateDTO.getBusinessNumber() != null ? updateDTO.getBusinessNumber() : company.getBusinessNumber();
                     String representativeName = updateDTO.getRepresentativeName() != null ? updateDTO.getRepresentativeName() : company.getRepresentativeName();
                     LocalDate openedOn = updateDTO.getOpenedOn() != null ? updateDTO.getOpenedOn() : company.getOpenedOn();
 
-                    verificationStatus = businessVerificationService.verify(businessNumber, representativeName, openedOn);
+                    businessVerificationSessionService.requireVerifiedBusiness(businessNumber, representativeName, openedOn, session);
+                    verificationStatus = BusinessVerificationStatus.MATCHED;
                     company.recordBusinessVerification(verificationStatus);
+
+//                     DB 커밋 성공 후 사업자 검증 세션을 정리하도록 등록
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new TransactionSynchronization() {
+                                @Override
+                                public void afterCommit() {
+                                    try {
+                                        businessVerificationSessionService.clear(session);
+                                    } catch (RuntimeException cleanUpFailure) {
+                                        log.warn(
+                                                "기업 수정 성공 후 사업자 검증 세션 정리 실패",
+                                                cleanUpFailure
+                                        );
+                                    }
+                                }
+                            }
+                    );
                 }
 
 //        검사 후 결과에 따라 최종 Status가 결정된다.
@@ -142,6 +165,7 @@ public class CompanyService {
 //                새 파일키로 변경하기 전, 기존 키 기억
                 String previousStorageKey = company.getBusinessCertificateFileName();
 
+//                새 파일로 교체되는 경우, DB 커밋 성공 후 기존 파일 삭제
                 if (storedFile != null
                         && previousStorageKey != null
                         && !previousStorageKey.isBlank()
@@ -164,6 +188,7 @@ public class CompanyService {
                     );
                 }
 
+//                위 조건을 모두 통과하면 DB 데이터 수정이 이루어짐
                 company.update(
                         updateDTO.getName(),
                         updateDTO.getEmail(),
@@ -176,6 +201,7 @@ public class CompanyService {
                         storedFile != null ? storedFile.getStorageKey() : null
                 );
 
+//                비밀번호 해싱
                 if (updateDTO.getPassword() != null) {
                     String encodedPassword = passwordEncoder.encode(updateDTO.getPassword());
                     company.changePassword(encodedPassword);

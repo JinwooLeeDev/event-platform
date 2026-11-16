@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>{{> layout/head-meta}}<title>관리할 회차 선택 | Busan Play</title></head>
+<body>
+{{> layout/header}}
+{{> layout/account-style}}
+{{> company/session-style}}
+<main class="session-page"><div class="account-layout">
+    {{> layout/company-nav}}
+    <section class="account-content" data-session-picker>
+        <a href="/events">← 주최 행사 목록</a>
+        <p class="member-eyebrow">BUSAN PLAY · PARTNERS</p><h1>관리할 회차 선택</h1>
+        <p class="session-muted">일정과 모집 현황을 확인하고 관리할 회차를 선택해 주세요. 회차가 하나면 관리 화면으로 바로 이동합니다.</p>
+        {{> event_session/create-form}}
+        {{#eventSession}}
+        <a class="session-panel session-choice-link" href="/event-sessions/{{id}}" data-session-link>
+            <h2>{{name}} <span aria-hidden="true">→</span></h2>
+            <dl class="session-facts">
+                <div><dt>개최 일정</dt><dd><span data-session-date>{{startsAt}}</span> ~ <span data-session-date>{{endsAt}}</span></dd></div>
+                <div><dt>모집 기간</dt><dd><span data-session-date>{{applyStartAt}}</span> ~ <span data-session-date>{{applyEndAt}}</span></dd></div>
+                <div><dt>정원·현재 점유</dt><dd>{{capacityLabel}} · {{occupiedCount}}명</dd></div>
+                <div><dt>참가비·운영 상태</dt><dd><span data-session-point>{{fee}}</span> · <span data-session-status>{{status}}</span></dd></div>
+            </dl>
+        </a>
+        {{/eventSession}}
+        {{^eventSession}}<div class="session-panel"><h2>등록된 회차가 없습니다.</h2><p class="session-muted">주최 행사 목록에서 행사 정보를 확인해 주세요.</p><a href="/events">목록으로 돌아가기</a></div>{{/eventSession}}
+        <noscript><p class="session-muted">회차 이름을 선택하면 관리 화면으로 이동합니다.</p></noscript>
+    </section>
+</div></main>
+{{> layout/footer}}
+<script src="/js/company-session.js" defer></script>
+</body></html>

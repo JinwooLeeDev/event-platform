@@ -33,6 +33,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         // 2. 관리자 검사 : 로그인 검사 다음에 등록 (등록한 순서대로 실행 됨)
         registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/admin", "/admin/**");
+                .addPathPatterns("/admin", "/admin/**", "/events/approve/**", "/events/feedback/*", "/events/cancel/**");
     }
 }

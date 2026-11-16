@@ -55,7 +55,6 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
         """)
     Optional<EventSession> findByIdForUpdate(@Param("sessionId") Long sessionId);
 
-
     @Query("select count(es) from EventSession es where es.event.id = :eventId")
     int countEventSessionByEventId(@Param("eventId") Long eventId);
 
@@ -65,4 +64,6 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
             where es.id = :eventSessionId
             """)
     Optional<EventSession> findByIdWithEvent(@Param("eventSessionId") Long eventSessionId);
+
+    // Todo - 기본 Delete 기능 말고 신청·결제 이력이 없는 행사·회차만 삭제하고, 이력이 있으면 취소 처리하는 메서드 필요
 }

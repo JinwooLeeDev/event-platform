@@ -110,7 +110,7 @@ class AdminCompanyPageTest {
     }
 
     private MockMvc mvc(CompanyReviewService service) {
-        return MockMvcBuilders.standaloneSetup(new AdminController(service),new CompanyAdminReviewController(service))
+        return MockMvcBuilders.standaloneSetup(new AdminController(service, org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class)),new CompanyAdminReviewController(service))
                 .addInterceptors(new AdminInterceptor()).setControllerAdvice(new GlobalExceptionHandler()).build();
     }
 
@@ -137,7 +137,7 @@ class AdminCompanyPageTest {
     void companyListHasOneMappingAndUsesExistingAdminLayout() throws Exception {
         var service = mock(CompanyReviewService.class);
         when(service.findReviewTargets(1L)).thenReturn(List.of());
-        var mvc = MockMvcBuilders.standaloneSetup(new AdminController(service), new CompanyAdminReviewController(service)).build();
+        var mvc = MockMvcBuilders.standaloneSetup(new AdminController(service, org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class)), new CompanyAdminReviewController(service)).build();
         mvc.perform(get("/admin/companies").session(adminSession()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/page"))

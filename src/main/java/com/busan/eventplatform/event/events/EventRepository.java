@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
+    long countByStatus(EventStatus status);
+
+    @Query("select e from Event e join fetch e.company join fetch e.category where e.status = :status order by e.createdAt asc, e.id asc")
+    List<Event> findReviewTargets(@Param("status") EventStatus status);
 
     @Query(value = """
             select e from Event e left join fetch e.category

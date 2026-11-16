@@ -38,7 +38,7 @@ public class EventSessionController {
         EventSessionResponse.DetailDto detailDto = eventSessionService.findById(id);
         model.addAttribute("eventSession", detailDto);
 
-        return "event_Session/detail";
+        return "event_session/detail";
     }
 
     // 행사별 회차 목록 조회

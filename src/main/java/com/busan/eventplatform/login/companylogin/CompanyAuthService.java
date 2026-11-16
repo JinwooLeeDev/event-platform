@@ -1,28 +1,28 @@
 package com.busan.eventplatform.login.companylogin;
 
-import com.busan.eventplatform.company.businessverification.BusinessVerificationService;
-import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
-import com.busan.eventplatform.login.LoginReqDto;
-
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.company.CompanyStatus;
+import com.busan.eventplatform.company.businessverification.BusinessVerificationSessionService;
+import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
-import com.busan.eventplatform.global.file.FileStorage;
-import com.busan.eventplatform.global.file.FileStorageResult;
-import com.busan.eventplatform.login.emailverification.EmailVerificationService;
-import jakarta.servlet.http.HttpSession;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.global.file.FileStorage;
+import com.busan.eventplatform.global.file.FileStorageResult;
+import com.busan.eventplatform.login.LoginReqDto;
+import com.busan.eventplatform.login.emailverification.EmailVerificationService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+
 import java.time.Instant;
 
 @Service
@@ -35,7 +35,7 @@ public class CompanyAuthService {
     private final EmailVerificationService emailVerificationService;
     private final FileStorage fileStorage;
     private final PlatformTransactionManager transactionManager;
-    private final BusinessVerificationService businessVerificationService;
+    private final BusinessVerificationSessionService businessVerificationSessionService;
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void signup(CompanySignupReqDto request, HttpSession session) {
@@ -51,19 +51,11 @@ public class CompanyAuthService {
             throw new Exception400("이미 등록되어 있는 사업자 번호입니다.");
         });
 
-//        국세청 API 연동. 사업자 정보 등록여부 확인
-        BusinessVerificationStatus verificationStatus = businessVerificationService.verify(
-                request.getBusinessNumber(),
+//        가입 정보와 일치하는 사업자 검증 성공 기록 및 유효시간 확인
+        businessVerificationSessionService.requireVerifiedBusiness(request.getBusinessNumber(),
                 request.getRepresentativeName(),
-                request.getOpenedOn()
-        );
-
-        if (verificationStatus == BusinessVerificationStatus.MISMATCHED) {
-            throw new Exception400(
-                    "사업자 정보가 일치하지 않습니다. "
-                            + "사업자등록번호·대표자명·개업일자를 확인해주세요."
-            );
-        }
+                request.getOpenedOn(),
+                session);
 
         String passwordHash = passwordEncoder.encode(request.getPassword());
         FileStorageResult storedFile = fileStorage.upload(request.getBusinessCertificate());
@@ -86,7 +78,7 @@ public class CompanyAuthService {
                 .businessCertificateFileName(storedFile.getStorageKey())
                 .build();
                 company.verifyEmail(verifiedAt);
-                company.recordBusinessVerification(verificationStatus);
+                company.recordBusinessVerification(BusinessVerificationStatus.MATCHED);
                 companyRepository.saveAndFlush(company);
             });
         } catch (RuntimeException | Error failure) {
@@ -98,6 +90,8 @@ public class CompanyAuthService {
             }
             throw failure;
         }
+
+        businessVerificationSessionService.clear(session);
     }
 
     @Transactional(readOnly = true)
@@ -126,20 +120,18 @@ public class CompanyAuthService {
         }
 
         switch (company.getStatus()) {
-            case PENDING ->
-                    throw new Exception403(
-                            "관리자 승인 대기 중인 기업입니다."
-                    );
+            case PENDING -> {
+//                로그인 허용 행사 신청 금지
+            }
 
             case REJECTED ->
                     throw new Exception403(
                             "기업 가입 승인이 거부되었습니다."
                     );
 
-            case FEEDBACK_NEEDED ->
-                    throw new Exception403(
-                            "기업 정보 보완이 필요합니다."
-                    );
+            case FEEDBACK_NEEDED -> {
+//                로그인 허용 행사 신청 금지
+            }
 
             case SUSPENDED ->
                     throw new Exception403(
