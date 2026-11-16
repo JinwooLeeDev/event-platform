@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.event.EventSession;
 import lombok.Data;
+import com.busan.eventplatform.event.EventSession;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
@@ -53,6 +54,7 @@ public class EventResponse {
 
     @Data
     public static class EventDto {
+        private List<SessionPeriodDto> sessionPeriods = List.of();
         private Long id;
         private Long categoryId;
         private String categoryName;
@@ -88,6 +90,20 @@ public class EventResponse {
                 this.applyStartAt = session.getApplyStartAt();
                 this.applyEndAt = session.getApplyEndAt();
             }
+        }
+    }
+
+    @Data
+    public static class SessionPeriodDto {
+        private String name;
+        private String applyStartAt;
+        private String applyEndAt;
+
+        public SessionPeriodDto(EventSession session) {
+            var format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+            this.name = session.getName();
+            this.applyStartAt = session.getApplyStartAt().format(format);
+            this.applyEndAt = session.getApplyEndAt().format(format);
         }
     }
 

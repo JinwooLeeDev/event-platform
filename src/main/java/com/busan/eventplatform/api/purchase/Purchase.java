@@ -35,7 +35,7 @@ public class Purchase {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eventSession_id" , nullable = false)
-    private EventSession eventSession;
+    private EventSession eventSession; // 유저가 재신청할 우려가 있으므로 user와 unique는 걸지말자.
 
     @CreationTimestamp
     private Timestamp purchasedAt;

@@ -13,6 +13,9 @@ import java.util.List;
 
 public interface EventSessionRepository extends JpaRepository<EventSession, Long> {
 
+    @Query("select s from EventSession s where s.event.id in :eventIds order by s.startsAt asc, s.id asc")
+    List<EventSession> findAllByEventIds(@Param("eventIds") List<Long> eventIds);
+
     // 행사 ID별 회차 목록 조회
     @Query("""
             select s from EventSession s

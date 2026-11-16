@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -105,28 +106,9 @@ public class EventService {
         eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
                 keyword == null ? "" : keyword.trim(), pageable);
 
-        // 현재 페이지에 있는 행사 ID 추출
-        List<Long> eventIds = eventPage.getContent().stream()
-                .map(Event::getId)
-                .toList();
-
-        // 행사별 첫 번째 회차 저장
-        Map<Long, EventSession> firstSessionByEventId = new HashMap<>();
-
-        if (!eventIds.isEmpty()) {
-            List<EventSession> sessions =
-                    eventSessionRepository.findAllByEventIds(eventIds);
-
-            for (EventSession session : sessions) {
-                firstSessionByEventId.putIfAbsent(
-                        session.getEvent().getId(),
-                        session
-                );
-            }
-        }
-
-// 행사와 회차 정보를 DTO에 전달
-        return new EventResponse.PageDto(eventPage, firstSessionByEventId);
+        var response = new EventResponse.PageDto(eventPage);
+        populateSessionPeriods(response.getEventList());
+        return response;
     }
 
     // 행사 상세 조회 기능
@@ -275,6 +257,18 @@ public class EventService {
     /// 각 행사마다 갖고있는 회차 수 추가.
     public EventResponse.ListDto findAllByCompanyId(Long companyId) {
         List<Event> eventList = eventRepository.findAllByCompanyId(companyId);
-        return new EventResponse.ListDto(eventList);
+        var response = new EventResponse.ListDto(eventList);
+        populateSessionPeriods(response.getEventList());
+        return response;
+    }
+
+    private void populateSessionPeriods(List<EventResponse.EventDto> events) {
+        if (events.isEmpty()) return;
+        var sessions = eventSessionRepository.findAllByEventIds(
+                events.stream().map(EventResponse.EventDto::getId).toList());
+        var byEvent = sessions.stream().collect(Collectors.groupingBy(
+                session -> session.getEvent().getId(),
+                Collectors.mapping(EventResponse.SessionPeriodDto::new, Collectors.toList())));
+        events.forEach(event -> event.setSessionPeriods(byEvent.getOrDefault(event.getId(), List.of())));
     }
 }

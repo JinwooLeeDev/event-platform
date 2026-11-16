@@ -2,14 +2,12 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -82,7 +80,12 @@ public class Event {
         return this.company.getId().equals(companyId);
     }
 
-    public boolean isPaidStatus() {return this.getStatus() == EventStatus.PAID_READY;}
-    public boolean isPendingStatus() {return this.getStatus() == EventStatus.PENDING_REVIEW;}
+    public boolean isPaidStatus() {
+        return this.getStatus() == EventStatus.PAID_READY;
+    }
+
+    public boolean isPendingStatus() {
+        return this.getStatus() == EventStatus.PENDING_REVIEW;
+    }
 
 }
