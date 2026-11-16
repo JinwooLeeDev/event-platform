@@ -1,27 +1,20 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategoryService;
 import com.busan.eventplatform.event.event_file.EventFileService;
 import com.busan.eventplatform.event.event_session.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception400;
-import com.busan.eventplatform.global.error.exception.Exception403;
-import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
-import com.busan.eventplatform.event.event_category.EventCategoryService;
-import com.busan.eventplatform.event.event_session.EventSessionService;
-import com.busan.eventplatform.event.event_session.EventSessionResponse;
-import java.util.Map;
-import java.util.Objects;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
