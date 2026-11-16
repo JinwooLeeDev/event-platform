@@ -1,280 +1,342 @@
------------------------------- Company테이블----------------------------------------
--- Company 테이블: 개발용 더미 데이터
--- 로컬 확인용 비밀번호는 1234이며 BCrypt 해시로 저장합니다.
-INSERT INTO company_tb (
-    name,
-    email,
-    password,
-    business_number,
-    representative_name,
-    opened_on,
-    address,
-    business_certificate_file_name,
-    contact_person_name,
-    contact_person_phone,
-    status,
-    point,
-    created_at
-)
-VALUES
-(
-    '부산문화재단',
-    'company1@example.test',
-    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
-    '0000000001',
-    '가상대표1',
-    '2020-01-01',
-    '부산광역시 남구 가상로 1',
-    NULL,
-    '더미담당1',
-    '010-0000-0001',
-    'APPROVED',
-    500000,
-    CURRENT_TIMESTAMP
-),
-(
-    '해운대이벤트',
-    'company2@example.test',
-    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
-    '0000000002',
-    '가상대표2',
-    '2021-02-01',
-    '부산광역시 해운대구 가상로 2',
-    NULL,
-    '더미담당2',
-    '010-0000-0002',
-    'PENDING',
-    100000,
-    CURRENT_TIMESTAMP
-),
-(
-    '부산페스티벌',
-    'company3@example.test',
-    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
-    '0000000003',
-    '가상대표3',
-    '2022-03-01',
-    '부산광역시 부산진구 가상로 3',
-    NULL,
-    '더미담당3',
-    '010-0000-0003',
-    'APPROVED',
-    300000,
-    CURRENT_TIMESTAMP
-),
-(
-    '광안리축제기획',
-    'company4@example.test',
-    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
-    '0000000004',
-    '가상대표4',
-    '2023-04-01',
-    '부산광역시 수영구 가상로 4',
-    NULL,
-    '더미담당4',
-    '010-0000-0004',
-    'APPROVED',
-    400000,
-    CURRENT_TIMESTAMP
-),
-(
-    '부산공연기획사',
-    'company5@example.test',
-    '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G',
-    '0000000005',
-    '가상대표5',
-    '2024-05-01',
-    '부산광역시 동래구 가상로 5',
-    NULL,
-    '더미담당5',
-    '010-0000-0005',
-    'PENDING',
-    150000,
-    CURRENT_TIMESTAMP
-);
-
------------------------------- User테이블----------------------------------------
--- 로컬 확인용 계정의 비밀번호는 1234입니다. BCrypt 해시로 저장합니다.
-INSERT INTO users(display_name, role, email_normalized, point , password_hash, status, preferred_locale, email_verified_at, created_at)
-VALUES
-    ('관리자', 'ADMIN', 'admin@busan.com', 10000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('김민수', 'MEMBER', 'minsu@naver.com', 0 ,'$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('이서연', 'MEMBER', 'seoyeon@naver.com', 40000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('박지훈', 'MEMBER', 'jihun@naver.com', 70000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('최유진', 'MEMBER', 'yujin@naver.com', 150000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('정현우', 'MEMBER', 'hyunwoo@naver.com', 25000 , '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- 개발 전용: 현재 JPA 엔티티 15개 테이블의 예시 데이터.
+-- 빈 스키마에서 1회 실행합니다. 기존 데이터 삭제/갱신, FK 검사 해제는 하지 않습니다.
+-- MySQL 8 / H2용 TIMESTAMPADD 문법. PostgreSQL용 SQL이 아닙니다.
+-- 모든 예시 비밀번호는 1234 (BCrypt). 실사용 계정/결제/사업자번호가 아닙니다.
+-- 관리자: seed36.admin@example.test / 일반회원: seed36.member5@example.test
+-- 승인 기업: company1@example.test / 심사 대상: company4@example.test, company8@example.test
+-- 날짜는 실행 시점 기준 상대값. 잔액은 화면용 스냅샷이며 과거 거래 전체의 원장은 아닙니다.
+-- 신청 PENDING은 이전 승인제 상태를 표시하기 위한 호환성 예시입니다.
+-- 파일/등록증은 메타데이터만 존재합니다. 실제 파일 다운로드를 위한 파일 생성은 하지 않습니다.
+-- ID 36001번부터 사용합니다. 이 파일은 재실행용 UPSERT가 아닙니다.
 
 
------------------------------- event_category테이블----------------------------------------
+-- 01 회원
+INSERT INTO users (id, display_name, role, email_normalized, point, password_hash, status, preferred_locale, email_verified_at, withdrawn_at, created_at) VALUES
+                                                                                                                                                              (36001, '예시관리자', 'ADMIN', 'seed36.admin@example.test', 101000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1536, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36002, '예시회원02', 'MEMBER', 'seed36.member2@example.test', 102000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1512, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36003, '예시회원03', 'MEMBER', 'seed36.member3@example.test', 103000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1488, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36004, '예시회원04', 'MEMBER', 'seed36.member4@example.test', 104000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1464, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36005, '예시회원05', 'MEMBER', 'seed36.member5@example.test', 105000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36006, '예시회원06', 'MEMBER', 'seed36.member6@example.test', 106000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1416, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36007, '예시회원07', 'MEMBER', 'seed36.member7@example.test', 107000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1392, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36008, '예시회원08', 'MEMBER', 'seed36.member8@example.test', 108000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1368, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36009, '예시회원09', 'MEMBER', 'seed36.member9@example.test', 109000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1344, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36010, '예시회원10', 'MEMBER', 'seed36.member10@example.test', 110000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1320, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36011, '예시회원11', 'MEMBER', 'seed36.member11@example.test', 111000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1296, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36012, '예시회원12', 'MEMBER', 'seed36.member12@example.test', 112000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1272, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36013, '예시회원13', 'MEMBER', 'seed36.member13@example.test', 113000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1248, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36014, '예시회원14', 'MEMBER', 'seed36.member14@example.test', 114000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1224, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36015, '예시회원15', 'MEMBER', 'seed36.member15@example.test', 115000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1200, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36016, '예시회원16', 'MEMBER', 'seed36.member16@example.test', 116000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1176, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36017, '예시회원17', 'MEMBER', 'seed36.member17@example.test', 117000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1152, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36018, '예시회원18', 'MEMBER', 'seed36.member18@example.test', 118000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1128, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36019, '예시회원19', 'MEMBER', 'seed36.member19@example.test', 119000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1104, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36020, '예시회원20', 'MEMBER', 'seed36.member20@example.test', 120000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1080, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36021, '예시회원21', 'MEMBER', 'seed36.member21@example.test', 121000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1056, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36022, '예시회원22', 'MEMBER', 'seed36.member22@example.test', 122000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1032, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36023, '예시회원23', 'MEMBER', 'seed36.member23@example.test', 123000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -1008, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36024, '예시회원24', 'MEMBER', 'seed36.member24@example.test', 0, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -984, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36025, '예시회원25', 'MEMBER', 'seed36.member25@example.test', 125000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'SUSPENDED', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36026, '예시회원26', 'MEMBER', 'seed36.member26@example.test', 126000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'SUSPENDED', 'en', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -936, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36027, '예시회원27', 'MEMBER', 'seed36.member27@example.test', 0, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'WITHDRAWN', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -72, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -912, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36028, '예시회원28', 'MEMBER', 'seed36.member28@example.test', 0, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'WITHDRAWN', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -72, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -888, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36029, '<테스트> O''Neil', 'MEMBER', 'seed36.member29@example.test', 129000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ko', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -864, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36030, '예시회원30', 'MEMBER', 'seed36.member30@example.test', 130000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'en', NULL, NULL, TIMESTAMPADD(HOUR, -840, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36031, '예시회원31', 'MEMBER', 'seed36.member31@example.test', 131000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'ja', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -816, CURRENT_TIMESTAMP)),
+                                                                                                                                                              (36032, '예시회원32', 'MEMBER', 'seed36.member32@example.test', 132000, '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', 'ACTIVE', 'zh-CN', TIMESTAMPADD(HOUR, -960, CURRENT_TIMESTAMP), NULL, TIMESTAMPADD(HOUR, -792, CURRENT_TIMESTAMP));
+
+
+-- 02 기업
+INSERT INTO company_tb (id, name, email, password, business_number, representative_name, opened_on, address, business_certificate_file_name, contact_person_name, contact_person_phone, status, point, created_at, business_verification_status, email_verified_at, review_feedback) VALUES
+                                                                                                                                                                                                                                                                                         (36001, '예시주최기업1', 'company1@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036001', '가상대표1', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000001.pdf', '담당자1', '010-3600-0001', 'APPROVED', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MATCHED', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), NULL),
+                                                                                                                                                                                                                                                                                         (36002, '예시주최기업2', 'company2@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036002', '가상대표2', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000002.pdf', '담당자2', '010-3600-0002', 'APPROVED', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MATCHED', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), NULL),
+                                                                                                                                                                                                                                                                                         (36003, '예시주최기업3', 'company3@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036003', '가상대표3', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000003.pdf', '담당자3', '010-3600-0003', 'APPROVED', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MATCHED', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), NULL),
+                                                                                                                                                                                                                                                                                         (36004, '예시주최기업4', 'company4@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036004', '가상대표4', '2020-01-01', '부산광역시 해운대구 APEC로 55', NULL, '담당자4', '010-3600-0004', 'PENDING', 0, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MATCHED', NULL, NULL),
+                                                                                                                                                                                                                                                                                         (36005, '예시주최기업5', 'company5@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036005', '가상대표5', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000005.pdf', '담당자5', '010-3600-0005', 'REJECTED', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MISMATCHED', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), NULL),
+                                                                                                                                                                                                                                                                                         (36006, '예시주최기업6', 'company6@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036006', '가상대표6', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000006.pdf', '담당자6', '010-3600-0006', 'FEEDBACK_NEEDED', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MISMATCHED', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), '사업자 정보와 증빙을 보완해주세요.'),
+                                                                                                                                                                                                                                                                                         (36007, '예시주최기업7', 'company7@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036007', '가상대표7', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000007.pdf', '담당자7', '010-3600-0007', 'SUSPENDED', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'MATCHED', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), NULL),
+                                                                                                                                                                                                                                                                                         (36008, '예시주최기업8', 'company8@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036008', '가상대표8', '2020-01-01', '부산광역시 해운대구 APEC로 55', 'files/00000000-0000-4000-8000-000000000008.pdf', '담당자8', '010-3600-0008', 'PENDING', 500000, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'ERROR', TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), NULL),
+                                                                                                                                                                                                                                                                                         (36009, '검증 전 예시기업', 'company9@example.test', '$2a$10$qqSYOXRVGAbe.uzf/0lAI.M.2i2japKDA7x/t05IFOrF0DkyuIs1G', '9900036009', '가상대표4', '2020-01-01', '부산광역시 해운대구 APEC로 55', NULL, '담당자4', '010-3600-0004', 'PENDING', 0, TIMESTAMPADD(HOUR, -1440, CURRENT_TIMESTAMP), 'NOT_CHECKED', NULL, NULL);
+
+
+-- 03 기업 심사 이력
+INSERT INTO company_review_history (id, company_id, reviewer_id, from_status, to_status, feedback, created_at) VALUES
+                                                                                                                   (36001, 36001, 36001, 'PENDING', 'APPROVED', NULL, TIMESTAMPADD(HOUR, -1200, CURRENT_TIMESTAMP)),
+                                                                                                                   (36002, 36002, 36001, 'PENDING', 'APPROVED', NULL, TIMESTAMPADD(HOUR, -1200, CURRENT_TIMESTAMP)),
+                                                                                                                   (36003, 36003, 36001, 'PENDING', 'APPROVED', NULL, TIMESTAMPADD(HOUR, -1200, CURRENT_TIMESTAMP)),
+                                                                                                                   (36004, 36006, 36001, 'PENDING', 'FEEDBACK_NEEDED', '사업자 정보와 증빙을 보완해주세요.', TIMESTAMPADD(HOUR, -1200, CURRENT_TIMESTAMP));
+
+
+-- 04 행사 카테고리
 INSERT INTO event_category_tb (id, name) VALUES
-    (1, '공연'),
-    (2, '음식/축제'),
-    (3, '문화/전시');
+                                             (36001, '팝업'),
+                                             (36002, '전시'),
+                                             (36003, '문화행사'),
+                                             (36004, '체험'),
+                                             (36005, '특강'),
+                                             (36006, '봉사'),
+                                             (36007, '교류');
 
 
+-- 신청 데이터 흐름
+-- 회차 있음: 입력한 회차별 일정·정원·참가비를 저장합니다.
+-- 회차 없음: 기본 회차 1개, 정원 2147483647, 점유 시간 0, 최소 인원 1,
+--            시작일 00:00:00 / 종료일 23:59:59, 최소 인원 확인 시점=종료일시입니다.
+-- PENDING_REVIEW / FEEDBACK_REQUIRED / PAID_READY: 행사·회차·대표 이미지 메타데이터만 있고 보증금은 없습니다.
+-- PUBLISHED: 보증금 결제 성공 후 deposit_tb(PAID)가 생기며 공개일시가 기록됩니다.
+-- 수정 후 재심사 요청: 기존 행사·회차를 유지하고 PENDING_REVIEW, feedback_message=NULL로 돌아갑니다.
+-- 결제 실패·잔액 부족: PAID_READY를 유지하고 보증금 레코드는 생성하지 않습니다.
+-- 화면 확인: company1=회차별 심사 대기/기본 회차 심사 대기/보완 요청/기본 회차 결제 대기,
+--            company2=기본 회차 보완 요청/재심사 대기, company3=회차별 결제 대기.
 
--- ------------------------------ event 테이블 ----------------------------------------
-
-INSERT INTO events (
-    company_id,
-    category_id,
-    address,
-    title,
-    summary,
-    status,
-    description,
-    published_at,
-    cancelled_at,
-    cancellation_reason,
-    feedback_message,
-    created_at
-) VALUES
-      (
-          1,
-          1,
-          '부산광역시 해운대구 APEC로 55',
-          '2026 부산 겨울 콘서트',
-          '부산에서 즐기는 겨울 음악 축제',
-          'PUBLISHED',
-          '다양한 아티스트들이 참여하는 겨울 콘서트입니다.',
-          '2026-11-09 10:00:00',
-          NULL,
-          NULL,
-          NULL,
-          NOW()
-      ),
-      (
-          2,
-          2,
-          '부산광역시 부산진구 중앙대로 708',
-          '부산 푸드 페스티벌',
-          '부산의 다양한 음식을 즐기는 축제',
-          'PUBLISHED',
-          '부산의 대표 음식과 다양한 먹거리를 체험할 수 있습니다.',
-          '2026-11-09 10:00:00',
-          NULL,
-          NULL,
-          NULL,
-          NOW()
-      ),
-      (
-          3,
-          3,
-          '부산광역시 수영구 광안해변로 219',
-          '2026 부산 문화 예술 전시회',
-          '다양한 예술 작품을 감상하는 문화 행사',
-          'PENDING_REVIEW',
-          '지역 예술가들의 작품을 전시하고 체험하는 행사입니다.',
-          NULL,
-          NULL,
-          NULL,
-          NULL,
-          NOW()
-      );
+-- 05 행사
+-- 모집 기간은 event_sessions에서 관리하므로 events INSERT에서 제외
+INSERT INTO events (id, company_id, category_id, address, title, summary, status, description, published_at, cancelled_at, cancellation_reason, feedback_message, created_at) VALUES
+(36001, 36002, 36002, '부산광역시 수영구 광안해변로 219', '모집 중 무료·유료 복합 행사', '[예시36-01] 모집 중 무료·유료 복합 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36002, 36003, 36003, '부산광역시 부산진구 중앙대로 708', '모집 시작 전 행사', '[예시36-02] 모집 시작 전 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36003, 36001, 36004, '부산광역시 해운대구 APEC로 55', '모집 마감 행사', '[예시36-03] 모집 마감 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36004, 36002, 36005, '부산광역시 수영구 광안해변로 219', '종료된 전시·특강', '[예시36-04] 종료된 전시·특강', 'COMPLETED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36005, 36003, 36006, '부산광역시 부산진구 중앙대로 708', '주최자 취소 행사', '[예시36-05] 주최자 취소 행사', 'CANCELLED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), '주최 측 사정으로 취소', NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36006, 36001, 36001, '부산광역시 해운대구 APEC로 55', '신규 심사 대기 행사', '[예시36-06] 신규 심사 대기 행사', 'PENDING_REVIEW', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', NULL, NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36007, 36002, 36002, '부산광역시 수영구 광안해변로 219', '보완 요청 행사', '[예시36-07] 보완 요청 행사', 'FEEDBACK_REQUIRED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', NULL, NULL, NULL, '장소 안내와 참가 조건을 보완해주세요.', TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36008, 36003, 36003, '부산광역시 부산진구 중앙대로 708', '오늘 개최 및 최소 인원 주의 행사', '[예시36-08] 오늘 개최 및 최소 인원 주의 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36009, 36001, 36004, '부산광역시 해운대구 APEC로 55', '최소 개최 인원 충족 행사', '[예시36-09] 최소 개최 인원 충족 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36010, 36002, 36005, '부산광역시 수영구 광안해변로 219', '회차 없는 무료 행사·기본 회차 공개', '[예시36-10] 회차 없는 무료 행사·기본 회차 공개', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36011, 36003, 36006, '부산광역시 부산진구 중앙대로 708', '신청자가 없는 유료 행사', '[예시36-11] 신청자가 없는 유료 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36012, 36001, 36001, '부산광역시 해운대구 APEC로 55', '대표 이미지 연결 전시', '대표 이미지 1개 연결 확인용 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36013, 36002, 36002, '부산광역시 수영구 광안해변로 219', '무료·예약금 회차 행사', '[예시36-13] 무료·예약금 회차 행사', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36014, 36003, 36003, '부산광역시 부산진구 중앙대로 708', '회차 없는 유료 행사·모집 마감', '[예시36-14] 회차 없는 유료 행사·모집 마감', 'PUBLISHED', '개발 화면 확인용 행사입니다. 실제 모집하지 않습니다.\n일정·장소·비용을 확인해주세요. O''Neil & Busan <문화> 🎨', TIMESTAMPADD(HOUR, -500, CURRENT_TIMESTAMP), NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36015, 36003, 36005, '부산광역시 해운대구 APEC로 55', '기업 보증금 결제 대기 특강', '승인 후 보증금 결제를 확인하는 행사', 'PAID_READY', '개발용 보증금 결제 예시입니다.', NULL, NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36016, 36001, 36001, '부산광역시 해운대구 APEC로 55', '회차 없는 무료 행사·신규 심사 대기', '회차 없는 무료 행사·신규 심사 대기', 'PENDING_REVIEW', '기업 주최 신청 분기 확인용 더미입니다.', NULL, NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36017, 36001, 36002, '부산광역시 해운대구 APEC로 55', '회차별 행사·보완 요청', '회차별 행사·보완 요청', 'FEEDBACK_REQUIRED', '기업 주최 신청 분기 확인용 더미입니다.', NULL, NULL, NULL, '모집 일정과 행사 안내 문구를 보완해주세요.', TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36018, 36001, 36003, '부산광역시 해운대구 APEC로 55', '회차 없는 유료 행사·보증금 결제 대기', '회차 없는 유료 행사·보증금 결제 대기', 'PAID_READY', '기업 주최 신청 분기 확인용 더미입니다.', NULL, NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP)),
+(36019, 36002, 36004, '부산광역시 해운대구 APEC로 55', '수정 후 재심사 대기 행사', '수정 후 재심사 대기 행사', 'PENDING_REVIEW', '기업 주최 신청 분기 확인용 더미입니다.', NULL, NULL, NULL, NULL, TIMESTAMPADD(HOUR, -720, CURRENT_TIMESTAMP));
 
 
--- ------------------------------ event_sessions 테이블 ----------------------------------------
+-- 06 회차
+-- 모집 기간은 각 회차에 저장
+INSERT INTO event_sessions (id, event_id, name, starts_at, ends_at, apply_start_at, apply_end_at, capacity, occupied_count, next_reception_number, hold_duration_seconds, pricing_type, fee, reservation_deposit_points, minimum_participants, minimum_check_at, status, created_at) VALUES
+(36001, 36001, '무료 여유·대기 승격·재신청', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 4, 3, 5, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36002, 36001, '유료 여유·승인 대기·반려', TIMESTAMPADD(HOUR, 192, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 194, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 4, 2, 5, 300, 'PAID', 5000, 0, 2, TIMESTAMPADD(HOUR, 190, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36003, 36001, '무료 만석·대기열', TIMESTAMPADD(HOUR, 216, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 218, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2, 2, 5, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, 214, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36004, 36001, '유료 만석·대기열', TIMESTAMPADD(HOUR, 240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 242, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2, 2, 4, 300, 'PAID', 7000, 0, 2, TIMESTAMPADD(HOUR, 238, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36005, 36002, '모집 시작 전 회차', TIMESTAMPADD(HOUR, 144, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 146, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 48, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 96, CURRENT_TIMESTAMP), 5, 0, 1, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, 142, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36006, 36003, '모집 마감 회차', TIMESTAMPADD(HOUR, 24, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 26, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 5, 1, 2, 300, 'PAID', 3000, 0, 2, TIMESTAMPADD(HOUR, 22, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36007, 36004, '종료 무료·출석·미출석', TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -118, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -144, CURRENT_TIMESTAMP), 4, 3, 4, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, -122, CURRENT_TIMESTAMP), 'COMPLETED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36008, 36004, '종료 유료·출석·미출석', TIMESTAMPADD(HOUR, -96, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -94, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -144, CURRENT_TIMESTAMP), 3, 2, 3, 300, 'PAID', 8000, 0, 2, TIMESTAMPADD(HOUR, -98, CURRENT_TIMESTAMP), 'COMPLETED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36009, 36005, '행사 취소·반환 대기', TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 122, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -288, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 4, 0, 3, 300, 'PAID', 2000, 0, 2, TIMESTAMPADD(HOUR, 118, CURRENT_TIMESTAMP), 'CANCELLED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36010, 36008, '오늘 진행 중', TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 1, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP), 3, 2, 3, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, -3, CURRENT_TIMESTAMP), 'IN_PROGRESS', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36011, 36008, '오늘 최소 인원 미달', TIMESTAMPADD(HOUR, 3, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 5, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP), 5, 1, 2, 300, 'FREE', 0, 0, 3, TIMESTAMPADD(HOUR, 1, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36012, 36009, '최소 인원 정확히 충족', TIMESTAMPADD(HOUR, 24, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 26, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP), 3, 2, 3, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, 22, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36013, 36001, '행사 유지·개별 회차 취소', TIMESTAMPADD(HOUR, 264, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 266, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2, 0, 2, 300, 'FREE', 0, 0, 1, TIMESTAMPADD(HOUR, 262, CURRENT_TIMESTAMP), 'CANCELLED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36014, 36011, '신청 0건·기업 포인트 거래', TIMESTAMPADD(HOUR, 192, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 194, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 10, 0, 1, 300, 'PAID', 10000, 0, 2, TIMESTAMPADD(HOUR, 190, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36015, 36013, '무료·예약금 별도', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 5, 1, 2, 300, 'FREE', 0, 1000, 1, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36016, 36012, '첨부파일 행사 회차', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -120, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 10, 0, 1, 300, 'FREE', 0, 0, 1, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36017, 36015, '보증금 결제 대기 회차', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 48, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 144, CURRENT_TIMESTAMP), 10, 0, 1, 300, 'FREE', 0, 0, 2, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36018, 36003, '2일 전 취소·부분 반환', TIMESTAMPADD(HOUR, 24, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 26, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 5, 0, 2, 300, 'PAID', 9000, 0, 1, TIMESTAMPADD(HOUR, 22, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36019, 36006, '심사 대기 무료 회차', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 30, 0, 1, 300, 'FREE', 0, 0, 1, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36020, 36006, '심사 대기 유료 회차', TIMESTAMPADD(HOUR, 192, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 194, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 30, 0, 1, 300, 'PAID', 5000, 0, 1, TIMESTAMPADD(HOUR, 190, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36021, 36007, '기본 회차', TIMESTAMPADD(DAY, 7, CURRENT_DATE), TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2147483647, 0, 1, 0, 'PAID', 6000, 0, 1, TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36022, 36010, '기본 회차', TIMESTAMPADD(DAY, 7, CURRENT_DATE), TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2147483647, 0, 1, 0, 'FREE', 0, 0, 1, TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36023, 36014, '기본 회차', TIMESTAMPADD(DAY, 1, CURRENT_DATE), TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 3, CURRENT_DATE)), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 2147483647, 0, 1, 0, 'PAID', 4000, 0, 1, TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 3, CURRENT_DATE)), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36024, 36016, '기본 회차', TIMESTAMPADD(DAY, 7, CURRENT_DATE), TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2147483647, 0, 1, 0, 'FREE', 0, 0, 1, TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36025, 36017, '보완 요청 1회차', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 30, 0, 1, 300, 'FREE', 0, 0, 1, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36026, 36017, '보완 요청 2회차', TIMESTAMPADD(HOUR, 192, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 194, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 30, 0, 1, 300, 'PAID', 3000, 0, 1, TIMESTAMPADD(HOUR, 190, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36027, 36018, '기본 회차', TIMESTAMPADD(DAY, 7, CURRENT_DATE), TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 2147483647, 0, 1, 0, 'PAID', 7000, 0, 1, TIMESTAMPADD(SECOND, -1, TIMESTAMPADD(DAY, 9, CURRENT_DATE)), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP)),
+(36028, 36019, '재심사 요청 회차', TIMESTAMPADD(HOUR, 168, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 170, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, 120, CURRENT_TIMESTAMP), 30, 0, 1, 300, 'FREE', 0, 0, 1, TIMESTAMPADD(HOUR, 166, CURRENT_TIMESTAMP), 'SCHEDULED', TIMESTAMPADD(HOUR, -600, CURRENT_TIMESTAMP));
 
-INSERT INTO event_sessions (
-    capacity,
-    name,
-    event_id,
-    apply_start_at,
-    apply_end_at,
-    starts_at,
-    ends_at,
-    occupied_count,
-    next_reception_number,
-    hold_duration_seconds,
-    pricing_type,
-    fee,
-    reservation_deposit_points,
-    minimum_participants,
-    minimum_check_at,
-    status,
-    created_at
-) VALUES
 
--- 1번 행사: 부산 겨울 콘서트
-(
-    100,
-    '1회차 - 오후 공연',
-    1,
-    '2026-11-10 09:00:00',
-    '2026-12-10 18:00:00',
-    '2026-12-20 14:00:00',
-    '2026-12-20 16:00:00',
-    0, 1, 300, 'PAID', 25000, 0, 30,
-    '2026-12-15 09:00:00',
-    'SCHEDULED',
-    NOW()
-),
-(
-    100,
-    '2회차 - 저녁 공연',
-    1,
-    '2026-11-10 09:00:00',
-    '2026-12-10 18:00:00',
-    '2026-12-20 19:00:00',
-    '2026-12-20 21:00:00',
-    0, 1, 300, 'PAID', 30000, 0, 30,
-    '2026-12-15 09:00:00',
-    'SCHEDULED',
-    NOW()
-),
+-- 07 기업 보증금
+-- 결제 대기 행사(36015, 36018)에는 아직 보증금 행을 넣지 않습니다. 결제 성공 시 애플리케이션에서 생성합니다.
+INSERT INTO deposit_tb (id, company_id, event_session_id, status, amount, paid_at) VALUES
+(36001, 36002, 36001, 'PAID', 750000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36002, 36003, 36002, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36003, 36001, 36003, 'PAID', 300000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36004, 36002, 36004, 'PAID', 300000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36005, 36003, 36005, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36006, 36003, 36008, 'PAID', 300000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36007, 36001, 36009, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36008, 36003, 36011, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36009, 36001, 36012, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36010, 36002, 36013, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36011, 36002, 36010, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP)),
+(36012, 36003, 36014, 'PAID', 150000, TIMESTAMPADD(HOUR, -510, CURRENT_TIMESTAMP));
 
--- 2번 행사: 부산 푸드 페스티벌
-(
-    200,
-    '1회차 - 오전 입장',
-    2,
-    '2026-11-15 09:00:00',
-    '2026-12-15 18:00:00',
-    '2026-12-25 10:00:00',
-    '2026-12-25 13:00:00',
-    0, 1, 300, 'PAID', 10000, 0, 50,
-    '2026-12-20 09:00:00',
-    'SCHEDULED',
-    NOW()
-),
-(
-    200,
-    '2회차 - 오후 입장',
-    2,
-    '2026-11-15 09:00:00',
-    '2026-12-15 18:00:00',
-    '2026-12-25 14:00:00',
-    '2026-12-25 17:00:00',
-    0, 1, 300, 'PAID', 15000, 0, 50,
-    '2026-12-20 09:00:00',
-    'SCHEDULED',
-    NOW()
-),
 
--- 3번 행사: 부산 문화 예술 전시회
-(
-    80,
-    '1회차 - 오전 관람',
-    3,
-    '2026-12-01 09:00:00',
-    '2026-12-20 18:00:00',
-    '2026-12-28 10:00:00',
-    '2026-12-28 12:00:00',
-    0, 1, 300, 'FREE', 0, 0, 10,
-    '2026-12-23 09:00:00',
-    'SCHEDULED',
-    NOW()
-),
-(
-    80,
-    '2회차 - 오후 관람',
-    3,
-    '2026-12-01 09:00:00',
-    '2026-12-20 18:00:00',
-    '2026-12-28 14:00:00',
-    '2026-12-28 16:00:00',
-    0, 1, 300, 'FREE', 0, 0, 10,
-    '2026-12-23 09:00:00',
-    'SCHEDULED',
-    NOW()
-);
+-- 08 개인/기업 충전
+INSERT INTO payment_tb (id, user_id, company_id, status, amount, paid_at, payment_id) VALUES
+                                                                                          (36001, 36021, NULL, 'READY', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_READY'),
+                                                                                          (36002, 36022, NULL, 'PAID', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_PAID'),
+                                                                                          (36003, 36023, NULL, 'CANCELED', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_CANCELED'),
+                                                                                          (36004, NULL, 36001, 'READY', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_READY'),
+                                                                                          (36005, NULL, 36002, 'PAID', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_PAID'),
+                                                                                          (36006, NULL, 36003, 'CANCELED', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_CANCELED');
+
+
+-- 09 개인 참가비 구매
+INSERT INTO purchase_tb (id, user_id, company_id, event_session_id, purchased_at, price, status) VALUES
+                                                                                                     (36001, 36002, NULL, 36001, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36002, 36003, NULL, 36001, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36003, 36004, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+                                                                                                     (36004, 36005, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+                                                                                                     (36005, 36006, NULL, 36003, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36006, 36007, NULL, 36003, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36007, 36008, NULL, 36003, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36008, 36009, NULL, 36003, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36009, 36010, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
+                                                                                                     (36010, 36011, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
+                                                                                                     (36011, 36012, NULL, 36004, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 7000, 'PURCHASED'),
+                                                                                                     (36012, 36013, NULL, 36006, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 3000, 'PURCHASED'),
+                                                                                                     (36013, 36002, NULL, 36007, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36014, 36003, NULL, 36007, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36015, 36004, NULL, 36007, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36016, 36005, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000, 'PURCHASED'),
+                                                                                                     (36017, 36006, NULL, 36008, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 8000, 'PURCHASED'),
+                                                                                                     (36018, 36007, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'PURCHASED'),
+                                                                                                     (36019, 36008, NULL, 36009, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 2000, 'REFUNDED'),
+                                                                                                     (36020, 36009, NULL, 36010, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36021, 36010, NULL, 36010, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36022, 36011, NULL, 36011, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36023, 36012, NULL, 36012, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36024, 36013, NULL, 36012, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36025, 36014, NULL, 36013, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'REFUNDED'),
+                                                                                                     (36026, 36014, NULL, 36015, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36027, 36015, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'PURCHASED'),
+                                                                                                     (36028, 36016, NULL, 36002, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 5000, 'REFUNDED'),
+                                                                                                     (36029, 36017, NULL, 36001, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), 0, 'REFUNDED'),
+                                                                                                     (36030, 36017, NULL, 36001, TIMESTAMPADD(HOUR, -23, CURRENT_TIMESTAMP), 0, 'PURCHASED'),
+                                                                                                     (36031, 36018, NULL, 36018, TIMESTAMPADD(HOUR, -100, CURRENT_TIMESTAMP), 9000, 'REFUNDED');
+
+
+-- 10 신청
+INSERT INTO registrations (id, user_id, event_session_id, status, reception_number, created_at, updated_at, purchase_id) VALUES
+                                                                                                                             (36001, 36002, 36001, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36001),
+                                                                                                                             (36002, 36003, 36001, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36002),
+                                                                                                                             (36003, 36004, 36002, 'PENDING', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36003),
+                                                                                                                             (36004, 36005, 36002, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36004),
+                                                                                                                             (36005, 36006, 36003, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36005),
+                                                                                                                             (36006, 36007, 36003, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36006),
+                                                                                                                             (36007, 36008, 36003, 'WAITING', 3, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36007),
+                                                                                                                             (36008, 36009, 36003, 'WAITING', 4, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36008),
+                                                                                                                             (36009, 36010, 36004, 'PENDING', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36009),
+                                                                                                                             (36010, 36011, 36004, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36010),
+                                                                                                                             (36011, 36012, 36004, 'WAITING', 3, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36011),
+                                                                                                                             (36012, 36013, 36006, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36012),
+                                                                                                                             (36013, 36002, 36007, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -121, CURRENT_TIMESTAMP), 36013),
+                                                                                                                             (36014, 36003, 36007, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -121, CURRENT_TIMESTAMP), 36014),
+                                                                                                                             (36015, 36004, 36007, 'CONFIRMED', 3, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -121, CURRENT_TIMESTAMP), 36015),
+                                                                                                                             (36016, 36005, 36008, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -97, CURRENT_TIMESTAMP), 36016),
+                                                                                                                             (36017, 36006, 36008, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -97, CURRENT_TIMESTAMP), 36017),
+                                                                                                                             (36018, 36007, 36009, 'CANCELLED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36018),
+                                                                                                                             (36019, 36008, 36009, 'CANCELLED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36019),
+                                                                                                                             (36020, 36009, 36010, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP), 36020),
+                                                                                                                             (36021, 36010, 36010, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP), 36021),
+                                                                                                                             (36022, 36011, 36011, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36022),
+                                                                                                                             (36023, 36012, 36012, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36023),
+                                                                                                                             (36024, 36013, 36012, 'CONFIRMED', 2, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36024),
+                                                                                                                             (36025, 36014, 36013, 'CANCELLED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36025),
+                                                                                                                             (36026, 36014, 36015, 'CONFIRMED', 1, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36026),
+                                                                                                                             (36027, 36015, 36002, 'CANCELLED', 3, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36027),
+                                                                                                                             (36028, 36016, 36002, 'REJECTED', 4, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36028),
+                                                                                                                             (36029, 36017, 36001, 'CANCELLED', 3, TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36029),
+                                                                                                                             (36030, 36017, 36001, 'CONFIRMED', 4, TIMESTAMPADD(HOUR, -23, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -23, CURRENT_TIMESTAMP), 36030),
+                                                                                                                             (36031, 36018, 36018, 'CANCELLED', 1, TIMESTAMPADD(HOUR, -100, CURRENT_TIMESTAMP), TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP), 36031);
+
+
+-- 11 신청 상태 이력
+INSERT INTO registration_history (id, registration_id, changed_status, processed_by_user_id, reason, created_at) VALUES
+                                                                                                                     (36001, 36001, 'CONFIRMED', 36002, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36002, 36002, 'WAITING', 36003, '참가 신청: 만석 대기', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36003, 36002, 'CONFIRMED', NULL, '선행 대기자 자동 승격', TIMESTAMPADD(HOUR, -239, CURRENT_TIMESTAMP)),
+                                                                                                                     (36004, 36003, 'PENDING', 36004, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36005, 36004, 'PENDING', 36005, '유료 참가 신청: 승인 대기', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36006, 36004, 'CONFIRMED', NULL, '주최자 승인', TIMESTAMPADD(HOUR, -239, CURRENT_TIMESTAMP)),
+                                                                                                                     (36007, 36005, 'CONFIRMED', 36006, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36008, 36006, 'CONFIRMED', 36007, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36009, 36007, 'WAITING', 36008, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36010, 36008, 'WAITING', 36009, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36011, 36009, 'PENDING', 36010, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36012, 36010, 'PENDING', 36011, '유료 참가 신청: 승인 대기', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36013, 36010, 'CONFIRMED', NULL, '주최자 승인', TIMESTAMPADD(HOUR, -239, CURRENT_TIMESTAMP)),
+                                                                                                                     (36014, 36011, 'WAITING', 36012, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36015, 36012, 'PENDING', 36013, '유료 참가 신청: 승인 대기', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36016, 36012, 'CONFIRMED', NULL, '주최자 승인', TIMESTAMPADD(HOUR, -239, CURRENT_TIMESTAMP)),
+                                                                                                                     (36017, 36013, 'CONFIRMED', 36002, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36018, 36014, 'CONFIRMED', 36003, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36019, 36015, 'CONFIRMED', 36004, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36020, 36016, 'PENDING', 36005, '유료 참가 신청: 승인 대기', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36021, 36016, 'CONFIRMED', NULL, '주최자 승인', TIMESTAMPADD(HOUR, -239, CURRENT_TIMESTAMP)),
+                                                                                                                     (36022, 36017, 'PENDING', 36006, '유료 참가 신청: 승인 대기', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36023, 36017, 'CONFIRMED', NULL, '주최자 승인', TIMESTAMPADD(HOUR, -239, CURRENT_TIMESTAMP)),
+                                                                                                                     (36024, 36018, 'PENDING', 36007, '최초 참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36025, 36018, 'CANCELLED', NULL, '행사/회차 취소', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                                     (36026, 36019, 'PENDING', 36008, '최초 참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36027, 36019, 'CANCELLED', NULL, '행사/회차 취소', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                                     (36028, 36020, 'CONFIRMED', 36009, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36029, 36021, 'CONFIRMED', 36010, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36030, 36022, 'CONFIRMED', 36011, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36031, 36023, 'CONFIRMED', 36012, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36032, 36024, 'CONFIRMED', 36013, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36033, 36025, 'CONFIRMED', 36014, '최초 참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36034, 36025, 'CANCELLED', NULL, '행사/회차 취소', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                                     (36035, 36026, 'CONFIRMED', 36014, '참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36036, 36027, 'PENDING', 36015, '최초 참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36037, 36027, 'CANCELLED', 36015, '본인 취소', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                                     (36038, 36028, 'PENDING', 36016, '최초 참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36039, 36028, 'REJECTED', NULL, '주최자 반려 (companyId=36002)', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                                     (36040, 36029, 'CONFIRMED', 36017, '최초 참가 신청', TIMESTAMPADD(HOUR, -240, CURRENT_TIMESTAMP)),
+                                                                                                                     (36041, 36029, 'CANCELLED', 36017, '본인 취소', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                                     (36042, 36030, 'CONFIRMED', 36017, '참가 신청', TIMESTAMPADD(HOUR, -23, CURRENT_TIMESTAMP)),
+                                                                                                                     (36043, 36031, 'CONFIRMED', 36018, '최초 참가 신청', TIMESTAMPADD(HOUR, -100, CURRENT_TIMESTAMP)),
+                                                                                                                     (36044, 36031, 'CANCELLED', 36018, '회차 2일 전 본인 취소·절반 반환', TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP));
+
+
+-- 12 출석
+INSERT INTO attendances (id, registration_id, attempt_no, checked_by, attended_at, created_at) VALUES
+                                                                                                   (36001, 36013, 1, 36002, TIMESTAMPADD(MINUTE, -7194, CURRENT_TIMESTAMP), TIMESTAMPADD(MINUTE, -7194, CURRENT_TIMESTAMP)),
+                                                                                                   (36002, 36014, 1, 36002, TIMESTAMPADD(MINUTE, -7194, CURRENT_TIMESTAMP), TIMESTAMPADD(MINUTE, -7194, CURRENT_TIMESTAMP)),
+                                                                                                   (36003, 36016, 1, 36002, TIMESTAMPADD(MINUTE, -5754, CURRENT_TIMESTAMP), TIMESTAMPADD(MINUTE, -5754, CURRENT_TIMESTAMP)),
+                                                                                                   (36004, 36020, 1, 36003, TIMESTAMPADD(MINUTE, -54, CURRENT_TIMESTAMP), TIMESTAMPADD(MINUTE, -54, CURRENT_TIMESTAMP));
+
+
+-- 13 개인 참가비 반환
+INSERT INTO refund_tb (id, user_id, company_id, purchase_id, status, reason, amount, created_at) VALUES
+                                                                                                     (36001, 36007, NULL, 36018, 'PENDING', '참가 취소에 따른 반환', 2000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36002, 36008, NULL, 36019, 'REFUND', '참가 취소에 따른 반환', 2000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36003, 36014, NULL, 36025, 'REFUND', '참가 취소에 따른 반환', 0, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36004, 36015, NULL, 36027, 'PENDING', NULL, 5000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36005, 36016, NULL, 36028, 'REFUND', '주최자 반려에 따른 반환', 5000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36006, 36017, NULL, 36029, 'REFUND', '참가 취소에 따른 반환', 0, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36007, 36018, NULL, 36031, 'REFUND', '회차 2일 전 취소: 1/2 반환', 4500, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP));
+
+
+-- 14 관심 행사
+INSERT INTO event_favorites (id, user_id, event_id, created_at) VALUES
+                                                                    (36001, 36002, 36001, TIMESTAMPADD(HOUR, -72, CURRENT_TIMESTAMP)),
+                                                                    (36002, 36002, 36010, TIMESTAMPADD(HOUR, -48, CURRENT_TIMESTAMP)),
+                                                                    (36003, 36003, 36001, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                    (36004, 36004, 36002, TIMESTAMPADD(HOUR, -12, CURRENT_TIMESTAMP));
+
+
+-- 15 대표 이미지
+-- 삭제된 display_order 컬럼은 사용하지 않음. 파일 실물은 없음.
+INSERT INTO event_files (id, event_id, storage_key) VALUES
+                                                        (36001, 36001, 'files/10000000-0000-4000-8000-000000000001.png'),
+                                                        (36002, 36004, 'files/10000000-0000-4000-8000-000000000002.png'),
+                                                        (36003, 36012, 'files/10000000-0000-4000-8000-000000000003.png'),
+(36004, 36002, 'files/10000000-0000-4000-8000-000000036004.png'),
+(36005, 36003, 'files/10000000-0000-4000-8000-000000036005.png'),
+(36006, 36005, 'files/10000000-0000-4000-8000-000000036006.png'),
+(36007, 36006, 'files/10000000-0000-4000-8000-000000036007.png'),
+(36008, 36007, 'files/10000000-0000-4000-8000-000000036008.png'),
+(36009, 36008, 'files/10000000-0000-4000-8000-000000036009.png'),
+(36010, 36009, 'files/10000000-0000-4000-8000-000000036010.png'),
+(36011, 36010, 'files/10000000-0000-4000-8000-000000036011.png'),
+(36012, 36011, 'files/10000000-0000-4000-8000-000000036012.png'),
+(36013, 36013, 'files/10000000-0000-4000-8000-000000036013.png'),
+(36014, 36014, 'files/10000000-0000-4000-8000-000000036014.png'),
+(36015, 36015, 'files/10000000-0000-4000-8000-000000036015.png'),
+(36016, 36016, 'files/10000000-0000-4000-8000-000000036016.png'),
+(36017, 36017, 'files/10000000-0000-4000-8000-000000036017.png'),
+(36018, 36018, 'files/10000000-0000-4000-8000-000000036018.png'),
+(36019, 36019, 'files/10000000-0000-4000-8000-000000036019.png');

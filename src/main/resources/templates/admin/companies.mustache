@@ -1,0 +1,52 @@
+{{#companyListPage}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>기업 심사 대기 <span class="admin-badge">{{companyCount}}건</span></h2></div>
+    <p class="admin-company-note">승인 대기 상태이며 사업자 정보가 일치하거나 검증 오류로 수동 확인이 필요한 기업을 표시합니다.</p>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <caption class="admin-sr-only">기업 심사 대상 목록</caption>
+        <thead><tr><th scope="col">번호</th><th scope="col">기업명</th><th scope="col">사업자등록번호</th><th scope="col">기업 상태</th><th scope="col">사업자 검증</th><th scope="col">심사</th></tr></thead>
+        <tbody>
+            {{#companies}}<tr><td>{{id}}</td><td>{{name}}</td><td>{{businessNumber}}</td><td><span class="admin-badge">{{statusLabel}}</span></td><td>{{verificationLabel}}</td><td><a href="/admin/companies/{{id}}">상세 검토 →</a></td></tr>{{/companies}}
+            {{^companies}}<tr><td colspan="6" class="admin-member-empty">현재 심사 대기 중인 기업이 없습니다.</td></tr>{{/companies}}
+        </tbody>
+    </table></div>
+</section>
+{{/companyListPage}}
+{{#companyDetailPage}}
+{{#company}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>{{name}}</h2><a href="/admin/companies">심사 목록 →</a></div>
+    <dl class="admin-member-facts">
+        <div><dt>기업 번호</dt><dd>{{id}}</dd></div>
+        <div><dt>기업명</dt><dd>{{name}}</dd></div>
+        <div><dt>이메일</dt><dd>{{email}}</dd></div>
+        <div><dt>사업자등록번호</dt><dd>{{businessNumber}}</dd></div>
+        <div><dt>대표자</dt><dd>{{representativeName}}</dd></div>
+        <div><dt>개업일</dt><dd>{{#openedOn}}{{openedOn}}{{/openedOn}}{{^openedOn}}미등록{{/openedOn}}</dd></div>
+        <div><dt>주소</dt><dd>{{address}}</dd></div>
+        <div><dt>담당자</dt><dd>{{contactPersonName}}</dd></div>
+        <div><dt>담당자 연락처</dt><dd>{{contactPersonPhone}}</dd></div>
+        <div><dt>기업 상태</dt><dd><span class="admin-badge">{{companyStatusLabel}}</span></dd></div>
+        <div><dt>사업자 검증</dt><dd>{{companyVerificationLabel}}</dd></div>
+        <div><dt>사업자등록증</dt><dd><a class="admin-company-certificate" href="/admin/companies/{{id}}/certificate" target="_blank" rel="noopener">증빙 열기 ↗<span class="admin-sr-only"> (새 창)</span></a></dd></div>
+        {{#reviewFeedback}}<div><dt>최근 보완 사유</dt><dd class="admin-company-feedback">{{reviewFeedback}}</dd></div>{{/reviewFeedback}}
+    </dl>
+</section>
+<section class="admin-panel admin-history">
+    <div class="admin-panel-heading"><h2>기업 심사 처리</h2></div>
+    {{#reviewable}}
+    <div class="admin-company-review">
+        {{#verificationError}}<p class="admin-company-warning" role="status">사업자 검증 오류가 발생한 기업입니다. 현재 승인할 수 없으며, 증빙 검토 후 보완을 요청할 수 있습니다.</p>{{/verificationError}}
+        {{#approvable}}<form action="/admin/companies/{{id}}/approve" method="post" class="admin-company-approve"><p>사업자 정보와 제출 증빙을 확인했다면 기업 가입을 승인할 수 있습니다.</p><button class="admin-status-button admin-status-button-activate" type="submit">기업 승인</button></form>{{/approvable}}
+        <form action="/admin/companies/{{id}}/correction" method="post" class="admin-company-correction">
+            <label for="company-feedback">보완 요청 사유</label>
+            <p id="company-feedback-help">기업 담당자가 수정해야 할 내용을 입력해주세요. 최대 2,000자까지 입력할 수 있습니다.</p>
+            <textarea id="company-feedback" name="feedback" rows="5" maxlength="2000" required aria-describedby="company-feedback-help" placeholder="확인이 필요한 정보와 수정할 내용을 입력해주세요."></textarea>
+            <button class="admin-status-button admin-status-button-danger" type="submit">보완 요청</button>
+        </form>
+    </div>
+    {{/reviewable}}
+    {{^reviewable}}<p class="admin-company-note">현재 심사 대상 상태가 아닙니다. 기업 정보와 최근 보완 사유를 확인할 수 있습니다.</p>{{/reviewable}}
+</section>
+{{/company}}
+{{/companyDetailPage}}

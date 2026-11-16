@@ -52,29 +52,29 @@
 
             <section class="point-history" aria-labelledby="charge-history-title">
                 <h2 id="charge-history-title">충전 내역</h2>
-            </section>
-            {{#paymentList}}
-                <div class="point-row">
-                    <div>
-                        <strong>포인트 충전</strong>
-                        <small>
-                            충전일 :
-                            {{#paidAt}}
-                                {{paidAt}}
-                            {{/paidAt}}
+                {{#paymentList}}
+                    <div class="point-row">
+                        <div>
+                            <strong>포인트 충전</strong>
+                            <small>
+                                충전일 :
+                                {{#paidAt}}
+                                    {{paidAt}}
+                                {{/paidAt}}
 
-                            {{^paidAt}}
-                                충전일 확인 중
-                            {{/paidAt}}
-                        </small>
+                                {{^paidAt}}
+                                    충전일 확인 중
+                                {{/paidAt}}
+                            </small>
+                        </div>
+                        <span class="point-amount">+<span class="point-number">{{amount}}</span></span>
                     </div>
-                    <span class="point-amount">+<span class="point-number">{{amount}}</span></span>
-                </div>
-            {{/paymentList}}
+                {{/paymentList}}
 
-            {{^paymentList}}
-                <p class="point-description">포인트 충전 내역이 없습니다.</p>
-            {{/paymentList}}
+                {{^paymentList}}
+                    <p class="point-description">포인트 충전 내역이 없습니다.</p>
+                {{/paymentList}}
+            </section>
 
             <section class="point-history" aria-labelledby="use-history-title">
                 <h2 id="use-history-title">행사 구매 내역</h2>

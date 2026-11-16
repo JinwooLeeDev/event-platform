@@ -4,5 +4,5 @@ public enum EventSessionStatus {
     SCHEDULED, // 행사 진행 예정
     IN_PROGRESS, // 행사 진행 중
     COMPLETED, // 행사 종료
-    CANCELLED // 행사 취소
+    CANCELLED , // 행사 취소
 }

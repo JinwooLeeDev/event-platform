@@ -1,19 +1,51 @@
+
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
+import com.busan.eventplatform.event.event_category.EventCategory;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class EventTest {
 
-    // 1. 행사 생성 시 소유 기업 확인
     @Test
-    void isOwner_test() {
-        // given
+    @DisplayName("행사 엔티티를 생성한다")
+    void createEvent() {
+        Company company = mock(Company.class);
+        EventCategory category = mock(EventCategory.class);
+
+        Event event = Event.builder()
+                .id(100L)
+                .company(company)
+                .category(category)
+                .title("부산 전시 행사")
+                .summary("전시 행사 소개")
+                .description("전시 행사 상세 설명")
+                .address("부산광역시 해운대구")
+                .status(EventStatus.PENDING_REVIEW)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        assertEquals(100L, event.getId());
+        assertSame(company, event.getCompany());
+        assertSame(category, event.getCategory());
+        assertEquals("부산 전시 행사", event.getTitle());
+        assertEquals("전시 행사 소개", event.getSummary());
+        assertEquals("전시 행사 상세 설명", event.getDescription());
+        assertEquals("부산광역시 해운대구", event.getAddress());
+        assertEquals(EventStatus.PENDING_REVIEW, event.getStatus());
+        assertNotNull(event.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("행사 소유 기업이면 true를 반환한다")
+    void isOwner_true() {
         Company company = mock(Company.class);
         when(company.getId()).thenReturn(1L);
 
@@ -21,17 +53,12 @@ class EventTest {
                 .company(company)
                 .build();
 
-        // when
-        boolean result = event.isOwner(1L);
-
-        // then
-        assertThat(result).isTrue();
+        assertTrue(event.isOwner(1L));
     }
 
-    // 2. 다른 기업은 소유자가 아님
     @Test
-    void isOwner_differentCompany_test() {
-        // given
+    @DisplayName("행사 소유 기업이 아니면 false를 반환한다")
+    void isOwner_false() {
         Company company = mock(Company.class);
         when(company.getId()).thenReturn(1L);
 
@@ -39,39 +66,62 @@ class EventTest {
                 .company(company)
                 .build();
 
-        // when
-        boolean result = event.isOwner(2L);
-
-        // then
-        assertThat(result).isFalse();
+        assertFalse(event.isOwner(2L));
     }
 
-    // 3. 행사 생성 시각 자동 설정
     @Test
-    void onCreate_test() {
-        // given
-        Event event = new Event();
+    @DisplayName("결제 대기 상태이면 true를 반환한다")
+    void isPaidStatus_true() {
+        Event event = Event.builder()
+                .status(EventStatus.PAID_READY)
+                .build();
 
-        // when
-        event.onCreate();
-
-        // then
-        assertThat(event.getCreatedAt()).isNotNull();
-        assertThat(event.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+        assertTrue(event.isPaidStatus());
     }
 
-    // 4. 행사 생성 시각이 기존 값으로 덮어지지 않는지 확인
     @Test
-    void onCreate_setsCurrentTime_test() {
-        // given
+    @DisplayName("결제 대기 상태가 아니면 false를 반환한다")
+    void isPaidStatus_false() {
+        Event event = Event.builder()
+                .status(EventStatus.PENDING_REVIEW)
+                .build();
+
+        assertFalse(event.isPaidStatus());
+    }
+
+    @Test
+    @DisplayName("승인 대기 상태이면 true를 반환한다")
+    void isPendingStatus_true() {
+        Event event = Event.builder()
+                .status(EventStatus.PENDING_REVIEW)
+                .build();
+
+        assertTrue(event.isPendingStatus());
+    }
+
+    @Test
+    @DisplayName("승인 대기 상태가 아니면 false를 반환한다")
+    void isPendingStatus_false() {
+        Event event = Event.builder()
+                .status(EventStatus.PUBLISHED)
+                .build();
+
+        assertFalse(event.isPendingStatus());
+    }
+
+    @Test
+    @DisplayName("행사 생성 시각을 자동으로 설정한다")
+    void onCreate() {
         Event event = new Event();
 
-        // when
+        LocalDateTime before = LocalDateTime.now();
+
         event.onCreate();
 
-        LocalDateTime createdAt = event.getCreatedAt();
+        LocalDateTime after = LocalDateTime.now();
 
-        // then
-        assertThat(createdAt).isNotNull();
+        assertNotNull(event.getCreatedAt());
+        assertFalse(event.getCreatedAt().isBefore(before));
+        assertFalse(event.getCreatedAt().isAfter(after));
     }
 }

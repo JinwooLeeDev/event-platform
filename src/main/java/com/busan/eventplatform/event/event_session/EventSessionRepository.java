@@ -2,13 +2,13 @@ package com.busan.eventplatform.event.event_session;
 
 import com.busan.eventplatform.event.EventSession;
 import jakarta.persistence.LockModeType;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EventSessionRepository extends JpaRepository<EventSession, Long> {
 
@@ -19,6 +19,14 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
             order by s.startsAt asc
             """)
     List<EventSession> findByEventId(@Param("eventId") Long eventId);
+
+    // 여러 행사 ID에 해당하는 회차를 한 번에 조회
+    @Query("""
+            select s from EventSession s
+            where s.event.id in :eventIds
+            order by s.event.id asc, s.startsAt asc
+            """)
+    List<EventSession> findAllByEventIds(@Param("eventIds") List<Long> eventIds);
 
     // 회차 상태별 조회
     @Query("""
@@ -41,4 +49,18 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
     Optional<EventSession> findByIdForUpdate(@Param("sessionId") Long sessionId);
 
 
+    @Query("""
+            select es from EventSession es join fetch es.event e join fetch e.category c
+            where es.id = :eventSessionId
+            """)
+    Optional<EventSession> findByIdWithEvent(@Param("eventSessionId") Long eventSessionId);
+
+
+    @Query("""
+        select es from EventSession es where es.event.company.id = :companyId and es.id = :sessionId
+""")
+    Optional<EventSession> findByCompanyIdAndSessionId(@Param("companyId") Long companyId , @Param("sessionId") Long sessionId);
+
+
+    // Todo - 기본 Delete 기능 말고 신청·결제 이력이 없는 행사·회차만 삭제하고, 이력이 있으면 취소 처리하는 메서드 필요
 }

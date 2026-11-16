@@ -1,10 +1,13 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.event.EventSession;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 public class EventResponse {
 
@@ -18,9 +21,16 @@ public class EventResponse {
         private boolean isFirst;
         private boolean isLast;
 
-        public PageDto(Page<Event> eventPage, List<EventDto> eventDtoList) {
+        public PageDto(Page<Event> eventPage) {
+            this(eventPage, null);
+        }
+
+        public PageDto(Page<Event> eventPage, Map<Long, EventSession> sessionMap) {
             this.eventList = eventPage.getContent().stream()
-                    .map(EventDto::new)
+                    .map(event -> new EventDto(
+                            event,
+                            sessionMap == null ? null : sessionMap.get(event.getId())
+                    ))
                     .toList();
             this.currentPage = eventPage.getNumber() + 1;
             this.totalPages = eventPage.getTotalPages();
@@ -44,6 +54,11 @@ public class EventResponse {
 
     @Data
     public static class EventDto {
+        public String getDepositAmountText() {
+            return String.format(java.util.Locale.KOREA, "%,d",
+                    (long) sessionCount * com.busan.eventplatform.api.purchase.Deposit.SESSION_DEPOSIT);
+        }
+        private List<SessionPeriodDto> sessionPeriods = List.of();
         private Long id;
         private Long categoryId;
         private String categoryName;
@@ -53,14 +68,16 @@ public class EventResponse {
         private LocalDateTime publishedAt;
         private EventStatus status;
         private String feedbackMessage;
-        private Long favoriteCount;
-        private boolean isFavorite;
+        private boolean paidReadyEvent; // 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
+        private int sessionCount; // 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public EventDto(Event event) {
-            this(event, 0L, false);
+            this(event, null);
         }
 
-        public EventDto(Event event, Long favoriteCount, boolean isFavorite) {
+        public EventDto(Event event, EventSession session) {
             this.id = event.getId();
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
@@ -72,8 +89,27 @@ public class EventResponse {
             this.publishedAt = event.getPublishedAt();
             this.status = event.getStatus();
             this.feedbackMessage = event.getFeedbackMessage();
-            this.favoriteCount = favoriteCount;
-            this.isFavorite = isFavorite;
+            this.paidReadyEvent = event.getStatus() == EventStatus.PAID_READY;
+            if (session != null) {
+                this.applyStartAt = session.getApplyStartAt();
+                this.applyEndAt = session.getApplyEndAt();
+            }
+        }
+    }
+
+    @Data
+    public static class SessionPeriodDto {
+        private String name;
+        private String applyStartAt;
+        private String applyEndAt;
+        private Long sessionId; /// 행사 회차마다 환불 , 결제를 진행해야하므로 sessionId 추가.
+
+        public SessionPeriodDto(EventSession session) {
+            var format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+            this.name = session.getName();
+            this.applyStartAt = session.getApplyStartAt().format(format);
+            this.applyEndAt = session.getApplyEndAt().format(format);
+            this.sessionId = session.getId();
         }
     }
 
@@ -82,13 +118,12 @@ public class EventResponse {
     public static class DetailDto {
         private Long id;
         private String title;
-        private Long companyId;
+        private String companyName;
         private Long categoryId;
         private String categoryName;
         private String summary;
         private String description;
         private String address;
-
         private LocalDateTime publishedAt;
         private LocalDateTime createdAt;
         private boolean owner;
@@ -100,7 +135,7 @@ public class EventResponse {
             this.id = event.getId();
             this.title = event.getTitle();
             if (event.getCompany() != null) {
-                this.companyId = event.getCompany().getId();
+                this.companyName = event.getCompany().getName();
             }
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
@@ -149,5 +184,4 @@ public class EventResponse {
             this.feedbackMessage = event.getFeedbackMessage();
         }
     }
-
 }

@@ -6,13 +6,14 @@ import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.login.LoginIdentity;
-import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -97,8 +98,18 @@ public class PaymentService {
         // 6. 최종 DB 반영 + status 값 변경 + 유저 / company point 변경.(더티체킹)
         payment.confirmPay();
 
-        if(loginIdentity.isUser()) payment.getUser().chargePoint(payment.getAmount());
-        else if(loginIdentity.isCompany()) payment.getCompany().chargePoint(payment.getAmount());
+        if(loginIdentity.isUser()) {
+            User user = userRepository.LockFindById(payment.getUser().getId())
+                    .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
+
+            user.chargePoint(payment.getAmount());
+        }
+        else if(loginIdentity.isCompany()) {
+            Company company = companyRepository.LockFindById(payment.getCompany().getId())
+                    .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다"));
+
+            company.chargePoint(payment.getAmount());
+        }
         else throw new Exception400("결제 처리가 완료되지 않았습니다.");
 
         return new PaymentRes.CompleteDto(payment.getAmount());
@@ -119,9 +130,11 @@ public class PaymentService {
     }
 
 
-//    public PaymentRes.ListDto paymentList(Long userId){
-//
-//
-//    }
+    public List<PaymentRes.ListDto> paymentList(Long userId){
+        // 충전 결제완료된 내역만 조회해야하므로 status.PAID
+        List<Payment> payment = paymentRepository.findByUserIdWithPayment(userId , PaymentStatus.PAID);
+
+        return payment.stream().map(PaymentRes.ListDto::new).toList();
+    }
 
 }

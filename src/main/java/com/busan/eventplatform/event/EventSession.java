@@ -24,6 +24,7 @@ public class EventSession {
     @Column(nullable = false)
     private int capacity;
 
+    // 몇 회차인지 알려주는 컬럼 ex) 1회차, 2회차 ...
     @Column(nullable = false)
     private String name;
 
@@ -38,7 +39,6 @@ public class EventSession {
     // 행사 종료일
     @Column(nullable = false)
     private LocalDateTime endsAt;
-
 
     // 모집 시작일
     @Column(nullable = false)
@@ -108,14 +108,14 @@ public class EventSession {
         this.capacity = dto.getCapacity();
         this.startsAt = dto.getStartsAt();
         this.endsAt = dto.getEndsAt();
+        this.applyStartAt = dto.getApplyStartAt();
+        this.applyEndAt = dto.getApplyEndAt();
         this.holdDurationSeconds = dto.getHoldDurationSeconds();
         this.pricingType = dto.getPricingType();
         this.fee = dto.getFee();
         this.reservationDepositPoints = dto.getReservationDepositPoints();
         this.minimumParticipants = dto.getMinimumParticipants();
         this.minimumCheckAt = dto.getMinimumCheckAt();
-        this.applyStartAt = dto.getApplyStartAt();
-        this.applyEndAt = dto.getApplyEndAt();
     }
 
     // =========================================================
@@ -148,4 +148,12 @@ public class EventSession {
     public int issueReceptionNumber() {
         return this.nextReceptionNumber++;
     }
+
+
+    // 관리자에게 승인취소 받은 행사인지 검사 --> 기업 보증금 환불에서 사용.
+    public boolean isCanceled() {return this.status == EventSessionStatus.CANCELLED;}
+
+    public void setScheduled() {this.status = EventSessionStatus.SCHEDULED;}
+
+    public boolean isOwner(Long companyId) {return this.event.getCompany().getId().equals(companyId);}
 }
