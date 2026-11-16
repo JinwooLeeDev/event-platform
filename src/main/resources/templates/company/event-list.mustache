@@ -10,7 +10,12 @@
 <style>
     .company-events-page { padding: 40px 24px 60px; background: #f8f9fb; color: #292f3d; font-family: 'Pretendard',sans-serif; }
     .company-events-description { color: #72757e; font-size: 14px; line-height: 1.75; }
-    .company-event-card { padding: 26px; margin-top: 18px; border: 1px solid #e6e7eb; border-radius: 16px; background: white; }
+    .company-event-card { position: relative; padding: 26px; margin-top: 18px; border: 1px solid #e6e7eb; border-radius: 16px; background: white; }
+    .company-event-manage-link { color: inherit; text-decoration: none; }
+    .company-event-manage-link::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: 16px; }
+    .company-event-manage-link:hover { color: #0750d8; }
+    .company-event-manage-link:focus-visible::after { outline: 3px solid #9cbfff; outline-offset: 3px; }
+    .company-event-card form, .company-event-card [data-event-edit], .company-event-payment a { position: relative; z-index: 2; }
     .company-event-card h2 { margin: 12px 0; }
     .company-event-tags { display: flex; gap: 8px; flex-wrap: wrap; }
     .company-event-tag { padding: 5px 10px; border-radius: 999px; background: #f0ede7; color: #64615a; font-size: 12px; }
@@ -22,6 +27,7 @@
     .company-event-payment-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .company-event-pay-button { padding: 12px 20px; border: 0; border-radius: 10px; background: #0750d8; color: white; font: inherit; font-weight: 700; cursor: pointer; }
     .company-event-pay-button:hover { background: #0642b3; }
+    .company-event-delete-button { margin-top:16px; padding:10px 16px; border:1px solid #edc7ca; border-radius:9px; background:#fff5f5; color:#a93038; font:inherit; cursor:pointer; }
     .company-event-payment a { color: #0750d8; font-size: 13px; }
     .company-event-payment :focus-visible { outline: 3px solid #9cbfff; outline-offset: 4px; }
     .company-event-success { padding: 18px 22px; border-radius: 12px; background: #edf8f2; color: #216943; }
@@ -38,7 +44,7 @@
         <section class="account-content" aria-labelledby="company-events-title">
             <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span>
             <h1 id="company-events-title">주최 행사</h1>
-            <p class="company-events-description">로그인한 기업이 등록한 행사를 확인하는 공간입니다. 승인 대기·보완 요청 등 공개 전 행사도 포함합니다.</p>
+            <p class="company-events-description">행사 카드를 선택하면 회차별 운영 정보와 참가자 목록을 확인할 수 있습니다. 회차가 여러 개면 관리할 회차를 먼저 선택해 주세요.</p>
             {{#successMessage}}<p class="company-event-success" role="status">{{successMessage}}</p>{{/successMessage}}
             {{#eventList}}
                 {{#eventList}}
@@ -47,7 +53,7 @@
                         <span class="company-event-tag">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}{categoryName}{{/categoryName}}</span>
                         <span class="company-event-tag company-event-state" data-company-event-status>{{#status}}{{status}}{{/status}}{{^status}}{status}{{/status}}</span>
                     </div>
-                    <h2>{{#title}}{{title}} - 총 {{sessionCount}}회차 예정{{/title}}{{^title}}{title}{{/title}}</h2>
+                    <h2><a class="company-event-manage-link" href="/events/sessions/list/{{id}}">{{#title}}{{title}} - 총 {{sessionCount}}회차 예정{{/title}}{{^title}}{title}{{/title}} <span aria-hidden="true">→</span></a></h2>
                     <p class="company-events-description">{{#summary}}{{summary}}{{/summary}}{{^summary}}{summary}{{/summary}}</p>
                     <dl class="company-event-facts">
                         <div><dt>회차별 모집 기간</dt><dd>{{#sessionPeriods}}<div><strong>{{name}}</strong><br>{{applyStartAt}} ~ {{applyEndAt}}</div>{{/sessionPeriods}}{{^sessionPeriods}}등록된 회차가 없습니다.{{/sessionPeriods}}</dd></div>
@@ -73,6 +79,10 @@
 
                     {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
                     <p data-event-edit hidden><a class="company-event-pay-button" style="display:inline-block;text-decoration:none" href="/events/update/{{id}}">행사 정보 수정</a></p>
+                    <form action="/events/delete/{{id}}" method="post" data-delete-form data-confirm="행사를 삭제하시겠습니까? 삭제한 행사는 복구할 수 없습니다.">
+                        <button type="submit" class="company-event-delete-button">행사 삭제</button>
+                        <p class="company-event-feedback" data-delete-error role="alert" hidden></p>
+                    </form>
                 </article>
                 {{/eventList}}
                 {{^eventList}}<div class="company-event-card"><h2>등록한 행사가 없습니다.</h2><p class="company-events-description">기업이 등록한 행사가 생기면 이곳에 표시됩니다.</p></div>{{/eventList}}
@@ -99,5 +109,6 @@
     document.querySelectorAll('[data-company-event-date]').forEach(element => { const value = element.textContent.trim(); if(/^\d{4}-\d{2}-\d{2}T/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.'); });
 })();
 </script>
+<script src="/js/company-session.js" defer></script>
 </body>
 </html>

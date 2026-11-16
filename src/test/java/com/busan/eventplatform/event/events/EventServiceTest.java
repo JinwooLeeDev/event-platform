@@ -59,6 +59,8 @@ class EventServiceTest {
 
     @Mock
     private EventSessionRepository eventSessionRepository;
+    @Mock
+    private com.busan.eventplatform.event.event_file.EventFileService eventFileService;
 
     @InjectMocks
     private EventService eventService;
@@ -688,6 +690,49 @@ class EventServiceTest {
         assertEquals(createUpdateDto().getDescription(), result.getDescription());
         assertEquals(EventStatus.PENDING_REVIEW, result.getStatus());
         assertNull(result.getFeedbackMessage());
+    }
+
+    @Test
+    void updateAndResubmit_reusesSessionUpdateAndOptionalImageReplacement() {
+        var corrected = createOwnedEvent(EventStatus.FEEDBACK_REQUIRED);
+        when(company.getId()).thenReturn(companyId);
+        when(eventRepository.findByDetail(eventId)).thenReturn(Optional.of(corrected));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(corrected));
+        when(eventCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        var request = createUpdateDto();
+        var row = new EventSessionRequest.UpdateDto();
+        row.setId(12L); row.setName("Updated session"); row.setStartsAt(LocalDateTime.now().plusDays(4));
+        row.setEndsAt(row.getStartsAt().plusHours(2)); row.setCapacity(30); row.setPricingType("PAID"); row.setFee(5000);
+        row.setApplyStartAt(row.getStartsAt().minusDays(3)); row.setApplyEndAt(row.getStartsAt().minusDays(1));
+        row.setMinimumParticipants(1); row.setMinimumCheckAt(row.getStartsAt().minusHours(1));
+        request.setSessions(List.of(row));
+        var detail = mock(com.busan.eventplatform.event.event_session.EventSessionResponse.DetailDto.class);
+        when(detail.getEventId()).thenReturn(eventId);
+        when(eventSessionService.findById(12L)).thenReturn(detail);
+        var file = new org.springframework.mock.web.MockMultipartFile("file", "poster.png", "image/png", new byte[]{1});
+
+        var result = eventService.updateAndResubmit(eventId, companyId, request, file);
+
+        verify(eventSessionService).update(12L, row, companyId);
+        verify(eventFileService).attachFile(eventId, file);
+        assertEquals(EventStatus.PENDING_REVIEW, result.getStatus());
+    }
+
+    @Test
+    void updateAndResubmit_rejectsSessionFromAnotherEventBeforeSaving() {
+        var request = createUpdateDto();
+        var row = new EventSessionRequest.UpdateDto();
+        row.setId(12L); row.setName("Session"); row.setStartsAt(LocalDateTime.now().plusDays(4));
+        row.setEndsAt(row.getStartsAt().plusHours(2)); row.setCapacity(30); row.setPricingType("FREE");
+        row.setApplyStartAt(row.getStartsAt().minusDays(3)); row.setApplyEndAt(row.getStartsAt().minusDays(1));
+        row.setMinimumParticipants(1); row.setMinimumCheckAt(row.getStartsAt().minusHours(1));
+        request.setSessions(List.of(row));
+        var detail = mock(com.busan.eventplatform.event.event_session.EventSessionResponse.DetailDto.class);
+        when(detail.getEventId()).thenReturn(999L);
+        when(eventSessionService.findById(12L)).thenReturn(detail);
+        assertThrows(Exception403.class, () -> eventService.updateAndResubmit(eventId, companyId, request));
+        verifyNoInteractions(eventRepository, eventFileService);
+        verify(eventSessionService, never()).update(anyLong(), any(), anyLong());
     }
 
     @Test

@@ -16,11 +16,11 @@
             <header class="event-save-header">
                 <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
                 <h1>행사 정보 수정</h1>
-                <p>보완 요청을 확인하고 행사 기본 정보를 수정해 주세요. 저장하면 관리자에게 재심사를 요청합니다.</p>
+                <p>보완 요청을 확인하고 행사 정보·회차·대표 이미지를 수정해 주세요. 저장하면 관리자에게 재심사를 요청합니다.</p>
             </header>
             {{#event}}
             {{#feedbackMessage}}<div class="event-save-notice" style="margin-bottom:24px"><strong>관리자 보완 요청</strong><p style="white-space:pre-wrap;margin-bottom:0">{{feedbackMessage}}</p></div>{{/feedbackMessage}}
-            <form id="event-update-form" class="event-save-form" action="/events/update/{{id}}" method="post">
+            <form id="event-update-form" class="event-save-form" action="/events/update/{{id}}" method="post" enctype="multipart/form-data">
                 <section class="event-save-section">
                     <h2>행사 기본 정보</h2>
                     <p class="section-description">입력된 내용을 수정하고 저장해 주세요. 모든 항목은 필수입니다.</p>
@@ -36,6 +36,42 @@
                     <div class="form-group"><label for="update-address">행사 주소</label><input id="update-address" name="address" value="{{address}}" required></div>
                     <div class="form-group"><label for="update-description">상세 설명</label><textarea id="update-description" name="description" rows="8" required>{{description}}</textarea></div>
                 </section>
+                <section class="event-save-section">
+                    <h2>회차 정보 수정</h2>
+                    <p class="section-description">회차 이름·개최 일정·모집 기간·정원·참가비를 수정할 수 있습니다.</p>
+                    {{#editSessions}}{{#session}}
+                    <div class="session-item" data-edit-session>
+                        <h3>{{name}}</h3>
+                        <input type="hidden" name="sessions[{{index}}].id" value="{{id}}">
+                        <input type="hidden" name="sessions[{{index}}].holdDurationSeconds" value="{{holdDurationSeconds}}">
+                        <input type="hidden" name="sessions[{{index}}].reservationDepositPoints" value="{{reservationDepositPoints}}">
+                        <input type="hidden" name="sessions[{{index}}].minimumParticipants" value="{{minimumParticipants}}">
+                        <input type="hidden" name="sessions[{{index}}].minimumCheckAt" value="{{minimumCheckAt}}">
+                        <div class="form-group"><label>회차명<input name="sessions[{{index}}].name" value="{{name}}" required></label></div>
+                        <div class="date-time-group">
+                            <div class="form-group"><label>개최 시작<input type="datetime-local" step="any" name="sessions[{{index}}].startsAt" data-start value="{{startsAt}}" required></label></div>
+                            <div class="form-group"><label>개최 종료<input type="datetime-local" step="any" name="sessions[{{index}}].endsAt" data-end value="{{endsAt}}" required></label></div>
+                        </div>
+                        <div class="date-time-group">
+                            <div class="form-group"><label>모집 시작<input type="datetime-local" step="any" name="sessions[{{index}}].applyStartAt" data-apply-start value="{{applyStartAt}}" required></label></div>
+                            <div class="form-group"><label>모집 마감<input type="datetime-local" step="any" name="sessions[{{index}}].applyEndAt" data-apply-end value="{{applyEndAt}}" required></label></div>
+                        </div>
+                        <div class="form-group"><label>정원<input type="number" min="{{minimumParticipants}}" max="2147483647" name="sessions[{{index}}].capacity" data-capacity value="{{capacity}}" required></label>
+                            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" data-unlimited style="width:18px;height:18px;min-height:18px">제한 없음</label>
+                            <small>현재 점유 {{occupiedCount}}명 · 최소 진행 인원 {{minimumParticipants}}명 이상으로 설정해 주세요.</small>
+                        </div>
+                        <div class="form-group"><label>참가비 유형<select name="sessions[{{index}}].pricingType" data-current="{{pricingType}}" data-pricing required><option value="{{pricingType}}" selected>기존 참가비 유형 유지</option><option value="FREE">무료</option><option value="PAID">유료</option></select></label></div>
+                        <div class="form-group"><label>참가비 (P)<input type="number" min="0" name="sessions[{{index}}].fee" data-fee value="{{fee}}" required></label></div>
+                    </div>
+                    {{/session}}{{/editSessions}}
+                    {{^editSessions}}<p class="section-description">등록된 회차가 없습니다.</p>{{/editSessions}}
+                </section>
+                <section class="event-save-section">
+                    <h2>대표 이미지 교체</h2>
+                    <p class="section-description">새 이미지를 선택하지 않으면 기존 이미지를 유지합니다.</p>
+                    <img src="/event-files/{{id}}" alt="기존 행사 대표 이미지" style="max-width:100%;max-height:300px;object-fit:contain" onerror="this.hidden=true">
+                    <div class="form-group"><label for="update-image">교체할 이미지 (선택)</label><input id="update-image" type="file" name="file" accept=".jpg,.jpeg,.png"><small>JPG·JPEG·PNG, 최대 10MB</small></div>
+                </section>
                 <p class="event-save-notice">수정 내용을 저장하면 승인 대기로 전환되어 관리자에게 다시 제출됩니다.</p>
                 <div class="event-save-actions"><a href="/events" class="cancel-button">목록으로</a><button type="submit" class="submit-button">저장 후 재심사 요청</button></div>
             </form>
@@ -46,10 +82,29 @@
 {{> layout/footer}}
 <script>
 (() => {
-    const category = document.getElementById('update-category');
-    if (category && Array.from(category.options).some((option, index) => index > 0 && option.value === category.dataset.current)) {
-        category.options[0].remove(); category.value = category.dataset.current;
-    }
+    document.querySelectorAll('select[data-current]').forEach(select => {
+        if (Array.from(select.options).some((option, index) => index > 0 && option.value === select.dataset.current)) {
+            select.options[0].remove(); select.value = select.dataset.current;
+        }
+    });
+    document.querySelectorAll('[data-edit-session]').forEach(row => {
+        const capacity = row.querySelector('[data-capacity]');
+        const unlimited = row.querySelector('[data-unlimited]');
+        unlimited.checked = capacity.value === '2147483647';
+        capacity.hidden = unlimited.checked;
+        unlimited.addEventListener('change', () => { capacity.hidden = unlimited.checked; capacity.value = unlimited.checked ? '2147483647' : ''; });
+        const pricing = row.querySelector('[data-pricing]'), fee = row.querySelector('[data-fee]');
+        const updateFee = () => { fee.readOnly = pricing.value === 'FREE'; fee.min = fee.readOnly ? '0' : '1'; if (fee.readOnly) fee.value = '0'; };
+        pricing.addEventListener('change', updateFee); updateFee();
+        const start = row.querySelector('[data-start]'), end = row.querySelector('[data-end]');
+        const validateDate = () => end.setCustomValidity(start.value && end.value && start.value > end.value ? '종료 일시는 시작 일시보다 빠를 수 없습니다.' : '');
+        start.addEventListener('input', validateDate); end.addEventListener('input', validateDate);
+        const applyStart = row.querySelector('[data-apply-start]'), applyEnd = row.querySelector('[data-apply-end]');
+        const validateApplyDate = () => applyEnd.setCustomValidity(applyStart.value && applyEnd.value && applyStart.value > applyEnd.value ? '모집 마감은 모집 시작보다 빠를 수 없습니다.' : '');
+        applyStart.addEventListener('input', validateApplyDate); applyEnd.addEventListener('input', validateApplyDate);
+    });
+    const file = document.getElementById('update-image');
+    file.addEventListener('change', () => file.setCustomValidity(file.files[0]?.size > 10485760 ? '이미지는 10MB 이하여야 합니다.' : ''));
     document.getElementById('event-update-form').addEventListener('submit', event => {
         const blank = Array.from(event.target.querySelectorAll('input[required], textarea[required]')).find(input => !input.value.trim());
         if (blank) { event.preventDefault(); blank.focus(); alert('공백만 입력할 수 없습니다. 내용을 입력해 주세요.'); }

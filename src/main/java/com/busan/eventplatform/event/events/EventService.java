@@ -39,6 +39,7 @@ public class EventService {
     private final RegistrationRepository registrationRepository;
     private final EventSessionService eventSessionService;
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+    private final com.busan.eventplatform.event.event_file.EventFileService eventFileService;
 
     // 행사 등록 기능
     @Transactional
@@ -172,8 +173,25 @@ public class EventService {
     // 보완 요청 - 수정 후 재제출 (수정된 내용 저장, 상태 변경, 메시지 초기화)
     @Transactional
     public Event updateAndResubmit(Long id, Long companyId, EventRequest.UpdateDto updateDto) {
+        return updateAndResubmit(id, companyId, updateDto, null);
+    }
+
+    @Transactional
+    public Event updateAndResubmit(Long id, Long companyId, EventRequest.UpdateDto updateDto, org.springframework.web.multipart.MultipartFile file) {
+        updateDto.validate();
+        if (updateDto.getSessions() != null) {
+            var ids = new java.util.HashSet<Long>();
+            for (var session : updateDto.getSessions()) {
+                if (session == null || session.getId() == null || !ids.add(session.getId())) throw new Exception400("회차 정보를 확인해주세요.");
+                session.validate();
+                if (!id.equals(eventSessionService.findById(session.getId()).getEventId())) throw new Exception403("다른 행사의 회차는 수정할 수 없습니다.");
+            }
+        }
         update(id, companyId, updateDto);
-        return resubmit(id, companyId);
+        if (updateDto.getSessions() != null) for (var session : updateDto.getSessions()) eventSessionService.update(session.getId(), session, companyId);
+        Event event = resubmit(id, companyId);
+        if (file != null && !file.isEmpty()) eventFileService.attachFile(id, file);
+        return event;
     }
 
     @Transactional
