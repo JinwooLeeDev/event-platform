@@ -112,6 +112,23 @@
             grid-template-columns: 110px minmax(0, 1fr);
         }
     }
+
+    .company-review-feedback {
+        margin: 20px 0;
+        padding: 18px 20px;
+        border: 1px solid #f2c5c5;
+        border-radius: 12px;
+        background: #fff5f5;
+        color: #912626;
+    }
+
+    .company-review-feedback p {
+        margin: 8px 0 0;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.7;
+    }
+
 </style>
 <main class="company-home">
     <div class="account-layout">
@@ -123,6 +140,14 @@
             <p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
 
             {{#company}}
+
+                {{#reviewReason}}
+                <div class="company-review-feedback" role="note">
+                    <strong>관리자 보완 요청</strong>
+                    <p>{{reviewReason}}</p>
+                </div>
+                {{/reviewReason}}
+
                 <section class="company-point-card" aria-labelledby="company-point-title">
                     <h2 id="company-point-title">보유 포인트</h2>
                     <strong class="company-point-balance">{{pointText}}</strong>
