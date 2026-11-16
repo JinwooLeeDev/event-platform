@@ -18,29 +18,29 @@ public class BusinessVerificationSession implements Serializable { // 이메일 
 
     private final String businessNumber;
     private final String representativeName;
-    private final LocalDate openOn;
+    private final LocalDate openedOn;
     private final Instant verifiedAt;
 
     @Builder
     public BusinessVerificationSession(String businessNumber,
                                        String representativeName,
-                                       LocalDate openOn,
+                                       LocalDate openedOn,
                                        Instant verifiedAt) {
 //        필수 정보가 빠진 세션 객체 생성을 막음.
         this.businessNumber = Objects.requireNonNull(businessNumber);
         this.representativeName = Objects.requireNonNull(representativeName);
-        this.openOn = Objects.requireNonNull(openOn);
+        this.openedOn = Objects.requireNonNull(openedOn);
         this.verifiedAt = Objects.requireNonNull(verifiedAt);
     }
 
     public boolean matches(
             String businessNumber,
             String representativeName,
-            LocalDate openOn
+            LocalDate openedOn
     ) {
         return this.businessNumber.equals(businessNumber)
                 && this.representativeName.equals(representativeName)
-                && this.openOn.equals(openOn);
+                && this.openedOn.equals(openedOn);
     }
 
     public boolean isExpired(Instant now) {

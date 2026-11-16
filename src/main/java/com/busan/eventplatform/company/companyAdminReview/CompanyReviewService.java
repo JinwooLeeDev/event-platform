@@ -127,14 +127,13 @@ public class CompanyReviewService {
         companyReviewHistoryRepository.save(history);
     }
 
-//    TODO 리펙터링 후보
     public AdminReviewResponse.DetailDTO findDetail(
             Long companyId,
             Long adminId
     ) {
         findAdmin(adminId);
 
-//        findValidateCompany를 써선 안 됨. 승인·보완 처리 후에도 상세 화면을 봐야 한다.
+//        findReviewableCompany 써선 안 됨. 승인·보완 처리 후에도 상세 조회가 가능하므로 심사 가능 상태는 검사하지 않음
         Company company = findCompany(companyId);
 
         return new AdminReviewResponse.DetailDTO(company);

@@ -56,7 +56,7 @@ public class BusinessVerificationSessionService {
         );
     }
 
-//    최종 회원가입에서 호출
+//     가입·수정 저장 전 사업자 검증 기록 확인
     public void requireVerifiedBusiness (
             String businessNumber,
             String representativeName,
@@ -82,7 +82,7 @@ public class BusinessVerificationSessionService {
         }
     }
 
-//    회원가입이 완료되면 삭제
+//    가입·수정이 정상 완료된 후 검증 기록 제거
     public void clear(HttpSession session) {
         session.removeAttribute(SESSION_KEY);
     }

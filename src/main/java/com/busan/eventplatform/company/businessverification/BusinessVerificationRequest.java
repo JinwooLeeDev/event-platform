@@ -53,6 +53,8 @@ public class BusinessVerificationRequest {
                 throw new Exception400("대표자명을 입력해주세요.");
             }
 
+            representativeName = representativeName.strip();
+
             if (representativeName.length() > 50) {
                 throw new Exception400("대표자명은 50자까지 입력 가능합니다.");
             }
