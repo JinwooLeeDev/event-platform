@@ -18,19 +18,19 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class CommunityMembershipListener {
     private final CommunityService communityService;
+    private final CommunityNotifier communityNotifier;   // ★ [3단계] 실시간 알림
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onRegistrationStatusChanged(RegistrationStatusChangedEvent event) {
         try {
             if (event.becameConfirmed()) {
-                // 신청 즉시 확정, 대기 → 확정 승격
                 communityService.join(event.sessionId(), event.userId());
+                communityNotifier.notifyJoined(event.sessionId(), event.userId());          // ★ 방 + 본인에게 입장 알림
             } else if (event.leftConfirmed()) {
-                // 확정 후 본인 취소(CANCELLED), 기업 거절(REJECTED)
-                communityService.leave(event.sessionId(), event.userId(),
-                        CommunityLeaveReason.from(event.after()));
+                CommunityLeaveReason reason = CommunityLeaveReason.from(event.after());
+                communityService.leave(event.sessionId(), event.userId(), reason);
+                communityNotifier.notifyLeft(event.sessionId(), event.userId(), reason);    // ★ 방 + 본인(KICKED) 알림
             }
-            // 대기 신청·대기 취소는 멤버십 변화 없음 (대기자는 멤버가 아님)
         } catch (Exception e) {
             log.error("[community] 멤버십 반영 실패 신청={} 회원={} 회차={} {} → {}",
                     event.registrationId(), event.userId(), event.sessionId(),
