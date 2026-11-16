@@ -108,6 +108,8 @@ public class EventSession {
         this.capacity = dto.getCapacity();
         this.startsAt = dto.getStartsAt();
         this.endsAt = dto.getEndsAt();
+        this.applyStartAt = dto.getApplyStartAt();
+        this.applyEndAt = dto.getApplyEndAt();
         this.holdDurationSeconds = dto.getHoldDurationSeconds();
         this.pricingType = dto.getPricingType();
         this.fee = dto.getFee();

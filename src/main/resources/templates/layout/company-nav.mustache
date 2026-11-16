@@ -7,10 +7,10 @@
         <a href="/events" data-company-nav="/events"><span aria-hidden="true">03</span>주최 행사</a>
         <a href="/events/save" data-company-nav="/events/save"><span aria-hidden="true">04</span>행사 주최 신청</a>
     </nav>
-    <div class="account-sidebar-bottom"><p>회차·참가자 관리 화면은<br>순차적으로 준비 중입니다.</p><a href="/">메인으로 돌아가기 →</a></div>
+    <div class="account-sidebar-bottom"><p>주최 행사에서 회차별 정보와<br>참가자 목록을 확인하세요.</p><a href="/">메인으로 돌아가기 →</a></div>
 </aside>
 <script>
 document.querySelectorAll('[data-company-nav]').forEach(link => {
-    if(link.dataset.companyNav === window.location.pathname) link.setAttribute('aria-current', 'page');
+    if(link.dataset.companyNav === window.location.pathname || (link.dataset.companyNav === '/events' && /^\/(?:events\/sessions\/|event-sessions\/)/.test(window.location.pathname))) link.setAttribute('aria-current', 'page');
 });
 </script>

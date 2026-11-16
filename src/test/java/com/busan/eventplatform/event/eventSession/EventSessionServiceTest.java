@@ -115,6 +115,8 @@ class EventSessionServiceTest {
 
         dto.setName("수정된 1회차");
         dto.setStartsAt(LocalDateTime.of(2026, 12, 2, 10, 0));
+        dto.setApplyStartAt(LocalDateTime.of(2026, 11, 20, 9, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2026, 11, 30, 18, 0));
         dto.setEndsAt(LocalDateTime.of(2026, 12, 2, 18, 0));
         dto.setCapacity(capacity);
         dto.setHoldDurationSeconds(600);

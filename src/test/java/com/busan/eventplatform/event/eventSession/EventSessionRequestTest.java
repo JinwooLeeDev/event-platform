@@ -38,6 +38,8 @@ class EventSessionRequestTest {
 
         dto.setName("1회차");
         dto.setStartsAt(LocalDateTime.of(2026, 12, 1, 10, 0));
+        dto.setApplyStartAt(LocalDateTime.of(2026, 11, 20, 9, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2026, 11, 30, 18, 0));
         dto.setEndsAt(LocalDateTime.of(2026, 12, 1, 18, 0));
         dto.setCapacity(30);
         dto.setHoldDurationSeconds(300);
@@ -127,6 +129,20 @@ class EventSessionRequestTest {
         EventSessionRequest.UpdateDto dto = createUpdateDto();
 
         assertDoesNotThrow(dto::validate);
+    }
+
+    @Test
+    void updateDto_requiresRecruitmentPeriodInOrder() {
+        var dto = createUpdateDto();
+        var start = LocalDateTime.of(2026, 11, 20, 9, 0);
+        dto.setApplyStartAt(start); dto.setApplyEndAt(start.plusDays(5));
+        assertDoesNotThrow(dto::validate);
+        dto.setApplyEndAt(start.minusMinutes(1));
+        assertThrows(Exception400.class, dto::validate);
+        dto.setApplyEndAt(null);
+        assertThrows(Exception400.class, dto::validate);
+        dto.setApplyEndAt(start.plusDays(5)); dto.setApplyStartAt(null);
+        assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
