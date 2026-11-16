@@ -25,6 +25,7 @@
     .community-system { text-align: center; font-size: 12px; color: #8a8f99; margin: 10px 0; }
     .community-form { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid #edf0f5; }
     .community-form input { flex: 1; }
+    .community-notice { margin: 0; padding: 12px 24px; background: #fff8e6; border-bottom: 1px solid #f3e2b3; color: #6b4e00; font-size: 14px; white-space: pre-line; }
 </style>
 
 <main class="community-page py-5">
@@ -45,6 +46,9 @@
                     <div class="community-sub">{{sessionName}} · {{closeText}}</div>
                     <div id="community-status" class="community-status mt-2" role="status">연결 중…</div>
                 </div>
+
+                <!-- [5-2] 종료일 당일 안내 배너: 서버가 11시 이후에만 값을 줌, 11시 실시간 알림(REMINDER)도 여기에 표시 -->
+                <p id="community-end-day-notice" class="community-notice" role="status" {{^endDayNotice}}hidden{{/endDayNotice}}>{{#endDayNotice}}{{.}}{{/endDayNotice}}</p>
 
                 <ul id="community-messages" class="community-messages" aria-live="polite"
                     data-session-id="{{sessionId}}" data-my-user-id="{{myUserId}}">
@@ -117,6 +121,13 @@
             scrollToBottom();
         }
 
+        // 종료일 당일 안내 → 상단 배너 (textContent 로 넣어 XSS 방지)
+        function showEndDayNotice(text) {
+            const banner = document.getElementById('community-end-day-notice');
+            banner.textContent = text;
+            banner.hidden = false;
+        }
+
         // 퇴장(KICKED)·종료(CLOSED)·권한 거부 → 연결을 끊고 더 이상 받지 않음
         function end(text, goBack) {
             if (ended) return;
@@ -142,6 +153,7 @@
                 if (m.type === 'CHAT') appendChat(m);
                 else if (m.type === 'JOIN' || m.type === 'LEAVE') appendSystem(m.content);
                 else if (m.type === 'CLOSED') end(m.content, true);
+                else if (m.type === 'REMINDER') showEndDayNotice(m.content);
             });
 
             client.subscribe('/user/queue/community', frame => {

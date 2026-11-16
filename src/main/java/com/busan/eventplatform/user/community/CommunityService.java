@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * [f/40] 커뮤니티 — 멤버십 입장·퇴장(2단계) + 채팅방·메시지·내 커뮤니티(4단계) + 종료(5단계)
+ * [f/40] 커뮤니티 — 멤버십 입장·퇴장(2단계) + 채팅방·메시지·내 커뮤니티(4단계) + 종료(5단계) + 종료일 안내(5-2)
  *
  * join/leave 가 REQUIRES_NEW 인 이유:
  * - 신청 트랜잭션이 '커밋된 뒤'(AFTER_COMMIT) 리스너에서 불리므로, 이미 끝난 트랜잭션에 합류하지 않고 새 트랜잭션으로 저장한다.
@@ -110,7 +110,8 @@ public class CommunityService {
     public CommunityRes.RoomDto getRoom(Long sessionId, Long userId) {
         EventSession session = eventSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new Exception404("커뮤니티를 찾을 수 없습니다"));
-        if (!CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())) {
+        LocalDateTime now = CommunityPolicy.now();
+        if (!CommunityPolicy.isOpen(session.getEndsAt(), now)) {
             throw new Exception400("행사가 끝나 커뮤니티가 종료되었습니다");
         }
         if (!isActiveMember(sessionId, userId)) {
@@ -134,6 +135,7 @@ public class CommunityService {
                 session.getEvent().getTitle(),
                 session.getName(),
                 session.getEndsAt().toLocalDate().format(DATE) + " 24시에 커뮤니티가 종료됩니다",
+                CommunityPolicy.showsEndDayNotice(session.getEndsAt(), now) ? CommunityPolicy.END_DAY_NOTICE : null, // ★ [5-2]
                 userId,
                 messages,
                 messages.isEmpty());
@@ -177,6 +179,16 @@ public class CommunityService {
                         session.getEndsAt().toLocalDate().format(DATE) + " 24시까지",
                         "/community/" + session.getId()))
                 .toList();
+    }
+
+    // =========================================================
+    // 종료일 당일 안내 (5-2단계)
+    // =========================================================
+
+    /** ★ 오늘이 종료일인 운영 중 방 — 11:00 스케줄러가 안내를 보낼 대상 */
+    public List<Long> findRoomsEndingToday(LocalDateTime now) {
+        LocalDateTime dayStart = now.toLocalDate().atStartOfDay();
+        return communityMemberRepository.findOpenSessionIdsEndingBetween(dayStart, dayStart.plusDays(1));
     }
 
     // =========================================================

@@ -19,6 +19,7 @@ public class CommunityRes {
         private String eventTitle;
         private String sessionName;
         private String closeText;           // "2026. 11. 23 24시에 커뮤니티가 종료됩니다"
+        private String endDayNotice;        // ★ [5-2] 종료일 당일 11시 이후에만 안내 문구, 아니면 null(배너 숨김)
         private Long myUserId;
         private List<ChatItemDto> messages; // 오래된 것 → 최신 순
         private boolean empty;

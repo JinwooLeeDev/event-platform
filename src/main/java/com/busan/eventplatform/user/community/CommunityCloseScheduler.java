@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * [f/40] 커뮤니티 종료 (Q4·Q10·Q11) — 회차 종료일 24시에 방을 닫는다
+ * [f/40] 커뮤니티 종료 (Q4·Q10·Q11) — 회차 종료일 24시에 방을 닫는다 + 종료일 당일 11:00 안내(5-2)
  * - 매일 00:00 (Asia/Seoul) 실행
  * - 서버 시작 시에도 1회 실행 → 서버가 꺼져 있어 자정 실행을 놓쳐도 정리됨
  * - 순서: DB 정리(멤버 비활성·메시지 삭제, 한 트랜잭션) → 커밋 후 CLOSED 알림 (접속 중인 화면 종료)
@@ -28,6 +28,22 @@ public class CommunityCloseScheduler {
     @Scheduled(cron = "${community.close-cron:0 0 0 * * *}", zone = CommunityPolicy.ZONE_NAME)
     public void closeAtMidnight() {
         run("자정");
+    }
+
+    /**
+     * ★ [5-2] 종료일 당일 11:00 안내 — 오늘이 종료일인 방에 실시간 안내 1번
+     * 접속해 있지 않던 사람은 방에 들어올 때 상단 배너로 봄(getRoom) → 따로 저장하지 않아 재시작해도 중복 없음
+     * 로컬 테스트: VM 옵션 -Dcommunity.end-day-notice-cron="0 * * * * *"
+     */
+    @Scheduled(cron = "${community.end-day-notice-cron:0 0 11 * * *}", zone = CommunityPolicy.ZONE_NAME)
+    public void noticeEndDay() {
+        try {
+            List<Long> rooms = communityService.findRoomsEndingToday(CommunityPolicy.now());
+            rooms.forEach(communityNotifier::notifyEndDay);
+            log.info("[community] 종료일 안내 {}개 방 {}", rooms.size(), rooms);
+        } catch (Exception e) {
+            log.error("[community] 종료일 안내 실패", e);
+        }
     }
 
     @EventListener(ApplicationReadyEvent.class)

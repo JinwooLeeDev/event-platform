@@ -33,6 +33,12 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
             "where m.leftAt is null and m.eventSession.endsAt < :endedBefore")
     List<Long> findOpenSessionIdsEndedBefore(@Param("endedBefore") LocalDateTime endedBefore);
 
+    /** ★ [5-2] 오늘이 종료일인 방 — 활성 멤버가 있고 회차 종료 시각이 [오늘 00:00, 내일 00:00) */
+    @Query("select distinct m.eventSession.id from CommunityMember m " +
+            "where m.leftAt is null and m.eventSession.endsAt >= :dayStart and m.eventSession.endsAt < :nextDayStart")
+    List<Long> findOpenSessionIdsEndingBetween(@Param("dayStart") LocalDateTime dayStart,
+                                               @Param("nextDayStart") LocalDateTime nextDayStart);
+
     /** ★ [5단계] 방 전체 멤버 비활성 (CLOSED) — 행은 남김 (Q11) */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update CommunityMember m set m.leftAt = :now, m.leftReason = :reason " +
