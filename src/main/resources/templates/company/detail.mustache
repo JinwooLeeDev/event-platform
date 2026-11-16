@@ -95,6 +95,10 @@
         border-color: #d9dbe1;
     }
 
+    .company-home .company-point-card { margin: 24px 0; padding: 24px; border: 1px solid #e7e1d7; border-radius: 16px; background: #f3efe8; }
+    .company-home .company-point-card h2 { margin: 0 0 12px; font-size: 15px; }
+    .company-home .company-point-balance { display: block; margin-bottom: 12px; font-size: 30px; letter-spacing: -.7px; color: #292f3d; }
+    .company-home .company-point-card p { margin: 0 0 18px; color: #72716e; font-size: 13px; line-height: 1.8; }
     @media (max-width: 600px) {
         .company-home {
             padding: 28px 16px 40px;
@@ -119,6 +123,12 @@
             <p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
 
             {{#company}}
+                <section class="company-point-card" aria-labelledby="company-point-title">
+                    <h2 id="company-point-title">보유 포인트</h2>
+                    <strong class="company-point-balance">{{pointText}}</strong>
+                    <p>행사 승인 후 보증금 결제에 사용할 수 있는 기업 포인트입니다.</p>
+                    <a class="company-link" href="/charge">포인트 충전하기 →</a>
+                </section>
                 <h2>{{name}}</h2>
 
                 <dl>

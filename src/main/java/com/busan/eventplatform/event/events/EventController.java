@@ -11,7 +11,6 @@ import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
-import com.busan.eventplatform.user.registration.RegistrationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,6 @@ public class EventController {
     private final EventCategoryService eventCategoryService;
     private final EventSessionService eventSessionService;
     private final EventFileService eventFileService;
-    private final RegistrationService registrationService;
 
     @Value("${naver-map.client-id:}")
     private String naverMapClientId;
@@ -80,9 +78,6 @@ public class EventController {
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
         var eventSessions = eventSessionService.findByEventId(id);
-
-        Map<Long, String> closedReasons = registrationService.getClosedReasonsByEventId(id);
-        eventSessions.forEach(s -> s.applyRegistrationState(closedReasons.getOrDefault(s.getId(), "")));
 
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
@@ -162,6 +157,7 @@ public class EventController {
         EventResponse.UpdateFormDto updateFormDto =
                 eventService.update(id, sessionCompanyDto.getId());
         model.addAttribute("event", updateFormDto);
+        model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
 
         return "event/update-form";
     }
@@ -169,12 +165,14 @@ public class EventController {
     // 행사 수정
     // POST - http://localhost:8080/events/update/1
     @PostMapping("/events/update/{id}")
-    public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session) {
+    public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session,
+                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
 
         updateDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        eventService.update(id, sessionCompanyDto.getId(), updateDto);
+        eventService.updateAndResubmit(id, sessionCompanyDto.getId(), updateDto);
+        redirect.addFlashAttribute("successMessage", "수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다.");
 
         return "redirect:/events";
     }

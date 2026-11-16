@@ -1,0 +1,58 @@
+{{#reviewSuccess}}<p class="admin-company-warning" role="status">{{reviewSuccess}}</p>{{/reviewSuccess}}
+{{#eventListPage}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>행사 심사 대기 <span class="admin-badge">{{eventReviewCount}}건</span></h2></div>
+    <p class="admin-company-note">심사 대기 중인 행사를 신청 순서대로 표시합니다. 승인 후에는 기업의 최종 결제가 필요합니다.</p>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <caption class="admin-sr-only">행사 심사 대기 목록</caption>
+        <thead><tr><th scope="col">번호</th><th scope="col">행사명</th><th scope="col">주최 기업</th><th scope="col">카테고리</th><th scope="col">신청일</th><th scope="col">심사</th></tr></thead>
+        <tbody>
+        {{#reviewEvents}}<tr><td>{{id}}</td><td>{{title}}</td><td>{{company.name}}</td><td>{{category.name}}</td><td>{{createdAt}}</td><td><a href="/admin/events/{{id}}">상세 검토 →</a></td></tr>{{/reviewEvents}}
+        {{^reviewEvents}}<tr><td colspan="6" class="admin-member-empty">현재 심사 대기 중인 행사가 없습니다.</td></tr>{{/reviewEvents}}
+        </tbody>
+    </table></div>
+</section>
+{{/eventListPage}}
+{{#eventDetailPage}}
+{{#reviewEvent}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>{{title}}</h2><a href="/admin/events">심사 목록 →</a></div>
+    <dl class="admin-member-facts">
+        <div><dt>주최 기업</dt><dd>{{company.name}}</dd></div>
+        <div><dt>카테고리</dt><dd>{{category.name}}</dd></div>
+        <div><dt>행사 주소</dt><dd>{{address}}</dd></div>
+        <div><dt>신청일</dt><dd>{{createdAt}}</dd></div>
+        <div><dt>한 줄 소개</dt><dd>{{summary}}</dd></div>
+        <div><dt>상세 설명</dt><dd class="admin-company-feedback">{{description}}</dd></div>
+        {{#feedbackMessage}}<div><dt>보완 요청 사유</dt><dd class="admin-company-feedback">{{feedbackMessage}}</dd></div>{{/feedbackMessage}}
+    </dl>
+</section>
+<section class="admin-panel admin-history">
+    <div class="admin-panel-heading"><h2>회차 및 모집 정보</h2></div>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <caption class="admin-sr-only">신청 행사 회차 정보</caption>
+        <thead><tr><th scope="col">회차</th><th scope="col">개최 일정</th><th scope="col">모집 기간</th><th scope="col">정원</th><th scope="col">참가비</th></tr></thead>
+        <tbody>{{#reviewSessions}}<tr><td>{{name}}</td><td>{{startsAt}}<br>~ {{endsAt}}</td><td>{{applyStartAt}}<br>~ {{applyEndAt}}</td><td>{{capacityLabel}}</td><td>{{fee}} P</td></tr>{{/reviewSessions}}
+        {{^reviewSessions}}<tr><td colspan="5" class="admin-member-empty">등록된 회차가 없습니다.</td></tr>{{/reviewSessions}}</tbody>
+    </table></div>
+</section>
+<section class="admin-panel admin-history">
+    <div class="admin-panel-heading"><h2>행사 심사 처리</h2></div>
+    <div class="admin-company-review">
+    {{#reviewable}}
+        <form action="/admin/events/{{id}}/approve" method="post" class="admin-company-approve">
+            <p>행사와 회차 정보를 확인했다면 승인해 주세요.<br>승인 후 기업 결제가 완료되면 행사가 공개됩니다.</p>
+            <button class="admin-status-button admin-status-button-activate" type="submit">행사 승인</button>
+        </form>
+        <form action="/admin/events/{{id}}/feedback" method="post" class="admin-company-correction">
+            <label for="event-feedback">보완 요청 사유</label>
+            <p id="event-feedback-help">기업이 수정할 내용을 최대 1,000자까지 입력해 주세요.</p>
+            <textarea id="event-feedback" name="feedbackMessage" rows="5" maxlength="1000" required aria-describedby="event-feedback-help"></textarea>
+            <button class="admin-status-button admin-status-button-danger" type="submit">보완 요청</button>
+        </form>
+    {{/reviewable}}
+    {{^reviewable}}<p class="admin-company-note">이미 심사가 처리되어 현재 승인 또는 보완 요청을 할 수 없습니다.</p>{{/reviewable}}
+    </div>
+</section>
+{{/reviewEvent}}
+{{/eventDetailPage}}
