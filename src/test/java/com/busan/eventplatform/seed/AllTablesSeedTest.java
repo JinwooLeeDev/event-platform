@@ -67,7 +67,26 @@ class AllTablesSeedTest {
                 assertStates(connection,"registrations","status",RegistrationStatus.values());
                 assertStates(connection,"registration_history","changed_status",RegistrationStatus.values());
                 assertStates(connection,"purchase_tb","status",PurchaseStatus.values());
-                assertStates(connection,"deposit_tb","status",DepositStatus.values());
+                assertStates(connection,"deposit_tb","status",new DepositStatus[]{DepositStatus.PAID});
+                assertEquals(0, count(connection,"select count(*) from events e where not exists (select 1 from event_sessions s where s.event_id=e.id)"));
+                assertEquals(0, count(connection,"select count(*) from events e where not exists (select 1 from event_files f where f.event_id=e.id)"));
+                assertEquals(0, count(connection,"""
+                        select count(*) from events e where e.status in ('PENDING_REVIEW','FEEDBACK_REQUIRED','PAID_READY')
+                        and (e.published_at is not null or exists (select 1 from deposit_tb d where d.event_id=e.id))
+                        """));
+                assertEquals(0, count(connection,"""
+                        select count(*) from events e where e.status in ('PUBLISHED','COMPLETED','CANCELLED')
+                        and not exists (select 1 from deposit_tb d where d.event_id=e.id and d.status='PAID')
+                        """));
+                assertTrue(count(connection,"select count(*) from event_sessions where name='기본 회차' and pricing_type='FREE'") > 0);
+                assertTrue(count(connection,"select count(*) from event_sessions where name='기본 회차' and pricing_type='PAID'") > 0);
+                assertEquals(0, count(connection,"""
+                        select count(*) from event_sessions s where s.name='기본 회차' and
+                        (s.capacity!=2147483647 or s.hold_duration_seconds!=0 or s.reservation_deposit_points!=0
+                        or s.minimum_participants!=1 or s.minimum_check_at!=s.ends_at
+                        or cast(s.starts_at as time)!='00:00:00' or cast(s.ends_at as time)!='23:59:59'
+                        or (select count(*) from event_sessions other where other.event_id=s.event_id)!=1)
+                        """));
                 assertStates(connection,"refund_tb","status",RefundStatus.values());
                 assertEquals(0,count(connection,"""
                         select count(*) from registrations r left join purchase_tb p on p.id=r.purchase_id
@@ -90,7 +109,7 @@ class AllTablesSeedTest {
                         select count(*) from event_sessions s where s.occupied_count !=
                         (select count(*) from registrations r where r.event_session_id=s.id and r.status in ('CONFIRMED','PENDING'))
                         or s.occupied_count > s.capacity or s.minimum_participants > s.capacity
-                        or s.starts_at >= s.ends_at or s.minimum_check_at > s.starts_at
+                        or s.starts_at >= s.ends_at or (s.name!='기본 회차' and s.minimum_check_at > s.starts_at)
                         or s.next_reception_number <= coalesce((select max(r.reception_number) from registrations r where r.event_session_id=s.id),0)
                         """));
                 assertEquals(0, count(connection,"""
@@ -127,7 +146,7 @@ class AllTablesSeedTest {
                         select count(*) from purchase_tb p where p.price<
                         (select coalesce(sum(f.amount),0) from refund_tb f where f.purchase_id=p.id)
                         """));
-                assertEquals(0,count(connection,"select count(*) from events where apply_start_at>=apply_end_at or created_at>apply_start_at"));
+                assertEquals(0,count(connection,"select count(*) from event_sessions where apply_start_at>=apply_end_at or created_at>apply_start_at"));
                 assertEquals(0,count(connection,"select count(*) from events e join company_tb c on c.id=e.company_id where c.status!='APPROVED'"));
                 assertEquals(0,count(connection,"select count(*) from users where (status='WITHDRAWN' and withdrawn_at is null) or (status!='WITHDRAWN' and withdrawn_at is not null)"));
                 assertTrue(count(connection,"select count(*) from users")>20);

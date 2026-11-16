@@ -1,27 +1,20 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategoryService;
 import com.busan.eventplatform.event.event_file.EventFileService;
 import com.busan.eventplatform.event.event_session.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception400;
-import com.busan.eventplatform.global.error.exception.Exception403;
-import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
-import com.busan.eventplatform.event.event_category.EventCategoryService;
-import com.busan.eventplatform.event.event_session.EventSessionService;
-import com.busan.eventplatform.event.event_session.EventSessionResponse;
-import java.util.Map;
-import java.util.Objects;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
@@ -103,8 +97,7 @@ public class EventController {
     // 행사 등록
     // POST - http://localhost:8080/events/save
     @PostMapping("/events/save")
-    public String save(EventRequest.SaveDto saveDto,
-                       @RequestParam("file") MultipartFile file, HttpSession session) {
+    public String save(EventRequest.SaveDto saveDto, @RequestParam("file") MultipartFile file, HttpSession session) {
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
@@ -116,7 +109,6 @@ public class EventController {
         }
         Event event = eventService.save(saveDto, sessionCompanyDto.getId());
         eventFileService.attachFile(event.getId(), file);
-
         return "redirect:/";
     }
 
@@ -144,12 +136,10 @@ public class EventController {
     // GET - http://localhost:8080/company/events/feedback
     @GetMapping("/events/feedback")
     public String findAllFeedback(HttpSession session, Model model) {
-
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         model.addAttribute("eventList",
                 eventService.findAllFeedback(sessionCompanyDto.getId()));
-
         return "company/event-feedback-list";
     }
 
@@ -163,6 +153,10 @@ public class EventController {
         EventResponse.UpdateFormDto updateFormDto =
                 eventService.update(id, sessionCompanyDto.getId());
         model.addAttribute("event", updateFormDto);
+        model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
+        var sessions = eventSessionService.findDetailsByEventId(id);
+        model.addAttribute("editSessions", java.util.stream.IntStream.range(0, sessions.size())
+                .mapToObj(i -> Map.of("index", i, "session", sessions.get(i))).toList());
 
         return "event/update-form";
     }
@@ -170,13 +164,14 @@ public class EventController {
     // 행사 수정
     // POST - http://localhost:8080/events/update/1
     @PostMapping("/events/update/{id}")
-    public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session) {
-
+    public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session,
+                         @RequestParam(value = "file", required = false) MultipartFile file,
+                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
         updateDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        eventService.update(id, sessionCompanyDto.getId(), updateDto);
-
+        eventService.updateAndResubmit(id, sessionCompanyDto.getId(), updateDto, file);
+        redirect.addFlashAttribute("successMessage", "수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다.");
         return "redirect:/events";
     }
 
@@ -186,7 +181,6 @@ public class EventController {
     public String resubmit(@PathVariable Long id, HttpSession session) {
         SessionCompanyDto sessionCompanyDto = (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         eventService.resubmit(id, sessionCompanyDto.getId());
-
         return "redirect:/events";
     }
 
@@ -194,11 +188,9 @@ public class EventController {
     // POST - http://localhost:8080/company/events/delete/1
     @PostMapping("/events/delete/{id}")
     public String delete(@PathVariable Long id, HttpSession session) {
-
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         eventService.delete(id, sessionCompanyDto.getId());
-
         return "redirect:/events";
     }
 
@@ -206,20 +198,15 @@ public class EventController {
     // POST - http://localhost:8080/events/approve/1
     @PostMapping("/events/approve/{id}")
     public String approve(@PathVariable Long id) {
-
         eventService.approve(id);
-
         return "redirect:/events";
     }
 
     // 관리자 보완 요청
     // POST - http://localhost:8080/events/feedback/1
     @PostMapping("/events/feedback/{id}")
-    public String requestFeedback(@PathVariable Long id,
-                                  @RequestParam String feedbackMessage) {
-
+    public String requestFeedback(@PathVariable Long id, @RequestParam String feedbackMessage) {
         eventService.requestFeedback(id, feedbackMessage);
-
         return "redirect:/events";
     }
 
@@ -227,13 +214,8 @@ public class EventController {
     // POST - http://localhost:8080/events/cancel/1
     @PostMapping("/events/cancel/{id}")
     public String cancel(@PathVariable Long id, EventRequest.CancelDto cancelDto) {
-
         cancelDto.validate();
         eventService.cancel(id, cancelDto);
-
         return "redirect:/events";
     }
-
-
-
 }

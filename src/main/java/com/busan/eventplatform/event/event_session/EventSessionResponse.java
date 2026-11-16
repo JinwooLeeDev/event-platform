@@ -22,6 +22,9 @@ public class EventSessionResponse {
     // 회차 한 개 정보
     @Data
     public static class EventSessionDto {
+        public String getCapacityLabel() {
+            return capacity == Integer.MAX_VALUE ? "제한 없음" : capacity + "명";
+        }
         private Long id;
         private String name;
         private LocalDateTime startsAt;
@@ -33,8 +36,13 @@ public class EventSessionResponse {
         private EventSessionStatus status;
         private LocalDateTime applyStartAt;
         private LocalDateTime applyEndAt;
-        private boolean canApply;
-        private String closedReason;
+        private boolean canApply = true;
+        private String closedReason = "";
+
+        public void applyRegistrationState(String closedReason) {
+            this.closedReason = (closedReason == null) ? "" : closedReason;
+            this.canApply = this.closedReason.isEmpty();
+        }
 
         public EventSessionDto(EventSession eventSession) {
             this(eventSession, null);
@@ -52,8 +60,8 @@ public class EventSessionResponse {
             this.status = eventSession.getStatus();
             this.applyStartAt = eventSession.getApplyStartAt();
             this.applyEndAt = eventSession.getApplyEndAt();
-            this.closedReason = closedReason;
-            this.canApply = (closedReason == null);
+            this.closedReason = (closedReason == null) ? "" : closedReason;
+            this.canApply = this.closedReason.isEmpty();
         }
     }
 

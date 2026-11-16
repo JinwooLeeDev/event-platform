@@ -66,11 +66,11 @@ class AdminPageTest {
 
     @Test
     void rendersEveryAdminPageWithSharedNavigationAndEscapedAccountName() throws Exception {
-        var controller = new AdminController(org.mockito.Mockito.mock(com.busan.eventplatform.company.companyAdminReview.CompanyReviewService.class));
+        var controller = new AdminController(org.mockito.Mockito.mock(com.busan.eventplatform.company.companyAdminReview.CompanyReviewService.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class));
         for (String section : List.of("dashboard", "events", "sessions")) {
             var model = new ExtendedModelMap();
             String view = switch (section) {
-                case "events" -> controller.events(model);
+                case "events" -> new AdminEventController(org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventService.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.event_session.EventSessionService.class)).list(model);
                 case "sessions" -> controller.sessions(model);
                 default -> controller.dashboard(com.busan.eventplatform.login.personallogin.SessionUserDto.builder().id(1L).build(), model);
             };
@@ -85,7 +85,7 @@ class AdminPageTest {
             assertTrue(html.contains("action=\"/logout\" method=\"post\""));
             assertTrue(html.contains("&lt;script&gt;admin&lt;/script&gt;"));
             assertFalse(html.contains("<script>admin</script>"));
-            assertTrue(html.contains(section.equals("dashboard") ? "집계 준비 중" : "관리 기능을 준비하고 있습니다"));
+            if (!section.equals("events")) assertTrue(html.contains(section.equals("dashboard") ? "집계 준비 중" : "관리 기능을 준비하고 있습니다"));
         }
         assertEquals("redirect:/admin/dashboard", controller.index());
     }

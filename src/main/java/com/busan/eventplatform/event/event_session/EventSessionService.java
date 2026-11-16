@@ -47,6 +47,10 @@ public class EventSessionService {
     }
 
     // 행사별 회차 목록 조회
+    public List<EventSessionResponse.DetailDto> findDetailsByEventId(Long eventId) {
+        return eventSessionRepository.findByEventId(eventId).stream().map(EventSessionResponse.DetailDto::new).toList();
+    }
+
     public List<EventSessionResponse.EventSessionDto> findByEventId(Long eventId) {
         return eventSessionRepository.findByEventId(eventId)
                 .stream()
@@ -94,5 +98,4 @@ public class EventSessionService {
         }
         eventSessionRepository.delete(eventSession);
     }
-
 }
