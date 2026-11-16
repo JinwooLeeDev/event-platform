@@ -153,4 +153,11 @@ public class EventSession {
     public void cancel() {
         this.status = EventSessionStatus.CANCELLED;
     }
+
+    // 관리자에게 승인취소 받은 행사인지 검사 --> 기업 보증금 환불에서 사용.
+    public boolean isCanceled() {return this.status == EventSessionStatus.CANCELLED;}
+
+    public void setScheduled() {this.status = EventSessionStatus.SCHEDULED;}
+
+    public boolean isOwner(Long companyId) {return this.event.getCompany().getId().equals(companyId);}
 }

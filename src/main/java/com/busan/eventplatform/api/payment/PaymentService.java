@@ -98,8 +98,18 @@ public class PaymentService {
         // 6. 최종 DB 반영 + status 값 변경 + 유저 / company point 변경.(더티체킹)
         payment.confirmPay();
 
-        if(loginIdentity.isUser()) payment.getUser().chargePoint(payment.getAmount());
-        else if(loginIdentity.isCompany()) payment.getCompany().chargePoint(payment.getAmount());
+        if(loginIdentity.isUser()) {
+            User user = userRepository.LockFindById(payment.getUser().getId())
+                    .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
+
+            user.chargePoint(payment.getAmount());
+        }
+        else if(loginIdentity.isCompany()) {
+            Company company = companyRepository.LockFindById(payment.getCompany().getId())
+                    .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다"));
+
+            company.chargePoint(payment.getAmount());
+        }
         else throw new Exception400("결제 처리가 완료되지 않았습니다.");
 
         return new PaymentRes.CompleteDto(payment.getAmount());

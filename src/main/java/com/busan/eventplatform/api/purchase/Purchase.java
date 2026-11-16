@@ -2,23 +2,18 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.global.util.MyDateUtil;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 
 @Table(name = "purchase_tb")
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 public class Purchase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +29,7 @@ public class Purchase {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eventSession_id" , nullable = false)
+    @JoinColumn(name = "event_session_id" , nullable = false)
     private EventSession eventSession; // 유저가 재신청할 우려가 있으므로 user와 unique는 걸지말자.
 
     @CreationTimestamp
@@ -54,4 +49,6 @@ public class Purchase {
         this.status = PurchaseStatus.PURCHASED;
     }
 
+
+    public void setPurchaseRefunded() {this.status = PurchaseStatus.REFUNDED;}
 }

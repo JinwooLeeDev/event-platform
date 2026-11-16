@@ -16,10 +16,12 @@ public interface PurchaseRepository extends JpaRepository<Purchase , Long>{
     @Query("""
             select case when count(p.user) > 0 then true else false end
             from Purchase p 
-            where p.user.id = :userId and p.eventSession.id = :eventId 
+            where p.user.id = :userId and p.eventSession.id = :eventId and p.status = :status
             """
             )
-    boolean existsEventByUser (@Param("userId") Long userId , @Param("eventId") Long eventId);
+    boolean existsEventByUser (@Param("userId") Long userId ,
+                               @Param("eventId") Long eventId ,
+                                @Param("status") PurchaseStatus status);
 
 
     // purchase , event , eventSession 가져오기.
