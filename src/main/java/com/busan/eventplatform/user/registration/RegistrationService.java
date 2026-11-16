@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationEventPublisher;   // ★ [f/40] 상태 변경 이벤트 발행
+
+
 /**
  * 참가 신청 도메인.
  * <p>
@@ -48,6 +51,7 @@ public class RegistrationService {
     private static final DateTimeFormatter HISTORY_DATE = DateTimeFormatter.ofPattern("yyyy. MM. dd");
     private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
 
+    private final ApplicationEventPublisher eventPublisher;   // ★ [f/40] 상태 변경 알림 → 커뮤니티 입장·퇴장
     /**
      * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
      *
@@ -131,6 +135,8 @@ public class RegistrationService {
 
         // 3. 이력 기록
         recordHistory(registration, status, user, "참가 신청");
+        publishStatusChanged(registration, null);  // ★ [f/40] 새 신청 (확정이면 커뮤니티 입장, 대기면 무시)
+
 
         Integer waitingNumber = waitingNumberOf(registration);
         return RegistrationRes.ApplyDto.of(registration, waitingNumber);
@@ -179,6 +185,7 @@ public class RegistrationService {
 
         registration.cancel(); // 상태가 바뀜
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
+        publishStatusChanged(registration, statusBefore); // ★ [f/40] 확정이었다면 커뮤니티 퇴장
 
         // ★ 추가: 포인트 환불
         //   - 상태를 CANCELLED로 바꾼 '후' 호출 (RefundService가 CANCELLED인지 검사함)
@@ -216,11 +223,13 @@ public class RegistrationService {
 
         validateOrganizer(session, loginIdentity);
 
-        boolean releasedSeat = registration.getStatus().isSeatOccupying();
+        RegistrationStatus statusBefore = registration.getStatus(); // ★ [f/40] 거절 전 상태 기억
+        boolean releasedSeat = statusBefore.isSeatOccupying();
         registration.reject();
         // 주최자는 Company 라 processedByUser(User 타입)에 넣을 수 없음 → null + 사유에 기업 id 기록
         recordHistory(registration, RegistrationStatus.REJECTED, null,
                 "주최자 반려 (companyId=" + loginIdentity.getId() + ")");
+        publishStatusChanged(registration, statusBefore);   // ★ [f/40] 확정이었다면 커뮤니티 퇴장
 
         if (releasedSeat) {
             session.releaseSeat();
@@ -260,7 +269,7 @@ public class RegistrationService {
             RegistrationStatus promotedStatus = seatStatusFor(session);
             next.promote(promotedStatus);
             recordHistory(next, promotedStatus, null, "선행 대기자 승격"); // 시스템 자동 처리
-            registrationRepository.flush(); // 다음 findFirst 조회에 상태 변경이 반영되도록
+            publishStatusChanged(next, RegistrationStatus.WAITING);       // ★ [f/40] 대기 → 확정 승격: 커뮤니티 입장
         }
     }
 
@@ -452,6 +461,19 @@ public class RegistrationService {
                 .processedByUser(processedBy)
                 .reason(reason)
                 .build());
+    }
+
+    /**
+     * ★ [f/40] 상태 변경 이벤트 발행 — 상태를 바꾸고 이력을 남긴 '직후'에 호출
+     * 실제 처리(커뮤니티 입장·퇴장)는 트랜잭션 커밋 후 리스너가 한다.
+     */
+    private void publishStatusChanged(Registration registration, RegistrationStatus before) {
+        eventPublisher.publishEvent(new RegistrationStatusChangedEvent(
+                registration.getId(),
+                registration.getUser().getId(),
+                registration.getEventSession().getId(),
+                before,
+                registration.getStatus()));
     }
 
     private Registration findRegistration(Long registrationId) {
