@@ -9,7 +9,7 @@
                     <p class="event-card__summary">{{summary}}</p>
                     <div class="event-card__period">
                         <span>모집 기간</span>
-                        <div>{{applyStartAt}}<br>~ {{applyEndAt}}</div>
+                        <div>{{#sessionPeriods}}<div><strong>{{name}}</strong><br>{{applyStartAt}} ~ {{applyEndAt}}</div>{{/sessionPeriods}}{{^sessionPeriods}}등록된 회차가 없습니다.{{/sessionPeriods}}</div>
                     </div>
                     {{#categoryName}}<span class="event-card__category">{{categoryName}}</span>{{/categoryName}}
                     {{^categoryName}}<span class="event-card__category">카테고리 준비 중</span>{{/categoryName}}

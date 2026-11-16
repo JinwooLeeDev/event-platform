@@ -44,24 +44,24 @@
                 <h1 id="event-title">{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}{title}{{/event.title}}</h1>
                 <p class="detail-summary">{{#event.summary}}{{event.summary}}{{/event.summary}}{{^event.summary}}{summary}{{/event.summary}}</p>
                 <dl class="detail-facts">
-                    <div><dt>모집 시작</dt><dd>{{#event.applyStartAt}}<span data-detail-date>{{event.applyStartAt}}</span>{{/event.applyStartAt}}{{^event.applyStartAt}}{applyStartAt}{{/event.applyStartAt}}</dd></div>
-                    <div><dt>모집 마감</dt><dd>{{#event.applyEndAt}}<span data-detail-date>{{event.applyEndAt}}</span>{{/event.applyEndAt}}{{^event.applyEndAt}}{applyEndAt}{{/event.applyEndAt}}</dd></div>
+                    <div><dt>모집 시작</dt><dd id="session-apply-start">회차를 선택해주세요.</dd></div>
+                    <div><dt>모집 마감</dt><dd id="session-apply-end">회차를 선택해주세요.</dd></div>
                     <div><dt>장소</dt><dd>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}{address}{{/event.address}}</dd></div>
                     <div><dt>주최 기업</dt><dd>{{event.companyName}}</dd></div>
                 </dl>
-                {{#event.applicationClosed}}<p class="detail-state">모집 기간이 마감되었습니다.</p>{{/event.applicationClosed}}
+                <p id="session-apply-state" class="detail-state" role="status" hidden></p>
                 <div class="detail-session-picker">
                     <label for="event-session">참가 회차 선택</label>
-                    <select id="event-session" name="eventSessionId" aria-describedby="session-picker-help" {{^hasEventSessions}}disabled{{/hasEventSessions}}>
+                    <select id="event-session" name="sessionId" aria-describedby="session-picker-help" {{^hasEventSessions}}disabled{{/hasEventSessions}}>
                         <option value="" selected disabled>참가할 회차를 선택해주세요</option>
                         {{#eventSessions}}
-                            <option value="{{id}}" data-session-option>{{name}}{{#startsAt}} · {{startsAt}}{{/startsAt}}</option>
+                            <option value="{{id}}" data-session-option data-session-name="{{name}}" data-apply-start="{{applyStartAt}}" data-apply-end="{{applyEndAt}}" data-can-apply="{{canApply}}" data-closed-reason="{{#closedReason}}{{closedReason}}{{/closedReason}}">{{name}}{{#startsAt}} · {{startsAt}}{{/startsAt}}</option>
                         {{/eventSessions}}
                     </select>
-                    <p id="session-picker-help" class="detail-muted">{{#hasEventSessions}}참가할 회차를 선택해주세요. 신청 기능은 준비 중입니다.{{/hasEventSessions}}{{^hasEventSessions}}등록된 회차가 없습니다.{{/hasEventSessions}}</p>
+                    <p id="session-picker-help" class="detail-muted">{{#hasEventSessions}}참가할 회차를 선택하면 신청 가능 여부와 필요한 포인트를 확인할 수 있습니다.{{/hasEventSessions}}{{^hasEventSessions}}등록된 회차가 없습니다.{{/hasEventSessions}}</p>
                 </div>
-                <button class="detail-button" type="button" disabled>참가 신청 연결 준비 중</button>
-                <p class="detail-muted">모집 시작 여부·정원·회차별 신청 기능은 추후 연결됩니다.</p>
+                <button class="detail-button reg-apply-btn" type="button" {{^hasEventSessions}}disabled{{/hasEventSessions}}>참가 신청</button>
+                <p class="detail-muted">정원이 마감된 회차는 대기 신청으로 접수됩니다. 포인트 결제 화면에서 최종 신청을 진행합니다.</p>
                 <a class="detail-back" href="/">메인으로 돌아가기 →</a>
 
             </aside>
@@ -69,7 +69,9 @@
     </div>
 </main>
 {{> layout/footer}}
+{{> registration/apply-button-script}}
 <script src="/js/event-detail-map.js" defer></script>
+<script src="/js/event-detail-session.js" defer></script>
 <script>
 document.querySelectorAll('[data-session-option]').forEach(option => {
     option.textContent = option.textContent.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?/, value =>

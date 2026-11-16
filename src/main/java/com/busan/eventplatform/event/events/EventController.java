@@ -1,28 +1,20 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategoryService;
 import com.busan.eventplatform.event.event_file.EventFileService;
 import com.busan.eventplatform.event.event_session.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception400;
-import com.busan.eventplatform.global.error.exception.Exception403;
-import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
-import com.busan.eventplatform.event.event_category.EventCategoryService;
-import com.busan.eventplatform.event.event_session.EventSessionService;
-import com.busan.eventplatform.event.event_session.EventSessionResponse;
-import java.util.Map;
-import java.util.Objects;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
@@ -69,7 +62,7 @@ public class EventController {
     }
 
     // 행사 상세 조회
-    // GET - http://localhost:8080/evets/1
+    // GET - http://localhost:8080/event/1
     @GetMapping("/event/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session) {
 
@@ -84,8 +77,8 @@ public class EventController {
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
-        var eventSessions = new EventSessionResponse.ListDto(eventSessionService.findByEventId(id))
-                .getEventSessionList();
+        var eventSessions = eventSessionService.findByEventId(id);
+
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
         model.addAttribute("naverMapClientId", naverMapClientId);
@@ -106,8 +99,6 @@ public class EventController {
     @PostMapping("/events/save")
     public String save(EventRequest.SaveDto saveDto,
                        @RequestParam("file") MultipartFile file, HttpSession session) {
-        System.out.println("1. 행사 등록 컨트롤러 진입");
-
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
@@ -125,7 +116,7 @@ public class EventController {
 
     // 기업이 등록한 행사 전체 조회
     // GET - http://localhost:8080/events
-    @GetMapping ("/events")
+    @GetMapping("/events")
     public String findAllByCompanyId(HttpSession session, Model model) {
         LoginIdentity identity = LoginSession.requireIdentity(session);
         if (!identity.isCompany()) {
@@ -166,6 +157,7 @@ public class EventController {
         EventResponse.UpdateFormDto updateFormDto =
                 eventService.update(id, sessionCompanyDto.getId());
         model.addAttribute("event", updateFormDto);
+        model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
 
         return "event/update-form";
     }
@@ -173,12 +165,14 @@ public class EventController {
     // 행사 수정
     // POST - http://localhost:8080/events/update/1
     @PostMapping("/events/update/{id}")
-    public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session) {
+    public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session,
+                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
 
         updateDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        eventService.update(id, sessionCompanyDto.getId(), updateDto);
+        eventService.updateAndResubmit(id, sessionCompanyDto.getId(), updateDto);
+        redirect.addFlashAttribute("successMessage", "수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다.");
 
         return "redirect:/events";
     }

@@ -1,6 +1,8 @@
 package com.busan.eventplatform.user.registration;
 
 import com.busan.eventplatform.api.purchase.Purchase;
+import com.busan.eventplatform.api.refund.RefundPolicy;
+import com.busan.eventplatform.api.refund.RefundService;   // ★ 추가: 참가 취소 시 포인트 환불 (포인트 파트)
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
@@ -19,15 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 참가 신청 도메인.
  * <p>
  * 결제 정책: "신청 시 결제"
- * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 PurchaseService.purchase() 로 결제.
+ * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 결제 (RegistrationPurchaseService → PurchaseService.pay).
  * - 대기열 승격 시에는 추가 결제 없이 상태만 변경.
- * - 취소/반려 시 환불은 PurchaseService 의 환불 메서드(구현 중)에 위임.
+ * - 본인 취소 환불은 RefundService.refundUser() 에 위임, 기업 거절 환불은 refundCompany 구현 후 연결.
  * <p>
  * 결제·환불 로직은 이 클래스에서 직접 처리하지 않는다.
  */
@@ -42,6 +46,7 @@ public class RegistrationService {
     private final UserRepository userRepository;
     // [나의 신청 내역] 결제일 표시 형식
     private static final DateTimeFormatter HISTORY_DATE = DateTimeFormatter.ofPattern("yyyy. MM. dd");
+    private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
 
     /**
      * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
@@ -53,10 +58,10 @@ public class RegistrationService {
     }
 
     /**
-     * 환불 요청 — cancel()/reject() 가 만들어 흐름 클래스로 넘기면, 흐름 클래스가 PurchaseService.refund() 호출
+     * reject() 전용 (기업 거절 환불 refundCompany 연결 전까지 유지)
      *
      * @param purchaseId   환불할 결제 (신청에 연결된 결제, 연결 전 기존 데이터면 null)
-     * @param refundAmount 환불 규칙(RegistrationRefundPolicy)으로 계산한 금액 (0 가능)
+     * @param refundAmount 환불 규칙(RefundPolicy)으로 계산한 금액 (0 가능)
      */
     public record RefundRequest(Long purchaseId, int refundAmount) {
     }
@@ -136,7 +141,7 @@ public class RegistrationService {
      * - 결제는 직접 호출하지 않는다. 신청 + 결제 순서는 RegistrationPurchaseService 가 조율한다.
      *   검증(prepareApply) → 결제(PurchaseService.pay) → 저장(completeApply), 하나의 트랜잭션
      * - 대기열 승격 시에는 추가 결제 없이 상태만 변경 (신청 시점에 이미 결제)
-     * - 취소·반려 시 환불은 포인트 파트 refund() 완성 후 흐름 클래스에서 연결 (TODO)
+     * - 본인 취소 환불: cancel() 에서 RefundService.refundUser() 호출로 연결 / 거절 환불: TODO (refundCompany 구현 대기)
      */
 
     // =========================================================
@@ -145,12 +150,10 @@ public class RegistrationService {
 
     /**
      * 본인 취소. 회차 시작 전이면 언제든지 취소 가능, 환불 금액은 날짜별 차등 (조장님 결정 D3·D5).
-     * 포인트는 여기서 돌려주지 않는다 — 반환된 RefundRequest 로 흐름 클래스가 환불 처리 (진행 순서 8)
-     *
-     * @return 환불 요청 (어느 결제를 얼마 환불할지)
+     * 상태를 CANCELLED 로 바꾼 뒤 RefundService.refundUser() 로 환불 (금액 계산은 포인트 파트 RefundPolicy).
      */
     @Transactional
-    public RefundRequest cancel(Long registrationId, LoginIdentity loginIdentity) {
+    public void cancel(Long registrationId, LoginIdentity loginIdentity) {
         if (!loginIdentity.isUser()) {
             throw new RegistrationForbiddenException("개인 회원만 신청을 취소할 수 있습니다");
         }
@@ -158,6 +161,7 @@ public class RegistrationService {
         // 회차 락 → 신청 조회 순서 (동시 승격과 겹쳐도 최신 상태로 판단)
         Registration registration = findRegistrationWithSessionLock(registrationId);
         EventSession session = registration.getEventSession();
+
 
         if (!registration.isOwnedBy(loginIdentity.getId())) {
             throw new RegistrationForbiddenException("본인의 신청만 취소할 수 있습니다");
@@ -173,19 +177,25 @@ public class RegistrationService {
         RegistrationStatus statusBefore = registration.getStatus();
         boolean releasedSeat = statusBefore.isSeatOccupying();
 
-        registration.cancel();
+        registration.cancel(); // 상태가 바뀜
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
+
+        // ★ 추가: 포인트 환불
+        //   - 상태를 CANCELLED로 바꾼 '후' 호출 (RefundService가 CANCELLED인지 검사함)
+        //   - statusBefore가 WAITING이면 날짜와 상관없이 전액, CONFIRMED면 날짜별 정책 적용
+        //   - 무료(0P)도 호출: 0P 환불 기록 + 결제 CANCELED 처리 → 같은 회차 재신청 가능
+        //   - 결제 연결이 없는 예전 신청(purchase == null)은 환불할 결제가 없으므로 건너뜀
+        //   - 같은 트랜잭션이라 환불에 실패하면 취소도 함께 되돌려짐
+        if (registration.getPurchase() != null) {
+            refundService.refundUser(registration.getUser().getId(), registration, statusBefore);
+        }
+
 
         if (releasedSeat) {
             session.releaseSeat();
             promoteWaitingUsersIfAny(session);
         }
 
-        // 환불 금액 계산 (실제 결제 금액 기준, 날짜 기준 차등)
-        int paidAmount = paidAmountOf(registration);
-        int refundAmount = RegistrationRefundPolicy.forUserCancel(
-                paidAmount, statusBefore, now.toLocalDate(), session.getStartsAt().toLocalDate());
-        return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
 
@@ -217,7 +227,7 @@ public class RegistrationService {
             promoteWaitingUsersIfAny(session);
         }
 
-        int refundAmount = RegistrationRefundPolicy.forCompanyReject(paidAmountOf(registration));
+        int refundAmount = RefundPolicy.forCompanyReject(paidAmountOf(registration));
         return new RefundRequest(purchaseIdOf(registration), refundAmount);
     }
 
@@ -298,9 +308,10 @@ public class RegistrationService {
         String currentKeyword = keyword == null ? "" : keyword.trim();
 
         // 1. 내 신청 전체 → 카드 데이터 (요약 카드·탭 개수는 검색과 관계없이 전체 기준)
-        List<RegistrationRes.MyHistoryItemDto> all = registrationRepository
-                .findAllByUserIdForHistory(loginIdentity.getId()).stream()
-                .map(r -> toHistoryItem(r, now))
+        List<Registration> registrations = registrationRepository.findAllByUserIdForHistory(loginIdentity.getId());
+        Map<Long, Integer> refundAmounts = refundAmountsOf(registrations); // ★ 추가: 결제 id → 실제 환불 금액
+        List<RegistrationRes.MyHistoryItemDto> all = registrations.stream()
+                .map(r -> toHistoryItem(r, now, refundAmounts))            // ★ 변경: 환불 금액 전달
                 .toList();
 
         // 2. 탭 + 행사명 검색 적용
@@ -368,10 +379,10 @@ public class RegistrationService {
             return "취소된 행사입니다";
         }
         // 행사 모집 기간 (Event.applyStartAt ~ applyEndAt)
-        if (now.isBefore(event.getApplyStartAt())) {
+        if (now.isBefore(session.getApplyStartAt())) {
             return "아직 모집 기간이 아닙니다";
         }
-        if (event.isApplicationClosed()) {
+        if (session.isApplicationClosed()) {
             return "모집이 마감된 행사입니다";
         }
         // 회차 상태: 진행 예정(SCHEDULED) 회차만 신청 가능 (상태가 비어 있는 데이터는 허용)
@@ -390,6 +401,19 @@ public class RegistrationService {
         }
         return null;
     }
+
+    // [행사 상세 화면용] 행사의 회차별 신청 불가 사유 — key: 회차 id, value: 사유 (신청 가능하면 "")
+    // 회차의 행사(LAZY) 정보를 읽으므로 트랜잭션 안에서 계산해 결과만 넘김 (컨트롤러에서 직접 부르면 LazyInitializationException)
+    @Transactional(readOnly = true)
+    public Map<Long, String> getClosedReasonsByEventId(Long eventId) {
+        Map<Long, String> reasons = new HashMap<>();
+        for (EventSession session : eventSessionRepository.findByEventId(eventId)) {
+            String reason = getClosedReason(session);
+            reasons.put(session.getId(), reason == null ? "" : reason);
+        }
+        return reasons;
+    }
+
 
     /**
      * 본인 취소가 불가능한 이유. 취소 가능하면 null.
@@ -483,6 +507,35 @@ public class RegistrationService {
         return registration.getPurchase() == null ? null : registration.getPurchase().getId();
     }
 
+    /**
+     * ★ 추가: [나의 신청 내역] 신청 목록의 실제 환불 금액 — key: 결제 id, value: 환불 금액 (refund_tb)
+     * 카드마다 조회하지 않고 목록 전체를 쿼리 1번으로 가져온다
+     */
+    private Map<Long, Integer> refundAmountsOf(List<Registration> registrations) {
+        List<Long> purchaseIds = registrations.stream()
+                .map(this::purchaseIdOf)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+        Map<Long, Integer> amounts = new HashMap<>();
+        if (purchaseIds.isEmpty()) {
+            return amounts; // 결제 연결된 신청이 없으면 조회 생략 (빈 IN 절 방지)
+        }
+        for (Object[] row : registrationRepository.findRefundAmountsByPurchaseIds(purchaseIds)) {
+            amounts.put((Long) row[0], ((Number) row[1]).intValue());
+        }
+        return amounts;
+    }
+
+    /**
+     * ★ 추가: [나의 신청 내역] '환불 내역' 문구 — 환불 기록이 있을 때만 "환불 완료 7,000P", 없으면 null (제목 숨김)
+     * 무료 취소는 0P 기록이 남으므로 "환불 완료 0P"로 표시된다
+     */
+    private String refundTextOf(Registration r, Map<Long, Integer> refundAmounts) {
+        Long purchaseId = purchaseIdOf(r);
+        Integer refunded = purchaseId == null ? null : refundAmounts.get(purchaseId);
+        return refunded == null ? null : "환불 완료 " + point(refunded);
+    }
+
     private Integer waitingNumberOf(Registration registration) {
         if (registration.getStatus() != RegistrationStatus.WAITING) {
             return null;
@@ -492,16 +545,17 @@ public class RegistrationService {
     }
 
     // [나의 신청 내역] 신청 한 건 → 카드 (상태 라벨·상황별 문구·예상 환불액 계산)
-    private RegistrationRes.MyHistoryItemDto toHistoryItem(Registration r, LocalDateTime now) {
+    private RegistrationRes.MyHistoryItemDto toHistoryItem(Registration r, LocalDateTime now,
+                                                           Map<Long, Integer> refundAmounts) { // ★ 추가: 실제 환불 금액
         EventSession session = r.getEventSession();
         Event event = session.getEvent();
         RegistrationStatus status = r.getStatus();
         int paid = paidAmountOf(r);
         boolean cancelable = isCancelable(r, now);
 
-        // 1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RegistrationRefundPolicy)
+        //  1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RefundPolicy)
         int expectedRefund = cancelable
-                ? RegistrationRefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
+                ? RefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
                 : 0;
 
         // 2. 표시 상태 결정 — 우선순위: 거절 > 취소 > 시작됨(행사 종료) > 대기 > 확정
@@ -559,14 +613,15 @@ public class RegistrationService {
                 .waiting(waitingNumber != null)
                 .waitingRank(waitingNumber == null ? 0 : waitingNumber)
                 .paidPointText(point(paid))
-                .purchasedAtText(r.getPurchase() == null || r.getPurchase().getPurchasedAt() == null
-                        ? "" : r.getPurchase().getPurchasedAt().toLocalDateTime().format(HISTORY_DATE))
-                .expectedRefundText(cancelable ? point(expectedRefund) : "")
-                .refundText("") // TODO step 8: 포인트 파트 환불 필드(refundAmount) 연결 → "환불 완료 16,666P"
+                .purchasedAtText(blankToNull(r.getPurchase() == null || r.getPurchase().getPurchasedAt() == null
+                        ? "" : r.getPurchase().getPurchasedAt().toLocalDateTime().format(HISTORY_DATE))) // ★ 빈 값 → null (제목만 나오는 것 방지)
+                .expectedRefundText(blankToNull(cancelable ? point(expectedRefund) : "")) // ★ 취소 불가 건은 '취소 시 예상 환불' 숨김
+                .refundText(refundTextOf(r, refundAmounts)) // ★ 실제 환불 기록(refund_tb)이 있으면 "환불 완료 7,000P", 없으면 null
                 .cancelable(cancelable)
                 .cancelConfirmText(cancelConfirm)
+                .refundPolicyText(cancelable && paid > 0 ? RefundPolicy.REGISTRATION_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
-                .detailUrl("/events/" + event.getId()) // 행사 상세 주소 (행사 담당자 확정: /events/{id})
+                .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
                 .build();
     }
 
@@ -594,5 +649,12 @@ public class RegistrationService {
         if (!isOrganizer) {
             throw new RegistrationForbiddenException("행사 주최자만 처리할 수 있습니다");
         }
+    }
+
+    // ★ 추가: 빈 문자열이면 null로 변환
+    //   Mustache는 ""도 '값 있음'으로 보고 {{#refundText}} 블록을 그려서
+    //   내용 없이 "환불 내역" 제목만 나오던 문제를 막는다
+    private static String blankToNull(String text) {
+        return (text == null || text.isBlank()) ? null : text;
     }
 }

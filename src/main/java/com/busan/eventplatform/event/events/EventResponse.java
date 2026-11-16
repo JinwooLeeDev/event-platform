@@ -1,11 +1,13 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.event.EventSession;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 public class EventResponse {
 
@@ -20,8 +22,15 @@ public class EventResponse {
         private boolean isLast;
 
         public PageDto(Page<Event> eventPage) {
+            this(eventPage, null);
+        }
+
+        public PageDto(Page<Event> eventPage, Map<Long, EventSession> sessionMap) {
             this.eventList = eventPage.getContent().stream()
-                    .map(EventDto::new)
+                    .map(event -> new EventDto(
+                            event,
+                            sessionMap == null ? null : sessionMap.get(event.getId())
+                    ))
                     .toList();
             this.currentPage = eventPage.getNumber() + 1;
             this.totalPages = eventPage.getTotalPages();
@@ -45,23 +54,30 @@ public class EventResponse {
 
     @Data
     public static class EventDto {
-        private static final DateTimeFormatter APPLICATION_DATE_FORMAT =
-                DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+        public String getDepositAmountText() {
+            return String.format(java.util.Locale.KOREA, "%,d",
+                    (long) sessionCount * com.busan.eventplatform.api.purchase.Deposit.SESSION_DEPOSIT);
+        }
+        private List<SessionPeriodDto> sessionPeriods = List.of();
         private Long id;
         private Long categoryId;
         private String categoryName;
         private String title;
         private String summary;
-        private String applyStartAt;
-        private String applyEndAt;
         private LocalDateTime createdAt;
         private LocalDateTime publishedAt;
         private EventStatus status;
         private String feedbackMessage;
-        private boolean paidReadyEvent; /// 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
-        private int sessionCount; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private boolean paidReadyEvent; // 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
+        private int sessionCount; // 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private LocalDateTime applyStartAt;
+        private LocalDateTime applyEndAt;
 
         public EventDto(Event event) {
+            this(event, null);
+        }
+
+        public EventDto(Event event, EventSession session) {
             this.id = event.getId();
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
@@ -69,15 +85,29 @@ public class EventResponse {
             }
             this.title = event.getTitle();
             this.summary = event.getSummary();
-            this.applyStartAt = event.getApplyStartAt() == null
-                    ? "일정 확인 중" : event.getApplyStartAt().format(APPLICATION_DATE_FORMAT);
-            this.applyEndAt = event.getApplyEndAt() == null
-                    ? "일정 확인 중" : event.getApplyEndAt().format(APPLICATION_DATE_FORMAT);
             this.createdAt = event.getCreatedAt();
             this.publishedAt = event.getPublishedAt();
             this.status = event.getStatus();
             this.feedbackMessage = event.getFeedbackMessage();
             this.paidReadyEvent = event.getStatus() == EventStatus.PAID_READY;
+            if (session != null) {
+                this.applyStartAt = session.getApplyStartAt();
+                this.applyEndAt = session.getApplyEndAt();
+            }
+        }
+    }
+
+    @Data
+    public static class SessionPeriodDto {
+        private String name;
+        private String applyStartAt;
+        private String applyEndAt;
+
+        public SessionPeriodDto(EventSession session) {
+            var format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+            this.name = session.getName();
+            this.applyStartAt = session.getApplyStartAt().format(format);
+            this.applyEndAt = session.getApplyEndAt().format(format);
         }
     }
 
@@ -92,11 +122,8 @@ public class EventResponse {
         private String summary;
         private String description;
         private String address;
-        private LocalDateTime applyStartAt;
-        private LocalDateTime applyEndAt;
         private LocalDateTime publishedAt;
         private LocalDateTime createdAt;
-        private boolean applicationClosed;
         private boolean owner;
         private Long confirmedCount;
         private Long waitingCount;
@@ -115,11 +142,8 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
-            this.applyStartAt = event.getApplyStartAt();
-            this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
             this.createdAt = event.getCreatedAt();
-            this.applicationClosed = event.isApplicationClosed();
             this.owner = owner;
             this.confirmedCount = confirmedCount;
             this.waitingCount = waitingCount;
@@ -138,8 +162,6 @@ public class EventResponse {
         private String summary;
         private String description;
         private String address;
-        private LocalDateTime applyStartAt;
-        private LocalDateTime applyEndAt;
         private LocalDateTime publishedAt;
         private String feedbackMessage;
 
@@ -156,8 +178,6 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
-            this.applyStartAt = event.getApplyStartAt();
-            this.applyEndAt = event.getApplyEndAt();
             this.publishedAt = event.getPublishedAt();
             this.feedbackMessage = event.getFeedbackMessage();
         }

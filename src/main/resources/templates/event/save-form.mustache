@@ -1,18 +1,29 @@
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>행사 주최 신청 | Busan Play</title>
+</head>
+<body>
 {{> layout/header}}
+{{> layout/account-style}}
 {{> event/save-form-style}}
 
 <main class="event-save-page">
-    <div class="event-save-container">
+    <div class="account-layout">
+        {{> layout/company-nav}}
+    <div class="event-save-container account-content">
 
         <div class="event-save-navigation">
             <a href="/events">← 내 행사 목록으로</a>
         </div>
 
         <section class="event-save-header">
-            <span class="event-save-label">BUSAN PLAY</span>
-            <h1>행사 등록</h1>
-            <p>부산의 특별한 순간을 등록해 보세요.</p>
+            <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
+            <h1>행사 주최 신청</h1>
+            <p>부산에서 함께할 새로운 경험을 소개해 주세요.<br>행사 정보와 일정을 작성하면 관리자 심사를 위해 접수됩니다.</p>
+            <div class="event-save-guide"><span>01 기본 정보</span><span>02 일정 및 참가비</span><span>03 대표 이미지</span></div>
         </section>
 
         <form action="/events/save"
@@ -23,7 +34,7 @@
 
             <!-- 행사 기본 정보 -->
             <section class="event-save-section">
-                <h2>행사 기본 정보</h2>
+                <h2><span class="event-section-number">01</span>행사 기본 정보</h2>
                 <p class="section-description">
                     행사에 대한 기본 정보를 입력해 주세요.
                 </p>
@@ -40,17 +51,17 @@
 
                 <div class="form-group">
                     <label>행사 제목 <span>*</span></label>
-                    <input type="text" name="title" required>
+                    <input type="text" name="title" placeholder="행사의 이름을 입력해 주세요" required>
                 </div>
 
                 <div class="form-group">
                     <label>한 줄 요약 <span>*</span></label>
-                    <input type="text" name="summary" required>
+                    <input type="text" name="summary" placeholder="어떤 경험을 할 수 있는 행사인가요?" required>
                 </div>
 
                 <div class="form-group">
                     <label>행사 주소 <span>*</span></label>
-                    <input type="text" name="address" required>
+                    <input type="text" name="address" placeholder="행사가 열리는 상세 주소를 입력해 주세요" required>
                 </div>
 
                 <div class="form-group">
@@ -64,7 +75,7 @@
 
             <!-- 행사 일정 -->
             <section class="event-save-section">
-                <h2>행사 일정</h2>
+                <h2><span class="event-section-number">02</span>행사 일정</h2>
                 <p class="section-description">
                     회차별로 운영하는 행사인지 선택해 주세요.
                 </p>
@@ -213,7 +224,7 @@
 
             <!-- 대표 이미지 -->
             <section class="event-save-section">
-                <h2>대표 이미지</h2>
+                <h2><span class="event-section-number">03</span>대표 이미지</h2>
                 <p class="section-description">
                     행사를 대표하는 포스터 이미지를 등록해 주세요.
                 </p>
@@ -233,16 +244,18 @@
             </section>
 
 
+            <p class="event-save-notice">신청한 행사의 심사 상태는 기업 관리의 ‘주최 행사’에서 확인할 수 있습니다.</p>
             <!-- 등록 버튼 -->
             <div class="event-save-actions">
                 <a href="/events" class="cancel-button">취소</a>
 
                 <button type="submit" class="submit-button">
-                    행사 등록하기
+                    주최 신청하기
                 </button>
             </div>
 
         </form>
+    </div>
     </div>
 </main>
 
@@ -347,6 +360,13 @@
         <input type="hidden" data-field="endsAt">
         <input type="hidden" data-field="applyStartAt">
         <input type="hidden" data-field="applyEndAt">
+        <input type="hidden" data-field="minimumParticipants" value="1">
+        <input type="hidden" data-field="minimumCheckAt">
+
+        <div class="form-group">
+            <label>정원 <span>*</span></label>
+            <input type="number" data-field="capacity" min="1" required>
+        </div>
 
 
         <!-- 참가비 -->
@@ -692,6 +712,8 @@
                     values[field] = combined;
                 });
 
+                item.querySelector('[data-field="minimumCheckAt"]').value = values.startsAt;
+
                 if (values.startsAt > values.endsAt) {
                     event.preventDefault();
                     alert("회차 종료 일시는 시작 일시보다 빠를 수 없습니다.");
@@ -711,3 +733,5 @@
 </script>
 
 {{> layout/footer}}
+</body>
+</html>

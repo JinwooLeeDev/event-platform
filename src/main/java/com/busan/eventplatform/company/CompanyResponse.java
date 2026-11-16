@@ -68,6 +68,11 @@ public class CompanyResponse {
 
     @Data
     public static class DetailDTO {
+        private int point;
+
+        public String getPointText() {
+            return String.format(java.util.Locale.KOREA, "%,d P", point);
+        }
         private String email; //기업 이메일
         private String contactPersonName; // 담당자 명
         private String contactPersonPhone; // 담당자 연락처
@@ -81,6 +86,7 @@ public class CompanyResponse {
         private CompanyStatus status;
 
         public DetailDTO(Company company) {
+            this.point = company.getPoint();
             this.email = company.getEmail();
             this.contactPersonName = company.getContactPersonName();
             this.contactPersonPhone = company.getContactPersonPhone();

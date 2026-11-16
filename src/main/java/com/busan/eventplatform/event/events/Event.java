@@ -2,14 +2,12 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -54,18 +52,6 @@ public class Event {
     @Column(nullable = false)
     private String description;
 
-    // 모집 시작일
-    @Column(nullable = false)
-    private LocalDateTime applyStartAt;
-
-    // 모집 마감일
-    @Column(nullable = false)
-    private LocalDateTime applyEndAt;
-
-    public boolean isApplicationClosed() {
-        return applyEndAt != null && !LocalDateTime.now().isBefore(applyEndAt);
-    }
-
     // 행사 정보가 공개된 시각 -- 목록 정렬 유용
     @Column
     private LocalDateTime publishedAt; // 공개 전에는 null
@@ -94,7 +80,12 @@ public class Event {
         return this.company.getId().equals(companyId);
     }
 
-    public boolean isPaidStatus() {return this.getStatus() == EventStatus.PAID_READY;}
-    public boolean isPendingStatus() {return this.getStatus() == EventStatus.PENDING_REVIEW;}
+    public boolean isPaidStatus() {
+        return this.getStatus() == EventStatus.PAID_READY;
+    }
+
+    public boolean isPendingStatus() {
+        return this.getStatus() == EventStatus.PENDING_REVIEW;
+    }
 
 }

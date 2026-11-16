@@ -21,6 +21,14 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
             """)
     List<EventSession> findByEventId(@Param("eventId") Long eventId);
 
+    // 여러 행사 ID에 해당하는 회차를 한 번에 조회
+    @Query("""
+            select s from EventSession s
+            where s.event.id in :eventIds
+            order by s.event.id asc, s.startsAt asc
+            """)
+    List<EventSession> findAllByEventIds(@Param("eventIds") List<Long> eventIds);
+
     // 회차 상태별 조회
     @Query("""
         select s from EventSession s
@@ -49,6 +57,6 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
     @Query("""
             select es from EventSession es join fetch es.event e join fetch e.category c
             where es.id = :eventSessionId
-                        """)
+            """)
     Optional<EventSession> findByIdWithEvent(@Param("eventSessionId") Long eventSessionId);
 }

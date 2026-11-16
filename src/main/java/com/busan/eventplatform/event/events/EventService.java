@@ -23,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -53,6 +56,7 @@ public class EventService {
 
         if (saveDto.isHasSessions()) {
             for (EventSessionRequest.SaveDto sessionDto : saveDto.getSessions()) {
+
                 eventSessionService.save(event.getId(), companyId, sessionDto);
             }
         } else {
@@ -72,8 +76,8 @@ public class EventService {
             sessionDto.setMinimumParticipants(1);
             sessionDto.setMinimumCheckAt(sessionDto.getEndsAt());
 
-            sessionDto.setStartsAt(saveDto.getApplyStartAt());
-            sessionDto.setEndsAt(saveDto.getApplyEndAt());
+            sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
+            sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
 
             eventSessionService.save(event.getId(), companyId, sessionDto);
         }
@@ -99,7 +103,9 @@ public class EventService {
         eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
                 keyword == null ? "" : keyword.trim(), pageable);
 
-        return new EventResponse.PageDto(eventPage);
+        var response = new EventResponse.PageDto(eventPage);
+        populateSessionPeriods(response.getEventList());
+        return response;
     }
 
     // 행사 상세 조회 기능
@@ -132,6 +138,12 @@ public class EventService {
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("행사 수정 권한이 없습니다.");
         }
+        if (EventStatus.PUBLISHED.equals(event.getStatus())) {
+            throw new Exception400("승인된 행사는 수정할 수 없습니다.");
+        }
+        if (!EventStatus.FEEDBACK_REQUIRED.equals(event.getStatus())) {
+            throw new Exception400("보완 요청된 행사만 수정할 수 있습니다.");
+        }
         return new EventResponse.UpdateFormDto(event);
     }
 
@@ -143,6 +155,12 @@ public class EventService {
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("행사 수정 권한이 없습니다.");
         }
+        if (EventStatus.PUBLISHED.equals(event.getStatus())) {
+            throw new Exception400("승인된 행사는 수정할 수 없습니다.");
+        }
+        if (!EventStatus.FEEDBACK_REQUIRED.equals(event.getStatus())) {
+            throw new Exception400("보완 요청된 행사만 수정할 수 있습니다.");
+        }
         EventCategory category = eventCategoryRepository.findById(updateDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
         // 수정된 행사 내용 저장
@@ -152,6 +170,12 @@ public class EventService {
     }
 
     // 보완 요청 - 수정 후 재제출 (수정된 내용 저장, 상태 변경, 메시지 초기화)
+    @Transactional
+    public Event updateAndResubmit(Long id, Long companyId, EventRequest.UpdateDto updateDto) {
+        update(id, companyId, updateDto);
+        return resubmit(id, companyId);
+    }
+
     @Transactional
     public Event resubmit(Long id, Long companyId) {
         Event event = eventRepository.findById(id)
@@ -213,13 +237,16 @@ public class EventService {
     // 보완 요청 (관리자 -> 기업)
     @Transactional
     public Event requestFeedback(Long id, String feedbackMessage) {
+        if (feedbackMessage == null || feedbackMessage.isBlank() || feedbackMessage.trim().length() > 1000) {
+            throw new Exception400("보완 요청 사유를 1~1,000자로 입력해주세요.");
+        }
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (!EventStatus.PENDING_REVIEW.equals(event.getStatus())) {
             throw new Exception400("승인 대기 중인 행사만 보완 요청할 수 있습니다.");
         }
         event.setStatus(EventStatus.FEEDBACK_REQUIRED);
-        event.setFeedbackMessage(feedbackMessage);
+        event.setFeedbackMessage(feedbackMessage.trim());
 
         return event;
     }
@@ -236,6 +263,22 @@ public class EventService {
     /// 각 행사마다 갖고있는 회차 수 추가.
     public EventResponse.ListDto findAllByCompanyId(Long companyId) {
         List<Event> eventList = eventRepository.findAllByCompanyId(companyId);
-        return new EventResponse.ListDto(eventList);
+        var response = new EventResponse.ListDto(eventList);
+        populateSessionPeriods(response.getEventList());
+        return response;
+    }
+
+    private void populateSessionPeriods(List<EventResponse.EventDto> events) {
+        if (events.isEmpty()) return;
+        var sessions = eventSessionRepository.findAllByEventIds(
+                events.stream().map(EventResponse.EventDto::getId).toList());
+        var byEvent = sessions.stream().collect(Collectors.groupingBy(
+                session -> session.getEvent().getId(),
+                Collectors.mapping(EventResponse.SessionPeriodDto::new, Collectors.toList())));
+        events.forEach(event -> {
+            var periods = byEvent.getOrDefault(event.getId(), List.of());
+            event.setSessionPeriods(periods);
+            event.setSessionCount(periods.size());
+        });
     }
 }

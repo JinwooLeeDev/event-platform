@@ -50,5 +50,5 @@ portone:
   secret-key: ${NAVER_SECRET_KEY}
 
 naver-map:
-  client-id: ${NAVER_MAP_CLIENT_ID}
-  client-secret: ${NAVER_MAP_CLIENT_SECRET}
+  client-id: ${NAVER_MAP_CLIENT_ID:}
+  client-secret: ${NAVER_MAP_CLIENT_SECRET:}

@@ -31,10 +31,30 @@
             return Number(value || 0).toLocaleString("ko-KR") + "P";
         }
 
-        // 신청 직전 확인 창 문구 — 잔여석 있음 / 정원 마감(대기) 상황별
+        // 신청 직전 확인 창 문구 — 선택한 회차명 + 무료/유료 × 자리 있음/정원 마감(대기) 상황별
         function buildConfirmMessage(check, sessionName) {
-            var fee = formatPoint(check.fee);
             var title = sessionName ? "[" + sessionName + "]\n" : "";
+            var isFree = Number(check.fee || 0) === 0;   // 무료 회차: 차감·환불 안내 대신 "무료" 안내
+
+            if (isFree) {
+                // 무료여도 0P 결제 화면을 거쳐야 신청이 완료됨 (신청 1건 = 결제 1건)
+                // → 결제 화면이 나와도 혼란 없도록 [결제하기] 필요 + 실제 차감 0P를 미리 안내
+                var nextStep = "다음 화면에서 [결제하기]를 눌러야 신청이 완료됩니다.\n"
+                        + "(실제로 차감되는 포인트는 0P입니다.)\n\n";
+                if (check.waitlist) {
+                    return title
+                            + "무료 회차입니다.\n"
+                            + "정원이 마감되어 대기 신청으로 접수됩니다.\n"
+                            + nextStep
+                            + "신청하시겠습니까?";
+                }
+                return title
+                        + "무료 회차입니다.\n"
+                        + nextStep
+                        + "참가 신청하시겠습니까?";
+            }
+
+            var fee = formatPoint(check.fee);
             if (check.waitlist) {
                 return title
                         + "정원이 마감되어 대기 신청으로 접수됩니다.\n"
@@ -55,8 +75,9 @@
             if (button.dataset.sessionId) {
                 return {id: button.dataset.sessionId, name: button.dataset.sessionName || ""};
             }
-            var picked = document.querySelector('input[name="sessionId"]:checked')
-                    || document.querySelector('select[name="sessionId"] option:checked');
+            // 회차 선택 요소 이름: sessionId (신청 파트 기본) / eventSessionId (행사 상세 화면) 둘 다 지원
+            var picked = document.querySelector('input[name="sessionId"]:checked, input[name="eventSessionId"]:checked')
+                    || document.querySelector('select[name="sessionId"] option:checked, select[name="eventSessionId"] option:checked');
             if (!picked || !picked.value) return null;
             return {id: picked.value, name: picked.dataset.sessionName || ""};
         }

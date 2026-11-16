@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>행사 정보 수정 | Busan Play</title>
+</head>
+<body>
+{{> layout/header}}
+{{> layout/account-style}}
+{{> event/save-form-style}}
+<main class="event-save-page">
+    <div class="account-layout">
+        {{> layout/company-nav}}
+        <div class="event-save-container account-content">
+            <div class="event-save-navigation"><a href="/events">← 주최 행사 목록으로</a></div>
+            <header class="event-save-header">
+                <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
+                <h1>행사 정보 수정</h1>
+                <p>보완 요청을 확인하고 행사 기본 정보를 수정해 주세요. 저장하면 관리자에게 재심사를 요청합니다.</p>
+            </header>
+            {{#event}}
+            {{#feedbackMessage}}<div class="event-save-notice" style="margin-bottom:24px"><strong>관리자 보완 요청</strong><p style="white-space:pre-wrap;margin-bottom:0">{{feedbackMessage}}</p></div>{{/feedbackMessage}}
+            <form id="event-update-form" class="event-save-form" action="/events/update/{{id}}" method="post">
+                <section class="event-save-section">
+                    <h2>행사 기본 정보</h2>
+                    <p class="section-description">입력된 내용을 수정하고 저장해 주세요. 모든 항목은 필수입니다.</p>
+                    <div class="form-group">
+                        <label for="update-category">행사 카테고리</label>
+                        <select id="update-category" name="categoryId" data-current="{{categoryId}}" required>
+                            <option value="{{categoryId}}" selected>{{categoryName}} (현재 선택)</option>
+                            {{#categoryList}}<option value="{{id}}">{{name}}</option>{{/categoryList}}
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="update-title">행사 제목</label><input id="update-title" name="title" value="{{title}}" required></div>
+                    <div class="form-group"><label for="update-summary">한 줄 소개</label><input id="update-summary" name="summary" value="{{summary}}" required></div>
+                    <div class="form-group"><label for="update-address">행사 주소</label><input id="update-address" name="address" value="{{address}}" required></div>
+                    <div class="form-group"><label for="update-description">상세 설명</label><textarea id="update-description" name="description" rows="8" required>{{description}}</textarea></div>
+                </section>
+                <p class="event-save-notice">수정 내용을 저장하면 승인 대기로 전환되어 관리자에게 다시 제출됩니다.</p>
+                <div class="event-save-actions"><a href="/events" class="cancel-button">목록으로</a><button type="submit" class="submit-button">저장 후 재심사 요청</button></div>
+            </form>
+            {{/event}}
+        </div>
+    </div>
+</main>
+{{> layout/footer}}
+<script>
+(() => {
+    const category = document.getElementById('update-category');
+    if (category && Array.from(category.options).some((option, index) => index > 0 && option.value === category.dataset.current)) {
+        category.options[0].remove(); category.value = category.dataset.current;
+    }
+    document.getElementById('event-update-form').addEventListener('submit', event => {
+        const blank = Array.from(event.target.querySelectorAll('input[required], textarea[required]')).find(input => !input.value.trim());
+        if (blank) { event.preventDefault(); blank.focus(); alert('공백만 입력할 수 없습니다. 내용을 입력해 주세요.'); }
+    });
+})();
+</script>
+</body>
+</html>

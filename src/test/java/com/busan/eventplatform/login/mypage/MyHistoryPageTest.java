@@ -54,6 +54,7 @@ class MyHistoryPageTest {
                 .statusMessage("서버 안내").waiting(true).waitingRank(3).paidPointText("25,000P")
                 .purchasedAtText("2026. 11. 12").expectedRefundText("25,000P").refundText("")
                 .cancelable(true).cancelConfirmText("취소할까요?\nO'Neil \"확인\"")
+                .refundPolicyText("환불 정책: \"개최 전\" & 취소")
                 .cancelUrl("/registrations/cancel/9").detailUrl("/event/3").build();
         var history = RegistrationRes.MyHistoryDto.builder().totalCount(5).confirmedCount(2)
                 .waitingCount(1).pastCount(2).currentTab("waiting").keyword("").items(List.of(item)).empty(false).build();
@@ -69,8 +70,13 @@ class MyHistoryPageTest {
         assertTrue(html.contains("서버 안내"));
         assertTrue(html.contains("<dd>3번</dd>"));
         assertTrue(html.contains("25,000P"));
-        assertTrue(html.contains("action=\"/registrations/cancel/9\" method=\"post\""));
-        assertTrue(html.contains("confirm(this.dataset.confirm)"));
+        assertTrue(html.contains("class=\"btn btn-outline-danger reg-cancel-btn\" type=\"button\""));
+        assertTrue(html.contains("data-cancel-url=\"/registrations/cancel/9\""));
+        assertTrue(html.contains("data-confirm=\"취소할까요?\nO&#39;Neil &quot;확인&quot;\""));
+        assertTrue(html.contains("data-refund-policy=\"환불 정책: &quot;개최 전&quot; &amp; 취소\""));
+        assertEquals(1, html.split("<dialog id=\"reg-cancel-dialog\"", -1).length - 1);
+        assertTrue(html.contains("<form method=\"post\" id=\"reg-cancel-form\""));
+        assertFalse(html.contains("confirm(this.dataset.confirm)"));
         assertFalse(html.contains("Date.parse"));
         assertFalse(html.contains("승인 대기"));
         assertFalse(html.contains("환불 완료"));
