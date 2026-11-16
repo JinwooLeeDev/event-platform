@@ -2,7 +2,8 @@ package com.busan.eventplatform.company.businessverification;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 public class BusinessVerificationResponse {
 
     @NoArgsConstructor
-    @Data
+    @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Validate {
         // 	API 요청 처리 결과 코드
@@ -31,7 +32,7 @@ public class BusinessVerificationResponse {
     }
 
     @NoArgsConstructor
-    @Data
+    @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Result {
         // 사업자번호
@@ -51,7 +52,7 @@ public class BusinessVerificationResponse {
     }
 
     @NoArgsConstructor
-    @Data
+    @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Status {
         // 사업자 상태
@@ -65,5 +66,12 @@ public class BusinessVerificationResponse {
         // 폐업일자
         @JsonProperty("end_dt")
         private String closedOn;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class Check {
+        private final BusinessVerificationStatus status;
+        private final String message;
     }
 }
