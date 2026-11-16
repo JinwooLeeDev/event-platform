@@ -67,10 +67,11 @@
                             <h3>심사가 승인되었습니다</h3>
                             <p>보증금을 결제하면 행사가 공개되고 참가자를 모집할 수 있습니다.<br>회차당 150,000 P × {{sessionCount}}회차 · 결제 금액 <strong>{{depositAmountText}} P</strong></p>
                             <div class="company-event-payment-actions">
-                                <form action="/event/deposit/{{id}}" method="post" onsubmit="return confirm('행사 보증금 {{depositAmountText}} P를 결제하시겠습니까? 결제 완료 후 행사가 공개됩니다.')">
-                                    <input type="hidden" name="sessionCount" value="{{sessionCount}}">
+                                {{#sessionPeriods}}
+                                <form action="/event/deposit/{{sessionId}}" method="post" onsubmit="return confirm('행사 보증금 {{depositAmountText}} P를 결제하시겠습니까? 결제 완료 후 행사가 공개됩니다.')">
                                     <button type="submit" class="company-event-pay-button">보증금 결제하기</button>
                                 </form>
+                                {{/sessionPeriods}}
                                 <a href="/charge">포인트 충전하기 →</a>
                             </div>
                             <p>기업 보유 포인트에서 차감됩니다. 잔액이 부족하면 포인트를 충전한 후 다시 결제해 주세요.</p>
