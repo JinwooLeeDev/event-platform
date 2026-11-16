@@ -277,7 +277,7 @@ INSERT INTO refund_tb (id, user_id, company_id, purchase_id, status, reason, amo
                                                                                                      (36001, 36007, NULL, 36018, 'PENDING', '참가 취소에 따른 반환', 2000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
                                                                                                      (36002, 36008, NULL, 36019, 'REFUND', '참가 취소에 따른 반환', 2000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
                                                                                                      (36003, 36014, NULL, 36025, 'REFUND', '참가 취소에 따른 반환', 0, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
-                                                                                                     (36004, 36015, NULL, 36027, 'READY', NULL, 5000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
+                                                                                                     (36004, 36015, NULL, 36027, 'PENDING', NULL, 5000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
                                                                                                      (36005, 36016, NULL, 36028, 'REFUND', '주최자 반려에 따른 반환', 5000, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
                                                                                                      (36006, 36017, NULL, 36029, 'REFUND', '참가 취소에 따른 반환', 0, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP)),
                                                                                                      (36007, 36018, NULL, 36031, 'REFUND', '회차 2일 전 취소: 1/2 반환', 4500, TIMESTAMPADD(HOUR, -24, CURRENT_TIMESTAMP));

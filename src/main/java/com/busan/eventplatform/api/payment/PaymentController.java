@@ -51,8 +51,10 @@ public class PaymentController {
         PaymentRes.CompleteDto result = paymentPortOneService.complete(loginIdentity , completeDto.getPaymentId());
         int currentPoint = paymentService.currentPoint(loginIdentity);
 
+        String redirectUrl = loginIdentity.isUser() ? "/mypoint" : "/company/detail";
+
         // 포인트 충전시 화면에 실시간으로 충전된 금액까지 포함하여 보여주기위해 "currentPoint"로 전달.
-        return ResponseEntity.ok(Map.of("payment" , result , "currentPoint" , currentPoint));
+        return ResponseEntity.ok(Map.of("payment" , result , "currentPoint" , currentPoint , "redirectUrl" , redirectUrl));
     }
 
 }

@@ -2,23 +2,18 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.global.util.MyDateUtil;
 import com.busan.eventplatform.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 
 @Table(name = "purchase_tb")
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 public class Purchase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,4 +49,6 @@ public class Purchase {
         this.status = PurchaseStatus.PURCHASED;
     }
 
+
+    public void setPurchaseRefunded() {this.status = PurchaseStatus.REFUNDED;}
 }

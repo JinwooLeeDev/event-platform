@@ -1,7 +1,11 @@
 package com.busan.eventplatform.api.refund;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * [임시 생성]
@@ -12,4 +16,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RefundRepository extends JpaRepository<Refund, Long> {
 
+    @Query("""
+        select r from Refund r where r.deposit.id = :depositId and r.status = :status
+""")
+    Optional<Refund> findByDepositId(@Param("depositId") Long depositId , @Param("status") RefundStatus status);
 }

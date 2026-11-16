@@ -20,13 +20,13 @@ public class DepositController {
     private final DepositService depositService;
 
     @PostMapping("/event/deposit/{id}")
-    public String payDeposit(@PathVariable(name = "id") Long eventId ,
+    public String payDeposit(@PathVariable(name = "id") Long sessionId ,
                              @RequestParam(name = "sessionCount") int sessionCount ,
                              HttpSession session , RedirectAttributes redirectAttributes){
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
         if(!loginIdentity.isCompany()) throw new Exception403("기업 세션만 이용가능합니다");
 
-        depositService.payDeposit(loginIdentity.getId() , eventId , sessionCount);
+        depositService.payDeposit(loginIdentity.getId() , sessionId , sessionCount);
         redirectAttributes.addFlashAttribute("successMessage" , "결제가 완료되었습니다. 해당 행사가 최종 확정됩니다.");
 
         return "redirect:/events";

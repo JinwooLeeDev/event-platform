@@ -29,7 +29,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
                                     @Param("verificationStatuses")List<BusinessVerificationStatus> verificationStatuses);
 
     // 포인트 충전결제 요청을 동시에 두번 이상 시도할 경우 가장 마지막에 반영된 포인트충전 금액만 충전될 경우를 대비하여 비관적 락
-    @Lock(LockModeType.WRITE)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Company c where c.id = :id")
     Optional<Company> LockFindById(@Param("id") Long id);
 }

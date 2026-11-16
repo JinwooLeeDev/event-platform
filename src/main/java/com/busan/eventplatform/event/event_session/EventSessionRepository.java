@@ -54,4 +54,9 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
             where es.id = :eventSessionId
                         """)
     Optional<EventSession> findByIdWithEvent(@Param("eventSessionId") Long eventSessionId);
+
+    @Query("""
+        select es from EventSession es where es.event.company.id = :companyId and es.id = :sessionId
+""")
+    Optional<EventSession> findByCompanyIdAndSessionId(@Param("companyId") Long companyId , @Param("sessionId") Long sessionId);
 }

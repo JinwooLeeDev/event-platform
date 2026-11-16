@@ -46,7 +46,7 @@
 
                     <!--   "결제대기" 상태인 행사를 나타내려고 추가.      -->
                     {{#paidReadyEvent}}
-                              <form action="/event/deposit/{{id}}" method="post" onsubmit="return confirm('최종 결제하시겠습니까?')">
+                              <form action="/event/deposit/{{sessionId}}" method="post" onsubmit="return confirm('최종 결제하시겠습니까?')">
                                   <input type="hidden" name="sessionCount" value={{sessionCount}}>
                                   <button type="submit">최종 결제하기</button>
                               </form>

@@ -80,12 +80,14 @@ public class EventResponse {
         private String name;
         private String applyStartAt;
         private String applyEndAt;
+        private Long sessionId; /// 행사 회차마다 환불 , 결제를 진행해야하므로 sessionId 추가.
 
         public SessionPeriodDto(EventSession session) {
             var format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
             this.name = session.getName();
             this.applyStartAt = session.getApplyStartAt().format(format);
             this.applyEndAt = session.getApplyEndAt().format(format);
+            this.sessionId = session.getId();
         }
     }
 

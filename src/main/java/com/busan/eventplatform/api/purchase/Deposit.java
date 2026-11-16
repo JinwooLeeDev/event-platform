@@ -1,11 +1,12 @@
 package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.company.Company;
+import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -19,7 +20,7 @@ import java.sql.Timestamp;
  명확하게 명시.
  */
 
-@Data
+@Getter
 @Entity
 @Table(name = "deposit_tb")
 @NoArgsConstructor
@@ -41,8 +42,8 @@ public class Deposit {
     private Company company;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id" , nullable = false , unique = true)
-    private Event event;
+    @JoinColumn(name = "eventSession_id" , nullable = false , unique = true)
+    private EventSession eventSession;
 
     @CreationTimestamp
     private Timestamp paidAt;
@@ -51,10 +52,15 @@ public class Deposit {
     private int amount;
 
     @Builder
-    public Deposit(Company company, Event event , int sessionCount) {
+    public Deposit(Company company, EventSession eventSession , int sessionCount) {
         this.status = DepositStatus.READY;
         this.company = company;
-        this.event = event;
+        this.eventSession = eventSession;
         this.amount = sessionCount * SESSION_DEPOSIT;
     }
+
+
+    public void setDepositRefunded() {this.status = DepositStatus.REFUNDED;}
+    public void setDepositPaid() {this.status = DepositStatus.PAID;}
+    public void setDepositReturned() {this.status = DepositStatus.RETURN;}
 }
