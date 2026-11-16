@@ -50,7 +50,7 @@ public class CommunityService {
     /** 입장 — 처음이면 행 생성, 퇴장했던 멤버면 다시 활성화, 이미 활성이면 그대로 */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void join(Long sessionId, Long userId) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = CommunityPolicy.now();
         communityMemberRepository.findByEventSessionIdAndUserId(sessionId, userId)
                 .ifPresentOrElse(
                         member -> {
@@ -69,7 +69,7 @@ public class CommunityService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void leave(Long sessionId, Long userId, CommunityLeaveReason reason) {
         communityMemberRepository.findByEventSessionIdAndUserId(sessionId, userId)
-                .ifPresent(member -> member.leave(reason, LocalDateTime.now()));
+                .ifPresent(member -> member.leave(reason, CommunityPolicy.now()));
         log.info("[community] 퇴장 회차={} 회원={} 사유={}", sessionId, userId, reason);
     }
 
@@ -89,7 +89,7 @@ public class CommunityService {
     public CommunityRes.RoomDto getRoom(Long sessionId, Long userId) {
         EventSession session = eventSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new Exception404("커뮤니티를 찾을 수 없습니다"));
-        if (!CommunityPolicy.isOpen(session.getEndsAt(), LocalDateTime.now())) {
+        if (!CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())) {
             throw new Exception400("행사가 끝나 커뮤니티가 종료되었습니다");
         }
         if (!isActiveMember(sessionId, userId)) {
@@ -145,7 +145,7 @@ public class CommunityService {
 
     /** 내 커뮤니티 목록 (Q9: 마이페이지 "내 커뮤니티") — 활성 멤버 + 운영 중인 방만 */
     public List<CommunityRes.MyCommunityDto> getMyCommunities(Long userId) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = CommunityPolicy.now();
         return communityMemberRepository.findAllByUserIdAndLeftAtIsNull(userId).stream()
                 .map(CommunityMember::getEventSession)
                 .filter(session -> CommunityPolicy.isOpen(session.getEndsAt(), now))

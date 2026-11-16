@@ -648,7 +648,7 @@ public class RegistrationService {
                 .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
                 // ★ [f/40] 참가 확정 + 커뮤니티 운영 중(회차 종료일 24시 전)일 때만 입장 주소, 아니면 null → 버튼 숨김
                 .communityUrl(status == RegistrationStatus.CONFIRMED
-                        && CommunityPolicy.isOpen(session.getEndsAt(), now)
+                        && CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())  // ★ 한국 시각 기준
                         ? "/community/" + session.getId() : null)
                 .build();
     }

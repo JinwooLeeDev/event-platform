@@ -34,7 +34,7 @@ public record CommunityMessage(
     }
 
     public static CommunityMessage system(Type type, Long sessionId, Long userId, String content) {
-        return new CommunityMessage(type, sessionId, userId, null, content, LocalDateTime.now().format(FORMAT));
+        return new CommunityMessage(type, sessionId, userId, null, content, CommunityPolicy.now().format(FORMAT)); // ★ 한국 시각 기준
     }
 
     public static CommunityMessage chat(Long sessionId, Long userId, String nickname, String content, LocalDateTime at) {

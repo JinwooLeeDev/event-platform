@@ -47,7 +47,8 @@ public class CommunityChatMessage {
     }
 
     public static CommunityChatMessage create(EventSession eventSession, User user, String content) {
-        return new CommunityChatMessage(eventSession, user, content, LocalDateTime.now());
+        return new CommunityChatMessage(eventSession, user, content, CommunityPolicy.now()); // ★ 한국 시각 기준
+
     }
 
 }
