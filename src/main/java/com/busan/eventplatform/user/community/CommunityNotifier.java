@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
  * - 본인(/user/queue/community)           : 입장됨 / 강제 퇴장됨
  * - 접속 중이 아니면 메시지는 그냥 사라짐 (멤버십은 DB에 이미 반영됨)
  * - 방 전체 안내에는 퇴장 사유(취소·거절)를 넣지 않는다 — 다른 참가자에게 사유가 드러나지 않게, 사유는 본인 알림에만
+ * - ★ [5단계] 커뮤니티 종료(CLOSED) — 방 전체에 한 번 → 화면이 연결을 끊고 내 행사로 이동
  */
 @Component
 @RequiredArgsConstructor
@@ -38,6 +39,13 @@ public class CommunityNotifier {
         messagingTemplate.convertAndSendToUser(String.valueOf(userId), USER_QUEUE,
                 CommunityMessage.system(CommunityMessage.Type.KICKED, sessionId, userId,
                         reason.getDescription() + "(으)로 커뮤니티에서 퇴장되었습니다."));
+    }
+
+    /** ★ [5단계] 커뮤니티 종료 — 스케줄러가 DB 정리(커밋)를 마친 뒤 호출 */
+    public void notifyClosed(Long sessionId) {
+        messagingTemplate.convertAndSend(topic(sessionId),
+                CommunityMessage.system(CommunityMessage.Type.CLOSED, sessionId, null,
+                        "행사가 끝나 커뮤니티가 종료되었습니다."));
     }
 
     /** 화면에 보여줄 닉네임 — 리스너(커밋 후)에서 불리므로 엔티티가 아닌 문자열만 꺼내 쓴다 */

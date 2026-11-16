@@ -2,9 +2,11 @@ package com.busan.eventplatform.user.community;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CommunityChatMessageRepository extends JpaRepository<CommunityChatMessage, Long> {
@@ -14,4 +16,13 @@ public interface CommunityChatMessageRepository extends JpaRepository<CommunityC
             "where m.eventSession.id = :sessionId order by m.id desc")
     List<CommunityChatMessage> findRecent(@Param("sessionId") Long sessionId, Pageable pageable);
 
+    /** ★ [5단계] 메시지가 남아 있는 종료된 방 (멤버가 모두 나간 방도 메시지는 지워야 하므로 따로 조회) */
+    @Query("select distinct m.eventSession.id from CommunityChatMessage m " +
+            "where m.eventSession.endsAt < :endedBefore")
+    List<Long> findSessionIdsEndedBefore(@Param("endedBefore") LocalDateTime endedBefore);
+
+    /** ★ [5단계] 방 메시지 일괄 삭제 (Q11-1) */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from CommunityChatMessage m where m.eventSession.id in :sessionIds")
+    int deleteAllBySessionIds(@Param("sessionIds") List<Long> sessionIds);
 }

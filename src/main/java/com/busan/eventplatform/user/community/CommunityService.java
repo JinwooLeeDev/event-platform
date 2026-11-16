@@ -18,12 +18,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * [f/40] 커뮤니티 멤버십 입장 및 퇴장
- /**
- * [f/40] 커뮤니티 — 멤버십 입장·퇴장(2단계) + 채팅방·메시지·내 커뮤니티(4단계)
+ * [f/40] 커뮤니티 — 멤버십 입장·퇴장(2단계) + 채팅방·메시지·내 커뮤니티(4단계) + 종료(5단계)
  *
  * join/leave 가 REQUIRES_NEW 인 이유:
  * - 신청 트랜잭션이 '커밋된 뒤'(AFTER_COMMIT) 리스너에서 불리므로, 이미 끝난 트랜잭션에 합류하지 않고 새 트랜잭션으로 저장한다.
@@ -47,10 +47,18 @@ public class CommunityService {
     // 멤버십 (2단계)
     // =========================================================
 
-    /** 입장 — 처음이면 행 생성, 퇴장했던 멤버면 다시 활성화, 이미 활성이면 그대로 */
+    /**
+     * 입장 — 처음이면 행 생성, 퇴장했던 멤버면 다시 활성화, 이미 활성이면 그대로
+     * ★ [5단계] 이미 종료된 회차면 입장시키지 않음 (서버 시작 동기화가 지난 회차 확정자를 다시 넣지 않게)
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void join(Long sessionId, Long userId) {
         LocalDateTime now = CommunityPolicy.now();
+        EventSession session = eventSessionRepository.findById(sessionId).orElse(null);
+        if (session == null || !CommunityPolicy.isOpen(session.getEndsAt(), now)) {
+            log.debug("[community] 종료된 회차라 입장 생략 회차={} 회원={}", sessionId, userId);
+            return;
+        }
         communityMemberRepository.findByEventSessionIdAndUserId(sessionId, userId)
                 .ifPresentOrElse(
                         member -> {
@@ -59,7 +67,7 @@ public class CommunityService {
                             }
                         },
                         () -> communityMemberRepository.save(CommunityMember.join(
-                                eventSessionRepository.getReferenceById(sessionId),
+                                session,
                                 userRepository.getReferenceById(userId),
                                 now)));
         log.info("[community] 입장 회차={} 회원={}", sessionId, userId);
@@ -73,9 +81,22 @@ public class CommunityService {
         log.info("[community] 퇴장 회차={} 회원={} 사유={}", sessionId, userId, reason);
     }
 
-    /** 지금 활성 멤버인지 — STOMP 구독·전송 권한 */
+    /** 지금 활성 멤버인지 (종료 여부는 보지 않음 — 종료까지 보려면 canAccess) */
     public boolean isActiveMember(Long sessionId, Long userId) {
         return communityMemberRepository.existsByEventSessionIdAndUserIdAndLeftAtIsNull(sessionId, userId);
+    }
+
+    /**
+     * ★ [5단계] 지금 이 방을 이용할 수 있는지 = 활성 멤버 + 운영 중(회차 종료일 24시 전)
+     * STOMP 구독·전송 권한 검사 — 스케줄러가 돌기 전이라도 24시가 지나면 바로 막힌다 (이중 차단, B-2)
+     */
+    public boolean canAccess(Long sessionId, Long userId) {
+        if (userId == null) {
+            return false;
+        }
+        return communityMemberRepository.findActiveSessionEndsAt(sessionId, userId)
+                .map(endsAt -> CommunityPolicy.isOpen(endsAt, CommunityPolicy.now()))
+                .orElse(false);
     }
 
     // =========================================================
@@ -131,8 +152,8 @@ public class CommunityService {
         if (text.length() > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("메시지는 " + MAX_CONTENT_LENGTH + "자까지 보낼 수 있습니다");
         }
-        if (userId == null || !isActiveMember(sessionId, userId)) { // 인터셉터에서 이미 검사하지만 한 번 더
-            throw new IllegalArgumentException("참가 확정자만 메시지를 보낼 수 있습니다");
+        if (!canAccess(sessionId, userId)) { // ★ [5단계] 멤버 + 운영 중 (인터셉터에서도 검사하지만 한 번 더)
+            throw new IllegalArgumentException("참가 확정자만, 커뮤니티 운영 기간에만 메시지를 보낼 수 있습니다");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다"));
@@ -158,4 +179,40 @@ public class CommunityService {
                 .toList();
     }
 
+    // =========================================================
+    // 커뮤니티 종료 (5단계, Q4·Q10·Q11)
+    // =========================================================
+
+    /**
+     * ★ 종료 시각이 지난 방 정리 — 스케줄러(매일 00:00)·서버 시작 시 호출
+     * 1. 활성 멤버 전원 비활성 (left_reason = CLOSED, 행은 기록으로 남김)
+     * 2. 메시지 삭제 (Q11-1, CommunityPolicy.DELETE_MESSAGES_ON_CLOSE)
+     * 시각을 인자로 받아 테스트에서 날짜를 바꿔 검증할 수 있게 함
+     *
+     * @return 이번에 닫은 방(활성 멤버가 있던 회차) id — 커밋 후 CLOSED 알림 대상
+     */
+    @Transactional
+    public List<Long> closeExpired(LocalDateTime now) {
+        LocalDateTime endedBefore = CommunityPolicy.closedIfEndedBefore(now);
+
+        List<Long> roomsToClose = communityMemberRepository.findOpenSessionIdsEndedBefore(endedBefore);
+        int closedMembers = roomsToClose.isEmpty() ? 0
+                : communityMemberRepository.closeAll(roomsToClose, CommunityLeaveReason.CLOSED, now);
+
+        int deletedMessages = 0;
+        if (CommunityPolicy.DELETE_MESSAGES_ON_CLOSE) {
+            // 멤버가 모두 나간 방에도 메시지가 남아 있을 수 있으므로 메시지 기준으로도 찾는다
+            Set<Long> roomsWithMessages = new LinkedHashSet<>(roomsToClose);
+            roomsWithMessages.addAll(communityChatMessageRepository.findSessionIdsEndedBefore(endedBefore));
+            if (!roomsWithMessages.isEmpty()) {
+                deletedMessages = communityChatMessageRepository.deleteAllBySessionIds(new ArrayList<>(roomsWithMessages));
+            }
+        }
+
+        if (!roomsToClose.isEmpty() || deletedMessages > 0) {
+            log.info("[community] 종료 정리 기준={} 방={} 멤버 비활성={}명 메시지 삭제={}건",
+                    endedBefore, roomsToClose, closedMembers, deletedMessages);
+        }
+        return roomsToClose;
+    }
 }

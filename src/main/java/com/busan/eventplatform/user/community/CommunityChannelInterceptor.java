@@ -12,17 +12,17 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * [f/40] STOMP 구독·전송 권한 검사 — "참가 확정자만 입장" (대기자·취소자·거절자·다른 회차 회원 거부)
- * - SUBSCRIBE /topic/community/{sessionId} : 그 회차의 활성 멤버만
- * - SEND      /app/community/{sessionId}/… : 그 회차의 활성 멤버만 (4단계 채팅)
+ * [f/40] STOMP 구독·전송 권한 검사 — "참가 확정자만, 운영 기간에만" (대기자·취소자·거절자·다른 회차 회원·종료된 방 거부)
+ * - SUBSCRIBE /topic/community/{sessionId} : 그 회차의 활성 멤버 + 운영 중
+ * - SEND      /app/community/{sessionId}/… : 그 회차의 활성 멤버 + 운영 중
  * - /user/queue/community (본인 알림)         : 허용
  * - 그 밖의 /topic, /queue 직접 구독          : 거부 (다른 사람의 개인 알림 주소를 직접 구독하는 것 방지)
  * 거부하면 클라이언트에 STOMP ERROR 프레임이 가고 연결이 끊긴다.
+ * ★ [5단계] 운영 기간 검사 추가 (B-2) — 연결된 채로 24시를 넘겨도 스케줄러를 기다리지 않고 바로 막힘
  */
 @Component
 @RequiredArgsConstructor
-public class CommunityChannelInterceptor implements
-ChannelInterceptor{
+public class CommunityChannelInterceptor implements ChannelInterceptor {
 
     private static final String TOPIC_PREFIX = "/topic/community/";
     private static final String APP_PREFIX = "/app/community/";
@@ -53,9 +53,8 @@ ChannelInterceptor{
             return message; // /user/queue/community 등
         }
 
-        Long userId = userIdOf(accessor);
-        if (userId == null || !communityService.isActiveMember(sessionId, userId)) {
-            throw new MessagingException("참가 확정자만 커뮤니티에 입장할 수 있습니다");
+        if (!communityService.canAccess(sessionId, userIdOf(accessor))) { // ★ 멤버 + 운영 중
+            throw new MessagingException("참가 확정자만, 커뮤니티 운영 기간에만 이용할 수 있습니다");
         }
         return message;
     }
@@ -79,5 +78,4 @@ ChannelInterceptor{
         Object value = attributes.get(CommunityHandshakeInterceptor.ATTR_USER_ID);
         return value instanceof Long id ? id : null;
     }
-
 }
