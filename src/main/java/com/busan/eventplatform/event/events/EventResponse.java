@@ -2,10 +2,10 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.event.EventSession;
 import lombok.Data;
-import com.busan.eventplatform.event.EventSession;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 

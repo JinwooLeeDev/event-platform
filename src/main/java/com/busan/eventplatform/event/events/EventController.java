@@ -11,6 +11,7 @@ import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ public class EventController {
     private final EventCategoryService eventCategoryService;
     private final EventSessionService eventSessionService;
     private final EventFileService eventFileService;
+    private final RegistrationService registrationService;
 
     @Value("${naver-map.client-id:}")
     private String naverMapClientId;
@@ -78,6 +80,9 @@ public class EventController {
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
         var eventSessions = eventSessionService.findByEventId(id);
+
+        Map<Long, String> closedReasons = registrationService.getClosedReasonsByEventId(id);
+        eventSessions.forEach(s -> s.applyRegistrationState(closedReasons.getOrDefault(s.getId(), "")));
 
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
