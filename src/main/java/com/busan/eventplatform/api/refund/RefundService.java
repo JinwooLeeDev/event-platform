@@ -23,10 +23,12 @@ public class RefundService {
     private final RefundRepository refundRepository;
 
     @Transactional
-    // User의 환불. --> User 검증 , 환불할 Registration내역 검증받고 들어오므로 User , registration 그대로 사용가능.
+    // User 본인 결정으로의 환불. --> User 검증 , 환불할 Registration내역 검증받고 들어오므로 User , registration 그대로 사용가능.
     public void refundUser(Long userId , Registration registration , RegistrationStatus beforeStatus) {
         // 1. 전달받은 행사가 이 유저가 실제 결제한 구매행사가 맞는지.
-        if(!purchaseRepository.existsEventByUser(userId , registration.getEventSession().getId())) throw new Exception400("해당 행사는 결제한 이력이 없습니다");
+        if(!purchaseRepository.existsEventByUser(userId , registration.getEventSession().getId() , PurchaseStatus.PURCHASED)){
+            throw new Exception400("해당 행사는 결제한 이력이 없습니다");
+        }
 
         Purchase purchase = purchaseRepository.findById(registration.getPurchase().getId())
                 .orElseThrow(() -> new Exception404("해당 행사는 구매한 이력이 없습니다"));
@@ -62,8 +64,9 @@ public class RefundService {
 
 
     @Transactional
-    // Company의 환불.
+    // Company의 환불 + User 전액 환불.
     public void refundCompany(LoginIdentity loginIdentity, Long eventSessionId) {
+        //
 
     }
 }
