@@ -146,4 +146,9 @@ public class EventSession {
     public int issueReceptionNumber() {
         return this.nextReceptionNumber++;
     }
+
+    // EventOperationDecisionService에 필요
+    public void cancel() {
+        this.status = EventSessionStatus.CANCELLED;
+    }
 }

@@ -143,9 +143,7 @@ public class EventController {
     // GET - http://localhost:8080/company/events/feedback
     @GetMapping("/events/feedback")
     public String findAllFeedback(HttpSession session, Model model) {
-
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompanySession(session);
         model.addAttribute("eventList",
                 eventService.findAllFeedback(sessionCompanyDto.getId()));
 
@@ -156,9 +154,7 @@ public class EventController {
     // GET - http://localhost:8080/events/update/1
     @GetMapping("/events/update/{id}")
     public String updateForm(@PathVariable Long id, HttpSession session, Model model) {
-
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompanySession(session);
         EventResponse.UpdateFormDto updateFormDto =
                 eventService.update(id, sessionCompanyDto.getId());
         model.addAttribute("event", updateFormDto);
@@ -172,8 +168,7 @@ public class EventController {
     public String update(@PathVariable Long id, EventRequest.UpdateDto updateDto, HttpSession session) {
 
         updateDto.validate();
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompanySession(session);
         eventService.update(id, sessionCompanyDto.getId(), updateDto);
 
         return "redirect:/events";
@@ -183,7 +178,7 @@ public class EventController {
     // POST - http://localhost:8080/events/resubmit/1
     @PostMapping("/events/resubmit/{id}")
     public String resubmit(@PathVariable Long id, HttpSession session) {
-        SessionCompanyDto sessionCompanyDto = (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompanySession(session);
         eventService.resubmit(id, sessionCompanyDto.getId());
 
         return "redirect:/events";
@@ -193,9 +188,7 @@ public class EventController {
     // POST - http://localhost:8080/company/events/delete/1
     @PostMapping("/events/delete/{id}")
     public String delete(@PathVariable Long id, HttpSession session) {
-
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompanySession(session);
         eventService.delete(id, sessionCompanyDto.getId());
 
         return "redirect:/events";
@@ -231,6 +224,22 @@ public class EventController {
         eventService.cancel(id, cancelDto);
 
         return "redirect:/events";
+    }
+
+    private SessionCompanyDto requireCompanySession(HttpSession session) {
+        if (session == null) {
+            throw new Exception403("기업 계정만 이용할 수 있습니다.");
+        }
+        Object identityValue = session.getAttribute(LoginSession.IDENTITY);
+        if (!(identityValue instanceof LoginIdentity identity) || !identity.isCompany()) {
+            throw new Exception403("기업 계정만 이용할 수 있습니다.");
+        }
+        Object companyValue = session.getAttribute(LoginSession.COMPANY);
+        if (!(companyValue instanceof SessionCompanyDto company)
+                || !Objects.equals(identity.getId(), company.getId())) {
+            throw new Exception403("기업 계정으로 다시 로그인해주세요.");
+        }
+        return company;
     }
 
 

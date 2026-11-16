@@ -200,6 +200,9 @@ public class EventService {
         if (companyId == null || !event.isOwner(companyId)) {
             throw new Exception403("삭제 권한이 없습니다.");
         }
+        if (registrationRepository.existsByEventSessionEventId(id)) {
+            throw new Exception400("신청자가 있는 행사는 삭제할 수 없습니다.");
+        }
         eventRepository.delete(event);
     }
 
