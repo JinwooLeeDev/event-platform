@@ -222,13 +222,16 @@ public class EventService {
     // 보완 요청 (관리자 -> 기업)
     @Transactional
     public Event requestFeedback(Long id, String feedbackMessage) {
+        if (feedbackMessage == null || feedbackMessage.isBlank() || feedbackMessage.trim().length() > 1000) {
+            throw new Exception400("보완 요청 사유를 1~1,000자로 입력해주세요.");
+        }
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (!EventStatus.PENDING_REVIEW.equals(event.getStatus())) {
             throw new Exception400("승인 대기 중인 행사만 보완 요청할 수 있습니다.");
         }
         event.setStatus(EventStatus.FEEDBACK_REQUIRED);
-        event.setFeedbackMessage(feedbackMessage);
+        event.setFeedbackMessage(feedbackMessage.trim());
 
         return event;
     }
@@ -257,6 +260,10 @@ public class EventService {
         var byEvent = sessions.stream().collect(Collectors.groupingBy(
                 session -> session.getEvent().getId(),
                 Collectors.mapping(EventResponse.SessionPeriodDto::new, Collectors.toList())));
-        events.forEach(event -> event.setSessionPeriods(byEvent.getOrDefault(event.getId(), List.of())));
+        events.forEach(event -> {
+            var periods = byEvent.getOrDefault(event.getId(), List.of());
+            event.setSessionPeriods(periods);
+            event.setSessionCount(periods.size());
+        });
     }
 }

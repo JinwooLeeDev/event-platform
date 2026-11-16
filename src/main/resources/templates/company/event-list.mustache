@@ -15,6 +15,16 @@
     .company-event-tags { display: flex; gap: 8px; flex-wrap: wrap; }
     .company-event-tag { padding: 5px 10px; border-radius: 999px; background: #f0ede7; color: #64615a; font-size: 12px; }
     .company-event-state { background: #eef1f6; color: #4a5e7a; }
+    .company-event-payment { margin-top: 24px; padding: 22px; border: 1px solid #dbe5f6; border-radius: 12px; background: #f4f7fc; }
+    .company-event-payment h3 { margin: 0 0 10px; font-size: 16px; }
+    .company-event-payment p { color: #555c68; font-size: 13px; line-height: 1.8; }
+    .company-event-payment strong { color: #0750d8; }
+    .company-event-payment-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .company-event-pay-button { padding: 12px 20px; border: 0; border-radius: 10px; background: #0750d8; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    .company-event-pay-button:hover { background: #0642b3; }
+    .company-event-payment a { color: #0750d8; font-size: 13px; }
+    .company-event-payment :focus-visible { outline: 3px solid #9cbfff; outline-offset: 4px; }
+    .company-event-success { padding: 18px 22px; border-radius: 12px; background: #edf8f2; color: #216943; }
     .company-event-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin: 22px 0 0; }
     .company-event-facts dt { font-size: 12px; color: #72757e; }
     .company-event-facts dd { margin: 5px 0 0; font-size: 14px; overflow-wrap: anywhere; }
@@ -29,6 +39,7 @@
             <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span>
             <h1 id="company-events-title">주최 행사</h1>
             <p class="company-events-description">로그인한 기업이 등록한 행사를 확인하는 공간입니다. 승인 대기·보완 요청 등 공개 전 행사도 포함합니다.</p>
+            {{#successMessage}}<p class="company-event-success" role="status">{{successMessage}}</p>{{/successMessage}}
             {{#eventList}}
                 {{#eventList}}
                 <article class="company-event-card">
@@ -46,10 +57,18 @@
 
                     <!--   "결제대기" 상태인 행사를 나타내려고 추가.      -->
                     {{#paidReadyEvent}}
-                              <form action="/event/deposit/{{id}}" method="post" onsubmit="return confirm('최종 결제하시겠습니까?')">
-                                  <input type="hidden" name="sessionCount" value={{sessionCount}}>
-                                  <button type="submit">최종 결제하기</button>
-                              </form>
+                        <section class="company-event-payment" aria-label="행사 보증금 결제">
+                            <h3>심사가 승인되었습니다</h3>
+                            <p>보증금을 결제하면 행사가 공개되고 참가자를 모집할 수 있습니다.<br>회차당 150,000 P × {{sessionCount}}회차 · 결제 금액 <strong>{{depositAmountText}} P</strong></p>
+                            <div class="company-event-payment-actions">
+                                <form action="/event/deposit/{{id}}" method="post" onsubmit="return confirm('행사 보증금 {{depositAmountText}} P를 결제하시겠습니까? 결제 완료 후 행사가 공개됩니다.')">
+                                    <input type="hidden" name="sessionCount" value="{{sessionCount}}">
+                                    <button type="submit" class="company-event-pay-button">보증금 결제하기</button>
+                                </form>
+                                <a href="/charge">포인트 충전하기 →</a>
+                            </div>
+                            <p>기업 보유 포인트에서 차감됩니다. 잔액이 부족하면 포인트를 충전한 후 다시 결제해 주세요.</p>
+                        </section>
                     {{/paidReadyEvent}}
 
                     {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
@@ -65,11 +84,6 @@
                 </div>
             {{/eventList}}
 
-            {{#successMessage}}
-                <script>
-                    alert('{{successMessage}}')
-                </script>
-            {{/successMessage}}
         </section>
     </div>
 </main>

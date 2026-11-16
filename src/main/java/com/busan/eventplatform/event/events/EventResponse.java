@@ -46,6 +46,10 @@ public class EventResponse {
 
     @Data
     public static class EventDto {
+        public String getDepositAmountText() {
+            return String.format(java.util.Locale.KOREA, "%,d",
+                    (long) sessionCount * com.busan.eventplatform.api.purchase.Deposit.SESSION_DEPOSIT);
+        }
         private List<SessionPeriodDto> sessionPeriods = List.of();
         private Long id;
         private Long categoryId;
