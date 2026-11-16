@@ -6,12 +6,18 @@ import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface EventSessionRepository extends JpaRepository<EventSession, Long> {
+
+    // 회차 ID로 삭제
+    @Modifying
+    @Query("DELETE FROM EventSession s WHERE s.id = :sessionId")
+    int deleteBySessionId(@Param("sessionId") Long sessionId);
 
     // 행사 ID별 회차 목록 조회
     @Query("""
