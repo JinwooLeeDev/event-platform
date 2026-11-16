@@ -85,8 +85,6 @@ public class EventSessionRequest {
                     .minimumParticipants(this.minimumParticipants)
                     .minimumCheckAt(this.minimumCheckAt)
                     .status(EventSessionStatus.SCHEDULED)
-                    .applyStartAt(this.applyStartAt)
-                    .applyEndAt(this.applyEndAt)
                     .build();
         }
     }

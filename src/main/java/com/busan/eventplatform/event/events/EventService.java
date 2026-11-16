@@ -57,9 +57,6 @@ public class EventService {
         if (saveDto.isHasSessions()) {
             for (EventSessionRequest.SaveDto sessionDto : saveDto.getSessions()) {
 
-                sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
-                sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
-
                 eventSessionService.save(event.getId(), companyId, sessionDto);
             }
         } else {
@@ -173,6 +170,12 @@ public class EventService {
     }
 
     // 보완 요청 - 수정 후 재제출 (수정된 내용 저장, 상태 변경, 메시지 초기화)
+    @Transactional
+    public Event updateAndResubmit(Long id, Long companyId, EventRequest.UpdateDto updateDto) {
+        update(id, companyId, updateDto);
+        return resubmit(id, companyId);
+    }
+
     @Transactional
     public Event resubmit(Long id, Long companyId) {
         Event event = eventRepository.findById(id)

@@ -72,6 +72,7 @@
                     {{/paidReadyEvent}}
 
                     {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
+                    <p data-event-edit hidden><a class="company-event-pay-button" style="display:inline-block;text-decoration:none" href="/events/update/{{id}}">행사 정보 수정</a></p>
                 </article>
                 {{/eventList}}
                 {{^eventList}}<div class="company-event-card"><h2>등록한 행사가 없습니다.</h2><p class="company-events-description">기업이 등록한 행사가 생기면 이곳에 표시됩니다.</p></div>{{/eventList}}
@@ -91,7 +92,10 @@
 <script>
 (() => {
     const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨',PAID_READY:'결제 대기중'};
-    document.querySelectorAll('[data-company-event-status]').forEach(element => { const value = element.textContent.trim(); element.textContent = labels[value] || value; });
+    document.querySelectorAll('[data-company-event-status]').forEach(element => {
+        const value = element.textContent.trim(); element.textContent = labels[value] || value;
+        element.closest('.company-event-card').querySelector('[data-event-edit]').hidden = value !== 'FEEDBACK_REQUIRED';
+    });
     document.querySelectorAll('[data-company-event-date]').forEach(element => { const value = element.textContent.trim(); if(/^\d{4}-\d{2}-\d{2}T/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.'); });
 })();
 </script>

@@ -9,6 +9,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CompanyEventPaymentViewTest {
+    @Test void editFormRendersExistingValuesCategoriesAndEscapedFeedback() throws Exception {
+        var category = com.busan.eventplatform.event.event_category.EventCategory.builder().id(3L).name("Culture").build();
+        var event = Event.builder().id(7L).category(category).title("<script>title</script>")
+                .summary("Summary").description("</textarea><script>description</script>").address("Busan")
+                .feedbackMessage("<script>feedback</script>").build();
+        var compiler = com.samskivert.mustache.Mustache.compiler().withLoader(name -> new java.io.InputStreamReader(
+                getClass().getResourceAsStream("/templates/" + name + ".mustache"), java.nio.charset.StandardCharsets.UTF_8));
+        try (var reader = new java.io.InputStreamReader(getClass().getResourceAsStream("/templates/event/update-form.mustache"), java.nio.charset.StandardCharsets.UTF_8)) {
+            var html = compiler.compile(reader).execute(java.util.Map.of("event", new EventResponse.UpdateFormDto(event),
+                    "categoryList", List.of(category), "loginUser", false));
+            assertTrue(html.contains("action=\"/events/update/7\" method=\"post\""));
+            assertTrue(html.contains("value=\"3\" selected"));
+            assertTrue(html.contains("&lt;script&gt;title&lt;/script&gt;"));
+            assertTrue(html.contains("&lt;/textarea&gt;&lt;script&gt;description&lt;/script&gt;"));
+            assertTrue(html.contains("&lt;script&gt;feedback&lt;/script&gt;"));
+            assertFalse(html.contains("<script>feedback</script>"));
+        }
+    }
     @Test void paymentActionOnlyRendersForApprovedEvents() throws Exception {
         var compiler = com.samskivert.mustache.Mustache.compiler().withLoader(name -> new java.io.InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), java.nio.charset.StandardCharsets.UTF_8));

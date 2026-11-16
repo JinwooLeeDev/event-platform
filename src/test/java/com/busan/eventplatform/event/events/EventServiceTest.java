@@ -141,6 +141,40 @@ class EventServiceTest {
     // 행사 등록
     // =========================
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans = {true, false})
+    void save_preservesEachSessionRecruitmentPeriod(boolean commonPeriodPresent) {
+        var dto = createSaveDto();
+        dto.setHasSessions(true);
+        if (!commonPeriodPresent) { dto.setApplyStartAt(null); dto.setApplyEndAt(null); }
+        var firstStart = LocalDateTime.of(2026, 11, 21, 10, 0);
+        var secondStart = firstStart.plusDays(2);
+        var sessions = List.of(firstStart, secondStart).stream().map(start -> {
+            var row = new EventSessionRequest.SaveDto();
+            row.setName("Session"); row.setStartsAt(start.plusDays(10)); row.setEndsAt(start.plusDays(11));
+            row.setApplyStartAt(start); row.setApplyEndAt(start.plusDays(3));
+            row.setCapacity(30); row.setPricingType("FREE"); row.setMinimumParticipants(1);
+            row.setMinimumCheckAt(start.plusDays(9));
+            return row;
+        }).toList();
+        dto.setSessions(sessions);
+        dto.validate();
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(eventCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        when(eventRepository.save(any())).thenAnswer(call -> {
+            Event saved = call.getArgument(0); saved.setId(eventId); return saved;
+        });
+        when(eventSessionService.save(eq(eventId), eq(companyId), any())).thenAnswer(call -> {
+            EventSessionRequest.SaveDto row = call.getArgument(2); row.validate(); return null;
+        });
+        eventService.save(dto, companyId);
+        assertEquals(firstStart, sessions.get(0).getApplyStartAt());
+        assertEquals(firstStart.plusDays(3), sessions.get(0).getApplyEndAt());
+        assertEquals(secondStart, sessions.get(1).getApplyStartAt());
+        assertEquals(secondStart.plusDays(3), sessions.get(1).getApplyEndAt());
+        verify(eventSessionService, times(2)).save(eq(eventId), eq(companyId), any());
+    }
+
     @Test
     @DisplayName("행사 등록 시 기본 회차를 생성한다")
     void save_createsDefaultSession() {
@@ -635,6 +669,23 @@ class EventServiceTest {
 
         Event result = eventService.resubmit(eventId, companyId);
 
+        assertEquals(EventStatus.PENDING_REVIEW, result.getStatus());
+        assertNull(result.getFeedbackMessage());
+    }
+
+    @Test
+    void updateAndResubmit_savesCorrectionAndReturnsToPendingReview() {
+        var corrected = createOwnedEvent(EventStatus.FEEDBACK_REQUIRED);
+        corrected.setFeedbackMessage("Please update the description");
+        when(company.getId()).thenReturn(companyId);
+        when(eventRepository.findByDetail(eventId)).thenReturn(Optional.of(corrected));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(corrected));
+        when(eventCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        var result = eventService.updateAndResubmit(eventId, companyId, createUpdateDto());
+
+        assertEquals(createUpdateDto().getTitle(), result.getTitle());
+        assertEquals(createUpdateDto().getDescription(), result.getDescription());
         assertEquals(EventStatus.PENDING_REVIEW, result.getStatus());
         assertNull(result.getFeedbackMessage());
     }
