@@ -52,7 +52,7 @@
                 <p class="status-note">{{statusMessage}}</p>
                 <div class="event-actions d-flex flex-wrap gap-2">
                     <a class="btn btn-primary" href="{{detailUrl}}">행사 상세</a>
-                    {{#cancelable}}<form action="{{cancelUrl}}" method="post" data-confirm="{{cancelConfirmText}}" onsubmit="return confirm(this.dataset.confirm);"><button class="btn btn-outline-danger" type="submit">참가 취소</button></form>{{/cancelable}}
+                    {{#cancelable}}<button class="btn btn-outline-danger reg-cancel-btn" type="button" data-cancel-url="{{cancelUrl}}" data-confirm="{{cancelConfirmText}}" data-refund-policy="{{refundPolicyText}}">참가 취소</button>{{/cancelable}}
                     {{^cancelable}}<button class="btn btn-outline-secondary" type="button" disabled>취소 불가</button>{{/cancelable}}
                 </div>
             </div></div>

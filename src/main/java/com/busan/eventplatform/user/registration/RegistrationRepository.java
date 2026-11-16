@@ -117,6 +117,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     @Query("select r.eventSession.id from Registration r where r.id = :registrationId")
     Optional<Long> findSessionIdById(@Param("registrationId") Long registrationId);
 
+    // ★ 추가: [나의 신청 내역] 결제 id 목록의 실제 환불 금액 (refund_tb) — 목록 전체를 쿼리 1번으로 조회
+    //   반환: [결제 id, 환불 금액] 배열 목록
+    @Query("select rf.purchase.id, rf.amount from Refund rf where rf.purchase.id in :purchaseIds")
+    List<Object[]> findRefundAmountsByPurchaseIds(@Param("purchaseIds") List<Long> purchaseIds);
+
 
 
 }
