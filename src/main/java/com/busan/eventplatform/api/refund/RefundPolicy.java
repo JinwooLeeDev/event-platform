@@ -64,6 +64,28 @@ public final class RefundPolicy {
         return 0;                         // 1일 전·당일: 환불 불가
     }
 
+    // 기업 보증금 환불 계산.
+    public static int forCompanyCancel(int paidAmount , LocalDate cancelDate, LocalDate sessionDate) {
+        if (paidAmount <= 0) {
+            return 0;  // 무료 행사(0P 결제)는 환불할 금액 없음
+        }
+
+        long daysBefore = ChronoUnit.DAYS.between(cancelDate, sessionDate);
+
+        if (daysBefore >= 4) {
+            return paidAmount;            // 4일 이상 전: 전액
+        }
+        if (daysBefore == 3) {
+            return paidAmount * 2 / 3;    // 3일 전: 2/3 (정수 나눗셈 = 내림)
+        }
+        if (daysBefore == 2) {
+            return paidAmount / 2;        // 2일 전: 1/2
+        }
+        return 0;                         // 1일 전·당일: 환불 불가
+    }
+
+
+
     /** 주최 기업의 참가 거절 시 환불 금액 — 전액 */
     public static int forCompanyReject(int paidAmount) {
         return Math.max(paidAmount, 0);
