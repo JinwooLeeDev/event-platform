@@ -31,7 +31,7 @@ public class PaymentController {
         return "point/charge-point";
     }
 
-    @PostMapping("/api/payment/prepare")
+    @PostMapping("/api/naver/payment/prepare")
     public ResponseEntity<?> prepare(@RequestBody PaymentReq.PrepareDto prepareDto , HttpSession session) {
         prepareDto.validate();
 
@@ -42,7 +42,7 @@ public class PaymentController {
         return ResponseEntity.ok(body);
     }
 
-    @PostMapping("/api/payment/complete")
+    @PostMapping("/api/naver/payment/complete")
     public ResponseEntity<?> complete(@RequestBody PaymentReq.CompleteDto completeDto , HttpSession session) {
         completeDto.validate();
 

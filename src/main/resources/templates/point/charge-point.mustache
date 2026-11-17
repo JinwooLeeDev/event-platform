@@ -110,7 +110,7 @@
                 N pay | 포인트 충전하기
             </button>
 
-            <button type="button" class="btn btn-warning btn-lg w-100 py-3 fw-bold" id="kakaoPayBtn">
+            <button type="button" class="btn btn-warning btn-lg w-100 py-3 fw-bold mt-2" id="kakaoPayBtn">
                 카카오페이로 충전하기
             </button>
 
@@ -140,6 +140,7 @@
 <script>
     let selectedPoint = 0;
     const naverPayBtn = document.querySelector("#naverPayBtn");
+    const kakaoPayBtn = document.querySelector("#kakaoPayBtn");
     const pointBtns = document.querySelectorAll(".amount-btn");
     const expectedPoint = document.querySelector("#expectedPoint")
     const inputPoint = document.querySelector("#chargeAmount")
@@ -170,7 +171,7 @@
        }
 
        try {
-           const prepareRes = await fetch("/api/payment/prepare" , {
+           const prepareRes = await fetch("/api/naver/payment/prepare" , {
                method : "post" ,
                headers : {"Content-Type" : "application/json"} ,
                body : JSON.stringify({amount : selectedPoint})
@@ -198,7 +199,7 @@
                return;
            }
 
-           const completeRes = await fetch("/api/payment/complete" , {
+           const completeRes = await fetch("/api/naver/payment/complete" , {
                method : "post" ,
                headers : {"Content-Type" : "application/json"} ,
                body : JSON.stringify({paymentId : payment.paymentId})
@@ -214,8 +215,21 @@
            window.location.href = completeReq.redirectUrl
 
        }catch (e) {
-            throw new Error("결제 실패하였습니다")
+            throw new Error("결제에 실패하였습니다")
        }
+    })
+
+    kakaoPayBtn.addEventListener("click" , async function() {
+        if(selectedPoint <= 0 || selectedPoint === null) {
+            alert("충전할 포인트를 입력하세요(0포인트 이상)");
+            return;
+        }
+        try {
+            const prepareReq =
+
+        }catch (e) {
+            throw new Error("결제에 실패하였습니다")
+        }
     })
 
 </script>
