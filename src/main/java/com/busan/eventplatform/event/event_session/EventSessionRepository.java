@@ -70,7 +70,7 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
     Optional<EventSession> findByCompanyIdAndSessionId(@Param("companyId") Long companyId , @Param("sessionId") Long sessionId);
 
     @Query("""
-            select es from EventSession es 
+            select count(es) from EventSession es 
             where es.event.id = :eventId and not exists (
             select d from Deposit d where d.eventSession = es and d.status = :status
             )
