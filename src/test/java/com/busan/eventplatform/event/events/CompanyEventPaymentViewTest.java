@@ -75,13 +75,22 @@ class CompanyEventPaymentViewTest {
             var event = Event.builder().id(7L).title("Event").summary("Summary").status(status).build();
             var list = new EventResponse.ListDto(List.of(event));
             list.getEventList().getFirst().setSessionCount(2);
+            var start = LocalDateTime.of(2026, 12, 20, 10, 0);
+            list.getEventList().getFirst().setSessionPeriods(List.of(
+                    new EventResponse.SessionPeriodDto(EventSession.builder().id(12L).name("오전 회차")
+                            .applyStartAt(start.minusDays(5)).applyEndAt(start.minusDays(1)).build()),
+                    new EventResponse.SessionPeriodDto(EventSession.builder().id(13L).name("오후 회차")
+                            .applyStartAt(start.minusDays(5)).applyEndAt(start.minusDays(1)).build())));
             try (var reader = new java.io.InputStreamReader(getClass().getResourceAsStream("/templates/company/event-list.mustache"), java.nio.charset.StandardCharsets.UTF_8)) {
                 var html = compiler.compile(reader).execute(java.util.Map.of("eventList", list, "loginUser", false));
-                assertEquals(status == EventStatus.PAID_READY, html.contains("action=\"/event/deposit/7\""));
+                assertEquals(status == EventStatus.PAID_READY, html.contains("action=\"/event/deposit/12\""));
+                assertEquals(status == EventStatus.PAID_READY, html.contains("action=\"/event/deposit/13\""));
+                assertFalse(html.contains("action=\"/event/deposit/7\""));
                 assertTrue(html.contains("action=\"/events/delete/7\""));
                 if (status == EventStatus.PAID_READY) {
-                    assertTrue(html.contains("300,000 P"));
-                    assertTrue(html.contains("name=\"sessionCount\" value=\"2\""));
+                    assertTrue(html.contains("150,000 P"));
+                    assertTrue(html.contains("오전 회차"));
+                    assertTrue(html.contains("오후 회차"));
                     assertTrue(html.contains("href=\"/charge\""));
                 }
             }

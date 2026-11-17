@@ -1,121 +1,29 @@
 <!DOCTYPE html>
 <html lang="ko"><head>{{> layout/head-meta}}<title>커뮤니티 | Busan Play</title></head><body>
 {{> layout/header}}
-
-{{> layout/bootstrap}}
-
-<style>
-    .community-page { min-height: 85vh; background: #f8f9fb; color: #1a2340; }
-    .community-container { max-width: 860px; }
-    .community-card { background: #fff; border: 1px solid #e6e7eb; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,.04); overflow: hidden; }
-    .community-head { padding: 20px 24px; border-bottom: 1px solid #edf0f5; }
-    .community-eyebrow { color: #0750d8; font-weight: 800; font-size: 12px; letter-spacing: 2px; }
-    .community-title { font-size: 20px; font-weight: 800; margin: 6px 0 4px; }
-    .community-sub { color: #72757e; font-size: 13px; }
-    .community-status { font-size: 12px; color: #72757e; }
-    .community-status.is-live { color: #3d725c; }
-    .community-status.is-off { color: #a34b4b; }
-    .community-messages { height: 50vh; overflow-y: auto; padding: 20px 24px; margin: 0; list-style: none; background: #fbfbfc; }
-    .community-msg { margin-bottom: 14px; max-width: 75%; }
-    .community-msg.mine { margin-left: auto; text-align: right; }
-    .community-msg .meta { font-size: 12px; color: #72757e; margin-bottom: 4px; }
-    .community-msg .meta strong { color: #292f3d; margin-right: 6px; }
-    .community-msg .bubble { display: inline-block; padding: 10px 14px; border-radius: 14px; background: #fff; border: 1px solid #e6e7eb; white-space: pre-wrap; word-break: break-word; text-align: left; }
-    .community-msg.mine .bubble { background: #0750d8; border-color: #0750d8; color: #fff; }
-    .community-msg.host .bubble { background: #fff4e0; border-color: #e9a23b; color: #4a3500; }  /* [6단계] 주최 기업 메시지 */
-    .community-msg.host .meta strong { color: #a5650a; }
-    .community-system { text-align: center; font-size: 12px; color: #8a8f99; margin: 10px 0; }
-    .community-system-time { color: #b0b4bc; margin-left: 4px; }
-    .community-form { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid #edf0f5; }
-    .community-form input { flex: 1; }
-    .community-notice { margin: 0; padding: 12px 24px; background: #fff8e6; border-bottom: 1px solid #f3e2b3; color: #6b4e00; font-size: 14px; white-space: pre-line; }
-    /* [6단계] 상단 고정 공지 · 참여자 목록 · 공지 입력 */
-    .community-pin { margin: 0; padding: 12px 24px; background: #eef3fd; border-bottom: 1px solid #d5e1fa; }
-    .community-pin .label { font-size: 12px; font-weight: 800; color: #0750d8; margin-bottom: 4px; }
-    .community-pin .text { font-size: 14px; color: #1a2340; white-space: pre-line; word-break: break-word; margin: 0; }
-    .community-pin .time { font-size: 12px; color: #72757e; margin-top: 4px; }
-    .community-people { padding: 10px 24px; border-bottom: 1px solid #edf0f5; font-size: 13px; color: #4a5568; }
-    .community-people summary { cursor: pointer; font-weight: 700; color: #292f3d; }
-    .community-people ul { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
-    .community-people li { background: #f1f3f7; border-radius: 999px; padding: 3px 10px; }
-    .community-notice-form { display: flex; flex-direction: column; gap: 6px; padding: 12px 24px; border-bottom: 1px solid #edf0f5; background: #fffaf0; }
-    .community-notice-form textarea { resize: vertical; min-height: 60px; }
-</style>
-
-<main class="community-page py-5">
-    <div class="container community-container">
-        {{#room}}
-            <nav class="mb-4 small text-secondary">
-                <a href="/" class="text-secondary text-decoration-none">홈</a>
-                <i class="bi bi-chevron-right mx-2"></i>
-                <a href="/community" class="text-secondary text-decoration-none">내 커뮤니티</a>
-                <i class="bi bi-chevron-right mx-2"></i>
-                <strong class="text-dark">{{eventTitle}}</strong>
-            </nav>
-
-            <section class="community-card" aria-labelledby="community-title">
-                <div class="community-head">
-                    <div class="community-eyebrow">BUSAN PLAY · COMMUNITY</div>
-                    <h1 id="community-title" class="community-title">{{eventTitle}}</h1>
-                    <div class="community-sub">{{sessionName}} · 주최 {{hostName}} · {{closeText}}</div>
-                    <div id="community-status" class="community-status mt-2" role="status">연결 중…</div>
-                </div>
-
-                <!-- [5-2] 종료일 당일 안내 배너: 값이 없으면 숨김, 11시 실시간 알림(REMINDER)도 여기에 표시 -->
-                <p id="community-end-day-notice" class="community-notice" role="status" {{^endDayNotice}}hidden{{/endDayNotice}}>{{#endDayNotice}}{{.}}{{/endDayNotice}}</p>
-
-                <!-- [6단계] 상단 고정 공지 (주최 기업 작성): 없으면 숨김, 실시간 NOTICE 로 갱신 -->
-                <div id="community-pin" class="community-pin" {{^notice}}hidden{{/notice}}>
-                    <div class="label">📌 주최 측 공지</div>
-                    <p id="community-pin-text" class="text">{{#notice}}{{.}}{{/notice}}</p>
-                    <div id="community-pin-time" class="time">{{#noticeUpdatedAt}}{{.}} 등록{{/noticeUpdatedAt}}</div>
-                </div>
-
-                {{#host}}
-                    <!-- [6단계] 주최 기업만: 공지 등록·수정 (비워서 등록하면 공지 내림) -->
-                    <form id="community-notice-form" class="community-notice-form" autocomplete="off">
-                        <label for="community-notice-input" class="small fw-bold">공지 등록·수정 <span class="text-secondary fw-normal">(비워서 등록하면 공지를 내립니다)</span></label>
-                        <textarea id="community-notice-input" class="form-control" maxlength="500" disabled>{{#notice}}{{.}}{{/notice}}</textarea>
-                        <div><button id="community-notice-send" class="btn btn-warning btn-sm" type="submit" disabled>공지 등록</button></div>
-                    </form>
-                {{/host}}
-
-                <!-- [6단계] 참여자 목록 (참가 확정자) — 입장·퇴장 시 실시간 갱신 -->
-                <details class="community-people">
-                    <summary>참여자 <span id="community-people-count">{{participantCount}}</span>명</summary>
-                    <ul id="community-people">
-                        {{#participants}}<li data-user-id="{{userId}}">{{nickname}}</li>{{/participants}}
-                    </ul>
-                </details>
-
-                <ul id="community-messages" class="community-messages" aria-live="polite"
-                    data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
-                    {{#empty}}<li class="community-system">아직 메시지가 없습니다. 첫 인사를 남겨 보세요!</li>{{/empty}}
-                    {{#messages}}
-                        {{#system}}<li class="community-system">{{content}} <span class="community-system-time">{{sentAt}}</span></li>{{/system}}
-                        {{^system}}
-                            <li class="community-msg {{#mine}}mine{{/mine}} {{#host}}host{{/host}}">
-                                <div class="meta"><strong>{{nickname}}</strong><span>{{sentAt}}</span></div>
-                                <div class="bubble">{{content}}</div>
-                            </li>
-                        {{/system}}
-                    {{/messages}}
-                </ul>
-
-                <form id="community-form" class="community-form" autocomplete="off">
-                    <label for="community-input" class="visually-hidden">메시지</label>
-                    <input id="community-input" class="form-control" type="text" maxlength="500"
-                           placeholder="메시지를 입력하세요 (최대 500자)" disabled>
-                    <button id="community-send" class="btn btn-primary" type="submit" disabled>보내기</button>
-                </form>
-            </section>
-        {{/room}}
-    </div>
-</main>
-
+{{> community/style}}
+<main class="community-page"><div class="community-room-wrap">
+    <a class="community-back" href="/community"><span aria-hidden="true">‹</span> 내 커뮤니티 목록</a>
+    {{#room}}
+    <section class="community-card" aria-labelledby="community-title">
+        <header class="community-head"><div><span class="community-tag">회차 커뮤니티</span><h1 id="community-title" class="community-title">{{eventTitle}}</h1><div class="community-sub">{{sessionName}} · 주최 {{hostName}}</div><div class="community-close">{{closeText}}</div></div><div id="community-status" class="community-status" role="status">연결 중…</div></header>
+        <p id="community-end-day-notice" class="community-notice" role="status" {{^endDayNotice}}hidden{{/endDayNotice}}>{{#endDayNotice}}{{.}}{{/endDayNotice}}</p>
+        <div id="community-pin" class="community-pin" {{^notice}}hidden{{/notice}}><div class="label">주최 측 공지</div><p id="community-pin-text" class="text">{{#notice}}{{.}}{{/notice}}</p><div id="community-pin-time" class="time">{{#noticeUpdatedAt}}{{.}} 등록{{/noticeUpdatedAt}}</div></div>
+        <div class="community-tools">
+            <details class="community-people"><summary>참여자 <span id="community-people-count">{{participantCount}}</span>명</summary><ul id="community-people">{{#participants}}<li data-user-id="{{userId}}">{{nickname}}</li>{{/participants}}</ul></details>
+            {{#host}}<details class="community-notice-editor"><summary>주최 공지 관리</summary><form id="community-notice-form" class="community-notice-form" autocomplete="off"><label for="community-notice-input">참가자에게 안내할 내용</label><textarea id="community-notice-input" maxlength="500" rows="3" aria-describedby="community-notice-help" disabled>{{#notice}}{{.}}{{/notice}}</textarea><p id="community-notice-help">최대 500자. 내용을 비우고 등록하면 공지를 내립니다.</p><button id="community-notice-send" class="community-button" type="submit" disabled>공지 등록·수정</button></form></details>{{/host}}
+        </div>
+        <ul id="community-messages" class="community-messages" role="log" aria-label="회차 대화 내역" aria-live="polite" aria-relevant="additions" data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
+            {{#empty}}<li class="community-system">아직 대화가 없어요. 함께할 참가자들에게 먼저 인사해보세요.</li>{{/empty}}
+            {{#messages}}{{#system}}<li class="community-system">{{content}} <span class="community-system-time">{{sentAt}}</span></li>{{/system}}{{^system}}<li class="community-msg{{#mine}} mine{{/mine}}{{#host}} host{{/host}}"><div class="meta"><strong>{{nickname}}</strong><span>{{sentAt}}</span></div><div class="bubble">{{content}}</div></li>{{/system}}{{/messages}}
+        </ul>
+        <form id="community-form" class="community-form" autocomplete="off"><label for="community-input" class="community-sr-only">메시지</label><input id="community-input" type="text" maxlength="500" placeholder="메시지를 입력하세요" aria-describedby="community-input-help" disabled><button id="community-send" class="community-button" type="submit" disabled>보내기</button></form>
+        <p id="community-input-help" class="community-input-help">서로를 배려하는 대화를 나눠주세요. 메시지는 최대 500자까지 보낼 수 있습니다.</p>
+    </section>
+    {{/room}}
+</div></main>
 {{> layout/footer}}
 
-<!-- 채팅용 라이브러리: 레이아웃과 같은 jsDelivr CDN, 이 화면에서만 로드 (Q5) -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
 <script>
