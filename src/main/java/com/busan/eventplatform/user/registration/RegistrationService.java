@@ -34,7 +34,8 @@ import java.util.Map;
  * 결제 정책: "신청 시 결제"
  * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 결제 (RegistrationPurchaseService → PurchaseService.pay).
  * - 대기열 승격 시에는 추가 결제 없이 상태만 변경.
- * - 본인 취소 환불은 RefundService.refundUser() 에 위임, 기업 거절 환불은 RefundService.refundCompany() 에 위임(f/41, B안)
+ * - 본인 취소 환불은 RefundService.refundUser() 에 위임, 기업 거절 환불은 RefundService.refundByCompany() 에 위임(f/41, B안)
+ * - ★ [f/41] 회차 삭제 승인 시 참가자 환불은 RefundService.pointBackUser() (승인 메서드가 호출), 신청 정리는 cancelAllBySession()
  * <p>
  * 결제·환불 로직은 이 클래스에서 직접 처리하지 않는다.
  */
@@ -232,6 +233,52 @@ public class RegistrationService {
         if (registration.getPurchase() != null) {
             refundService.refundByCompany(registration);
         }
+    }
+
+    // =========================================================
+    // ★ [f/41] 회차 삭제 승인 — 회차의 남은 신청 일괄 정리
+    // =========================================================
+
+    /**
+     * ★ [f/41] 회차 삭제(취소) 승인 시 그 회차의 확정·대기 신청을 모두 정리한다.
+     * 운영자 '삭제 승인' 메서드가 한 트랜잭션 안에서 아래 순서로 호출한다.
+     *   ① 회차 상태 CANCELLED
+     *   ② refundService.pointBackUser(session)   — 참가자 전원 전액 환불 (포인트 파트)
+     *   ③ registrationService.cancelAllBySession  — 이 메서드
+     *   ④ refundService.refundCompany(...)         — 기업 예약금 (포인트 파트, 삭제 신청일 기준)
+     * <p>
+     * ⚠ 반드시 pointBackUser '다음'에 호출한다.
+     *   pointBackUser 는 신청이 아직 확정·대기(isActive)일 때만 환불하므로,
+     *   이 메서드를 먼저 부르면 예외 없이 아무도 환불받지 못한다. (다른 흐름과 순서가 반대인 이유)
+     * <p>
+     * - 상태: REJECTED (주최 측 사정) + 이력 "행사 회차 취소 (사유)"
+     * - 환불: 하지 않음 (② 에서 이미 처리 → 이중 환불 방지)
+     * - 좌석 반납·대기자 승격: 하지 않음 (회차 자체가 취소됨)
+     * - 커뮤니티: 신청마다 이벤트를 보내지 않고 회차 단위 이벤트 1번 → 커밋 후 방 전체 종료·삭제
+     *   (신청마다 보내면 참가자마다 '주최자 거절' 퇴장 안내가 따로 나가고 메시지도 남는다)
+     *
+     * @param reason 운영자가 남긴 삭제 사유 (이력에 함께 기록, 없으면 생략)
+     * @return 정리한 신청 수
+     */
+    @Transactional
+    public int cancelAllBySession(Long sessionId, String reason) {
+        EventSession session = lockSession(sessionId);
+        if (session.getStatus() != EventSessionStatus.CANCELLED) {
+            throw new Exception400("취소된 회차만 참가 신청을 일괄 정리할 수 있습니다");
+        }
+
+        String historyReason = "행사 회차 취소" + (reason == null || reason.isBlank() ? "" : " (" + reason.strip() + ")");
+        List<Registration> actives = registrationRepository.findAllBySessionIdWithUser(sessionId).stream()
+                .filter(r -> r.getStatus().isActive())
+                .toList();
+
+        for (Registration registration : actives) {
+            registration.reject();
+            recordHistory(registration, RegistrationStatus.REJECTED, null, historyReason);
+        }
+
+        eventPublisher.publishEvent(new RegistrationSessionCancelledEvent(sessionId));  // 커밋 후 커뮤니티 종료
+        return actives.size();
     }
 
     // =========================================================
@@ -577,7 +624,13 @@ public class RegistrationService {
         // 2. 표시 상태 결정 — 우선순위: 거절 > 취소 > 시작됨(행사 종료) > 대기 > 확정
         String tab, label, cssClass, message;
         Integer waitingNumber = null;
-        if (status == RegistrationStatus.REJECTED) {
+        if (status == RegistrationStatus.REJECTED && session.getStatus() == EventSessionStatus.CANCELLED) {
+            // ★ [f/41] 회차 삭제 승인으로 정리된 신청 — '거절'로 오해하지 않게 따로 표시
+            tab = "past";
+            label = "행사 취소";
+            cssClass = "status-rejected";
+            message = "주최 측 사정으로 행사 회차가 취소되었습니다. 결제한 포인트는 전액 환불됩니다.";
+        } else if (status == RegistrationStatus.REJECTED) {
             tab = "past";
             label = "참가 거절";
             cssClass = "status-rejected";
