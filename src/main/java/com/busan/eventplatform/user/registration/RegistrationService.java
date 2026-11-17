@@ -15,18 +15,17 @@ import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.UserStatus;
+import com.busan.eventplatform.user.community.CommunityPolicy;   // ★ [f/40] 커뮤니티 운영 기간 규칙
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;   // ★ [f/40] 상태 변경 이벤트 발행
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.busan.eventplatform.user.community.CommunityPolicy;   // ★ [f/40] 커뮤니티 운영 기간 규칙
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.context.ApplicationEventPublisher;   // ★ [f/40] 상태 변경 이벤트 발행
 
 
 /**
@@ -35,7 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;   // ★ [f/40] �
  * 결제 정책: "신청 시 결제"
  * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 결제 (RegistrationPurchaseService → PurchaseService.pay).
  * - 대기열 승격 시에는 추가 결제 없이 상태만 변경.
- * - 본인 취소 환불은 RefundService.refundUser() 에 위임, 기업 거절 환불은 refundCompany 구현 후 연결.
+ * - 본인 취소 환불은 RefundService.refundUser() 에 위임, 기업 거절 환불은 RefundService.refundCompany() 에 위임(f/41, B안)
  * <p>
  * 결제·환불 로직은 이 클래스에서 직접 처리하지 않는다.
  */
@@ -61,15 +60,6 @@ public class RegistrationService {
      * @param user    검증을 통과한 신청자
      */
     public record ApplyContext(EventSession session, User user) {
-    }
-
-    /**
-     * reject() 전용 (기업 거절 환불 refundCompany 연결 전까지 유지)
-     *
-     * @param purchaseId   환불할 결제 (신청에 연결된 결제, 연결 전 기존 데이터면 null)
-     * @param refundAmount 환불 규칙(RefundPolicy)으로 계산한 금액 (0 가능)
-     */
-    public record RefundRequest(Long purchaseId, int refundAmount) {
     }
 
 
@@ -149,7 +139,7 @@ public class RegistrationService {
      * - 결제는 직접 호출하지 않는다. 신청 + 결제 순서는 RegistrationPurchaseService 가 조율한다.
      *   검증(prepareApply) → 결제(PurchaseService.pay) → 저장(completeApply), 하나의 트랜잭션
      * - 대기열 승격 시에는 추가 결제 없이 상태만 변경 (신청 시점에 이미 결제)
-     * - 본인 취소 환불: cancel() 에서 RefundService.refundUser() 호출로 연결 / 거절 환불: TODO (refundCompany 구현 대기)
+     * - 본인 취소 환불: cancel() 에서 RefundService.refundUser() / 기업 거절 환불: reject()에서 RefundService.refundByCompany() (f/41)
      */
 
     // =========================================================
@@ -214,12 +204,12 @@ public class RegistrationService {
 
     /**
      * 주최 기업의 참가 신청 거절. 기업 거절은 전액 환불 (조장님 결정 D5).
-     * 포인트는 여기서 돌려주지 않는다 — 반환된 RefundRequest 로 흐름 클래스가 환불 처리 (진행 순서 8)
-     *
-     * @return 환불 요청 (결제 금액 전액)
+     * ★ [f/41] B안 — 신청 파트: 상태(REJECTED)·이력·이벤트(커뮤니티 퇴장) / 포인트 파트: 환불만 (refundByCompany)
+     *   refundByCompany 는 상태가 REJECTED 인지 검사하므로 registration.reject() '후'에 호출한다.
+     *   같은 트랜잭션이라 환불이 실패하면 거절도 롤백된다 (커뮤니티 퇴장은 커밋 후에만 실행되므로 함께 취소됨).
      */
     @Transactional
-    public RefundRequest reject(Long registrationId, LoginIdentity loginIdentity) {
+    public void reject(Long registrationId, LoginIdentity loginIdentity) {
         Registration registration = findRegistrationWithSessionLock(registrationId);
         EventSession session = registration.getEventSession();
 
@@ -238,8 +228,10 @@ public class RegistrationService {
             promoteWaitingUsersIfAny(session);
         }
 
-        int refundAmount = RefundPolicy.forCompanyReject(paidAmountOf(registration));
-        return new RefundRequest(purchaseIdOf(registration), refundAmount);
+        // ★ [f/41] 환불(전액)은 포인트 파트에 위임 — 결제 연결이 없는 신청은 건너뜀 (cancel() 과 같은 방식)
+        if (registration.getPurchase() != null) {
+            refundService.refundByCompany(registration);
+        }
     }
 
     // =========================================================
