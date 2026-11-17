@@ -1,0 +1,44 @@
+<style>
+body.login-modal-open { overflow: hidden; }
+.login-modal { box-sizing: border-box; position: fixed; inset: 0; width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); margin: auto; padding: 36px; overflow-y: auto; border: 1px solid #dce4ee; border-radius: 20px; background: #fff; color: #142d4e; box-shadow: 0 24px 90px #142d4e33; font: 14px/1.75 Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif; }
+.login-modal:not([open]) { display: none; }
+.login-modal *, .login-modal *::before, .login-modal *::after { box-sizing: border-box; }
+.login-modal [hidden] { display: none !important; }
+.login-modal::backdrop { background: rgba(21, 39, 65, .5); backdrop-filter: blur(4px); }
+.login-modal-close { position: absolute; right: 16px; top: 16px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #f3f6fa; color: #627084; cursor: pointer; }
+.login-modal-close:hover { background: #e7edf5; color: #142d4e; }
+.login-modal-brand { display: flex; align-items: center; gap: 8px; margin: 2px 0 26px; color: #174bc1; font-size: 18px; font-weight: 800; letter-spacing: -.4px; }
+.login-modal h2 { margin: 0 0 8px; font-size: 25px; font-weight: 800; line-height: 1.45; letter-spacing: -.8px; word-break: keep-all; }
+#login-modal-intro { margin: 0; color: #627084; font-size: 13px; }
+.login-modal-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 24px 0 16px; border: 1px solid #e0e7f1; border-radius: 10px; background: #f0f4f9; }
+.login-modal-tabs button { min-height: 42px; padding: 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #627084; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.login-modal-tabs button[aria-selected="true"] { border-color: #dce4ee; background: #fff; color: #174bc1; box-shadow: 0 2px 6px #142d4e08; }
+.login-modal-description { margin: 0 0 20px; color: #627084; font-size: 12px; }
+.login-modal-field { margin-bottom: 18px; }
+.login-modal-field label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 600; }
+.login-modal-field input { display: block; min-width: 0; width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid #c0cfe3; border-radius: 8px; background: #fff; color: #142d4e; font: inherit; font-size: 14px; }
+.login-modal-field input::placeholder { color: #8a97a9; }
+.login-modal-submit { width: 100%; min-height: 48px; padding: 12px; margin-top: 4px; border: 1px solid #174bc1; border-radius: 8px; background: #174bc1; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.login-modal-submit:hover:not(:disabled) { background: #123b99; border-color: #123b99; }
+.login-modal button:disabled { cursor: wait; opacity: .6; }
+.login-modal-field input:disabled { background: #f5f7fb; }
+.login-modal-signup { margin: 22px 0 0; text-align: center; color: #627084; font-size: 12px; }
+.login-modal-signup a { color: #174bc1; font-weight: 600; margin-left: 4px; text-underline-offset: 4px; }
+.login-modal-error { margin: 0 0 14px; padding: 11px 13px; border: 1px solid #eccccc; border-radius: 8px; background: #fff4f3; color: #a33f3f; font-size: 12px; overflow-wrap: anywhere; }
+.login-modal-notice { margin: 16px 0 0; padding: 11px 13px; border: 1px solid #bddaca; border-radius: 8px; background: #f0f8f4; color: #2f7258; font-size: 12px; overflow-wrap: anywhere; }
+.login-modal :is(input,button,a):focus-visible { outline: 3px solid #9bb9ee; outline-offset: 3px; }
+.login-gateway { min-height: 60vh; padding: 100px 24px; text-align: center; color: #142d4e; background: #f6f8fb; font-family: Pretendard,"Malgun Gothic",sans-serif; }
+.login-gateway h1 { margin: 0 0 14px; font-size: 28px; }
+.login-gateway p { color: #627084; line-height: 1.8; }
+.login-gateway > a { display: inline-flex; padding: 12px 24px; margin-top: 16px; border-radius: 8px; background: #174bc1; color: #fff; text-decoration: none; }
+body:has(.login-gateway) { margin: 0; }
+body:has(.login-gateway) .header-container, body:has(.login-gateway) .footer-container { box-sizing: border-box; max-width: 1304px; padding-left: 24px; padding-right: 24px; }
+body:has(.login-gateway) .footer-container { flex-wrap: wrap; }
+body:has(.login-gateway) .footer-divider { display: none; }
+body:has(.login-gateway) .footer-info-section { flex: 2 1 260px; }
+body:has(.login-gateway) .footer-contact-section { flex: 1 1 160px; }
+body:has(.login-gateway) .footer-policy-section { flex: 1 1 100%; align-items: flex-start; }
+body:has(.login-gateway) .copyright-warning { text-align: left; }
+body:has(.login-gateway) .company-details { flex-wrap: wrap; }
+@media (max-width: 480px) { .login-modal { padding: 30px 24px; max-height: calc(100dvh - 24px); } .login-modal h2 { font-size: 23px; } .login-modal-brand { margin-bottom: 22px; } }
+</style>

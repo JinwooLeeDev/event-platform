@@ -24,7 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -50,7 +49,7 @@ public class MyPageController {
     @GetMapping("/myhistory")
     public String myHistory(
             @SessionAttribute(name = LoginSession.IDENTITY, required = false) LoginIdentity identity,
-            @RequestParam(defaultValue = "all") String tab,
+            @RequestParam(defaultValue = "confirmed") String tab,
             @RequestParam(defaultValue = "") String keyword,
             Model model
     ) {
@@ -60,17 +59,16 @@ public class MyPageController {
         if (!identity.isUser()) {
             throw new Exception403("개인 회원만 신청 내역을 조회할 수 있습니다.");
         }
-        String currentTab = tab != null && Set.of("all", "upcoming", "waiting", "past").contains(tab) ? tab : "all";
+        String currentTab = "waiting".equals(tab) || "past".equals(tab) ? tab : "confirmed";
         var history = registrationService.getMyHistory(identity, currentTab, keyword);
         model.addAttribute("history", history);
         model.addAttribute("myPoint", myPageService.getMyPage(identity.getId()).getPoint());
         model.addAttribute("resultCount", history.getItems().size());
         String search = "&keyword=" + URLEncoder.encode(history.getKeyword(), StandardCharsets.UTF_8);
         model.addAttribute("historyTabs", List.of(
-                Map.of("url", "/myhistory?tab=all" + search, "label", "전체 내역", "count", history.getTotalCount(), "active", currentTab.equals("all")),
-                Map.of("url", "/myhistory?tab=upcoming" + search, "label", "예정 행사", "count", history.getUpcomingCount(), "active", currentTab.equals("upcoming")),
+                Map.of("url", "/myhistory?tab=confirmed" + search, "label", "참가 확정", "count", history.getConfirmedCount(), "active", currentTab.equals("confirmed")),
                 Map.of("url", "/myhistory?tab=waiting" + search, "label", "대기 중", "count", history.getWaitingCount(), "active", currentTab.equals("waiting")),
-                Map.of("url", "/myhistory?tab=past" + search, "label", "지난 · 취소 내역", "count", history.getPastCount(), "active", currentTab.equals("past"))));
+                Map.of("url", "/myhistory?tab=past" + search, "label", "종료된 행사", "count", history.getPastCount(), "active", currentTab.equals("past"))));
         return "user/myhistory";
     }
 

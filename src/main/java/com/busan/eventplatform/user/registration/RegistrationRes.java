@@ -82,12 +82,12 @@ public class RegistrationRes {
     @Getter
     @Builder
     public static class MyHistoryDto {
-        private int totalCount;      // 요약 카드·탭: 전체
-        private int confirmedCount;  // 요약 카드: 참가 확정 (시작 전)
+        private int totalCount;      // 취소·거절 내역을 제외한 신청 수
+        private int confirmedCount;  // 참가 확정 (예정·진행 중)
         private int waitingCount;    // 요약 카드·탭: 대기 중
-        private int upcomingCount;   // 탭: 예정 (확정, 시작 전)
-        private int pastCount;       // 탭: 지난/취소 (시작됨·취소·거절)
-        private String currentTab;   // all / upcoming / waiting / past
+        private int upcomingCount;   // 기존 응답 필드 유지: confirmedCount와 동일
+        private int pastCount;       // 종료된 회차 신청 수
+        private String currentTab;   // confirmed / waiting / past
         private String keyword;      // 검색어 (없으면 "")
         private List<MyHistoryItemDto> items;
         private boolean empty;       // 목록이 비었으면 true → 빈 화면 안내
@@ -104,7 +104,7 @@ public class RegistrationRes {
         private String sessionName;        // 회차명
         private String place;              // 행사 주소
         private String scheduleText;       // 2026. 12. 20 (일) · 오후 2:00
-        private String tab;                // upcoming / waiting / past (탭 필터용)
+        private String tab;                // confirmed / waiting / past (탭 필터용)
         private String statusLabel;        // 참가 확정 / 대기열 등록 / 참가 취소 / 참가 거절 / 행사 종료
         private String statusClass;        // 배지 CSS 클래스 (status-confirmed 등)
         private String statusMessage;      // 상황별 안내 문구

@@ -21,7 +21,7 @@
                 <input id="category-name-{{id}}" name="name" value="{{name}}" maxlength="100" required>
                 <button type="submit" class="admin-status-button admin-status-button-activate">저장</button>
             </form></td>
-            <td><form action="/admin/categories/delete/{{id}}" method="post" class="admin-status-form" onsubmit="return confirm('이 카테고리를 삭제하시겠습니까?')">
+            <td><form action="/admin/categories/delete/{{id}}" method="post" class="admin-status-form" data-admin-confirm="카테고리 삭제" data-admin-target="{{name}}" data-admin-danger="true">
                 <button type="submit" class="admin-status-button admin-status-button-danger">삭제</button>
             </form></td>
         </tr>
