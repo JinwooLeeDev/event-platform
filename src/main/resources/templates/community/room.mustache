@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko"><head>{{> layout/head-meta}}<title>커뮤니티 | Busan Play</title></head><body>
+{{> layout/header}}
+
+{{> layout/bootstrap}}
+
+<style>
+    .community-page { min-height: 85vh; background: #f8f9fb; color: #1a2340; }
+    .community-container { max-width: 860px; }
+    .community-card { background: #fff; border: 1px solid #e6e7eb; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,.04); overflow: hidden; }
+    .community-head { padding: 20px 24px; border-bottom: 1px solid #edf0f5; }
+    .community-eyebrow { color: #0750d8; font-weight: 800; font-size: 12px; letter-spacing: 2px; }
+    .community-title { font-size: 20px; font-weight: 800; margin: 6px 0 4px; }
+    .community-sub { color: #72757e; font-size: 13px; }
+    .community-status { font-size: 12px; color: #72757e; }
+    .community-status.is-live { color: #3d725c; }
+    .community-status.is-off { color: #a34b4b; }
+    .community-messages { height: 50vh; overflow-y: auto; padding: 20px 24px; margin: 0; list-style: none; background: #fbfbfc; }
+    .community-msg { margin-bottom: 14px; max-width: 75%; }
+    .community-msg.mine { margin-left: auto; text-align: right; }
+    .community-msg .meta { font-size: 12px; color: #72757e; margin-bottom: 4px; }
+    .community-msg .meta strong { color: #292f3d; margin-right: 6px; }
+    .community-msg .bubble { display: inline-block; padding: 10px 14px; border-radius: 14px; background: #fff; border: 1px solid #e6e7eb; white-space: pre-wrap; word-break: break-word; text-align: left; }
+    .community-msg.mine .bubble { background: #0750d8; border-color: #0750d8; color: #fff; }
+    .community-msg.host .bubble { background: #fff4e0; border-color: #e9a23b; color: #4a3500; }  /* [6단계] 주최 기업 메시지 */
+    .community-msg.host .meta strong { color: #a5650a; }
+    .community-system { text-align: center; font-size: 12px; color: #8a8f99; margin: 10px 0; }
+    .community-system-time { color: #b0b4bc; margin-left: 4px; }
+    .community-form { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid #edf0f5; }
+    .community-form input { flex: 1; }
+    .community-notice { margin: 0; padding: 12px 24px; background: #fff8e6; border-bottom: 1px solid #f3e2b3; color: #6b4e00; font-size: 14px; white-space: pre-line; }
+    /* [6단계] 상단 고정 공지 · 참여자 목록 · 공지 입력 */
+    .community-pin { margin: 0; padding: 12px 24px; background: #eef3fd; border-bottom: 1px solid #d5e1fa; }
+    .community-pin .label { font-size: 12px; font-weight: 800; color: #0750d8; margin-bottom: 4px; }
+    .community-pin .text { font-size: 14px; color: #1a2340; white-space: pre-line; word-break: break-word; margin: 0; }
+    .community-pin .time { font-size: 12px; color: #72757e; margin-top: 4px; }
+    .community-people { padding: 10px 24px; border-bottom: 1px solid #edf0f5; font-size: 13px; color: #4a5568; }
+    .community-people summary { cursor: pointer; font-weight: 700; color: #292f3d; }
+    .community-people ul { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .community-people li { background: #f1f3f7; border-radius: 999px; padding: 3px 10px; }
+    .community-notice-form { display: flex; flex-direction: column; gap: 6px; padding: 12px 24px; border-bottom: 1px solid #edf0f5; background: #fffaf0; }
+    .community-notice-form textarea { resize: vertical; min-height: 60px; }
+</style>
+
+<main class="community-page py-5">
+    <div class="container community-container">
+        {{#room}}
+            <nav class="mb-4 small text-secondary">
+                <a href="/" class="text-secondary text-decoration-none">홈</a>
+                <i class="bi bi-chevron-right mx-2"></i>
+                <a href="/community" class="text-secondary text-decoration-none">내 커뮤니티</a>
+                <i class="bi bi-chevron-right mx-2"></i>
+                <strong class="text-dark">{{eventTitle}}</strong>
+            </nav>
+
+            <section class="community-card" aria-labelledby="community-title">
+                <div class="community-head">
+                    <div class="community-eyebrow">BUSAN PLAY · COMMUNITY</div>
+                    <h1 id="community-title" class="community-title">{{eventTitle}}</h1>
+                    <div class="community-sub">{{sessionName}} · 주최 {{hostName}} · {{closeText}}</div>
+                    <div id="community-status" class="community-status mt-2" role="status">연결 중…</div>
+                </div>
+
+                <!-- [5-2] 종료일 당일 안내 배너: 값이 없으면 숨김, 11시 실시간 알림(REMINDER)도 여기에 표시 -->
+                <p id="community-end-day-notice" class="community-notice" role="status" {{^endDayNotice}}hidden{{/endDayNotice}}>{{#endDayNotice}}{{.}}{{/endDayNotice}}</p>
+
+                <!-- [6단계] 상단 고정 공지 (주최 기업 작성): 없으면 숨김, 실시간 NOTICE 로 갱신 -->
+                <div id="community-pin" class="community-pin" {{^notice}}hidden{{/notice}}>
+                    <div class="label">📌 주최 측 공지</div>
+                    <p id="community-pin-text" class="text">{{#notice}}{{.}}{{/notice}}</p>
+                    <div id="community-pin-time" class="time">{{#noticeUpdatedAt}}{{.}} 등록{{/noticeUpdatedAt}}</div>
+                </div>
+
+                {{#host}}
+                    <!-- [6단계] 주최 기업만: 공지 등록·수정 (비워서 등록하면 공지 내림) -->
+                    <form id="community-notice-form" class="community-notice-form" autocomplete="off">
+                        <label for="community-notice-input" class="small fw-bold">공지 등록·수정 <span class="text-secondary fw-normal">(비워서 등록하면 공지를 내립니다)</span></label>
+                        <textarea id="community-notice-input" class="form-control" maxlength="500" disabled>{{#notice}}{{.}}{{/notice}}</textarea>
+                        <div><button id="community-notice-send" class="btn btn-warning btn-sm" type="submit" disabled>공지 등록</button></div>
+                    </form>
+                {{/host}}
+
+                <!-- [6단계] 참여자 목록 (참가 확정자) — 입장·퇴장 시 실시간 갱신 -->
+                <details class="community-people">
+                    <summary>참여자 <span id="community-people-count">{{participantCount}}</span>명</summary>
+                    <ul id="community-people">
+                        {{#participants}}<li data-user-id="{{userId}}">{{nickname}}</li>{{/participants}}
+                    </ul>
+                </details>
+
+                <ul id="community-messages" class="community-messages" aria-live="polite"
+                    data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
+                    {{#empty}}<li class="community-system">아직 메시지가 없습니다. 첫 인사를 남겨 보세요!</li>{{/empty}}
+                    {{#messages}}
+                        {{#system}}<li class="community-system">{{content}} <span class="community-system-time">{{sentAt}}</span></li>{{/system}}
+                        {{^system}}
+                            <li class="community-msg {{#mine}}mine{{/mine}} {{#host}}host{{/host}}">
+                                <div class="meta"><strong>{{nickname}}</strong><span>{{sentAt}}</span></div>
+                                <div class="bubble">{{content}}</div>
+                            </li>
+                        {{/system}}
+                    {{/messages}}
+                </ul>
+
+                <form id="community-form" class="community-form" autocomplete="off">
+                    <label for="community-input" class="visually-hidden">메시지</label>
+                    <input id="community-input" class="form-control" type="text" maxlength="500"
+                           placeholder="메시지를 입력하세요 (최대 500자)" disabled>
+                    <button id="community-send" class="btn btn-primary" type="submit" disabled>보내기</button>
+                </form>
+            </section>
+        {{/room}}
+    </div>
+</main>
+
+{{> layout/footer}}
+
+<!-- 채팅용 라이브러리: 레이아웃과 같은 jsDelivr CDN, 이 화면에서만 로드 (Q5) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+<script>
+    (() => {
+        const list = document.getElementById('community-messages');
+        if (!list) return;
+        const sessionId = list.dataset.sessionId;
+        const myKey = list.dataset.myKey;               // [6단계] "user:36002" / "company:5"
+        const statusEl = document.getElementById('community-status');
+        const form = document.getElementById('community-form');
+        const input = document.getElementById('community-input');
+        const sendBtn = document.getElementById('community-send');
+        const noticeForm = document.getElementById('community-notice-form');   // 주최 기업만 있음
+        const noticeInput = document.getElementById('community-notice-input');
+        const noticeBtn = document.getElementById('community-notice-send');
+        const people = document.getElementById('community-people');
+        const peopleCount = document.getElementById('community-people-count');
+        let ended = false;
+
+        const scrollToBottom = () => { list.scrollTop = list.scrollHeight; };
+        const setStatus = (text, cls) => { statusEl.textContent = text; statusEl.className = 'community-status mt-2 ' + (cls || ''); };
+        const setFormEnabled = enabled => {
+            input.disabled = !enabled; sendBtn.disabled = !enabled;
+            if (noticeForm) { noticeInput.disabled = !enabled; noticeBtn.disabled = !enabled; }
+        };
+
+        // 메시지는 반드시 textContent 로 넣는다 → 사용자가 <script> 를 보내도 글자로만 보임 (XSS 방지)
+        function appendChat(m) {
+            list.querySelector('.community-system.empty')?.remove();
+            const li = document.createElement('li');
+            li.className = 'community-msg' + (m.senderKey === myKey ? ' mine' : '') + (m.host ? ' host' : '');
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const name = document.createElement('strong');
+            name.textContent = m.nickname;
+            const time = document.createElement('span');
+            time.textContent = m.sentAt;
+            meta.append(name, time);
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = m.content;
+            li.append(meta, bubble);
+            list.appendChild(li);
+            scrollToBottom();
+        }
+
+        function appendSystem(text, sentAt) {
+            list.querySelector('.community-system.empty')?.remove();
+            const li = document.createElement('li');
+            li.className = 'community-system';
+            li.textContent = text;
+            if (sentAt) {                                  // 입장·퇴장 기록은 새로고침 후와 같게 시각 표시
+                const time = document.createElement('span');
+                time.className = 'community-system-time';
+                time.textContent = sentAt;
+                li.append(' ', time);
+            }
+            list.appendChild(li);
+            scrollToBottom();
+        }
+
+        // 종료일 당일 안내 → 상단 배너 (textContent 로 넣어 XSS 방지)
+        function showEndDayNotice(text) {
+            const banner = document.getElementById('community-end-day-notice');
+            banner.textContent = text;
+            banner.hidden = false;
+        }
+
+        // [6단계] 상단 고정 공지 갱신 — 빈 문구면 공지 내림
+        function showPin(m) {
+            const pin = document.getElementById('community-pin');
+            document.getElementById('community-pin-text').textContent = m.content;
+            document.getElementById('community-pin-time').textContent = m.content ? m.sentAt + ' 등록' : '';
+            pin.hidden = !m.content;
+            if (noticeInput && document.activeElement !== noticeInput) noticeInput.value = m.content;
+            appendSystem(m.content ? '📌 주최 측 공지가 등록되었습니다.' : '주최 측 공지가 내려갔습니다.');
+        }
+
+        // [6단계] 참여자 목록 갱신 — 입장(JOIN)·퇴장(LEAVE)
+        function refreshPeopleCount() { peopleCount.textContent = people.children.length; }
+        function addPerson(m) {
+            if (m.userId == null || people.querySelector('[data-user-id="' + m.userId + '"]')) return;
+            const li = document.createElement('li');
+            li.dataset.userId = m.userId;
+            li.textContent = m.nickname || '참가자';
+            people.appendChild(li);
+            refreshPeopleCount();
+        }
+        function removePerson(m) {
+            people.querySelector('[data-user-id="' + m.userId + '"]')?.remove();
+            refreshPeopleCount();
+        }
+
+        // 퇴장(KICKED)·종료(CLOSED)·권한 거부 → 연결을 끊고 더 이상 받지 않음
+        function end(text, goBack) {
+            if (ended) return;
+            ended = true;
+            setFormEnabled(false);
+            setStatus('연결 종료', 'is-off');
+            appendSystem(text);
+            client.deactivate();
+            if (goBack) setTimeout(() => { location.href = myKey.startsWith('company:') ? '/community' : '/myhistory'; }, 3000);
+        }
+
+        // [7단계 B-15] 연속으로 이만큼 연결에 실패하면 재연결을 멈추고 안내 (5초 간격 → 약 25초)
+        const MAX_RETRY = 5;
+        let failCount = 0;
+
+        const client = new StompJs.Client({
+            // [7단계 B-15] jsonp-polling 제외: 스크립트 태그 방식이라 실패 원인이 잘 안 보이고 보안상 불필요
+            webSocketFactory: () => new SockJS('/ws', null, { transports: ['websocket', 'xhr-streaming', 'xhr-polling'] }),
+            reconnectDelay: 5000   // 네트워크가 잠깐 끊기면 5초 뒤 다시 연결 (퇴장·종료 후에는 deactivate 로 멈춤)
+        });
+
+        client.onConnect = () => {
+            failCount = 0;   // [7단계 B-15] 연결에 성공하면 실패 횟수 초기화
+            setStatus('실시간 연결됨', 'is-live');
+            setFormEnabled(true);
+
+            client.subscribe('/topic/community/' + sessionId, frame => {
+                const m = JSON.parse(frame.body);
+                if (m.type === 'CHAT') appendChat(m);
+                else if (m.type === 'JOIN') { appendSystem(m.content, m.sentAt); addPerson(m); }
+                else if (m.type === 'LEAVE') { appendSystem(m.content, m.sentAt); removePerson(m); }
+                else if (m.type === 'NOTICE') showPin(m);
+                else if (m.type === 'CLOSED') end(m.content, true);
+                else if (m.type === 'REMINDER') showEndDayNotice(m.content);
+            });
+
+            client.subscribe('/user/queue/community', frame => {
+                const m = JSON.parse(frame.body);
+                if (m.type === 'KICKED' && String(m.sessionId) === sessionId) end(m.content + ' 잠시 후 내 행사로 이동합니다.', true);
+                else if (m.type === 'ERROR') appendSystem('⚠ ' + m.content);
+            });
+        };
+
+        client.onStompError = frame => end(frame.headers.message || '커뮤니티에 연결할 수 없습니다.', false);
+        // [7단계 B-15] 끊길 때마다 횟수를 세고, MAX_RETRY 번 연속 실패하면 재연결 중단 (서버 재시작으로 로그인이 풀린 경우 등)
+        client.onWebSocketClose = () => {
+            if (ended) return;
+            failCount++;
+            setFormEnabled(false);
+            if (failCount >= MAX_RETRY) {
+                end('연결할 수 없습니다. 새로고침하거나 다시 로그인해 주세요.', false);
+                return;
+            }
+            setStatus('연결이 끊겼습니다. 다시 연결하는 중… (' + failCount + '/' + MAX_RETRY + ')', 'is-off');
+        };
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            const content = input.value.trim();
+            if (!content || !client.connected) return;
+            client.publish({
+                destination: '/app/community/' + sessionId + '/messages',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            input.value = '';
+            input.focus();
+        });
+
+        // [6단계] 주최 기업 공지 등록·수정·내림
+        noticeForm?.addEventListener('submit', event => {
+            event.preventDefault();
+            if (!client.connected) return;
+            client.publish({
+                destination: '/app/community/' + sessionId + '/notice',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ content: noticeInput.value.trim() })
+            });
+        });
+
+        // 처음 메시지가 없을 때의 안내 문구 표시용 클래스
+        list.querySelector('.community-system')?.classList.add('empty');
+        scrollToBottom();
+        client.activate();
+    })();
+</script>
+</body></html>

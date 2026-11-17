@@ -125,6 +125,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     @Query("select rf.purchase.id, rf.amount from Refund rf where rf.purchase.id in :purchaseIds")
     List<Object[]> findRefundAmountsByPurchaseIds(@Param("purchaseIds") List<Long> purchaseIds);
 
+    // ★[f/40] 상태별 신청 전체 - 서버 시작 시 확정자 커뮤니티 멤버십 동기화
+    List<Registration> findAllByStatus(RegistrationStatus status);
+
 
 
 }
