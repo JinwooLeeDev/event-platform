@@ -27,6 +27,16 @@ public class EventCancelService {
                 .findByCompanyIdAndSessionId(companyId, sessionId)
                 .orElseThrow(() -> new Exception400("회차를 찾을 수 없습니다."));
 
+        // 이미 검토 대기 중인 취소 신청이 있는지 확인
+        boolean exists = eventCancelRepository.existsBySessionIdAndStatus(
+                sessionId,
+                EventCancelStatus.PENDING
+        );
+
+        if (exists) {
+            throw new Exception400("이미 취소 신청이 접수된 회차입니다.");
+        }
+
         // 취소 신청서 생성
         EventCancel eventCancel = EventCancel.builder()
                 .eventSession(eventSession)
@@ -64,7 +74,8 @@ public class EventCancelService {
         refundService.refundCompany(
                 company,
                 eventSession.getId(),
-                eventCancel.getCreatedAt().toLocalDate()
+                eventCancel.getCreatedAt().toLocalDate(),
+                eventCancel.getReason()
         );
         eventCancel.approve();
     }

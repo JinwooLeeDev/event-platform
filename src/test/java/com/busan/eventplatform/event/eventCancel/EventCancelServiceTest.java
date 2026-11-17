@@ -1,9 +1,13 @@
-
 package com.busan.eventplatform.event.eventCancel;
 
+import com.busan.eventplatform.api.refund.RefundService;
+import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
+import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.global.error.exception.Exception400;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -11,9 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,108 +32,204 @@ class EventCancelServiceTest {
     @Mock
     private EventSessionRepository eventSessionRepository;
 
+    @Mock
+    private RefundService refundService;
+
     @InjectMocks
     private EventCancelService eventCancelService;
 
-    // 1. 정상적인 취소 신청
-    @Test
-    void save_test() {
+    private EventSession eventSession;
 
+    @BeforeEach
+    void setUp() {
+        eventSession = mock(EventSession.class);
+    }
+
+    @Test
+    void 회차_취소신청_성공() {
+        // given
         Long companyId = 1L;
         Long sessionId = 10L;
-        String reason = "행사 운영이 어려워 취소를 신청합니다.";
-
-        EventSession eventSession = mock(EventSession.class);
+        String reason = "행사 운영이 어려워졌습니다.";
 
         when(eventSessionRepository.findByCompanyIdAndSessionId(companyId, sessionId))
                 .thenReturn(Optional.of(eventSession));
 
+        when(eventCancelRepository.existsBySessionIdAndStatus(
+                sessionId, EventCancelStatus.PENDING
+        )).thenReturn(false);
+
+        // when
         eventCancelService.save(companyId, sessionId, reason);
 
+        // then
         ArgumentCaptor<EventCancel> captor =
                 ArgumentCaptor.forClass(EventCancel.class);
 
         verify(eventCancelRepository).save(captor.capture());
 
-        EventCancel eventCancel = captor.getValue();
+        EventCancel saved = captor.getValue();
 
-        assertEquals(eventSession, eventCancel.getEventSession());
-        assertEquals(reason, eventCancel.getReason());
-        assertEquals(EventCancelStatus.PENDING, eventCancel.getStatus());
+        assertEquals(eventSession, saved.getEventSession());
+        assertEquals(reason, saved.getReason());
+        assertEquals(EventCancelStatus.PENDING, saved.getStatus());
     }
 
-    // 2. 존재하지 않는 회차 신청
     @Test
-    void save_fail_not_found_test() {
-
-        Long companyId = 1L;
-        Long sessionId = 10L;
-
-        when(eventSessionRepository.findByCompanyIdAndSessionId(companyId, sessionId))
+    void 소유하지_않은_회차는_취소신청할_수_없다() {
+        // given
+        when(eventSessionRepository.findByCompanyIdAndSessionId(1L, 10L))
                 .thenReturn(Optional.empty());
 
-        Exception400 exception = assertThrows(
-                Exception400.class,
-                () -> eventCancelService.save(companyId, sessionId, "취소 사유")
+        // when & then
+        assertThrows(Exception400.class, () ->
+                eventCancelService.save(1L, 10L, "취소 사유")
         );
 
-        assertEquals("회차를 찾을 수 없습니다.", exception.getMessage());
-
-        verify(eventCancelRepository, never()).save(any(EventCancel.class));
+        verify(eventCancelRepository, never()).save(any());
     }
 
-    // 3. 다른 기업 소유의 회차 신청 차단
     @Test
-    void save_fail_other_company_test() {
-
-        Long companyId = 2L;
-        Long sessionId = 10L;
-
-        when(eventSessionRepository.findByCompanyIdAndSessionId(companyId, sessionId))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                Exception400.class,
-                () -> eventCancelService.save(companyId, sessionId, "취소 사유")
-        );
-
-        verify(eventCancelRepository, never()).save(any(EventCancel.class));
-    }
-
-    // 4. 취소 신청 상태가 PENDING인지 확인
-    @Test
-    void save_pending_status_test() {
-
-        EventSession eventSession = mock(EventSession.class);
-
+    void 이미_대기중인_취소신청이_있으면_중복신청할_수_없다() {
+        // given
         when(eventSessionRepository.findByCompanyIdAndSessionId(1L, 10L))
                 .thenReturn(Optional.of(eventSession));
 
-        eventCancelService.save(1L, 10L, "행사 취소 사유");
+        when(eventCancelRepository.existsBySessionIdAndStatus(
+                10L, EventCancelStatus.PENDING
+        )).thenReturn(true);
 
-        ArgumentCaptor<EventCancel> captor =
-                ArgumentCaptor.forClass(EventCancel.class);
+        // when & then
+        assertThrows(Exception400.class, () ->
+                eventCancelService.save(1L, 10L, "취소 사유")
+        );
 
-        verify(eventCancelRepository).save(captor.capture());
+        verify(eventCancelRepository, never()).save(any());
+    }
 
-        assertEquals(
-                EventCancelStatus.PENDING,
-                captor.getValue().getStatus()
+    @Test
+    void 취소신청_승인시_회차취소와_환불을_처리한다() {
+        // given
+        Long cancelId = 100L;
+        Long sessionId = 10L;
+
+        LocalDateTime createdAt = LocalDateTime.of(2026, 11, 17, 10, 0);
+        String reason = "행사 운영이 어려워졌습니다.";
+
+        EventCancel eventCancel = mock(EventCancel.class);
+        Event event = mock(Event.class);
+        Company company = mock(Company.class);
+
+        when(eventCancelRepository.findById(cancelId))
+                .thenReturn(Optional.of(eventCancel));
+
+        when(eventCancel.getStatus())
+                .thenReturn(EventCancelStatus.PENDING);
+
+        when(eventCancel.getEventSession())
+                .thenReturn(eventSession);
+
+        when(eventCancel.getCreatedAt())
+                .thenReturn(createdAt);
+
+        when(eventCancel.getReason())
+                .thenReturn(reason);
+
+        when(eventSession.getId())
+                .thenReturn(sessionId);
+
+        when(eventSession.getEvent())
+                .thenReturn(event);
+
+        when(event.getCompany())
+                .thenReturn(company);
+
+        // when
+        eventCancelService.approve(cancelId);
+
+        // then
+        verify(eventSession).setStatus(EventSessionStatus.CANCELLED);
+
+        verify(refundService).pointBackUser(eventSession);
+
+        verify(refundService).refundCompany(
+                company,
+                sessionId,
+                LocalDate.of(2026, 11, 17),
+                reason
+        );
+
+        verify(eventCancel).approve();
+    }
+
+    @Test
+    void 이미_처리된_취소신청은_승인할_수_없다() {
+        // given
+        EventCancel eventCancel = mock(EventCancel.class);
+
+        when(eventCancelRepository.findById(100L))
+                .thenReturn(Optional.of(eventCancel));
+
+        when(eventCancel.getStatus())
+                .thenReturn(EventCancelStatus.APPROVED);
+
+        // when & then
+        assertThrows(Exception400.class, () ->
+                eventCancelService.approve(100L)
+        );
+
+        verify(refundService, never()).pointBackUser(any());
+        verify(refundService, never()).refundCompany(
+                any(), any(), any(), any()
         );
     }
 
-    // 5. 취소 신청서가 한 번만 저장되는지 확인
     @Test
-    void save_once_test() {
+    void 존재하지_않는_취소신청은_승인할_수_없다() {
+        // given
+        when(eventCancelRepository.findById(100L))
+                .thenReturn(Optional.empty());
 
-        EventSession eventSession = mock(EventSession.class);
+        // when & then
+        assertThrows(Exception400.class, () ->
+                eventCancelService.approve(100L)
+        );
+    }
 
-        when(eventSessionRepository.findByCompanyIdAndSessionId(1L, 10L))
-                .thenReturn(Optional.of(eventSession));
+    @Test
+    void 취소신청_거절_성공() {
+        // given
+        EventCancel eventCancel = mock(EventCancel.class);
 
-        eventCancelService.save(1L, 10L, "행사 취소 사유");
+        when(eventCancelRepository.findById(100L))
+                .thenReturn(Optional.of(eventCancel));
 
-        verify(eventCancelRepository, times(1))
-                .save(any(EventCancel.class));
+        when(eventCancel.getStatus())
+                .thenReturn(EventCancelStatus.PENDING);
+
+        // when
+        eventCancelService.reject(100L);
+
+        // then
+        verify(eventCancel).reject();
+    }
+
+    @Test
+    void 이미_처리된_취소신청은_거절할_수_없다() {
+        // given
+        EventCancel eventCancel = mock(EventCancel.class);
+
+        when(eventCancelRepository.findById(100L))
+                .thenReturn(Optional.of(eventCancel));
+
+        when(eventCancel.getStatus())
+                .thenReturn(EventCancelStatus.REJECTED);
+
+        // when & then
+        assertThrows(Exception400.class, () ->
+                eventCancelService.reject(100L)
+        );
+
+        verify(eventCancel, never()).reject();
     }
 }
