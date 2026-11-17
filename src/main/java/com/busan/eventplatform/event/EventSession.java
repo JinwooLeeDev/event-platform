@@ -3,6 +3,7 @@ package com.busan.eventplatform.event;
 import com.busan.eventplatform.event.event_session.EventSessionRequest;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
 import com.busan.eventplatform.event.events.Event;
+import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.persistence.*;
 import lombok.*;
@@ -101,6 +102,14 @@ public class EventSession {
 
     // 회차 수정
     public void update(EventSessionRequest.UpdateDto dto) {
+
+        validateDates(
+                dto.getStartsAt(),
+                dto.getEndsAt(),
+                dto.getApplyStartAt(),
+                dto.getApplyEndAt()
+        );
+
         if (dto.getCapacity() < this.occupiedCount) {
             throw new Exception400("현재 점유 인원보다 정원을 줄일 수 없습니다.");
         }
@@ -149,6 +158,8 @@ public class EventSession {
         return this.nextReceptionNumber++;
     }
 
+    // 현재 이벤트 세션이 결제 허용된 상태인지 체크.
+    public boolean forSessionDeposit() {return this.getEvent().getStatus() == EventStatus.PAID_READY && this.status == EventSessionStatus.SCHEDULED;}
 
     // 관리자에게 승인취소 받은 행사인지 검사 --> 기업 보증금 환불에서 사용.
     public boolean isCanceled() {return this.status == EventSessionStatus.CANCELLED;}
@@ -156,4 +167,38 @@ public class EventSession {
     public void setScheduled() {this.status = EventSessionStatus.SCHEDULED;}
 
     public boolean isOwner(Long companyId) {return this.event.getCompany().getId().equals(companyId);}
+
+    public void setStatus(EventSessionStatus status) {
+        this.status = status;
+    }
+
+    public static void validateDates(
+            LocalDateTime startsAt,
+            LocalDateTime endsAt,
+            LocalDateTime applyStartAt,
+            LocalDateTime applyEndAt
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (startsAt == null || endsAt == null ||
+                applyStartAt == null || applyEndAt == null) {
+            throw new Exception400("날짜는 모두 필수입니다.");
+        }
+        if (startsAt.isBefore(now)) {
+            throw new Exception400("행사 시작일은 현재 날짜보다 이전일 수 없습니다.");
+        }
+        if (applyStartAt.isBefore(now)) {
+            throw new Exception400("모집 시작일은 현재 날짜보다 이전일 수 없습니다.");
+        }
+        if (endsAt.isBefore(startsAt)) {
+            throw new Exception400("행사 종료일은 행사 시작일보다 이전일 수 없습니다.");
+        }
+        if (applyEndAt.isBefore(applyStartAt)) {
+            throw new Exception400("모집 마감일은 모집 시작일보다 이전일 수 없습니다.");
+        }
+        if (!startsAt.isAfter(applyEndAt)) {
+            throw new Exception400("행사 시작일은 모집 마감일 이후여야 합니다.");
+        }
+
+    }
 }

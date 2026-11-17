@@ -80,12 +80,5 @@ public class Event {
         return this.company.getId().equals(companyId);
     }
 
-    public boolean isPaidStatus() {
-        return this.getStatus() == EventStatus.PAID_READY;
-    }
-
-    public boolean isPendingStatus() {
-        return this.getStatus() == EventStatus.PENDING_REVIEW;
-    }
 
 }

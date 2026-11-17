@@ -6,8 +6,9 @@ import java.time.LocalDateTime;
 
 public class EventFavoriteResponse {
 
-    @Data
+    @Data //
     public static class ListDto {
+        private com.busan.eventplatform.event.events.EventResponse.EventDto event;
         private Long id;
         private Long eventId;
         private LocalDateTime createdAt;
@@ -16,6 +17,7 @@ public class EventFavoriteResponse {
             this.id = eventFavorite.getId();
             if (eventFavorite.getEvent() != null) {
                 this.eventId = eventFavorite.getEvent().getId();
+                this.event = new com.busan.eventplatform.event.events.EventResponse.EventDto(eventFavorite.getEvent());
             }
             this.createdAt = eventFavorite.getCreatedAt();
         }

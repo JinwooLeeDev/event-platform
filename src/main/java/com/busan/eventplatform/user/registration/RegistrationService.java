@@ -96,7 +96,7 @@ public class RegistrationService {
         validateApplicable(session);
 
         // 4. 계정 상태
-        User user = userRepository.findById(loginIdentity.getId())
+        User user = userRepository.LockFindById(loginIdentity.getId())
                 .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new Exception400("정지되었거나 탈퇴한 계정은 행사에 신청할 수 없습니다");

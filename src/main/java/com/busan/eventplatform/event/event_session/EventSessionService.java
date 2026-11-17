@@ -3,6 +3,7 @@ package com.busan.eventplatform.event.event_session;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
+import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.registration.RegistrationService;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +29,19 @@ public class EventSessionService {
     @Transactional
     public EventSession save(Long eventId, Long companyId, EventSessionRequest.SaveDto saveDto) {
 
+        saveDto.validate();
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new Exception404("해당 행사을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("해당 행사를 찾을 수 없습니다."));
         if (!event.getCompany().getId().equals(companyId)) {
             throw new Exception403("해당 행사에 회차를 등록할 권한이 없습니다.");
         }
-        saveDto.validate();
+        // 날짜 검증
+        EventSession.validateDates(
+                saveDto.getStartsAt(),
+                saveDto.getEndsAt(),
+                saveDto.getApplyStartAt(),
+                saveDto.getApplyEndAt()
+        );
         EventSession eventSession = saveDto.toEntity(event);
 
         return eventSessionRepository.save(eventSession);
@@ -69,6 +78,7 @@ public class EventSessionService {
     // 회차 수정
     @Transactional
     public EventSession update(Long id, EventSessionRequest.UpdateDto updateDto, Long companyId) {
+        updateDto.validate();
         EventSession eventSession = eventSessionRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new Exception404("해당 회차를 찾을 수 없습니다."));
         Event event = eventSession.getEvent();
@@ -92,10 +102,18 @@ public class EventSessionService {
     public void delete(Long id, Long companyId) {
         EventSession eventSession = eventSessionRepository.findById(id)
                 .orElseThrow(() -> new Exception404("해당 회차를 찾을 수 없습니다."));
+
         Event event = eventSession.getEvent();
         if (!event.getCompany().getId().equals(companyId)) {
             throw new Exception403("해당 행사에 회차를 삭제할 권한이 없습니다.");
         }
-        eventSessionRepository.delete(eventSession);
+
+        // 신청 이력이 없는 경우 실제 삭제
+        int deletedCount = eventSessionRepository.deleteIfNoRegistrationHistory(id);
+
+        // 신청 이력이 있으면 취소 처리
+        if (deletedCount == 0) {
+            eventSession.setStatus(EventSessionStatus.CANCELLED);
+        }
     }
 }

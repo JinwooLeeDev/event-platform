@@ -70,8 +70,13 @@ class AdminPageTest {
         for (String section : List.of("dashboard", "events", "sessions")) {
             var model = new ExtendedModelMap();
             String view = switch (section) {
-                case "events" -> new AdminEventController(org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventService.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.event_session.EventSessionService.class)).list(model);
-                case "sessions" -> controller.sessions(model);
+                case "events" -> new AdminEventController(org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventService.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.event_session.EventSessionService.class)).list(model, com.busan.eventplatform.event.events.EventStatus.PENDING_REVIEW);
+                case "sessions" -> {
+                    var sessions = org.mockito.Mockito.mock(com.busan.eventplatform.event.event_session.EventSessionRepository.class);
+                    org.mockito.Mockito.when(sessions.findForAdmin(org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.any()))
+                            .thenReturn(org.springframework.data.domain.Page.empty());
+                    yield new AdminSessionController(sessions).sessions(null, 1, model);
+                }
                 default -> controller.dashboard(com.busan.eventplatform.login.personallogin.SessionUserDto.builder().id(1L).build(), model);
             };
             model.addAttribute("loginUser", Map.of("displayName", "<script>admin</script>"));
@@ -85,7 +90,12 @@ class AdminPageTest {
             assertTrue(html.contains("action=\"/logout\" method=\"post\""));
             assertTrue(html.contains("&lt;script&gt;admin&lt;/script&gt;"));
             assertFalse(html.contains("<script>admin</script>"));
-            if (!section.equals("events")) assertTrue(html.contains(section.equals("dashboard") ? "집계 준비 중" : "관리 기능을 준비하고 있습니다"));
+            if (section.equals("dashboard")) {
+                assertTrue(html.contains("<span>행사 결제 대기</span><strong>0</strong>"));
+                assertTrue(html.contains("<span>행사 보완 요청</span><strong>0</strong>"));
+                assertFalse(html.contains("집계 준비 중"));
+            }
+            else assertFalse(html.contains("관리 기능을 준비하고 있습니다"));
         }
         assertEquals("redirect:/admin/dashboard", controller.index());
     }

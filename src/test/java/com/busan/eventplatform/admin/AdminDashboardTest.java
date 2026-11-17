@@ -29,7 +29,10 @@ class AdminDashboardTest {
         }).toList();
         when(service.findReviewTargets(1L)).thenReturn(targets);
         var model = new ExtendedModelMap();
-        var controller = new AdminController(service, org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class));
+        var events = mock(com.busan.eventplatform.event.events.EventRepository.class);
+        when(events.countByStatus(com.busan.eventplatform.event.events.EventStatus.PAID_READY)).thenReturn(7L);
+        when(events.countByStatus(com.busan.eventplatform.event.events.EventStatus.FEEDBACK_REQUIRED)).thenReturn(2L);
+        var controller = new AdminController(service, events);
         var admin = SessionUserDto.builder().id(1L).role(Role.ADMIN).build();
         assertEquals("admin/page", controller.dashboard(admin, model));
         assertEquals(8, model.get("companyReviewCount"));
@@ -45,6 +48,12 @@ class AdminDashboardTest {
             assertTrue(html.contains("href=\"/admin/companies/1\""));
             assertFalse(html.contains("href=\"/admin/companies/6\""));
             assertTrue(html.contains("검증 오류"));
+            assertTrue(html.contains("<span>행사 결제 대기</span><strong>7</strong>"));
+            assertTrue(html.contains("<span>행사 보완 요청</span><strong>2</strong>"));
+            assertTrue(html.contains("href=\"/admin/events?status=PAID_READY\""));
+            assertTrue(html.contains("href=\"/admin/events?status=FEEDBACK_REQUIRED\""));
+            assertFalse(html.contains("오늘 개최 회차"));
+            assertFalse(html.contains("참가 확정 인원"));
         }
     }
 }

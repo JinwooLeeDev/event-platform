@@ -1,67 +1,80 @@
 package com.busan.eventplatform.global.error.exception;
 
+import com.busan.eventplatform.login.LoginViewAdvice;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private final LoginViewAdvice loginViewAdvice;
 
     @ExceptionHandler(Exception400.class)
-    public ModelAndView handle400(Exception400 exception) {
+    public ModelAndView handle400(Exception400 exception, HttpServletRequest request) {
         return errorPage(
                 HttpStatus.BAD_REQUEST,
-                exception.getMessage()
+                exception.getMessage(),
+                request
         );
     }
 
     @ExceptionHandler(Exception401.class)
-    public ModelAndView handle401(Exception401 exception) {
+    public ModelAndView handle401(Exception401 exception, HttpServletRequest request) {
         return errorPage(
                 HttpStatus.UNAUTHORIZED,
-                exception.getMessage()
+                exception.getMessage(),
+                request
         );
     }
 
     @ExceptionHandler(Exception403.class)
-    public ModelAndView handle403(Exception403 exception) {
+    public ModelAndView handle403(Exception403 exception, HttpServletRequest request) {
         return errorPage(
                 HttpStatus.FORBIDDEN,
-                exception.getMessage()
+                exception.getMessage(),
+                request
         );
     }
 
     @ExceptionHandler(Exception404.class)
-    public ModelAndView handle404(Exception404 exception) {
+    public ModelAndView handle404(Exception404 exception, HttpServletRequest request) {
         return errorPage(
                 HttpStatus.NOT_FOUND,
-                exception.getMessage()
+                exception.getMessage(),
+                request
         );
     }
 
     @ExceptionHandler(Exception405.class)
-    public ModelAndView handle405(Exception405 exception) {
+    public ModelAndView handle405(Exception405 exception, HttpServletRequest request) {
         return errorPage(
                 HttpStatus.METHOD_NOT_ALLOWED,
-                exception.getMessage()
+                exception.getMessage(),
+                request
         );
     }
 
     @ExceptionHandler(Exception500.class)
-    public ModelAndView handle500(Exception500 exception) {
+    public ModelAndView handle500(Exception500 exception, HttpServletRequest request) {
         log.error("서버 처리 중 오류 발생", exception);
 
         return errorPage(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+                request
         );
     }
 
@@ -87,7 +100,7 @@ public class GlobalExceptionHandler {
 
         String html = """
                 <script>
-                    alert('아직 관리자에게 승인받지 못했습니다. 승인 받은 후 다시 결제해주세요');
+                    alert('이미 결제되었거나 아직 관리자에게 승인받지 못했습니다. 다시 확인해주세요.');
                     history.back();
                 </script>
                 """   ;
@@ -100,13 +113,20 @@ public class GlobalExceptionHandler {
 
     private ModelAndView errorPage(
             HttpStatus status,
-            String message
+            String message,
+            HttpServletRequest request
     ) {
         ModelAndView modelAndView = new ModelAndView("error/" + status.value());
 
         modelAndView.setStatus(status);
         modelAndView.addObject("status", status.value());
         modelAndView.addObject("errorMessage", message);
+
+        // 정상 화면과 동일한 기준으로 헤더 로그인 정보 구성
+        Model loginModel = new ExtendedModelMap();
+        loginViewAdvice.addLoginUser(request, loginModel);
+
+        modelAndView.addAllObjects(loginModel.asMap());
 
         return modelAndView;
     }

@@ -13,6 +13,7 @@ public final class AdminPageView {
         model.addAttribute("companiesPage", section.equals("companies"));
         model.addAttribute("eventsPage", section.equals("events"));
         model.addAttribute("sessionsPage", section.equals("sessions"));
+        model.addAttribute("categoriesPage", section.equals("categories"));
         model.addAttribute("membersPage", section.equals("members"));
         return "admin/page";
     }
