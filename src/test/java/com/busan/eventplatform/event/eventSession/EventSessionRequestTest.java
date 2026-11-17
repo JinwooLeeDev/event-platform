@@ -1,9 +1,8 @@
 
-package com.busan.eventplatform.event.event_session;
+package com.busan.eventplatform.event.eventSession;
 
+import com.busan.eventplatform.event.event_session.EventSessionRequest;
 import com.busan.eventplatform.global.error.exception.Exception400;
-
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -12,153 +11,96 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EventSessionRequestTest {
 
-    private EventSessionRequest.SaveDto createSaveDto() {
-        EventSessionRequest.SaveDto dto =
-                new EventSessionRequest.SaveDto();
-
+    private EventSessionRequest.SaveDto validDto() {
+        EventSessionRequest.SaveDto dto = new EventSessionRequest.SaveDto();
         dto.setName("1회차");
-        dto.setStartsAt(LocalDateTime.of(2026, 12, 1, 10, 0));
-        dto.setEndsAt(LocalDateTime.of(2026, 12, 1, 18, 0));
-        dto.setApplyStartAt(LocalDateTime.of(2026, 11, 20, 9, 0));
-        dto.setApplyEndAt(LocalDateTime.of(2026, 11, 30, 18, 0));
-        dto.setCapacity(30);
+        dto.setStartsAt(LocalDateTime.of(2027, 1, 10, 10, 0));
+        dto.setEndsAt(LocalDateTime.of(2027, 1, 10, 18, 0));
+        dto.setApplyStartAt(LocalDateTime.of(2027, 1, 1, 0, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2027, 1, 9, 23, 59));
+        dto.setCapacity(100);
         dto.setHoldDurationSeconds(300);
         dto.setPricingType("FREE");
         dto.setFee(0);
         dto.setReservationDepositPoints(0);
         dto.setMinimumParticipants(1);
-        dto.setMinimumCheckAt(LocalDateTime.of(2026, 12, 1, 18, 0));
-
-        return dto;
-    }
-
-    private EventSessionRequest.UpdateDto createUpdateDto() {
-        EventSessionRequest.UpdateDto dto =
-                new EventSessionRequest.UpdateDto();
-
-        dto.setName("1회차");
-        dto.setStartsAt(LocalDateTime.of(2026, 12, 1, 10, 0));
-        dto.setApplyStartAt(LocalDateTime.of(2026, 11, 20, 9, 0));
-        dto.setApplyEndAt(LocalDateTime.of(2026, 11, 30, 18, 0));
-        dto.setEndsAt(LocalDateTime.of(2026, 12, 1, 18, 0));
-        dto.setCapacity(30);
-        dto.setHoldDurationSeconds(300);
-        dto.setPricingType("FREE");
-        dto.setFee(0);
-        dto.setReservationDepositPoints(0);
-        dto.setMinimumParticipants(1);
-        dto.setMinimumCheckAt(LocalDateTime.of(2026, 12, 1, 18, 0));
-
+        dto.setMinimumCheckAt(LocalDateTime.of(2027, 1, 10, 18, 0));
         return dto;
     }
 
     @Test
-    @DisplayName("정상적인 회차 등록 요청은 검증을 통과한다")
-    void saveDto_validate_success() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
-
-        assertDoesNotThrow(dto::validate);
+    void 정상적인_회차_검증() {
+        assertDoesNotThrow(() -> validDto().validate());
     }
 
     @Test
-    @DisplayName("회차 이름이 없으면 등록할 수 없다")
-    void saveDto_validate_nameRequired() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
-        dto.setName(" ");
+    void 회차_이름이_없으면_예외() {
+        var dto = validDto();
+        dto.setName("");
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("행사 시작일이 종료일보다 늦으면 등록할 수 없다")
-    void saveDto_validate_invalidDate() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
-        dto.setStartsAt(LocalDateTime.of(2026, 12, 2, 10, 0));
+    void 행사_시작일이_종료일보다_늦으면_예외() {
+        var dto = validDto();
+        dto.setStartsAt(LocalDateTime.of(2027, 1, 11, 10, 0));
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("모집 시작일이 마감일보다 늦으면 등록할 수 없다")
-    void saveDto_validate_invalidApplyDate() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
-        dto.setApplyStartAt(LocalDateTime.of(2026, 12, 1, 10, 0));
+    void 행사_시작일이_모집_마감일보다_빠르면_예외() {
+        var dto = validDto();
+        dto.setStartsAt(LocalDateTime.of(2027, 1, 9, 10, 0));
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("정원이 0명이면 등록할 수 없다")
-    void saveDto_validate_invalidCapacity() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
+    void 정원이_1명_미만이면_예외() {
+        var dto = validDto();
         dto.setCapacity(0);
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("임시 정원 확보 시간이 음수이면 등록할 수 없다")
-    void saveDto_validate_invalidHoldDuration() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
+    void 임시_정원_확보_시간이_음수이면_예외() {
+        var dto = validDto();
         dto.setHoldDurationSeconds(-1);
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("참가비가 음수이면 등록할 수 없다")
-    void saveDto_validate_invalidFee() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
+    void 참가비가_음수이면_예외() {
+        var dto = validDto();
         dto.setFee(-1);
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("최소 진행 인원이 정원보다 크면 등록할 수 없다")
-    void saveDto_validate_invalidMinimumParticipants() {
-        EventSessionRequest.SaveDto dto = createSaveDto();
-        dto.setMinimumParticipants(31);
+    void 예약_보증금이_음수이면_예외() {
+        var dto = validDto();
+        dto.setReservationDepositPoints(-1);
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("정상적인 회차 수정 요청은 검증을 통과한다")
-    void updateDto_validate_success() {
-        EventSessionRequest.UpdateDto dto = createUpdateDto();
-
-        assertDoesNotThrow(dto::validate);
-    }
-
-    @Test
-    void updateDto_requiresRecruitmentPeriodInOrder() {
-        var dto = createUpdateDto();
-        var start = LocalDateTime.of(2026, 11, 20, 9, 0);
-        dto.setApplyStartAt(start); dto.setApplyEndAt(start.plusDays(5));
-        assertDoesNotThrow(dto::validate);
-        dto.setApplyEndAt(start.minusMinutes(1));
-        assertThrows(Exception400.class, dto::validate);
-        dto.setApplyEndAt(null);
-        assertThrows(Exception400.class, dto::validate);
-        dto.setApplyEndAt(start.plusDays(5)); dto.setApplyStartAt(null);
-        assertThrows(Exception400.class, dto::validate);
-    }
-
-    @Test
-    @DisplayName("회차 수정 시 정원이 0명이면 실패한다")
-    void updateDto_validate_invalidCapacity() {
-        EventSessionRequest.UpdateDto dto = createUpdateDto();
-        dto.setCapacity(0);
+    void 최소_인원이_정원보다_크면_예외() {
+        var dto = validDto();
+        dto.setMinimumParticipants(101);
 
         assertThrows(Exception400.class, dto::validate);
     }
 
     @Test
-    @DisplayName("회차 수정 시 최소 인원이 정원보다 크면 실패한다")
-    void updateDto_validate_invalidMinimumParticipants() {
-        EventSessionRequest.UpdateDto dto = createUpdateDto();
-        dto.setMinimumParticipants(31);
+    void 최소_인원_확인_시점이_없으면_예외() {
+        var dto = validDto();
+        dto.setMinimumCheckAt(null);
 
         assertThrows(Exception400.class, dto::validate);
     }

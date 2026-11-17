@@ -45,9 +45,13 @@ server:
   port: ${SERVER_PORT:8080}
 
 portone:
-  store-id: ${NAVER_STORE_ID}
-  channel-key: ${NAVER_CHANNEL_KEY}
-  secret-key: ${NAVER_SECRET_KEY}
+  naver-store-id: ${NAVER_STORE_ID}
+  naver-channel-key: ${NAVER_CHANNEL_KEY}
+  naver-secret-key: ${NAVER_SECRET_KEY}
+
+  kakao-store-id: ${KAKAO_STORE_ID}
+  kakao-channel-key: ${KAKAO_CHANNEL_KEY}
+  kakao-secret-key: ${KAKAO_SECRET_KEY}
 
 naver-map:
   client-id: ${NAVER_MAP_CLIENT_ID:}
