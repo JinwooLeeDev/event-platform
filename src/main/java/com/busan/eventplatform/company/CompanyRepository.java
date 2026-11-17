@@ -32,4 +32,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Company c where c.id = :id")
     Optional<Company> LockFindById(@Param("id") Long id);
+
+//    이메일 중복 여부만 확인할 때 사용
+    boolean existByEmail(String email);
 }
