@@ -1,173 +1,150 @@
-//
-//package com.busan.eventplatform.event.events;
-//
-//import com.busan.eventplatform.global.error.exception.Exception400;
-//import org.junit.jupiter.api.Test;
-//
-//import java.time.LocalDateTime;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//class EventRequestTest {
-//
-//    // 정상적인 행사 등록 DTO 생성
-//    private EventRequest.SaveDto createSaveDto() {
-//        EventRequest.SaveDto dto = new EventRequest.SaveDto();
-//        dto.setTitle("부산 전시회");
-//        dto.setSummary("전시회 소개");
-//        dto.setDescription("전시회 상세 설명");
-//        dto.setAddress("부산광역시 해운대구");
-//        dto.setCategoryId(1L);
-//        dto.setApplyStartAt(LocalDateTime.now());
-//        dto.setApplyEndAt(LocalDateTime.now().plusDays(7));
-//        return dto;
-//    }
-//
-//    // 정상적인 행사 수정 DTO 생성
-//    private EventRequest.UpdateDto createUpdateDto() {
-//        EventRequest.UpdateDto dto = new EventRequest.UpdateDto();
-//        dto.setTitle("수정된 전시회");
-//        dto.setSummary("수정된 소개");
-//        dto.setDescription("수정된 설명");
-//        dto.setAddress("부산광역시 수영구");
-//        dto.setCategoryId(1L);
-//        dto.setApplyStartAt(LocalDateTime.now());
-//        dto.setApplyEndAt(LocalDateTime.now().plusDays(7));
-//        return dto;
-//    }
-//
-//    // 정상적인 행사 등록
-//    @Test
-//    void saveDto_validate_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//
-//        assertDoesNotThrow(dto::validate);
-//    }
-//
-//    // 제목 누락
-//    @Test
-//    void saveDto_titleNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setTitle(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 소개 누락
-//    @Test
-//    void saveDto_summaryNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setSummary("");
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 상세 설명 누락
-//    @Test
-//    void saveDto_descriptionNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setDescription(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 주소 누락
-//    @Test
-//    void saveDto_addressNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setAddress(" ");
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 카테고리 누락
-//    @Test
-//    void saveDto_categoryNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setCategoryId(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 모집 시작일 누락
-//    @Test
-//    void saveDto_applyStartAtNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setApplyStartAt(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 모집 마감일 누락
-//    @Test
-//    void saveDto_applyEndAtNull_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setApplyEndAt(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 모집 시작일이 마감일보다 늦은 경우
-//    @Test
-//    void saveDto_invalidDate_test() {
-//        EventRequest.SaveDto dto = createSaveDto();
-//        dto.setApplyStartAt(LocalDateTime.now().plusDays(10));
-//        dto.setApplyEndAt(LocalDateTime.now().plusDays(5));
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 정상적인 행사 수정
-//    @Test
-//    void updateDto_validate_test() {
-//        EventRequest.UpdateDto dto = createUpdateDto();
-//
-//        assertDoesNotThrow(dto::validate);
-//    }
-//
-//    // 행사 수정 시 제목 누락
-//    @Test
-//    void updateDto_titleNull_test() {
-//        EventRequest.UpdateDto dto = createUpdateDto();
-//        dto.setTitle(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 행사 수정 시 카테고리 누락
-//    @Test
-//    void updateDto_categoryNull_test() {
-//        EventRequest.UpdateDto dto = createUpdateDto();
-//        dto.setCategoryId(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 행사 수정 시 날짜 오류
-//    @Test
-//    void updateDto_invalidDate_test() {
-//        EventRequest.UpdateDto dto = createUpdateDto();
-//        dto.setApplyStartAt(LocalDateTime.now().plusDays(10));
-//        dto.setApplyEndAt(LocalDateTime.now().plusDays(5));
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//
-//    // 정상적인 취소 사유
-//    @Test
-//    void cancelDto_validate_test() {
-//        EventRequest.CancelDto dto = new EventRequest.CancelDto();
-//        dto.setCancellationReason("행사 운영 사정");
-//
-//        assertDoesNotThrow(dto::validate);
-//    }
-//
-//    // 취소 사유 누락
-//    @Test
-//    void cancelDto_reasonNull_test() {
-//        EventRequest.CancelDto dto = new EventRequest.CancelDto();
-//        dto.setCancellationReason(null);
-//
-//        assertThrows(Exception400.class, dto::validate);
-//    }
-//}
+
+package com.busan.eventplatform.event.events;
+
+import com.busan.eventplatform.event.event_session.EventSessionRequest;
+import com.busan.eventplatform.global.error.exception.Exception400;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class EventRequestTest {
+
+    // 정상적인 회차 정보 생성
+    private EventSessionRequest.SaveDto validSession() {
+        EventSessionRequest.SaveDto dto = new EventSessionRequest.SaveDto();
+        dto.setName("1회차");
+        dto.setStartsAt(LocalDateTime.of(2027, 1, 10, 10, 0));
+        dto.setEndsAt(LocalDateTime.of(2027, 1, 10, 18, 0));
+        dto.setApplyStartAt(LocalDateTime.of(2027, 1, 1, 0, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2027, 1, 9, 23, 59));
+        dto.setCapacity(100);
+        dto.setHoldDurationSeconds(300);
+        dto.setPricingType("FREE");
+        dto.setFee(0);
+        dto.setReservationDepositPoints(0);
+        dto.setMinimumParticipants(1);
+        dto.setMinimumCheckAt(LocalDateTime.of(2027, 1, 10, 18, 0));
+        return dto;
+    }
+
+    // 정상적인 회차 없는 행사 정보 생성
+    private EventRequest.SaveDto validEvent() {
+        EventRequest.SaveDto dto = new EventRequest.SaveDto();
+        dto.setTitle("테스트 행사");
+        dto.setSummary("행사 소개");
+        dto.setDescription("행사 상세 설명");
+        dto.setAddress("부산광역시");
+        dto.setCategoryId(1L);
+        dto.setHasSessions(false);
+        dto.setStartDate(LocalDate.of(2027, 1, 10));
+        dto.setEndDate(LocalDate.of(2027, 1, 11));
+        dto.setApplyStartAt(LocalDateTime.of(2027, 1, 1, 0, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2027, 1, 9, 23, 59));
+        dto.setPricingType("FREE");
+        dto.setFee(0);
+        return dto;
+    }
+
+    @Test
+    void 정상적인_행사_등록_검증() {
+        EventRequest.SaveDto dto = validEvent();
+
+        assertDoesNotThrow(dto::validate);
+    }
+
+    @Test
+    void 행사_제목이_없으면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setTitle(" ");
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 카테고리가_없으면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setCategoryId(null);
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 행사_시작일이_마감일보다_늦으면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setStartDate(LocalDate.of(2027, 1, 12));
+        dto.setEndDate(LocalDate.of(2027, 1, 11));
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 모집_시작일이_마감일보다_늦으면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setApplyStartAt(LocalDateTime.of(2027, 1, 10, 0, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2027, 1, 9, 0, 0));
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 무료_행사는_참가비가_0으로_설정됨() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setFee(5000);
+
+        dto.validate();
+
+        assertEquals(0, dto.getFee());
+    }
+
+    @Test
+    void 유료_행사인데_참가비가_0이면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setPricingType("PAID");
+        dto.setFee(0);
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 잘못된_참가비_유형이면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setPricingType("INVALID");
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 회차가_있는_행사인데_회차가_없으면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setHasSessions(true);
+        dto.setSessions(List.of());
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+
+    @Test
+    void 정상적인_회차가_있는_행사는_검증_통과() {
+        EventRequest.SaveDto dto = validEvent();
+        dto.setHasSessions(true);
+        dto.setSessions(List.of(validSession()));
+
+        assertDoesNotThrow(dto::validate);
+    }
+
+    @Test
+    void 회차_행사에_잘못된_회차가_포함되면_예외() {
+        EventRequest.SaveDto dto = validEvent();
+
+        EventSessionRequest.SaveDto session = validSession();
+        session.setCapacity(0);
+
+        dto.setHasSessions(true);
+        dto.setSessions(List.of(session));
+
+        assertThrows(Exception400.class, dto::validate);
+    }
+}

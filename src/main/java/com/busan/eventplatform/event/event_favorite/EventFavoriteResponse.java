@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class EventFavoriteResponse {
 
-    @Data
+    @Data //
     public static class ListDto {
         private com.busan.eventplatform.event.events.EventResponse.EventDto event;
         private Long id;
