@@ -38,8 +38,8 @@ public class Refund {
     @JoinColumn(name = "purchase_id")
     private Purchase purchase;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "deposit_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deposit_id" , unique = true)
     private Deposit deposit;
 
     @Column(length = 800) // 유저는 사유 없어도 되고 기업은 필요하므로 null -- true.
@@ -48,19 +48,22 @@ public class Refund {
     @Column(nullable = false)
     private int amount; // 환불된 금액
 
+    // User전용 생성자.
     @Builder
-    public Refund(User user , Purchase purchase , int amount , RefundStatus status) {
+    public Refund(User user , Purchase purchase , int amount) {
         this.user = user;
         this.purchase = purchase;
-        this.status = status; // User는 "환불완료"만 사용.
+        this.status = RefundStatus.REFUND; // User는 "환불완료"만 사용.
         this.amount = amount;
     }
 
+    // 기업전용 생성자.
+    // TODO 기업이 취소 요청시 이 생성자 사용!
     @Builder(builderMethodName = "companyBuilder" , builderClassName = "companyBuilder")
     public Refund(Company company , Deposit deposit , String reason) {
         this.company = company;
         this.deposit = deposit;
-        this.status = RefundStatus.PENDING; // TODO Company만 "환불 대기" 필요. 유저는 환불되면 DB에 반영되므로 필요없음. 기업이 취소 요청시 이 생성자 사용!
+        this.status = RefundStatus.PENDING; // Company만 "환불 대기" 필요. 유저는 환불되면 DB에 반영되므로 필요없음.
         this.reason = reason;
         this.amount = Deposit.SESSION_DEPOSIT;
     }

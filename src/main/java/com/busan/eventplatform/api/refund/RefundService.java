@@ -8,6 +8,7 @@ import com.busan.eventplatform.event.event_session.EventSessionStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.User;
+import com.busan.eventplatform.user.UserRepository;
 import com.busan.eventplatform.user.registration.Registration;
 import com.busan.eventplatform.user.registration.RegistrationRepository;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
@@ -27,6 +28,7 @@ public class RefundService {
     private final EventSessionRepository eventSessionRepository;
     private final DepositRepository depositRepository;
     private final RegistrationRepository registrationRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     /// User 본인 결정으로의 환불. --> User 검증 , 환불할 Registration내역 검증받고 들어오므로 User , registration 그대로 사용가능.
@@ -59,7 +61,6 @@ public class RefundService {
         Refund refund = Refund.builder()
                 .user(registration.getUser())
                 .amount(refundAmount)
-                .status(RefundStatus.REFUND)
                 .purchase(purchase)
                 .build();
 
@@ -122,7 +123,6 @@ public class RefundService {
                         Refund.builder()
                                 .user(r.getUser())
                                 .purchase(r.getPurchase())
-                                .status(RefundStatus.REFUND)
                                 .amount(amount)
                                 .build()
                 );
@@ -159,15 +159,16 @@ public class RefundService {
     /// 기업이 특정 User를 거절했을 때 전액환불.
     @Transactional
     public void refundByCompany(Registration registration) {
-        User user = registration.getUser();
+        User user = userRepository.LockFindById(registration.getUser().getId())
+                .orElseThrow(() -> new Exception404("조회된 유저가 없습니다"));
         Purchase purchase = registration.getPurchase();
         EventSession eventSession = registration.getEventSession();
 
         // 1. 전달받은 등록 상태가 기업에게 "거절" 상태로 들어왔는지.
         if(registration.getStatus() != RegistrationStatus.REJECTED) throw new Exception400("기업측에서 거절받은 행사가 아닙니다");
 
-        // 2. 해당 유저가 이 세션에 실제 참가비용을 냈는지.
-        if(!purchaseRepository.existsEventByUser(user.getId() , eventSession.getId() , PurchaseStatus.PURCHASED)) {
+        // 2. 해당 유저가 이 세션에 실제 참가비용을 냈는지. registration은 유/무료 행사 등록 가능하므로 purchase가 null인 상황 대비.
+        if(purchase == null || !purchaseRepository.existsEventByUser(user.getId() , eventSession.getId() , PurchaseStatus.PURCHASED)) {
             throw new Exception404("해당 유저는 이 세션이 결제된 상태가 아닙니다");
         }
 
@@ -176,8 +177,15 @@ public class RefundService {
 
         // 최종. DB 상태변경 + 환불 + registration.
         int amount = RefundPolicy.forCompanyReject(purchase.getPrice());
+        Refund refund = Refund.builder()
+                .user(user)
+                .purchase(purchase)
+                .amount(amount)
+                .build();
+
         user.addPoint(amount);
+        purchase.setPurchaseRefunded();
 
-
+        refundRepository.save(refund);
     }
 }
