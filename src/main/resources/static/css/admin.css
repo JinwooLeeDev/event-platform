@@ -101,5 +101,9 @@ a:focus-visible, button:focus-visible { outline: 3px solid #759fff; outline-offs
 .admin-company-correction p { margin: 0; color: #78849a; font-size: 12px; line-height: 1.8; }
 .admin-company-correction textarea { width: 100%; min-height: 130px; padding: 14px; border: 1px solid #dbe2ee; border-radius: 8px; resize: vertical; font: inherit; font-size: 13px; }
 .admin-company-correction textarea:focus-visible { outline: 3px solid #759fff; outline-offset: 2px; }
+.admin-event-cancel-form { margin-top: 0; grid-template-columns: minmax(0, 1fr); }
+.admin-event-cancel-form .admin-status-button { justify-self: end; }
+.admin-category-edit { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.admin-category-edit input { min-width: 0; width: 240px; max-width: 100%; padding: 9px 12px; border: 1px solid #dbe2ee; border-radius: 7px; font: inherit; }
 @media (max-width: 1100px) { .admin-shell { grid-template-columns: 205px minmax(0, 1fr); } .admin-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .admin-panels { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 700px) { .admin-shell { display: block; } .admin-sidebar { position: static; height: auto; padding: 22px 16px 16px; } .admin-brand { font-size: 21px; } .admin-brand span { display: inline; margin-left: 10px; } .admin-nav-label, .admin-sidebar-footer { display: none; } .admin-sidebar nav { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 22px; } .admin-sidebar nav a { padding: 12px; } .admin-header { padding: 16px 20px; flex-wrap: wrap; } .admin-main { padding: 28px 18px; } .admin-metrics { gap: 10px; } .admin-card { padding: 18px; } .admin-page-heading h1 { font-size: 25px; } .admin-footer { padding-left: 18px; } }

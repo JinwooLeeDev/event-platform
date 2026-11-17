@@ -27,6 +27,38 @@ class AdminMappingContextTest {
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping mappings;
 
+    @Autowired
+    private com.busan.eventplatform.event.event_session.EventSessionRepository sessions;
+    @Autowired
+    private com.busan.eventplatform.event.event_category.EventCategoryService categories;
+    @Autowired
+    private com.busan.eventplatform.event.event_category.EventCategoryRepository categoryRepository;
+
+    @Test
+    void sessionQueryExecutesAndCategoriesPersistUpdatesAndDeletes() {
+        assertNotNull(sessions.findForAdmin(null, org.springframework.data.domain.PageRequest.of(0, 20)));
+        assertNotNull(sessions.findForAdmin(com.busan.eventplatform.event.event_session.EventSessionStatus.SCHEDULED,
+                org.springframework.data.domain.PageRequest.of(0, 20)));
+        var save = new com.busan.eventplatform.event.event_category.EventCategoryRequest.SaveDto();
+        save.setName("Admin category persistence test");
+        var category = categories.save(save);
+        var update = new com.busan.eventplatform.event.event_category.EventCategoryRequest.UpdateDto();
+        update.setName("Updated admin category");
+        categories.update(category.getId(), update);
+        assertEquals(update.getName(), categoryRepository.findById(category.getId()).orElseThrow().getName());
+        categories.delete(category.getId());
+        assertFalse(categoryRepository.existsById(category.getId()));
+    }
+
+    @Test
+    void sessionTabHasOneGetMapping() {
+        var handlers = mappings.getHandlerMethods().entrySet().stream()
+                .filter(entry -> entry.getKey().getPatternValues().contains("/admin/sessions"))
+                .filter(entry -> entry.getKey().getMethodsCondition().getMethods().contains(RequestMethod.GET)).toList();
+        assertEquals(1, handlers.size());
+        assertEquals(AdminSessionController.class, handlers.getFirst().getValue().getBeanType());
+    }
+
     @Test
     void applicationStartsWithOneCompanyListMappingOwnedByReviewController() {
         var handlers = mappings.getHandlerMethods().entrySet().stream()

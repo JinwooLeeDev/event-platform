@@ -56,11 +56,64 @@ class AdminEventScreenTest {
         var controller = new AdminEventController(repository, mock(EventService.class), sessions);
         when(repository.findReviewTargets(EventStatus.PENDING_REVIEW)).thenReturn(List.of());
         var model = new ExtendedModelMap();
-        assertEquals("admin/page", controller.list(model));
+        assertEquals("admin/page", controller.list(model, EventStatus.PENDING_REVIEW));
         assertEquals(0, model.get("eventReviewCount"));
         when(repository.findByDetail(1L)).thenReturn(Optional.of(Event.builder().status(EventStatus.PAID_READY).build()));
         when(sessions.findByEventId(1L)).thenReturn(List.of());
         controller.detail(1L, model);
         assertEquals(false, model.get("reviewable"));
+    }
+
+    @Test void cancelValidatesReasonAndReusesExistingService() {
+        var service = mock(EventService.class);
+        var controller = new AdminEventController(mock(EventRepository.class), service, mock(EventSessionService.class));
+        var dto = new EventRequest.CancelDto();
+        dto.setCancellationReason("   ");
+        var redirect = new org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap();
+        assertThrows(com.busan.eventplatform.global.error.exception.Exception400.class,
+                () -> controller.cancel(7L, dto, redirect));
+        verifyNoInteractions(service);
+        dto.setCancellationReason("x".repeat(256));
+        assertThrows(com.busan.eventplatform.global.error.exception.Exception400.class,
+                () -> controller.cancel(7L, dto, redirect));
+        verifyNoInteractions(service);
+        dto.setCancellationReason("Venue unavailable");
+        assertEquals("redirect:/admin/events/7", controller.cancel(7L, dto, redirect));
+        verify(service).cancel(7L, dto);
+        assertTrue(redirect.getFlashAttributes().containsKey("reviewSuccess"));
+    }
+
+    @Test void publishedEventsCanBeFoundAndCancelledEventsCannotBeCancelledAgain() throws Exception {
+        var repository = mock(EventRepository.class);
+        var sessions = mock(EventSessionService.class);
+        var controller = new AdminEventController(repository, mock(EventService.class), sessions);
+        var event = Event.builder().id(7L).title("Host event").status(EventStatus.PUBLISHED)
+                .company(com.busan.eventplatform.company.Company.builder().name("Host").build())
+                .category(mock(com.busan.eventplatform.event.event_category.EventCategory.class))
+                .summary("Summary").description("Description").address("Busan")
+                .createdAt(java.time.LocalDateTime.now()).build();
+        when(repository.findReviewTargets(EventStatus.PUBLISHED)).thenReturn(List.of(event));
+        when(event.getCategory().getName()).thenReturn("Culture");
+        when(repository.findByDetail(7L)).thenReturn(Optional.of(event));
+        when(sessions.findByEventId(7L)).thenReturn(List.of());
+        var model = new ExtendedModelMap();
+        controller.list(model, EventStatus.PUBLISHED);
+        assertEquals(List.of(event), model.get("reviewEvents"));
+        controller.detail(7L, model);
+        assertEquals(true, model.get("cancellable"));
+        assertTrue(renderEvents(model).contains("/admin/events/7/cancel"));
+        event.setStatus(EventStatus.CANCELLED);
+        event.setCancellationReason("<script>reason</script>");
+        controller.detail(7L, model);
+        var html = renderEvents(model);
+        assertEquals(false, model.get("cancellable"));
+        assertFalse(html.contains("/admin/events/7/cancel"));
+        assertTrue(html.contains("&lt;script&gt;reason&lt;/script&gt;"));
+    }
+
+    private String renderEvents(ExtendedModelMap model) throws Exception {
+        try (var reader = new java.io.InputStreamReader(getClass().getResourceAsStream("/templates/admin/events.mustache"), java.nio.charset.StandardCharsets.UTF_8)) {
+            return com.samskivert.mustache.Mustache.compiler().compile(reader).execute(model);
+        }
     }
 }
