@@ -57,17 +57,18 @@ public class Refund {
     }
 
     @Builder(builderMethodName = "companyBuilder" , builderClassName = "companyBuilder")
-    public Refund(Company company , Deposit deposit , String reason , RefundStatus status) {
+    public Refund(Company company , Deposit deposit , String reason) {
         this.company = company;
         this.deposit = deposit;
-        this.status = status; // Company만 "환불 대기" 필요. 유저는 환불되면 DB에 반영되므로 필요없음.
+        this.status = RefundStatus.PENDING; // TODO Company만 "환불 대기" 필요. 유저는 환불되면 DB에 반영되므로 필요없음. 기업이 취소 요청시 이 생성자 사용!
         this.reason = reason;
         this.amount = Deposit.SESSION_DEPOSIT;
     }
 
-    public void setCompanyRefund(int amount) {
+    public void setCompanyRefund(int amount , String reason) {
         if(amount < 0 || this.deposit == null) throw new Exception400("환불을 진행할 수 없습니다");
         this.amount = amount;
         this.status = RefundStatus.REFUND;
+        this.reason = reason;
     }
 }
