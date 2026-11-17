@@ -17,8 +17,8 @@
                 <section class="admin-metrics" aria-label="주요 운영 지표">
                     <a class="admin-card" href="/admin/companies"><span>기업 승인 대기</span><strong>{{companyReviewCount}}</strong><small>사업자 정보 일치·검증 오류 심사 대상</small></a>
                     <a class="admin-card" href="/admin/events"><span>행사 심사 대기</span><strong>{{eventReviewCount}}</strong><small>기업 주최 신청 · 승인 대기</small></a>
-                    <a class="admin-card" href="/admin/sessions"><span>오늘 개최 회차</span><strong>—</strong><small>집계 준비 중</small></a>
-                    <a class="admin-card" href="/admin/sessions"><span>참가 확정 인원</span><strong>—</strong><small>집계 준비 중</small></a>
+                    <a class="admin-card" href="/admin/events?status=PAID_READY"><span>행사 결제 대기</span><strong>{{eventPaymentCount}}</strong><small>승인 완료 · 기업 보증금 결제 대기</small></a>
+                    <a class="admin-card" href="/admin/events?status=FEEDBACK_REQUIRED"><span>행사 보완 요청</span><strong>{{eventFeedbackCount}}</strong><small>보완 요청 · 기업 수정 제출 대기</small></a>
                 </section>
                 <div class="admin-panels">
                     <section class="admin-panel">
@@ -35,10 +35,16 @@
                 {{#membersPage}}{{> admin/members}}{{/membersPage}}
                 {{#companiesPage}}{{> admin/companies}}{{/companiesPage}}
                 {{#eventsPage}}{{> admin/events}}{{/eventsPage}}
+                {{#sessionsPage}}{{> admin/sessions}}{{/sessionsPage}}
+                {{#categoriesPage}}{{> admin/categories}}{{/categoriesPage}}
                 {{^membersPage}}
                 {{^companiesPage}}
                 {{^eventsPage}}
+                {{^sessionsPage}}
+                {{^categoriesPage}}
                 <section class="admin-panel"><div class="admin-panel-heading"><h2>{{pageTitle}}</h2><span class="admin-badge">준비 중</span></div><div class="admin-empty admin-empty-large"><span class="admin-empty-icon" aria-hidden="true">☰</span><h3>관리 기능을 준비하고 있습니다</h3><p>목록 조회와 상세 관리 기능은 순차적으로 연결됩니다.</p><a class="admin-primary-link" href="/admin/dashboard">대시보드로 이동</a></div></section>
+                {{/categoriesPage}}
+                {{/sessionsPage}}
                 {{/eventsPage}}
                 {{/companiesPage}}
                 {{/membersPage}}

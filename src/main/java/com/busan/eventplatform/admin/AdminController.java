@@ -24,13 +24,10 @@ public class AdminController {
         var companies = companyReviewService.findReviewTargets(admin.getId());
         model.addAttribute("companyReviewCount", companies.size());
         model.addAttribute("eventReviewCount", eventRepository.countByStatus(com.busan.eventplatform.event.events.EventStatus.PENDING_REVIEW));
+        model.addAttribute("eventPaymentCount", eventRepository.countByStatus(com.busan.eventplatform.event.events.EventStatus.PAID_READY));
+        model.addAttribute("eventFeedbackCount", eventRepository.countByStatus(com.busan.eventplatform.event.events.EventStatus.FEEDBACK_REQUIRED));
         model.addAttribute("companyReviewItems", AdminCompanyView.rows(companies.stream().limit(5).toList()));
         return page(model, "운영 대시보드", "플랫폼 운영 현황과 처리할 업무를 확인하세요.", "dashboard");
-    }
-
-    @GetMapping("/admin/sessions")
-    public String sessions(Model model) {
-        return page(model, "회차 현황", "회차별 모집·참가·출석 현황을 확인하는 공간입니다.", "sessions");
     }
 
     static String page(Model model, String title, String description, String section) {

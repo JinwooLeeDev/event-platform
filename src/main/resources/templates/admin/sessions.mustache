@@ -1,0 +1,32 @@
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>회차 목록 <span class="admin-badge">{{totalCount}}건</span></h2></div>
+    <form action="/admin/sessions" method="get" class="admin-member-search">
+        <label for="session-status">운영 상태</label>
+        <select id="session-status" name="status"><option value="">전체</option>{{#statusOptions}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/statusOptions}}</select>
+        <button type="submit">조회</button>
+    </form>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <caption class="admin-sr-only">회차별 운영 상태와 모집 현황</caption>
+        <thead><tr><th scope="col">행사·회차</th><th scope="col">주최 기업</th><th scope="col">개최 일정</th><th scope="col">모집 기간</th><th scope="col">정원·점유</th><th scope="col">참가비</th><th scope="col">회차 상태</th></tr></thead>
+        <tbody>
+        {{#sessions}}
+        <tr>
+            <td><a href="/admin/events/{{event.id}}">{{event.title}}</a><br>{{session.name}}</td>
+            <td>{{event.company.name}}</td>
+            <td><span data-session-date>{{session.startsAt}}</span><br>~ <span data-session-date>{{session.endsAt}}</span></td>
+            <td><span data-session-date>{{session.applyStartAt}}</span><br>~ <span data-session-date>{{session.applyEndAt}}</span></td>
+            <td>{{session.capacityLabel}} · {{session.occupiedCount}}명 점유</td>
+            <td data-session-point>{{session.fee}}</td>
+            <td><span class="admin-badge" data-session-status>{{session.status}}</span></td>
+        </tr>
+        {{/sessions}}
+        {{^sessions}}<tr><td colspan="7" class="admin-member-empty">조회된 회차가 없습니다.</td></tr>{{/sessions}}
+        </tbody>
+    </table></div>
+    <nav class="admin-pagination" aria-label="회차 목록 페이지">
+        {{#hasPrevious}}<a href="/admin/sessions?page={{previousPage}}&amp;status={{statusValue}}">← 이전</a>{{/hasPrevious}}
+        <span>{{currentPage}} / {{totalPages}}</span>
+        {{#hasNext}}<a href="/admin/sessions?page={{nextPage}}&amp;status={{statusValue}}">다음 →</a>{{/hasNext}}
+    </nav>
+</section>
+<script src="/js/company-session.js" defer></script>
