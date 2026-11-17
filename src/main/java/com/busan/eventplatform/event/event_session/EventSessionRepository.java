@@ -15,6 +15,11 @@ import java.util.Optional;
 
 public interface EventSessionRepository extends JpaRepository<EventSession, Long> {
 
+    @Query(value = "select s from EventSession s join fetch s.event e join fetch e.company where (:status is null or s.status = :status) order by s.startsAt desc, s.id desc",
+            countQuery = "select count(s) from EventSession s where (:status is null or s.status = :status)")
+    org.springframework.data.domain.Page<EventSession> findForAdmin(@Param("status") EventSessionStatus status,
+            org.springframework.data.domain.Pageable pageable);
+
     // 행사 ID별 회차 목록 조회
     @Query("""
             select s from EventSession s
