@@ -94,7 +94,15 @@ public class EventController {
     // 행사 등록 화면
     // GET - http://localhost:8080/events/save
     @GetMapping("/events/save")
-    public String saveForm(Model model) {
+    public String saveForm(Model model, HttpSession session) {
+        LoginIdentity identity = LoginSession.requireIdentity(session);
+
+        if (!identity.isCompany()) {
+            throw new Exception403("기업 회원만 행사 등록이 가능합니다.");
+        }
+
+        eventService.validateRegistrationPermission(identity.getId());
+
         model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
         return "event/save-form";
     }

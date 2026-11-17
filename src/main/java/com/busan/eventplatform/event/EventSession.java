@@ -3,6 +3,7 @@ package com.busan.eventplatform.event;
 import com.busan.eventplatform.event.event_session.EventSessionRequest;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
 import com.busan.eventplatform.event.events.Event;
+import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.persistence.*;
 import lombok.*;
@@ -157,6 +158,8 @@ public class EventSession {
         return this.nextReceptionNumber++;
     }
 
+    // 현재 이벤트 세션이 결제 허용된 상태인지 체크.
+    public boolean forSessionDeposit() {return this.getEvent().getStatus() == EventStatus.PAID_READY && this.status == EventSessionStatus.SCHEDULED;}
 
     // 관리자에게 승인취소 받은 행사인지 검사 --> 기업 보증금 환불에서 사용.
     public boolean isCanceled() {return this.status == EventSessionStatus.CANCELLED;}

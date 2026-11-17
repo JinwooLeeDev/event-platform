@@ -104,6 +104,9 @@ public class RefundService {
     /// 기업 취소시 User에게 전액 환불. refundCompany와 함께 사용. --> 같은 트랜잭션에서 검증하고 들어오므로 eventSession 자체로 받아도될듯.
     @Transactional
     public void pointBackUser(EventSession eventSession) {
+        // 관리자에게 승인(검증) 받고 들어오지만 보안상 한번 더 검증.
+        if(eventSession.getStatus() != EventSessionStatus.CANCELLED) throw new Exception400("취소된 행사가 아니라 참가자 환불을 진행할 수 없습니다");
+
         List<Registration> registList = registrationRepository.findAllBySessionIdWithUser(eventSession.getId());
 
         for(Registration r : registList) {
@@ -111,7 +114,6 @@ public class RefundService {
                 eventSession.getStatus() == EventSessionStatus.CANCELLED) {
                 int amount = RefundPolicy.forCompanyReject(r.getPurchase().getPrice()); // user들에게 전액환불금액 계산.
                 r.getUser().addPoint(amount); // user들에게 환불금액 돌려줌.
-                r.reject(); // 등록상태 변경
                 r.getPurchase().setPurchaseRefunded(); // User들의 구매내역은 "환불"로 변경.
 
                 // 유저의 의도는 아니지만 어쨌든 기업으로 인해 환불되었으므로 환불내역에 추가.
@@ -130,7 +132,7 @@ public class RefundService {
 
     /**
      * 행사 정상 종료시 기업에게 보증금 자동환급.
-     * 외부에서 필요한 값 : eventSession 상태값이 "행사 종료"
+     * 외부에서 필요한 값 : eventSession 상태값이 "행사 종료"가 돼야함.
      */
     @Transactional
     public void refundEventCompleted(Long companyId , Long eventSessionId) {
