@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
+import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository;
@@ -46,6 +47,11 @@ public class EventService {
     public Event save(EventRequest.SaveDto saveDto, Long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
+
+        if (company.getStatus() != CompanyStatus.APPROVED) {
+            throw new Exception403("승인된 기업만 신청할 수 있습니다.");
+        }
+
         EventCategory category = eventCategoryRepository.findById(saveDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
 
@@ -298,5 +304,14 @@ public class EventService {
             event.setSessionPeriods(periods);
             event.setSessionCount(periods.size());
         });
+    }
+
+    public void validateRegistrationPermission(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
+
+        if (company.getStatus() != CompanyStatus.APPROVED) {
+            throw new Exception403("기업 승인 완료 후 행사를 등록할 수 있습니다.");
+        }
     }
 }
