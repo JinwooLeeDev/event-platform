@@ -44,6 +44,9 @@ public class EventSessionRequest {
             if (applyStartAt.isAfter(applyEndAt)) {
                 throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
             }
+            if (!startsAt.isAfter(applyEndAt)) {
+                throw new Exception400("행사 시작일은 모집 마감일 이후여야 합니다.");
+            }
             if (capacity < 1) {
                 throw new Exception400("정원은 1명 이상이어야 합니다.");
             }
@@ -123,6 +126,9 @@ public class EventSessionRequest {
             }
             if (applyStartAt.isAfter(applyEndAt)) {
                 throw new Exception400("모집 시작일은 마감일보다 늦을 수 없습니다.");
+            }
+            if (!startsAt.isAfter(applyEndAt)) {
+                throw new Exception400("행사 시작일은 모집 마감일 이후여야 합니다.");
             }
             if (capacity < 1) {
                 throw new Exception400("정원은 1명 이상이어야 합니다.");

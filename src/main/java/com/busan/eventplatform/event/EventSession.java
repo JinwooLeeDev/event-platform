@@ -101,6 +101,14 @@ public class EventSession {
 
     // 회차 수정
     public void update(EventSessionRequest.UpdateDto dto) {
+
+        validateDates(
+                dto.getStartsAt(),
+                dto.getEndsAt(),
+                dto.getApplyStartAt(),
+                dto.getApplyEndAt()
+        );
+
         if (dto.getCapacity() < this.occupiedCount) {
             throw new Exception400("현재 점유 인원보다 정원을 줄일 수 없습니다.");
         }
@@ -156,4 +164,38 @@ public class EventSession {
     public void setScheduled() {this.status = EventSessionStatus.SCHEDULED;}
 
     public boolean isOwner(Long companyId) {return this.event.getCompany().getId().equals(companyId);}
+
+    public void setStatus(EventSessionStatus status) {
+        this.status = status;
+    }
+
+    public static void validateDates(
+            LocalDateTime startsAt,
+            LocalDateTime endsAt,
+            LocalDateTime applyStartAt,
+            LocalDateTime applyEndAt
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (startsAt == null || endsAt == null ||
+                applyStartAt == null || applyEndAt == null) {
+            throw new Exception400("날짜는 모두 필수입니다.");
+        }
+        if (startsAt.isBefore(now)) {
+            throw new Exception400("행사 시작일은 현재 날짜보다 이전일 수 없습니다.");
+        }
+        if (applyStartAt.isBefore(now)) {
+            throw new Exception400("모집 시작일은 현재 날짜보다 이전일 수 없습니다.");
+        }
+        if (endsAt.isBefore(startsAt)) {
+            throw new Exception400("행사 종료일은 행사 시작일보다 이전일 수 없습니다.");
+        }
+        if (applyEndAt.isBefore(applyStartAt)) {
+            throw new Exception400("모집 마감일은 모집 시작일보다 이전일 수 없습니다.");
+        }
+        if (!startsAt.isAfter(applyEndAt)) {
+            throw new Exception400("행사 시작일은 모집 마감일 이후여야 합니다.");
+        }
+
+    }
 }

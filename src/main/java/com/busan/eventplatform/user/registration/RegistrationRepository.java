@@ -10,6 +10,9 @@ import java.util.Optional;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
+    /** 행사 삭제 차단: 취소된 신청 이력도 포함 */
+    boolean existsByEventSessionEventId(Long eventId);
+
     /** 중복 신청 확인 (유효한 신청이 이미 있는지) */
     @Query("""
             select count(r) > 0 from Registration r

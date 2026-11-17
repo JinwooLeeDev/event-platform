@@ -11,6 +11,7 @@ import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,11 +30,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class EventController {
 
-    // Todo - return 수정
     private final EventService eventService;
     private final EventCategoryService eventCategoryService;
     private final EventSessionService eventSessionService;
-    private final EventFileService eventFileService;
+    private final RegistrationService registrationService;
 
     @Value("${naver-map.client-id:}")
     private String naverMapClientId;
@@ -79,6 +79,11 @@ public class EventController {
         model.addAttribute("event", detailDto);
         var eventSessions = eventSessionService.findByEventId(id);
 
+
+        // detail() — eventSessions 조회 바로 다음
+        Map<Long, String> closedReasons = registrationService.getClosedReasonsByEventId(id);
+        eventSessions.forEach(s -> s.applyRegistrationState(closedReasons.getOrDefault(s.getId(), "")));
+
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
         model.addAttribute("naverMapClientId", naverMapClientId);
@@ -107,8 +112,8 @@ public class EventController {
         if (file == null || file.isEmpty()) {
             throw new Exception400("대표 이미지를 등록해주세요.");
         }
-        Event event = eventService.save(saveDto, sessionCompanyDto.getId());
-        eventFileService.attachFile(event.getId(), file);
+        eventService.save(saveDto, sessionCompanyDto.getId(), file);
+
         return "redirect:/";
     }
 
@@ -136,10 +141,10 @@ public class EventController {
     // GET - http://localhost:8080/company/events/feedback
     @GetMapping("/events/feedback")
     public String findAllFeedback(HttpSession session, Model model) {
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompany(session);
         model.addAttribute("eventList",
                 eventService.findAllFeedback(sessionCompanyDto.getId()));
+
         return "company/event-feedback-list";
     }
 
@@ -148,8 +153,7 @@ public class EventController {
     @GetMapping("/events/update/{id}")
     public String updateForm(@PathVariable Long id, HttpSession session, Model model) {
 
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompany(session);
         EventResponse.UpdateFormDto updateFormDto =
                 eventService.update(id, sessionCompanyDto.getId());
         model.addAttribute("event", updateFormDto);
@@ -168,8 +172,7 @@ public class EventController {
                          @RequestParam(value = "file", required = false) MultipartFile file,
                          org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
         updateDto.validate();
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompany(session);
         eventService.updateAndResubmit(id, sessionCompanyDto.getId(), updateDto, file);
         redirect.addFlashAttribute("successMessage", "수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다.");
         return "redirect:/events";
@@ -179,20 +182,19 @@ public class EventController {
     // POST - http://localhost:8080/events/resubmit/1
     @PostMapping("/events/resubmit/{id}")
     public String resubmit(@PathVariable Long id, HttpSession session) {
-        SessionCompanyDto sessionCompanyDto = (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        SessionCompanyDto sessionCompanyDto = requireCompany(session);
         eventService.resubmit(id, sessionCompanyDto.getId());
         return "redirect:/events";
     }
 
-    // 기업 행사 삭제
-    // POST - http://localhost:8080/company/events/delete/1
-    @PostMapping("/events/delete/{id}")
-    public String delete(@PathVariable Long id, HttpSession session) {
-        SessionCompanyDto sessionCompanyDto =
-                (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        eventService.delete(id, sessionCompanyDto.getId());
-        return "redirect:/events";
-    }
+//    // 기업 행사 삭제
+//    // POST - http://localhost:8080/company/events/delete/1
+//    @PostMapping("/events/delete/{id}")
+//    public String delete(@PathVariable Long id, HttpSession session) {
+//        SessionCompanyDto sessionCompanyDto = requireCompany(session);
+//        eventService.delete(id, sessionCompanyDto.getId());
+//        return "redirect:/events";
+//    }
 
     // 관리자 행사 승인
     // POST - http://localhost:8080/events/approve/1
@@ -210,12 +212,22 @@ public class EventController {
         return "redirect:/events";
     }
 
-    // 관리자 행사 취소
-    // POST - http://localhost:8080/events/cancel/1
-    @PostMapping("/events/cancel/{id}")
-    public String cancel(@PathVariable Long id, EventRequest.CancelDto cancelDto) {
-        cancelDto.validate();
-        eventService.cancel(id, cancelDto);
-        return "redirect:/events";
+//    // 관리자 행사 취소
+//    // POST - http://localhost:8080/events/cancel/1
+//    @PostMapping("/events/cancel/{id}")
+//    public String cancel(@PathVariable Long id, EventRequest.CancelDto cancelDto) {
+//        cancelDto.validate();
+//        eventService.cancel(id, cancelDto);
+//        return "redirect:/events";
+//    }
+
+    private SessionCompanyDto requireCompany(HttpSession session) {
+        Object value = session.getAttribute(Define.SESSION_COMPANY);
+
+        if (!(value instanceof SessionCompanyDto sessionCompanyDto)) {
+            throw new Exception403("기업 계정만 이용할 수 있습니다.");
+        }
+
+        return sessionCompanyDto;
     }
 }
