@@ -17,4 +17,8 @@ public class Define {
 
     // 인증 완료 결과의 유효시간: 10분
     public static final int EMAIL_VERIFIED_EXPIRE_MINUTES = 10;
+
+    // 네이버페이 , 카카오페이 구분점.
+    public static final String KAKAO = "KAKAO";
+    public static final String NAVER = "NAVER";
 }

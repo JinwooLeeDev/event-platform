@@ -10,6 +10,9 @@ import java.util.Optional;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
+    /** 행사 삭제 차단: 취소된 신청 이력도 포함 */
+    boolean existsByEventSessionEventId(Long eventId);
+
     /** 중복 신청 확인 (유효한 신청이 이미 있는지) */
     @Query("""
             select count(r) > 0 from Registration r
@@ -121,6 +124,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     //   반환: [결제 id, 환불 금액] 배열 목록
     @Query("select rf.purchase.id, rf.amount from Refund rf where rf.purchase.id in :purchaseIds")
     List<Object[]> findRefundAmountsByPurchaseIds(@Param("purchaseIds") List<Long> purchaseIds);
+
+    // ★[f/40] 상태별 신청 전체 - 서버 시작 시 확정자 커뮤니티 멤버십 동기화
+    List<Registration> findAllByStatus(RegistrationStatus status);
 
 
 

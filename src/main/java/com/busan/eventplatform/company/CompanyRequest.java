@@ -79,6 +79,13 @@ public class CompanyRequest {
                     throw new Exception400("사업자번호는 숫자 10자리여야 합니다.");
                 }
             }
+
+            if (contactPersonPhone != null) {
+//                유연한 국내 및 해외 통합 검증
+                if (!contactPersonPhone.matches("^(?:\\\\+?[1-9]\\\\d{0,2}[\\\\s.-]?)?(?:\\\\(?\\\\d{1,4}\\\\)?[\\\\s.-]?)?\\\\d{2,4}[\\\\s.-]?\\\\d{3,4}(?:[\\\\s.-]?\\\\d{3,4})?$")) {
+                    throw new Exception400("전화번호 형식이 올바르지 않습니다.");
+                }
+            }
         }
     }
 

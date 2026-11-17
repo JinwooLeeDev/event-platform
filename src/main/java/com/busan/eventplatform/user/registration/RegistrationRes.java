@@ -119,6 +119,7 @@ public class RegistrationRes {
         private String cancelUrl;          // /registrations/cancel/{id} (취소 불가면 "")
         private String detailUrl;          // /event/{eventId}
         private String refundPolicyText;   // [환불 정책 보기] 문구 (유료·취소 가능할 때만, 아니면 "" → 버튼 숨김)
+        private String communityUrl; // [f/40] 참가 확정 + 운영 중이면 "/community/{회차id}", 아니면 null(버튼 숨김)
     }
 
 

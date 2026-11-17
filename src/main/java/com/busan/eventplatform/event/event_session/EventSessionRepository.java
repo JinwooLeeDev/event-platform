@@ -1,9 +1,12 @@
 package com.busan.eventplatform.event.event_session;
 
+import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.events.EventStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -66,6 +69,26 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
 """)
     Optional<EventSession> findByCompanyIdAndSessionId(@Param("companyId") Long companyId , @Param("sessionId") Long sessionId);
 
+    @Query("""
+            select count(es) from EventSession es 
+            where es.event.id = :eventId and not exists (
+            select d from Deposit d where d.eventSession = es and d.status = :status
+            )
+""")
+    int countNotPaidSession(@Param("eventId") Long eventId , @Param("status") DepositStatus status);
 
-    // Todo - 기본 Delete 기능 말고 신청·결제 이력이 없는 행사·회차만 삭제하고, 이력이 있으면 취소 처리하는 메서드 필요
+
+    // 신청 이력이 없는 회차만 실제 삭제
+    @Modifying
+    @Query("""
+            delete from EventSession es
+            where es.id = :sessionId
+            and not exists (
+                select r
+                from Registration r
+                where r.eventSession.id = es.id
+            )
+            """)
+    int deleteIfNoRegistrationHistory(@Param("sessionId") Long sessionId);
+
 }

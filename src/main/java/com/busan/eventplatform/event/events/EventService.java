@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
+import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.event_category.EventCategoryRepository;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -43,9 +45,14 @@ public class EventService {
 
     // 행사 등록 기능
     @Transactional
-    public Event save(EventRequest.SaveDto saveDto, Long companyId) {
+    public Event save(EventRequest.SaveDto saveDto, Long companyId, MultipartFile file) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
+
+        if (company.getStatus() != CompanyStatus.APPROVED) {
+            throw new Exception403("승인된 기업만 신청할 수 있습니다.");
+        }
+
         EventCategory category = eventCategoryRepository.findById(saveDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
 
@@ -82,6 +89,7 @@ public class EventService {
 
             eventSessionService.save(event.getId(), companyId, sessionDto);
         }
+        eventFileService.attachFile(event.getId(), file);
 
         return event;
     }
@@ -213,31 +221,35 @@ public class EventService {
         return event;
     }
 
-    // 행사 삭제 기능
-    @Transactional
-    public void delete(Long id, Long companyId) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-        if (companyId == null || !event.isOwner(companyId)) {
-            throw new Exception403("삭제 권한이 없습니다.");
-        }
-        eventRepository.delete(event);
-    }
-
-    // 행사 취소 기능
-    @Transactional
-    public Event cancel(Long id, EventRequest.CancelDto cancelDto) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-        if (EventStatus.CANCELLED.equals(event.getStatus())) {
-            throw new Exception400("이미 취소된 행사입니다.");
-        }
-        event.setStatus(EventStatus.CANCELLED);
-        event.setCancelledAt(LocalDateTime.now());
-        event.setCancellationReason(cancelDto.getCancellationReason());
-
-        return event;
-    }
+//    // 행사 삭제 기능
+//    @Transactional
+//    public void delete(Long id, Long companyId) {
+//        Event event = eventRepository.findById(id)
+//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
+//        if (companyId == null || !event.isOwner(companyId)) {
+//            throw new Exception403("삭제 권한이 없습니다.");
+//        }
+//        if (registrationRepository.existsByEventSessionEventId(id)) {
+//            throw new Exception400("신청자가 있는 행사는 삭제할 수 없습니다.");
+//        }
+//
+//        eventRepository.delete(event);
+//    }
+//
+//    // 행사 취소 기능
+//    @Transactional
+//    public Event cancel(Long id, EventRequest.CancelDto cancelDto) {
+//        Event event = eventRepository.findById(id)
+//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
+//        if (EventStatus.CANCELLED.equals(event.getStatus())) {
+//            throw new Exception400("이미 취소된 행사입니다.");
+//        }
+//        event.setStatus(EventStatus.CANCELLED);
+//        event.setCancelledAt(LocalDateTime.now());
+//        event.setCancellationReason(cancelDto.getCancellationReason());
+//
+//        return event;
+//    }
 
     // 행사 승인 기능 (관리자)
     @Transactional
@@ -298,5 +310,14 @@ public class EventService {
             event.setSessionPeriods(periods);
             event.setSessionCount(periods.size());
         });
+    }
+
+    public void validateRegistrationPermission(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
+
+        if (company.getStatus() != CompanyStatus.APPROVED) {
+            throw new Exception403("기업 승인 완료 후 행사를 등록할 수 있습니다.");
+        }
     }
 }

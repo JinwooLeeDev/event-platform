@@ -51,6 +51,7 @@
 <script>
     let selectedPoint = 0;
     const naverPayBtn = document.querySelector("#naverPayBtn");
+    const kakaoPayBtn = document.querySelector("#kakaoPayBtn");
     const pointBtns = document.querySelectorAll(".amount-btn");
     const expectedPoint = document.querySelector("#expectedPoint");
     const inputPoint = document.querySelector("#chargeAmount");
@@ -133,6 +134,57 @@
        }catch (e) {
             throw new Error("결제 실패하였습니다")
        }
+    })
+
+    kakaoPayBtn.addEventListener("click" , async function() {
+        if(selectedPoint <= 0 || selectedPoint === null) {
+            alert("충전할 포인트를 입력하세요(0포인트 이상)");
+            return;
+        }
+        try {
+            const prepareRes = await fetch('/api/kakao/payment/prepare' , {
+                method : "post" ,
+                headers : {"Content-Type": "application/json"} ,
+                body : JSON.stringify({"amount" : selectedPoint})
+            })
+            const prepareReq = await prepareRes.json()
+            if(!prepareRes.ok) {
+                alert("결제 요청중 오류가 발생했습니다")
+                return;
+            }
+
+            const payment = await PortOne.requestPayment({
+                storeId : prepareReq.storeId ,
+                channelKey : prepareReq.channelKey ,
+                paymentId : prepareReq.paymentId ,
+                orderName : "POINT" ,
+                totalAmount :  selectedPoint ,
+                currency: "CURRENCY_KRW" ,
+                payMethod: "EASY_PAY"
+            })
+
+            if(!payment || payment.code !== undefined){
+                alert("결제처리가 중단되었습니다")
+                return;
+            }
+
+            const completeRes = await fetch('/api/kakao/payment/complete' , {
+                method : "post" ,
+                headers : {"Content-Type" : "application/json"} ,
+                body : JSON.stringify({"paymentId" : payment.paymentId})
+            })
+            const completeReq = await completeRes.json()
+            if(!completeRes.ok) {
+                alert("결제 처리도중 오류가 발생했습니다");
+                return;
+            }
+            myPoint.innerText = completeReq.currentPoint.toLocaleString() + "P"
+            alert("충전 완료되었습니다")
+            window.location.href = completeReq.redirectUrl
+
+        }catch (e) {
+            throw new Error("결제에 실패하였습니다")
+        }
     })
 
 </script>

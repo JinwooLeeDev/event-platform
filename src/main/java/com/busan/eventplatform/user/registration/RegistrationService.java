@@ -18,12 +18,16 @@ import com.busan.eventplatform.user.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.busan.eventplatform.user.community.CommunityPolicy;   // ★ [f/40] 커뮤니티 운영 기간 규칙
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.context.ApplicationEventPublisher;   // ★ [f/40] 상태 변경 이벤트 발행
+
 
 /**
  * 참가 신청 도메인.
@@ -47,6 +51,8 @@ public class RegistrationService {
     // [나의 신청 내역] 결제일 표시 형식
     private static final DateTimeFormatter HISTORY_DATE = DateTimeFormatter.ofPattern("yyyy. MM. dd");
     private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
+
+    private final ApplicationEventPublisher eventPublisher;   // ★ [f/40] 상태 변경 알림 → 커뮤니티 입장·퇴장
 
     /**
      * 신청 검증 결과 (prepareApply → 흐름 클래스 → completeApply 로 전달)
@@ -90,7 +96,7 @@ public class RegistrationService {
         validateApplicable(session);
 
         // 4. 계정 상태
-        User user = userRepository.findById(loginIdentity.getId())
+        User user = userRepository.LockFindById(loginIdentity.getId())
                 .orElseThrow(() -> new Exception404("유저를 찾을 수 없습니다"));
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new Exception400("정지되었거나 탈퇴한 계정은 행사에 신청할 수 없습니다");
@@ -131,6 +137,8 @@ public class RegistrationService {
 
         // 3. 이력 기록
         recordHistory(registration, status, user, "참가 신청");
+        publishStatusChanged(registration, null);  // ★ [f/40] 새 신청 (확정이면 커뮤니티 입장, 대기면 무시)
+
 
         Integer waitingNumber = waitingNumberOf(registration);
         return RegistrationRes.ApplyDto.of(registration, waitingNumber);
@@ -179,6 +187,7 @@ public class RegistrationService {
 
         registration.cancel(); // 상태가 바뀜
         recordHistory(registration, RegistrationStatus.CANCELLED, registration.getUser(), "본인 취소");
+        publishStatusChanged(registration, statusBefore); // ★ [f/40] 확정이었다면 커뮤니티 퇴장
 
         // ★ 추가: 포인트 환불
         //   - 상태를 CANCELLED로 바꾼 '후' 호출 (RefundService가 CANCELLED인지 검사함)
@@ -216,11 +225,13 @@ public class RegistrationService {
 
         validateOrganizer(session, loginIdentity);
 
-        boolean releasedSeat = registration.getStatus().isSeatOccupying();
+        RegistrationStatus statusBefore = registration.getStatus(); // ★ [f/40] 거절 전 상태 기억
+        boolean releasedSeat = statusBefore.isSeatOccupying();
         registration.reject();
         // 주최자는 Company 라 processedByUser(User 타입)에 넣을 수 없음 → null + 사유에 기업 id 기록
         recordHistory(registration, RegistrationStatus.REJECTED, null,
                 "주최자 반려 (companyId=" + loginIdentity.getId() + ")");
+        publishStatusChanged(registration, statusBefore);   // ★ [f/40] 확정이었다면 커뮤니티 퇴장
 
         if (releasedSeat) {
             session.releaseSeat();
@@ -260,7 +271,7 @@ public class RegistrationService {
             RegistrationStatus promotedStatus = seatStatusFor(session);
             next.promote(promotedStatus);
             recordHistory(next, promotedStatus, null, "선행 대기자 승격"); // 시스템 자동 처리
-            registrationRepository.flush(); // 다음 findFirst 조회에 상태 변경이 반영되도록
+            publishStatusChanged(next, RegistrationStatus.WAITING);       // ★ [f/40] 대기 → 확정 승격: 커뮤니티 입장
         }
     }
 
@@ -457,6 +468,19 @@ public class RegistrationService {
                 .build());
     }
 
+    /**
+     * ★ [f/40] 상태 변경 이벤트 발행 — 상태를 바꾸고 이력을 남긴 '직후'에 호출
+     * 실제 처리(커뮤니티 입장·퇴장)는 트랜잭션 커밋 후 리스너가 한다.
+     */
+    private void publishStatusChanged(Registration registration, RegistrationStatus before) {
+        eventPublisher.publishEvent(new RegistrationStatusChangedEvent(
+                registration.getId(),
+                registration.getUser().getId(),
+                registration.getEventSession().getId(),
+                before,
+                registration.getStatus()));
+    }
+
     private Registration findRegistration(Long registrationId) {
         return registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new Exception404("신청 내역을 찾을 수 없습니다"));
@@ -630,6 +654,10 @@ public class RegistrationService {
                 .refundPolicyText(cancelable && paid > 0 ? RefundPolicy.REGISTRATION_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
                 .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
+                // ★ [f/40] 참가 확정 + 커뮤니티 운영 중(회차 종료일 24시 전)일 때만 입장 주소, 아니면 null → 버튼 숨김
+                .communityUrl(status == RegistrationStatus.CONFIRMED
+                        && CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())  // ★ 한국 시각 기준
+                        ? "/community/" + session.getId() : null)
                 .build();
     }
 
