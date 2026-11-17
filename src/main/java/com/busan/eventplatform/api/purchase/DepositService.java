@@ -2,15 +2,13 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
+import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventStatus;
-import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
-import com.busan.eventplatform.global.error.exception.Exception400;
-import com.busan.eventplatform.global.error.exception.Exception404;
-import com.busan.eventplatform.global.error.exception.NotApproveException;
+import com.busan.eventplatform.global.error.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +40,13 @@ public class DepositService {
 
         // 4. 통과되면 결제 진행.
         Company company = companyRepository.LockFindById(companyId).orElseThrow(() -> new Exception404("존재하지 않는 기업세션입니다"));
+
+        // 기업 재심사·보완·정지 상태에서는 보증금 결제 및 행사 공개 차단
+        if (company.getStatus() != CompanyStatus.APPROVED) {
+            throw new Exception403(
+                    "기업 승인 완료 후 보증금을 결제할 수 있습니다."
+            );
+        }
 
         Deposit deposit = Deposit.builder()
                 .company(company)
