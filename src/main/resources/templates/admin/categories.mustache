@@ -1,0 +1,33 @@
+{{#categoryError}}<p class="admin-company-warning" role="alert">{{categoryError}}</p>{{/categoryError}}
+<section class="admin-panel">
+    <div class="admin-panel-heading"><h2>카테고리 등록</h2></div>
+    <form action="/admin/categories" method="post" class="admin-member-search">
+        <label for="category-name">카테고리 이름</label>
+        <input id="category-name" name="name" maxlength="100" required placeholder="예: 문화·예술">
+        <button type="submit">등록</button>
+    </form>
+</section>
+<section class="admin-panel admin-history">
+    <div class="admin-panel-heading"><h2>카테고리 목록</h2></div>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <caption class="admin-sr-only">카테고리 이름 수정 및 삭제</caption>
+        <thead><tr><th scope="col">번호</th><th scope="col">이름 수정</th><th scope="col">삭제</th></tr></thead>
+        <tbody>
+        {{#categoryList}}
+        <tr>
+            <td>{{id}}</td>
+            <td><form action="/admin/categories/update/{{id}}" method="post" class="admin-category-edit">
+                <label class="admin-sr-only" for="category-name-{{id}}">카테고리 이름</label>
+                <input id="category-name-{{id}}" name="name" value="{{name}}" maxlength="100" required>
+                <button type="submit" class="admin-status-button admin-status-button-activate">저장</button>
+            </form></td>
+            <td><form action="/admin/categories/delete/{{id}}" method="post" class="admin-status-form" onsubmit="return confirm('이 카테고리를 삭제하시겠습니까?')">
+                <button type="submit" class="admin-status-button admin-status-button-danger">삭제</button>
+            </form></td>
+        </tr>
+        {{/categoryList}}
+        {{^categoryList}}<tr><td colspan="3" class="admin-member-empty">등록된 카테고리가 없습니다.</td></tr>{{/categoryList}}
+        </tbody>
+    </table></div>
+    <p class="admin-company-note">행사에 사용 중인 카테고리는 삭제할 수 없습니다.</p>
+</section>

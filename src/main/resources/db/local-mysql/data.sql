@@ -164,13 +164,13 @@ INSERT INTO deposit_tb (id, company_id, event_session_id, status, amount, paid_a
 
 
 -- 08 개인/기업 충전
-INSERT INTO payment_tb (id, user_id, company_id, status, amount, paid_at, payment_id) VALUES
-                                                                                          (36001, 36021, NULL, 'READY', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_READY'),
-                                                                                          (36002, 36022, NULL, 'PAID', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_PAID'),
-                                                                                          (36003, 36023, NULL, 'CANCELED', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_CANCELED'),
-                                                                                          (36004, NULL, 36001, 'READY', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_READY'),
-                                                                                          (36005, NULL, 36002, 'PAID', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_PAID'),
-                                                                                          (36006, NULL, 36003, 'CANCELED', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_CANCELED');
+INSERT INTO payment_tb (id, user_id, company_id, status, amount, paid_at, payment_id, type_status) VALUES
+      (36001, 36021, NULL, 'READY',    100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_READY',       'NAVER'),
+      (36002, 36022, NULL, 'PAID',     100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_PAID',        'NAVER'),
+      (36003, 36023, NULL, 'CANCELED', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_USER_CANCELED',    'NAVER'),
+      (36004, NULL, 36001, 'READY',    100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_READY',    'NAVER'),
+      (36005, NULL, 36002, 'PAID',     100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_PAID',     'NAVER'),
+      (36006, NULL, 36003, 'CANCELED', 100000, TIMESTAMPADD(HOUR, -480, CURRENT_TIMESTAMP), 'SEED36_MOCK_COMPANY_CANCELED', 'NAVER');
 
 
 -- 09 개인 참가비 구매

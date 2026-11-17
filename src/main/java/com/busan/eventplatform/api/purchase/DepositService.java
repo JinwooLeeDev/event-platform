@@ -57,6 +57,7 @@ public class DepositService {
 
         // 5. '최종확정'으로 상태 변경 후 보증금 결제 DB 반영.
         deposit.setDepositPaid();
+        depositRepository.save(deposit);
 
         // eventId에 해당하는 세션을 찾고 이 세션이 deposit에서 결제된 상태인지 아닌지 count. --> 이 count가 0이라면 결제되지 않은 세션이 없다는 뜻. -> 전부 결제됨.
         if(eventSessionRepository.countNotPaidSession(event.getId() , DepositStatus.PAID) == 0){
@@ -64,6 +65,5 @@ public class DepositService {
             event.setPublishedAt(LocalDateTime.now()); // 확정 시간 저장.
         }
 
-        depositRepository.save(deposit);
     }
 }

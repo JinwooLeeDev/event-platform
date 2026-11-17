@@ -43,13 +43,18 @@ public class Payment {
     @Column(unique = true , nullable = false)
     private String paymentId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentTypeStatus typeStatus;
+
     @Builder
-    public Payment(User user , Company company , int amount , String paymentId) {
+    public Payment(User user , Company company , int amount , String paymentId , PaymentTypeStatus typeStatus) {
         this.company = company;
         this.user = user;
         this.status = PaymentStatus.READY;
         this.amount = amount;
         this.paymentId = paymentId;
+        this.typeStatus = typeStatus;
     }
 
     // 받은 유저가 현재 세션의 유저와 같은지?

@@ -34,6 +34,7 @@ public class EventCategoryService {
 
 
     // 기존 카테고리 이름 수정 (관리자용)
+    @Transactional
     public EventCategory update(Long id, EventCategoryRequest.UpdateDto updateDto) {
         EventCategory eventCategory = eventCategoryRepository.findById(id)
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
@@ -50,6 +51,7 @@ public class EventCategoryService {
     }
 
     // 기존 카테고리 삭제 (관리자용)
+    @Transactional
     public void delete(Long id) {
         EventCategory eventCategory = eventCategoryRepository.findById(id)
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));

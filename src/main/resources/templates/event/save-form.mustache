@@ -19,16 +19,11 @@
                 <a href="/events">← 내 행사 목록으로</a>
             </div>
 
-            <section class="event-save-header">
-                <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
-                <h1>행사 주최 신청</h1>
-                <p>부산에서 함께할 새로운 경험을 소개해 주세요.<br>행사 정보와 일정을 작성하면 관리자 심사를 위해 접수됩니다.</p>
-                <div class="event-save-guide">
-                    <span>01 기본 정보</span>
-                    <span>02 일정 및 참가비</span>
-                    <span>03 대표 이미지</span>
-                </div>
-            </section>
+        <section class="event-save-header">
+            <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
+            <h1>행사 주최 신청</h1>
+            <p>부산에서 함께할 새로운 경험을 소개해 주세요.<br>행사 정보와 일정을 작성하면 관리자 심사를 위해 접수됩니다.</p>
+        </section>
 
             <form action="/events/save"
                   method="post"
@@ -36,12 +31,12 @@
                   class="event-save-form"
                   id="event-save-form">
 
-                <!-- 행사 기본 정보 -->
-                <section class="event-save-section">
-                    <h2><span class="event-section-number">01</span>행사 기본 정보</h2>
-                    <p class="section-description">
-                        행사에 대한 기본 정보를 입력해 주세요.
-                    </p>
+            <!-- 행사 기본 정보 -->
+            <section class="event-save-section">
+                <h2><span class="event-section-number">01 </span>행사 기본 정보</h2>
+                <p class="section-description">
+                    행사에 대한 기본 정보를 입력해 주세요.
+                </p>
 
                     <div class="form-group">
                         <label>행사 카테고리 <span>*</span></label>
@@ -77,12 +72,13 @@
                     </div>
                 </section>
 
-                <!-- 행사 일정 -->
-                <section class="event-save-section">
-                    <h2><span class="event-section-number">02</span>행사 일정</h2>
-                    <p class="section-description">
-                        회차별로 운영하는 행사인지 선택해 주세요.
-                    </p>
+
+            <!-- 행사 일정 -->
+            <section class="event-save-section">
+                <h2><span class="event-section-number">02 </span>행사 일정</h2>
+                <p class="section-description">
+                    회차별로 운영하는 행사인지 선택해 주세요.
+                </p>
 
                     <div class="form-group">
                         <label>회차가 있나요? <span>*</span></label>
@@ -186,12 +182,13 @@
                     </div>
                 </section>
 
-                <!-- 대표 이미지 -->
-                <section class="event-save-section">
-                    <h2><span class="event-section-number">03</span>대표 이미지</h2>
-                    <p class="section-description">
-                        행사를 대표하는 포스터 이미지를 등록해 주세요.
-                    </p>
+
+            <!-- 대표 이미지 -->
+            <section class="event-save-section">
+                <h2><span class="event-section-number">03 </span>대표 이미지</h2>
+                <p class="section-description">
+                    행사를 대표하는 포스터 이미지를 등록해 주세요.
+                </p>
 
                     <div class="form-group">
                         <label>대표 이미지 <span>*</span></label>
@@ -218,8 +215,10 @@
     </div>
 </main>
 
+
 <!-- 회차 입력 템플릿 -->
 <template id="session-template">
+
     <div class="session-item">
 
         <div class="session-item-header">
@@ -232,6 +231,7 @@
             <input type="text" data-field="name"
                    placeholder="예: 1회차" required>
         </div>
+
 
         <!-- 행사 시작 -->
         <div class="date-time-group">
