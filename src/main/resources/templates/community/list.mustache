@@ -26,7 +26,8 @@
         <div class="mb-4">
             <div class="community-eyebrow mb-2">BUSAN PLAY · COMMUNITY</div>
             <h1 class="h3 fw-bold">내 커뮤니티</h1>
-            <p class="text-secondary mb-0">참가가 확정된 회차의 참가자들과 이야기를 나눌 수 있어요. 커뮤니티는 회차 종료일 24시에 닫힙니다.</p>
+            {{#host}}<p class="text-secondary mb-0">주최한 행사의 운영 중인 회차 커뮤니티입니다. 참여자를 확인하고 공지를 등록할 수 있어요. 커뮤니티는 회차 종료일 24시에 닫힙니다.</p>{{/host}}
+            {{^host}}<p class="text-secondary mb-0">참가가 확정된 회차의 참가자들과 이야기를 나눌 수 있어요. 커뮤니티는 회차 종료일 24시에 닫힙니다.</p>{{/host}}
         </div>
 
         {{#communities}}
@@ -42,8 +43,9 @@
         {{#empty}}
             <div class="community-item text-center p-5">
                 <h2 class="h5 fw-bold">입장할 수 있는 커뮤니티가 없습니다.</h2>
-                <p class="text-secondary mb-3">행사 참가가 확정되면 해당 회차의 커뮤니티에 자동으로 입장됩니다.</p>
-                <a class="btn btn-outline-primary" href="/myhistory">내 행사 보기</a>
+                {{#host}}<p class="text-secondary mb-3">운영 중인 회차가 없습니다. 행사가 공개되고 회차가 진행 예정이면 이곳에 표시됩니다.</p>{{/host}}
+                {{^host}}<p class="text-secondary mb-3">행사 참가가 확정되면 해당 회차의 커뮤니티에 자동으로 입장됩니다.</p>
+                    <a class="btn btn-outline-primary" href="/myhistory">내 행사 보기</a>{{/host}}
             </div>
         {{/empty}}
     </div>

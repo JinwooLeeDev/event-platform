@@ -26,18 +26,18 @@ public class CommunityNotifier {
     private final UserRepository userRepository;           // ★ 닉네임 조회용
 
     public void notifyJoined(Long sessionId, Long userId) {
-        messagingTemplate.convertAndSend(topic(sessionId),
-                CommunityMessage.system(CommunityMessage.Type.JOIN, sessionId, userId,
-                        nameOf(userId) + "님이 입장했습니다."));                         // ★ 닉네임 표시
-        messagingTemplate.convertAndSendToUser(String.valueOf(userId), USER_QUEUE,
+        String name = nameOf(userId);
+        messagingTemplate.convertAndSend(topic(sessionId),                                // ★ [6단계] 참여자 목록 갱신용 닉네임 포함
+                CommunityMessage.member(CommunityMessage.Type.JOIN, sessionId, userId, name, name + "님이 입장했습니다."));
+        messagingTemplate.convertAndSendToUser(CommunityViewer.userKey(userId), USER_QUEUE, // ★ [6단계] "user:{id}"
                 CommunityMessage.system(CommunityMessage.Type.JOINED, sessionId, userId, "참가가 확정되어 커뮤니티에 입장했습니다."));
     }
 
     public void notifyLeft(Long sessionId, Long userId, CommunityLeaveReason reason) {
-        messagingTemplate.convertAndSend(topic(sessionId),
-                CommunityMessage.system(CommunityMessage.Type.LEAVE, sessionId, userId,
-                        nameOf(userId) + "님이 퇴장했습니다."));                         // ★ 닉네임 표시 (사유는 넣지 않음)
-        messagingTemplate.convertAndSendToUser(String.valueOf(userId), USER_QUEUE,
+        String name = nameOf(userId);
+        messagingTemplate.convertAndSend(topic(sessionId),                                // 사유는 넣지 않음
+                CommunityMessage.member(CommunityMessage.Type.LEAVE, sessionId, userId, name, name + "님이 퇴장했습니다."));
+        messagingTemplate.convertAndSendToUser(CommunityViewer.userKey(userId), USER_QUEUE, // ★ [6단계] "user:{id}"
                 CommunityMessage.system(CommunityMessage.Type.KICKED, sessionId, userId,
                         reason.getDescription() + "(으)로 커뮤니티에서 퇴장되었습니다."));
     }

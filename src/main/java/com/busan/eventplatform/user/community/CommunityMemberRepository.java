@@ -1,5 +1,7 @@
 package com.busan.eventplatform.user.community;
 
+import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.event_session.EventSessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,6 +40,26 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
             "where m.leftAt is null and m.eventSession.endsAt >= :dayStart and m.eventSession.endsAt < :nextDayStart")
     List<Long> findOpenSessionIdsEndingBetween(@Param("dayStart") LocalDateTime dayStart,
                                                @Param("nextDayStart") LocalDateTime nextDayStart);
+
+    /** ★ [6단계] 방의 활성 멤버(참여자 목록) — 닉네임을 같이 가져와 N+1 방지, 먼저 들어온 순 */
+    @Query("select m from CommunityMember m join fetch m.user " +
+            "where m.eventSession.id = :sessionId and m.leftAt is null order by m.joinedAt")
+    List<CommunityMember> findActiveWithUser(@Param("sessionId") Long sessionId);
+
+    /**
+     * ★ [6단계] 이 기업이 주최한 회차라면 그 회차의 종료 시각 (아니면 빈 값)
+     * 주최 기업의 STOMP 구독·전송 권한 — '주최 여부 + 종료 시각'을 쿼리 1번으로 (EventSession.isOwner 와 같은 기준)
+     * (행사 파트 Repository 를 수정하지 않기 위해 커뮤니티 Repository 에 둔다)
+     */
+    @Query("select s.endsAt from EventSession s where s.id = :sessionId and s.event.company.id = :companyId")
+    Optional<LocalDateTime> findOwnedSessionEndsAt(@Param("sessionId") Long sessionId,
+                                                   @Param("companyId") Long companyId);
+
+    /** ★ [6단계] 기업용 "내 커뮤니티" — 이 기업이 주최한 회차 (취소된 회차 제외, 시작 순) */
+    @Query("select s from EventSession s join fetch s.event e " +
+            "where e.company.id = :companyId and s.status <> :excluded order by s.startsAt")
+    List<EventSession> findSessionsOwnedBy(@Param("companyId") Long companyId,
+                                           @Param("excluded") EventSessionStatus excluded);
 
     /** ★ [5단계] 방 전체 멤버 비활성 (CLOSED) — 행은 남김 (Q11) */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
