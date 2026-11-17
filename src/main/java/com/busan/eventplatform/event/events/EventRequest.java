@@ -100,6 +100,7 @@ public class EventRequest {
     // 행사 수정
     @Data
     public static class UpdateDto {
+        private List<EventSessionRequest.UpdateDto> sessions;
         private String title;
         private String summary;
         private String description;

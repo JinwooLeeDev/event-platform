@@ -137,6 +137,22 @@
                            required>
                 </p>
 
+                <div class="auth-field">
+                    <button id="checkBusinessButton"
+                            class="auth-button secondary"
+                            type="button"
+                            aria-describedby="businessVerificationMessage">
+                        사업자 정보 검증
+                    </button>
+
+                    <p id="businessVerificationMessage"
+                       class="auth-message"
+                       role="status"
+                       aria-live="polite">
+                        사업자등록번호·대표자명·개업일자를 입력한 후 검증해주세요.
+                    </p>
+                </div>
+
                 <p>
                     <label for="address">기업 주소</label><br>
                     <input id="address"
@@ -289,22 +305,168 @@
     let verifiedEmail = null;
     let busy = false;
 
+    // 사업자 검증에 사용하는 입력 요소
+    const businessNumberInput = document.getElementById("businessNumber");
+    const representativeNameInput = document.getElementById("representativeName");
+    const openedOnInput = document.getElementById("openedOn");
+    const businessCheckButton = document.getElementById("checkBusinessButton");
+    const businessMessage = document.getElementById("businessVerificationMessage");
+
+    // 검증 성공 당시 정보와 화면 기준 유효시간
+    let verifiedBusiness = null;
+    let businessVerifiedUntil = 0;
+
+    // 회원가입 중복 제출 방지
+    let submitting = false;
+
+    // 서버에 전달할 사업자 정보
+    function currentBusinessInfo() {
+        return {
+            businessNumber: businessNumberInput.value,
+            representativeName: representativeNameInput.value.trim(),
+            openedOn: openedOnInput.value
+        };
+    }
+
+    // 검증 당시와 현재 정보가 같고, 유효시간이 남았는지 확인
+    function isBusinessVerified() {
+        return verifiedBusiness !== null
+            && verifiedBusiness === JSON.stringify(currentBusinessInfo())
+            && Date.now() < businessVerifiedUntil;
+    }
+
+    // 화면의 검증 성공 상태 초기화
+    function resetBusinessVerification() {
+        verifiedBusiness = null;
+        businessVerifiedUntil = 0;
+        businessMessage.textContent =
+            "사업자 정보 검증을 진행해주세요.";
+        businessMessage.removeAttribute("data-state");
+    }
+
     function updateButtons() {
-        // 발송 후 이메일이 잠기면 같은 위치에 다시 입력 버튼 표시
         const emailLocked = email.readOnly;
+        const blocked = busy || submitting;
 
         sendButton.hidden = emailLocked;
         changeButton.hidden = !emailLocked;
 
-        sendButton.disabled = busy || verifiedEmail !== null;
-        changeButton.disabled = busy;
+        sendButton.disabled = blocked || verifiedEmail !== null;
+        changeButton.disabled = blocked;
 
         confirmButton.disabled =
-            busy || verifiedEmail !== null || !emailLocked;
+            blocked || verifiedEmail !== null || !emailLocked;
+
+        // 재검증할 수 있도록 성공 후에도 버튼은 유지
+        businessCheckButton.disabled = blocked;
 
         joinButton.disabled =
-            busy || verifiedEmail !== email.value;
+            blocked
+            || verifiedEmail !== email.value
+            || !isBusinessVerified();
     }
+
+    // 사업자 정보가 바뀌면 기존 성공 상태 초기화
+    [
+        businessNumberInput,
+        representativeNameInput,
+        openedOnInput
+    ].forEach(input => {
+        input.addEventListener("input", () => {
+            resetBusinessVerification();
+            updateButtons();
+        });
+
+        input.addEventListener("change", () => {
+            resetBusinessVerification();
+            updateButtons();
+        });
+    });
+
+    // 사업자 검증 버튼
+    businessCheckButton.addEventListener("click", async () => {
+        if (busy || submitting) {
+            return;
+        }
+
+        // 이전 성공 결과를 먼저 무효화
+        resetBusinessVerification();
+
+        const inputs = [
+            businessNumberInput,
+            representativeNameInput,
+            openedOnInput
+        ];
+
+        // 이메일·파일 등 다른 필드는 검사하지 않고 사업자 정보만 검사
+        for (const input of inputs) {
+            if (!input.reportValidity()) {
+                updateButtons();
+                return;
+            }
+        }
+
+        const request = currentBusinessInfo();
+
+        if (!request.representativeName) {
+            businessMessage.textContent = "대표자명을 입력해주세요.";
+            businessMessage.dataset.state = "error";
+            representativeNameInput.focus();
+            updateButtons();
+            return;
+        }
+
+        const requestedInfo = JSON.stringify(request);
+
+        // 응답 도착 시간이 아닌 요청 시작 시각 기준으로 보수적으로 계산
+        const requestedAt = Date.now();
+
+        busy = true;
+
+        // 검증 중에는 검사 대상 정보를 수정하지 못하게 함
+        inputs.forEach(input => {
+            input.readOnly = true;
+        });
+
+        businessMessage.textContent = "사업자 정보를 확인하고 있습니다.";
+        updateButtons();
+
+        try {
+            const data = await requestVerification(
+                "/api/v1/business-verifications",
+                request
+            );
+
+            // 요청 도중 값이 변경됐다면 이전 응답을 사용하지 않음
+            if (requestedInfo !== JSON.stringify(currentBusinessInfo())) {
+                resetBusinessVerification();
+                businessMessage.textContent =
+                    "사업자 정보가 변경되었습니다. 다시 검증해주세요.";
+                return;
+            }
+
+            businessMessage.textContent = data.message;
+
+            if (data.status === "MATCHED") {
+                verifiedBusiness = requestedInfo;
+                businessVerifiedUntil = requestedAt + 10 * 60 * 1000;
+                businessMessage.dataset.state = "success";
+            } else {
+                // MISMATCHED, ERROR 등은 가입 허용하지 않음
+                businessMessage.dataset.state = "error";
+            }
+        } catch (error) {
+            businessMessage.textContent = error.message;
+            businessMessage.dataset.state = "error";
+        } finally {
+            inputs.forEach(input => {
+                input.readOnly = false;
+            });
+
+            busy = false;
+            updateButtons();
+        }
+    });
 
     async function requestVerification(url, body) {
         const response = await fetch(url, {
@@ -327,7 +489,7 @@
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || "이메일 인증 요청에 실패했습니다.");
+            throw new Error(data.message || "인증 요청에 실패했습니다.");
         }
 
         return data;
@@ -408,6 +570,25 @@
     form.addEventListener("submit", (event) => {
         formMessage.textContent = "";
 
+            if (busy || submitting) {
+            event.preventDefault();
+            return;
+        }
+
+        if (!isBusinessVerified()) {
+            event.preventDefault();
+
+            resetBusinessVerification();
+            businessMessage.textContent =
+                "사업자 검증이 필요하거나 유효시간이 지났습니다. 다시 검증해주세요.";
+            businessMessage.dataset.state = "error";
+            formMessage.textContent = businessMessage.textContent;
+
+            updateButtons();
+            businessCheckButton.focus();
+            return;
+        }
+
         if (!verifiedEmail || verifiedEmail !== email.value) {
             event.preventDefault();
             formMessage.textContent = "가입 이메일 인증을 완료해주세요.";
@@ -442,7 +623,8 @@
             return;
         }
 
-        joinButton.disabled = true;
+        submitting = true;
+        updateButtons();
     });
 
     function checkPasswordMatch() {
@@ -467,6 +649,8 @@
 
     // 가입 실패 후 뒤로 돌아왔을 때 버튼과 비밀번호 안내 복원
     window.addEventListener("pageshow", () => {
+        submitting = false;
+        resetBusinessVerification();
         updateButtons();
         checkPasswordMatch();
     });

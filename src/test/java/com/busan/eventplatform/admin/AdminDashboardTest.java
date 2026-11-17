@@ -29,7 +29,7 @@ class AdminDashboardTest {
         }).toList();
         when(service.findReviewTargets(1L)).thenReturn(targets);
         var model = new ExtendedModelMap();
-        var controller = new AdminController(service);
+        var controller = new AdminController(service, org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class));
         var admin = SessionUserDto.builder().id(1L).role(Role.ADMIN).build();
         assertEquals("admin/page", controller.dashboard(admin, model));
         assertEquals(8, model.get("companyReviewCount"));

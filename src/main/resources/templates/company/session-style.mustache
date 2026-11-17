@@ -1,0 +1,30 @@
+<style>
+.session-page { padding:40px 24px 60px; background:#f8f9fb; color:#292f3d; font-family:'Pretendard',sans-serif; }
+.session-page h1 { margin:12px 0; font-size:30px; letter-spacing:-.8px; overflow-wrap:anywhere; }
+.session-page .account-content a:not(.session-choice-link) { color:#0750d8; text-underline-offset:3px; }
+.session-muted { color:#72757e; font-size:14px; line-height:1.8; }
+.session-panel { margin-top:24px; padding:26px; background:white; border:1px solid #e6e7eb; border-radius:16px; }
+.session-panel h2 { margin:0 0 16px; font-size:19px; }
+.session-panel h3 { margin:0 0 10px; font-size:17px; }
+.session-choice-link { display:block; color:#292f3d; text-decoration:none; }
+.session-choice-link:hover { border-color:#0750d8; }
+.session-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 24px; margin:0; }
+.session-facts dt { color:#72757e; font-size:12px; }
+.session-facts dd { margin:5px 0 0; overflow-wrap:anywhere; }
+.session-tools { display:flex; flex-wrap:wrap; gap:12px; align-items:end; }
+.session-tools label { display:grid; gap:7px; font-size:13px; }
+.session-tools input,.session-tools select,.session-tools button { padding:11px 14px; border:1px solid #d9dbe1; border-radius:9px; background:white; color:#292f3d; font:inherit; max-width:100%; }
+.session-tools button { background:#0750d8; color:white; border-color:#0750d8; cursor:pointer; }
+.session-tools button:disabled { opacity:.6; cursor:wait; }
+.session-create-form > label { flex:1 1 240px; }
+.session-create-form .session-wide { flex-basis:100%; }
+.session-page summary { cursor:pointer; color:#0750d8; font-weight:700; }
+.session-delete-button { padding:11px 16px; border:1px solid #edc7ca; border-radius:9px; background:#fff5f5; color:#a93038; font:inherit; cursor:pointer; }
+.session-table-wrap { overflow-x:auto; }
+.session-table { width:100%; border-collapse:collapse; font-size:14px; }
+.session-table th,.session-table td { padding:15px 12px; text-align:left; border-bottom:1px solid #eceef2; overflow-wrap:anywhere; }
+.session-table th { color:#72757e; font-weight:600; white-space:nowrap; }
+.session-page :focus-visible { outline:3px solid #9cbfff; outline-offset:3px; }
+.session-page [hidden] { display:none!important; }
+@media(max-width:650px) { .session-page { padding:28px 16px 40px; } .session-panel { padding:20px; } .session-facts { grid-template-columns:1fr; } .session-page h1 { font-size:25px; } }
+</style>

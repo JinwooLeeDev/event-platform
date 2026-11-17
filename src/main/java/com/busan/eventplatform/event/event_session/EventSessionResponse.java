@@ -22,6 +22,9 @@ public class EventSessionResponse {
     // 회차 한 개 정보
     @Data
     public static class EventSessionDto {
+        public String getCapacityLabel() {
+            return capacity == Integer.MAX_VALUE ? "제한 없음" : capacity + "명";
+        }
         private Long id;
         private String name;
         private LocalDateTime startsAt;

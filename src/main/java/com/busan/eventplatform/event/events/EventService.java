@@ -39,6 +39,7 @@ public class EventService {
     private final RegistrationRepository registrationRepository;
     private final EventSessionService eventSessionService;
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+    private final com.busan.eventplatform.event.event_file.EventFileService eventFileService;
 
     // 행사 등록 기능
     @Transactional
@@ -56,9 +57,6 @@ public class EventService {
 
         if (saveDto.isHasSessions()) {
             for (EventSessionRequest.SaveDto sessionDto : saveDto.getSessions()) {
-
-                sessionDto.setApplyStartAt(saveDto.getApplyStartAt());
-                sessionDto.setApplyEndAt(saveDto.getApplyEndAt());
 
                 eventSessionService.save(event.getId(), companyId, sessionDto);
             }
@@ -174,6 +172,29 @@ public class EventService {
 
     // 보완 요청 - 수정 후 재제출 (수정된 내용 저장, 상태 변경, 메시지 초기화)
     @Transactional
+    public Event updateAndResubmit(Long id, Long companyId, EventRequest.UpdateDto updateDto) {
+        return updateAndResubmit(id, companyId, updateDto, null);
+    }
+
+    @Transactional
+    public Event updateAndResubmit(Long id, Long companyId, EventRequest.UpdateDto updateDto, org.springframework.web.multipart.MultipartFile file) {
+        updateDto.validate();
+        if (updateDto.getSessions() != null) {
+            var ids = new java.util.HashSet<Long>();
+            for (var session : updateDto.getSessions()) {
+                if (session == null || session.getId() == null || !ids.add(session.getId())) throw new Exception400("회차 정보를 확인해주세요.");
+                session.validate();
+                if (!id.equals(eventSessionService.findById(session.getId()).getEventId())) throw new Exception403("다른 행사의 회차는 수정할 수 없습니다.");
+            }
+        }
+        update(id, companyId, updateDto);
+        if (updateDto.getSessions() != null) for (var session : updateDto.getSessions()) eventSessionService.update(session.getId(), session, companyId);
+        Event event = resubmit(id, companyId);
+        if (file != null && !file.isEmpty()) eventFileService.attachFile(id, file);
+        return event;
+    }
+
+    @Transactional
     public Event resubmit(Long id, Long companyId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
@@ -234,13 +255,16 @@ public class EventService {
     // 보완 요청 (관리자 -> 기업)
     @Transactional
     public Event requestFeedback(Long id, String feedbackMessage) {
+        if (feedbackMessage == null || feedbackMessage.isBlank() || feedbackMessage.trim().length() > 1000) {
+            throw new Exception400("보완 요청 사유를 1~1,000자로 입력해주세요.");
+        }
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
         if (!EventStatus.PENDING_REVIEW.equals(event.getStatus())) {
             throw new Exception400("승인 대기 중인 행사만 보완 요청할 수 있습니다.");
         }
         event.setStatus(EventStatus.FEEDBACK_REQUIRED);
-        event.setFeedbackMessage(feedbackMessage);
+        event.setFeedbackMessage(feedbackMessage.trim());
 
         return event;
     }
@@ -269,6 +293,10 @@ public class EventService {
         var byEvent = sessions.stream().collect(Collectors.groupingBy(
                 session -> session.getEvent().getId(),
                 Collectors.mapping(EventResponse.SessionPeriodDto::new, Collectors.toList())));
-        events.forEach(event -> event.setSessionPeriods(byEvent.getOrDefault(event.getId(), List.of())));
+        events.forEach(event -> {
+            var periods = byEvent.getOrDefault(event.getId(), List.of());
+            event.setSessionPeriods(periods);
+            event.setSessionCount(periods.size());
+        });
     }
 }

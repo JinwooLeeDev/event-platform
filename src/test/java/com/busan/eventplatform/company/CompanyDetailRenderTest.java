@@ -17,6 +17,7 @@ class CompanyDetailRenderTest {
         var company = Company.builder().name("<script>기업</script>").email("company@example.test")
                 .businessNumber("0000000001").representativeName("대표")
                 .address("부산").contactPersonName("담당자").contactPersonPhone("010-0000-0001").status(status).build();
+        company.chargePoint(350000);
         var compiler = Mustache.compiler().withLoader(name -> new InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), StandardCharsets.UTF_8));
         try (var reader = new InputStreamReader(getClass().getResourceAsStream("/templates/company/detail.mustache"), StandardCharsets.UTF_8)) {
@@ -24,6 +25,8 @@ class CompanyDetailRenderTest {
             assertTrue(html.contains("&lt;script&gt;기업&lt;/script&gt;"));
             assertTrue(html.contains("company@example.test"));
             assertTrue(html.contains("href=\"/company/update\""));
+            assertTrue(html.contains("350,000 P"));
+            assertTrue(html.contains("href=\"/charge\""));
             assertFalse(html.contains("/admin/companies/"));
             assertFalse(html.contains("correctionDialog"));
             assertFalse(html.contains("기업 승인"));

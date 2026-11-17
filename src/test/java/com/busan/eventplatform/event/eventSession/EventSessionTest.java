@@ -131,11 +131,15 @@ class EventSessionTest {
         EventSession session = createSession(30, 10);
 
         EventSessionRequest.UpdateDto dto = createUpdateDto(40);
+        dto.setApplyStartAt(LocalDateTime.of(2026, 11, 20, 9, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2026, 11, 30, 18, 0));
 
         session.update(dto);
 
         assertEquals(40, session.getCapacity());
         assertEquals("수정된 회차", session.getName());
+        assertEquals(dto.getApplyStartAt(), session.getApplyStartAt());
+        assertEquals(dto.getApplyEndAt(), session.getApplyEndAt());
     }
 
     @Test
@@ -165,6 +169,8 @@ class EventSessionTest {
         dto.setName("수정된 회차");
         dto.setCapacity(capacity);
         dto.setStartsAt(LocalDateTime.of(2026, 12, 2, 10, 0));
+        dto.setApplyStartAt(LocalDateTime.of(2026, 11, 20, 9, 0));
+        dto.setApplyEndAt(LocalDateTime.of(2026, 11, 30, 18, 0));
         dto.setEndsAt(LocalDateTime.of(2026, 12, 2, 18, 0));
         dto.setHoldDurationSeconds(300);
         dto.setPricingType("FREE");

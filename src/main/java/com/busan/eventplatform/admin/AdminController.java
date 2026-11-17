@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminController {
     private final CompanyReviewService companyReviewService;
+    private final com.busan.eventplatform.event.events.EventRepository eventRepository;
     @GetMapping({"/admin", "/admin/"})
     public String index() {
         return "redirect:/admin/dashboard";
@@ -22,13 +23,9 @@ public class AdminController {
     public String dashboard(@SessionAttribute(LoginSession.USER) SessionUserDto admin, Model model) {
         var companies = companyReviewService.findReviewTargets(admin.getId());
         model.addAttribute("companyReviewCount", companies.size());
+        model.addAttribute("eventReviewCount", eventRepository.countByStatus(com.busan.eventplatform.event.events.EventStatus.PENDING_REVIEW));
         model.addAttribute("companyReviewItems", AdminCompanyView.rows(companies.stream().limit(5).toList()));
         return page(model, "운영 대시보드", "플랫폼 운영 현황과 처리할 업무를 확인하세요.", "dashboard");
-    }
-
-    @GetMapping("/admin/events")
-    public String events(Model model) {
-        return page(model, "행사 관리", "행사 심사와 보완 요청을 관리하는 공간입니다.", "events");
     }
 
     @GetMapping("/admin/sessions")
