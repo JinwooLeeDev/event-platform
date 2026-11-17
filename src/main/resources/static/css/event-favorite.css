@@ -1,0 +1,20 @@
+.event-card { position:relative; }
+.event-favorite-control { position:absolute; top:12px; right:12px; z-index:2; }
+.event-favorite-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-width:62px; min-height:42px; padding:9px 12px; border:1px solid #e6e7eb; border-radius:999px; background:#fff; color:#555c68; font:inherit; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px #292f3d0a; }
+.event-favorite-button svg { fill:none; stroke:currentColor; stroke-width:1.7; flex-shrink:0; }
+.event-favorite-button[aria-pressed="true"] { color:#d23d60; border-color:#f1c5d0; background:#fff5f7; }
+.event-favorite-button[aria-pressed="true"] svg { fill:currentColor; }
+.event-favorite-button:hover { border-color:#d23d60; }
+.event-favorite-button:focus-visible { outline:3px solid #9cbfff; outline-offset:3px; }
+.event-favorite-button:disabled { cursor:wait; opacity:.65; }
+.event-favorite-message { position:absolute; top:100%; right:0; width:220px; margin:7px 0 0; padding:10px 12px; border:1px solid #e6e7eb; border-radius:9px; background:white; color:#a93038; font-size:12px; line-height:1.7; box-shadow:0 3px 12px #292f3d14; }
+.favorites-page { padding:40px 24px 60px; background:#f8f9fb; font-family:'Pretendard',sans-serif; color:#292f3d; }
+.favorites-page h1 { font-size:30px; letter-spacing:-.8px; }
+.favorites-description { color:#72757e; font-size:14px; line-height:1.8; }
+.favorite-item { position:relative; padding:26px 110px 26px 26px; margin-top:18px; background:white; border:1px solid #e6e7eb; border-radius:16px; }
+.favorite-item h2 { margin:10px 0; font-size:20px; overflow-wrap:anywhere; }
+.favorite-item a { color:#292f3d; text-underline-offset:3px; }
+.favorite-item .event-favorite-control { top:24px; right:20px; }
+.favorites-empty { margin-top:24px; padding:32px; border:1px solid #e6e7eb; border-radius:16px; background:white; }
+.favorites-page [hidden] { display:none!important; }
+@media(max-width:650px) { .favorites-page { padding:28px 16px 40px; } .favorite-item { padding:22px 95px 22px 20px; } .favorite-item .event-favorite-control { right:14px; top:20px; } }
