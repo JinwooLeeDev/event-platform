@@ -48,6 +48,10 @@ public class EventService {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
 
+        if (company.getStatus() != CompanyStatus.APPROVED) {
+            throw new Exception403("승인된 기업만 신청할 수 있습니다.");
+        }
+
         EventCategory category = eventCategoryRepository.findById(saveDto.getCategoryId())
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
 
