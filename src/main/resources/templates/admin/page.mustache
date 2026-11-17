@@ -12,8 +12,9 @@
     <div class="admin-workspace">
         {{> admin/layout/header}}
         <main id="admin-main" class="admin-main">
-            <div class="admin-page-heading"><span class="admin-eyebrow">BUSAN PLAY OPERATIONS</span><h1>{{pageTitle}}</h1><p>{{pageDescription}}</p></div>
+            <div class="admin-page-heading"><h1>{{pageTitle}}</h1><p>{{pageDescription}}</p></div>
             {{#dashboardPage}}
+                <div class="admin-section-heading"><h2>확인이 필요한 업무</h2><p>각 항목을 선택하면 해당 관리 화면으로 이동합니다.</p></div>
                 <section class="admin-metrics" aria-label="주요 운영 지표">
                     <a class="admin-card" href="/admin/companies"><span>기업 승인 대기</span><strong>{{companyReviewCount}}</strong><small>사업자 정보 일치·검증 오류 심사 대상</small></a>
                     <a class="admin-card" href="/admin/events"><span>행사 심사 대기</span><strong>{{eventReviewCount}}</strong><small>기업 주최 신청 · 승인 대기</small></a>
@@ -27,9 +28,8 @@
                         {{^companyReviewItems}}<div class="admin-empty"><span class="admin-empty-icon" aria-hidden="true">✓</span><h3>심사 대기 중인 기업이 없습니다.</h3><p>새로운 기업 심사 요청이 접수되면 이곳에 표시됩니다.</p></div>{{/companyReviewItems}}
                         <p class="admin-company-note">최근 가입순으로 최대 5건을 표시합니다.</p>
                     </section>
-                    <section class="admin-panel"><div class="admin-panel-heading"><h2>개최 주의 회차</h2><a href="/admin/sessions">회차 현황 →</a></div><div class="admin-empty"><span class="admin-empty-icon" aria-hidden="true">◷</span><h3>회차 현황 연결 준비 중</h3><p>최소 인원과 개최 일정을 확인해야 할 회차를 안내할 예정입니다.</p></div></section>
+                    <section class="admin-panel"><div class="admin-panel-heading"><h2>운영 업무 바로가기</h2></div><div class="admin-task-links"><a href="/admin/events"><span><strong>행사 심사</strong><small>행사 내용과 회차 정보를 검토합니다.</small></span><span aria-hidden="true">›</span></a><a href="/admin/sessions"><span><strong>회차 현황</strong><small>개최 일정·모집 기간·정원과 점유 인원을 확인합니다.</small></span><span aria-hidden="true">›</span></a><a href="/admin/members"><span><strong>회원 관리</strong><small>회원 정보 조회와 계정 상태 변경을 진행합니다.</small></span><span aria-hidden="true">›</span></a><a href="/admin/categories"><span><strong>카테고리 관리</strong><small>행사 분류를 등록하거나 수정합니다.</small></span><span aria-hidden="true">›</span></a></div></section>
                 </div>
-                <section class="admin-panel admin-history"><div class="admin-panel-heading"><h2>최근 운영 이력</h2><span class="admin-badge">준비 중</span></div><p class="admin-history-message">기업·행사 상태 변경과 관리자 처리 내역을 연결할 예정입니다.</p></section>
             {{/dashboardPage}}
             {{^dashboardPage}}
                 {{#membersPage}}{{> admin/members}}{{/membersPage}}
@@ -53,5 +53,6 @@
         <footer class="admin-footer">Busan Play · 관리자 운영 공간</footer>
     </div>
 </div>
+{{> admin/interaction}}
 </body>
 </html>

@@ -4,26 +4,29 @@
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
-<main class="favorites-page"><div class="account-layout">
-    {{> layout/account-nav}}
-    <section class="account-content" data-favorites-page>
-        <span class="member-eyebrow">BUSAN PLAY · MY PAGE</span><h1>좋아요한 행사</h1>
-        <p class="favorites-description">관심 있는 행사를 모았습니다. 하트를 다시 누르면 목록에서 제외됩니다.</p>
-        <p class="favorites-description" role="status">좋아요한 행사 <strong data-favorite-total>{{favoriteTotal}}</strong>개</p>
-        {{#favorites}}{{#event}}
-        <article class="favorite-item" data-favorite-item>
-            {{#categoryName}}<span class="favorites-description">{{categoryName}}</span>{{/categoryName}}
-            <h2><a href="/event/{{id}}">{{title}}</a></h2>
-            <p class="favorites-description">{{summary}}</p>
-            <p class="favorites-description" data-favorite-event-status>{{status}}</p>
-            {{> layout/favorite-button}}
-        </article>
-        {{/event}}{{/favorites}}
-        <div class="favorites-empty" data-favorites-empty {{#hasFavorites}}hidden{{/hasFavorites}}>
-            <h2>좋아요한 행사가 없습니다.</h2><p class="favorites-description">행사 카드의 하트를 눌러 관심 있는 행사를 모아보세요.</p><a href="/events/list">행사 둘러보기 →</a>
-        </div>
-        <noscript><p class="favorites-description">좋아요를 변경하려면 JavaScript를 활성화해 주세요.</p></noscript>
-    </section>
-</div></main>
+{{> layout/personal-account-style}}
+<main class="personal-account-page favorites-page">
+    <div class="account-layout">
+        {{> layout/account-nav}}
+        <section class="account-content" data-favorites-page>
+            <header class="account-heading"><div><p class="account-location">마이페이지 / 내 활동</p><h1>좋아요한 행사</h1><p class="account-description">다음에 가보고 싶은 부산의 경험을 모아두세요.</p></div><a class="account-button account-button--secondary" href="/events/list">행사 둘러보기 <span aria-hidden="true">↗</span></a></header>
+            <div class="account-result-line favorites-result"><span role="status">저장한 행사 <strong data-favorite-total>{{favoriteTotal}}</strong>개</span><span>하트를 누르면 목록에서 제외됩니다.</span></div>
+            <div class="account-favorites-grid">
+                {{#favorites}}{{#event}}
+                <article class="favorite-item account-favorite-card" data-favorite-item>
+                    <div class="favorite-card-heading"><span class="account-category">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}행사{{/categoryName}}</span><span class="account-event-status" data-favorite-event-status>{{status}}</span></div>
+                    <h2><a href="/event/{{id}}">{{title}}</a></h2>
+                    <p class="favorite-card-summary">{{summary}}</p>
+                    <a class="favorite-card-link" href="/event/{{id}}">일정과 상세 정보 확인 <span aria-hidden="true">↗</span></a>
+                    {{> layout/favorite-button}}
+                </article>
+                {{/event}}{{/favorites}}
+            </div>
+            <div class="account-empty favorites-empty" data-favorites-empty {{#hasFavorites}}hidden{{/hasFavorites}}><span class="account-empty-symbol" aria-hidden="true">♡</span><h2>아직 좋아요한 행사가 없어요.</h2><p>행사 카드의 하트를 눌러 관심 있는 행사를 모아보세요.</p><a class="account-button account-button--secondary" href="/events/list">행사 둘러보기</a></div>
+            <noscript><p class="account-description">좋아요를 변경하려면 JavaScript를 활성화해주세요.</p></noscript>
+        </section>
+    </div>
+</main>
 {{> layout/footer}}
-</body></html>
+</body>
+</html>

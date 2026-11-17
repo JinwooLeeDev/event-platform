@@ -315,23 +315,26 @@ public class RegistrationService {
             throw new RegistrationForbiddenException("개인 회원만 신청 내역을 조회할 수 있습니다");
         }
         LocalDateTime now = LocalDateTime.now();
-        String currentTab = (tab == null || tab.isBlank()) ? "all" : tab;
+        String currentTab = "waiting".equals(tab) || "past".equals(tab) ? tab : "confirmed";
         String currentKeyword = keyword == null ? "" : keyword.trim();
 
         // 1. 내 신청 전체 → 카드 데이터 (요약 카드·탭 개수는 검색과 관계없이 전체 기준)
         List<Registration> registrations = registrationRepository.findAllByUserIdForHistory(loginIdentity.getId());
         Map<Long, Integer> refundAmounts = refundAmountsOf(registrations); // ★ 추가: 결제 id → 실제 환불 금액
         List<RegistrationRes.MyHistoryItemDto> all = registrations.stream()
+                .filter(r -> r.getStatus() == RegistrationStatus.CONFIRMED || r.getStatus() == RegistrationStatus.WAITING)
+                .filter(r -> r.getEventSession().getStatus() != EventSessionStatus.CANCELLED
+                        && r.getEventSession().getEvent().getStatus() != EventStatus.CANCELLED)
                 .map(r -> toHistoryItem(r, now, refundAmounts))            // ★ 변경: 환불 금액 전달
                 .toList();
 
         // 2. 탭 + 행사명 검색 적용
         List<RegistrationRes.MyHistoryItemDto> items = all.stream()
-                .filter(i -> currentTab.equals("all") || currentTab.equals(i.getTab()))
+                .filter(i -> currentTab.equals(i.getTab()))
                 .filter(i -> currentKeyword.isEmpty() || i.getTitle().contains(currentKeyword))
                 .toList();
 
-        int upcoming = countTab(all, "upcoming");
+        int upcoming = countTab(all, "confirmed");
         return RegistrationRes.MyHistoryDto.builder()
                 .totalCount(all.size())
                 .confirmedCount(upcoming)
@@ -575,14 +578,17 @@ public class RegistrationService {
         Event event = session.getEvent();
         RegistrationStatus status = r.getStatus();
         int paid = paidAmountOf(r);
-        boolean cancelable = isCancelable(r, now);
+        boolean ended = session.getStatus() == EventSessionStatus.COMPLETED
+                || event.getStatus() == EventStatus.COMPLETED
+                || (session.getEndsAt() != null && !now.isBefore(session.getEndsAt()));
+        boolean cancelable = !ended && isCancelable(r, now);
 
         //  1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RefundPolicy)
         int expectedRefund = cancelable
                 ? RefundPolicy.forUserCancel(paid, status, now.toLocalDate(), session.getStartsAt().toLocalDate())
                 : 0;
 
-        // 2. 표시 상태 결정 — 우선순위: 거절 > 취소 > 시작됨(행사 종료) > 대기 > 확정
+        // 2. 표시 상태 결정 — 종료 시각·종료 상태를 기준으로 분류 (진행 중은 확정 탭에 유지)
         String tab, label, cssClass, message;
         Integer waitingNumber = null;
         if (status == RegistrationStatus.REJECTED) {
@@ -595,11 +601,11 @@ public class RegistrationService {
             label = "참가 취소";
             cssClass = "status-cancelled";
             message = "참가 신청을 취소했습니다.";
-        } else if (!now.isBefore(session.getStartsAt())) {
+        } else if (ended) {
             tab = "past";
             label = "행사 종료";
             cssClass = "status-ended";
-            message = "회차가 시작되어 더 이상 취소할 수 없습니다.";
+            message = "종료된 회차입니다. 참가한 행사 정보를 확인할 수 있습니다.";
         } else if (status == RegistrationStatus.WAITING) {
             waitingNumber = waitingNumberOf(r);
             tab = "waiting";
@@ -608,10 +614,12 @@ public class RegistrationService {
             message = "대기 " + waitingNumber + "번입니다. 앞선 신청이 취소되면 자동으로 참가 확정됩니다."
                     + (paid > 0 ? " 대기 중에 취소하면 " + point(paid) + "가 전액 환불됩니다." : "");
         } else {
-            tab = "upcoming";
+            tab = "confirmed";
             label = "참가 확정";
             cssClass = "status-confirmed";
-            message = "참가가 확정되었습니다. " + refundGuide(paid, expectedRefund);
+            message = !now.isBefore(session.getStartsAt())
+                    ? "현재 진행 중인 회차입니다."
+                    : "참가가 확정되었습니다. " + refundGuide(paid, expectedRefund);
         }
 
         // 3. 취소 버튼 확인 창 문구 — 환불 예정 금액을 미리 보여줌

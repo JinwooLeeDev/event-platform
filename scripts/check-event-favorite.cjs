@@ -5,8 +5,9 @@ const source = fs.readFileSync('src/main/resources/static/js/event-favorite.js',
 const tick = () => new Promise(setImmediate);
 const response = (favorite, count, status = 200) => ({status, ok:status === 200, json:async()=>({favorite, favoriteCount:count})});
 
-async function scenario(replies, {company = false, favoritePage = false, duplicates = 1, confirm = false} = {}) {
+async function scenario(replies, {company = false, favoritePage = false, duplicates = 1, confirm = false, loginModal = false} = {}) {
     const calls = [], redirects = [], messages = [], items = [];
+    const modalOpens = [];
     const total = {textContent:'1'}, empty = {hidden:true};
     const buttons = Array.from({length:duplicates}, () => {
         const message = {textContent:'',hidden:true}, count = {textContent:'—'};
@@ -21,11 +22,11 @@ async function scenario(replies, {company = false, favoritePage = false, duplica
         querySelector:selector=>selector==='[data-favorite-total]'?total:empty};
     vm.runInNewContext(source, {
         document:{querySelector:()=>favoritePage?page:null,querySelectorAll:selector=>selector==='[data-favorite-event]'?buttons:[]},
-        window:{addEventListener(){}}, location:{assign:url=>redirects.push(url)}, confirm:()=>confirm,
+        window:{addEventListener(){},BusanLogin:loginModal?{open:()=>modalOpens.push(true)}:undefined}, location:{assign:url=>redirects.push(url)}, confirm:()=>confirm,
         fetch:async(url,options)=>{calls.push({url,method:options.method});const reply=replies.shift();if(reply instanceof Error)throw reply;return await reply;}
     });
     await tick();
-    return {buttons,calls,redirects,messages,items,total,empty};
+    return {buttons,calls,redirects,messages,items,total,empty,modalOpens};
 }
 const click = button => button.click({preventDefault(){},stopPropagation(){}});
 
@@ -42,6 +43,8 @@ const click = button => button.click({preventDefault(){},stopPropagation(){}});
     const anonymous = await scenario([response(false,3), response(false,3,401)],{confirm:true});
     await click(anonymous.buttons[0]); assert.deepEqual(anonymous.redirects,['/login']);
     assert.equal(anonymous.buttons[0].attributes['aria-pressed'],'false');
+    const modal = await scenario([response(false,3),response(false,3,401)],{loginModal:true});
+    await click(modal.buttons[0]); assert.equal(modal.modalOpens.length,1); assert.deepEqual(modal.redirects,[]);
     const corporate = await scenario([response(false,3)],{company:true});
     await click(corporate.buttons[0]); assert.equal(corporate.calls.length,1); assert.equal(corporate.messages[0].hidden,false);
 

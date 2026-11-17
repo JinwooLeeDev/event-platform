@@ -59,7 +59,7 @@ public class AdminEventController {
         cancelDto.validate();
         if (cancelDto.getCancellationReason().length() > 255)
             throw new com.busan.eventplatform.global.error.exception.Exception400("취소 사유를 255자 이내로 입력해주세요.");
-        eventService.cancel(id, cancelDto);
+        // eventService.cancel(id, cancelDto);
         redirect.addFlashAttribute("reviewSuccess", "행사를 취소했습니다.");
         return "redirect:/admin/events/" + id;
     }

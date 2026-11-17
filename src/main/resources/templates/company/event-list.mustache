@@ -1,113 +1,102 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    {{> layout/head-meta}}
-    <title>주최 행사 | Busan Play</title>
-</head>
+<head>{{> layout/head-meta}}<title>주최 행사 | Busan Play</title></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
-<style>
-    .company-events-page { padding: 40px 24px 60px; background: #f8f9fb; color: #292f3d; font-family: 'Pretendard',sans-serif; }
-    .company-events-description { color: #72757e; font-size: 14px; line-height: 1.75; }
-    .company-event-card { position: relative; padding: 26px; margin-top: 18px; border: 1px solid #e6e7eb; border-radius: 16px; background: white; }
-    .company-event-manage-link { color: inherit; text-decoration: none; }
-    .company-event-manage-link::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: 16px; }
-    .company-event-manage-link:hover { color: #0750d8; }
-    .company-event-manage-link:focus-visible::after { outline: 3px solid #9cbfff; outline-offset: 3px; }
-    .company-event-card form, .company-event-card [data-event-edit], .company-event-payment a { position: relative; z-index: 2; }
-    .company-event-card h2 { margin: 12px 0; }
-    .company-event-tags { display: flex; gap: 8px; flex-wrap: wrap; }
-    .company-event-tag { padding: 5px 10px; border-radius: 999px; background: #f0ede7; color: #64615a; font-size: 12px; }
-    .company-event-state { background: #eef1f6; color: #4a5e7a; }
-    .company-event-payment { margin-top: 24px; padding: 22px; border: 1px solid #dbe5f6; border-radius: 12px; background: #f4f7fc; }
-    .company-event-payment h3 { margin: 0 0 10px; font-size: 16px; }
-    .company-event-payment p { color: #555c68; font-size: 13px; line-height: 1.8; }
-    .company-event-payment strong { color: #0750d8; }
-    .company-event-payment-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .company-event-pay-button { padding: 12px 20px; border: 0; border-radius: 10px; background: #0750d8; color: white; font: inherit; font-weight: 700; cursor: pointer; }
-    .company-event-pay-button:hover { background: #0642b3; }
-    .company-event-delete-button { margin-top:16px; padding:10px 16px; border:1px solid #edc7ca; border-radius:9px; background:#fff5f5; color:#a93038; font:inherit; cursor:pointer; }
-    .company-event-payment a { color: #0750d8; font-size: 13px; }
-    .company-event-payment :focus-visible { outline: 3px solid #9cbfff; outline-offset: 4px; }
-    .company-event-success { padding: 18px 22px; border-radius: 12px; background: #edf8f2; color: #216943; }
-    .company-event-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin: 22px 0 0; }
-    .company-event-facts dt { font-size: 12px; color: #72757e; }
-    .company-event-facts dd { margin: 5px 0 0; font-size: 14px; overflow-wrap: anywhere; }
-    .company-event-feedback { padding: 14px; margin-top: 20px; border-radius: 10px; background: #f7f0e5; color: #806333; font-size: 13px; }
-    .company-event-placeholder { padding: 22px; border: 1px dashed #d9dbe1; border-radius: 12px; color: #72757e; background: #f5f5f6; line-height: 1.9; }
-    @media(max-width:650px) { .company-events-page { padding: 28px 16px 40px; } .company-event-facts { grid-template-columns: 1fr; } .company-event-card { padding: 22px; } }
-</style>
-<main class="company-events-page">
+{{> company/workspace-style}}
+<main class="company-workspace company-events-page">
     <div class="account-layout">
         {{> layout/company-nav}}
         <section class="account-content" aria-labelledby="company-events-title">
-            <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span>
-            <h1 id="company-events-title">주최 행사</h1>
-            <p class="company-events-description">행사 카드를 선택하면 회차별 운영 정보와 참가자 목록을 확인할 수 있습니다. 회차가 여러 개면 관리할 회차를 먼저 선택해 주세요.</p>
-            {{#successMessage}}<p class="company-event-success" role="status">{{successMessage}}</p>{{/successMessage}}
-            {{#eventList}}
-                {{#eventList}}
-                <article class="company-event-card">
-                    <div class="company-event-tags">
-                        <span class="company-event-tag">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}{categoryName}{{/categoryName}}</span>
-                        <span class="company-event-tag company-event-state" data-company-event-status>{{#status}}{{status}}{{/status}}{{^status}}{status}{{/status}}</span>
-                    </div>
-                    <h2><a class="company-event-manage-link" href="/events/sessions/list/{{id}}">{{#title}}{{title}} - 총 {{sessionCount}}회차 예정{{/title}}{{^title}}{title}{{/title}} <span aria-hidden="true">→</span></a></h2>
-                    <p class="company-events-description">{{#summary}}{{summary}}{{/summary}}{{^summary}}{summary}{{/summary}}</p>
-                    <dl class="company-event-facts">
-                        <div><dt>회차별 모집 기간</dt><dd>{{#sessionPeriods}}<div><strong>{{name}}</strong><br>{{applyStartAt}} ~ {{applyEndAt}}</div>{{/sessionPeriods}}{{^sessionPeriods}}등록된 회차가 없습니다.{{/sessionPeriods}}</dd></div>
-                        <div><dt>등록일</dt><dd>{{#createdAt}}<span data-company-event-date>{{createdAt}}</span>{{/createdAt}}{{^createdAt}}{createdAt}{{/createdAt}}</dd></div>
-                        <div><dt>공개일</dt><dd>{{#publishedAt}}<span data-company-event-date>{{publishedAt}}</span>{{/publishedAt}}{{^publishedAt}}아직 공개되지 않았습니다.{{/publishedAt}}</dd></div>
-                    </dl>
-
-                    <!--   "결제대기" 상태인 행사를 나타내려고 추가.      -->
-                    {{#paidReadyEvent}}
-                        <section class="company-event-payment" aria-label="행사 보증금 결제">
-                            <h3>심사가 승인되었습니다</h3>
-                            <p>보증금을 결제하면 행사가 공개되고 참가자를 모집할 수 있습니다.<br>회차당 150,000 P × {{sessionCount}}회차 · 결제 금액 <strong>{{depositAmountText}} P</strong></p>
-                            <div class="company-event-payment-actions">
-                                {{#sessionPeriods}}
-                                <form action="/event/deposit/{{sessionId}}" method="post" onsubmit="return confirm('행사 보증금 {{depositAmountText}} P를 결제하시겠습니까? 결제 완료 후 행사가 공개됩니다.')">
-                                    <button type="submit" class="company-event-pay-button">보증금 결제하기</button>
-                                </form>
-                                {{/sessionPeriods}}
-                                <a href="/charge">포인트 충전하기 →</a>
-                            </div>
-                            <p>기업 보유 포인트에서 차감됩니다. 잔액이 부족하면 포인트를 충전한 후 다시 결제해 주세요.</p>
-                        </section>
-                    {{/paidReadyEvent}}
-
-                    {{#feedbackMessage}}<div class="company-event-feedback"><strong>보완 요청</strong><br>{{feedbackMessage}}</div>{{/feedbackMessage}}
-                    <p data-event-edit hidden><a class="company-event-pay-button" style="display:inline-block;text-decoration:none" href="/events/update/{{id}}">행사 정보 수정</a></p>
-                    <form action="/events/delete/{{id}}" method="post" data-delete-form data-confirm="행사를 삭제하시겠습니까? 삭제한 행사는 복구할 수 없습니다.">
-                        <button type="submit" class="company-event-delete-button">행사 삭제</button>
-                        <p class="company-event-feedback" data-delete-error role="alert" hidden></p>
-                    </form>
-                </article>
-                {{/eventList}}
-                {{^eventList}}<div class="company-event-card"><h2>등록한 행사가 없습니다.</h2><p class="company-events-description">기업이 등록한 행사가 생기면 이곳에 표시됩니다.</p></div>{{/eventList}}
-            {{/eventList}}
-            {{^eventList}}
-                <div class="company-event-card">
-                    <h2>행사 목록 연결 준비 중</h2>
-                    <p class="company-events-description">실제 데이터가 전달되기 전 화면 구성 예시입니다.</p>
-                    <div class="company-event-placeholder">{title}<br>{summary}<br>카테고리: {categoryName} · 상태: {status}<br>모집 기간: {applyStartAt} ~ {applyEndAt}</div>
+            <header class="company-heading"><div><p class="company-location">기업페이지 / 행사 운영</p><h1 id="company-events-title">주최 행사</h1><p class="company-description">행사 진행 상태를 확인하고 회차와 참가자를 관리하세요.</p></div><a class="company-button" href="/events/save">새 행사 주최 신청 <span aria-hidden="true">+</span></a></header>
+            {{#successMessage}}<p class="company-success" role="status">{{successMessage}}</p>{{/successMessage}}
+            <section class="company-panel company-events-filter" aria-label="주최 행사 검색과 분류">
+                <div class="company-event-tabs" role="tablist" aria-label="행사 진행 단계">
+                    <button id="company-events-published-tab" type="button" role="tab" aria-selected="true" aria-controls="company-events-panel" data-event-tab="published">공개 중 <span data-event-tab-count="published">0</span></button>
+                    <button id="company-events-review-tab" type="button" role="tab" aria-selected="false" aria-controls="company-events-panel" tabindex="-1" data-event-tab="review">승인 대기 <span data-event-tab-count="review">0</span></button>
+                    <button id="company-events-closed-tab" type="button" role="tab" aria-selected="false" aria-controls="company-events-panel" tabindex="-1" data-event-tab="closed">종료·취소 <span data-event-tab-count="closed">0</span></button>
                 </div>
-            {{/eventList}}
-
+                <p class="company-description" id="company-event-tab-description">현재 공개되어 운영 중인 행사입니다.</p>
+                <div class="company-events-toolbar"><label>행사 검색<input id="company-event-search" type="search" placeholder="선택한 탭에서 행사명 검색"></label><label>세부 상태<select id="company-event-filter"><option value="">탭 내 전체 상태</option><option value="PENDING_REVIEW">승인 대기</option><option value="FEEDBACK_REQUIRED">보완 요청</option><option value="PAID_READY">결제 대기</option><option value="PUBLISHED">공개 중</option><option value="COMPLETED">종료</option><option value="CANCELLED">취소</option></select></label></div>
+            </section>
+            <div id="company-events-panel" role="tabpanel" aria-labelledby="company-events-published-tab">
+            <p class="company-result" id="company-event-result" role="status"></p>
+            <div class="company-event-list">
+            {{#eventList}}{{#eventList}}
+                <article class="company-panel company-event-card" data-event-status="{{status}}" data-event-title="{{title}}">
+                    <div class="company-event-heading"><div><span class="company-category">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}행사{{/categoryName}}</span><h2><a class="company-event-manage-link" href="/events/sessions/list/{{id}}">{{title}}</a></h2></div><span class="company-state" data-company-event-status>{{status}}</span></div>
+                    <p class="company-event-summary">{{summary}}</p>
+                    <div class="company-event-meta"><span>등록된 회차 <strong>{{sessionCount}}개</strong></span>{{#createdAt}}<span>등록 <time data-company-event-date>{{createdAt}}</time></span>{{/createdAt}}{{#publishedAt}}<span>공개 <time data-company-event-date>{{publishedAt}}</time></span>{{/publishedAt}}</div>
+                    {{#feedbackMessage}}<div class="company-feedback"><strong>보완 요청을 확인해주세요</strong><p>{{feedbackMessage}}</p><div data-event-edit hidden><a class="company-button company-button--secondary" href="/events/update/{{id}}">행사 정보 수정·재심사</a></div></div>{{/feedbackMessage}}
+                    {{^feedbackMessage}}<div data-event-edit hidden class="company-feedback"><strong>행사 정보 보완이 필요합니다.</strong><p>제출 내용을 확인하고 수정해주세요.</p><a class="company-button company-button--secondary" href="/events/update/{{id}}">행사 정보 수정·재심사</a></div>{{/feedbackMessage}}
+                    {{#paidReadyEvent}}
+                    <section class="company-deposit" aria-label="행사 보증금 결제"><div class="company-deposit-heading"><div><h3>승인 완료 · 보증금 결제</h3><p>기업 보유 포인트로 결제합니다. 결제 후 행사가 공개됩니다.</p></div><span>회차당 <strong>150,000 P</strong></span></div>
+                        <div class="company-deposit-sessions">{{#sessionPeriods}}<div class="company-deposit-row"><div><strong>{{name}}</strong><small>회차 보증금 150,000 P</small></div><form action="/event/deposit/{{sessionId}}" method="post" onsubmit="return confirm('선택한 회차의 행사 보증금 150,000 P를 결제하시겠습니까? 결제 완료 후 행사가 공개됩니다.')"><button type="submit" class="company-button">보증금 결제</button></form></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">결제할 회차가 없습니다. 회차 정보를 먼저 확인해주세요.</p>{{/sessionPeriods}}</div>
+                        <a class="company-text-link" href="/charge">포인트가 부족하다면 충전하기 <span aria-hidden="true">↗</span></a>
+                    </section>
+                    {{/paidReadyEvent}}
+                    <section class="company-operation" aria-label="회차 운영"><div><h3>회차 운영</h3><p>회차별 일정과 모집 현황, 참가자 목록을 확인하세요.</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">회차·참가자 관리</a><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?add=1">회차 추가</a></div></section>
+                    <div class="company-event-secondary"><details class="company-recruitment"><summary>회차별 모집 기간 확인</summary><dl>{{#sessionPeriods}}<div><dt>{{name}}</dt><dd>{{applyStartAt}} ~ {{applyEndAt}}</dd></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">등록된 회차가 없습니다.</p>{{/sessionPeriods}}</dl></details><details class="company-danger"><summary>행사 삭제</summary><p>연결된 회차·신청·결제 이력에 따라 삭제가 제한될 수 있습니다. 삭제한 행사는 복구할 수 없습니다.</p><form action="/events/delete/{{id}}" method="post" data-delete-form data-confirm="행사를 삭제하시겠습니까? 삭제한 행사는 복구할 수 없습니다."><button type="submit" class="company-button company-button--danger">행사 삭제</button><p class="company-error" data-delete-error role="alert" hidden></p></form></details></div>
+                </article>
+            {{/eventList}}{{^eventList}}<div class="company-empty"><h2>첫 행사를 준비해보세요.</h2><p>행사를 등록하면 진행 상태와 회차를 이곳에서 관리할 수 있습니다.</p><a class="company-button company-button--secondary" href="/events/save">행사 주최 신청</a></div>{{/eventList}}{{/eventList}}
+            {{^eventList}}<div class="company-empty"><h2>주최 행사 정보를 확인할 수 없습니다.</h2><p>기업 정보와 로그인 상태를 확인한 뒤 다시 시도해주세요.</p><a class="company-button company-button--secondary" href="/company/detail">기업 정보 확인</a></div>{{/eventList}}
+            </div>
+            <div class="company-empty" id="company-event-filter-empty" hidden><h2>이 탭에 표시할 행사가 없습니다.</h2><p>다른 탭을 선택하거나 검색 조건을 변경해주세요.</p><button class="company-button company-button--secondary" id="company-event-filter-reset" type="button">검색 초기화</button></div>
+            </div>
         </section>
     </div>
 </main>
 {{> layout/footer}}
 <script>
 (() => {
-    const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨',PAID_READY:'결제 대기중'};
+    const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨',PAID_READY:'결제 대기'};
+    const cards = [...document.querySelectorAll('.company-event-card')];
     document.querySelectorAll('[data-company-event-status]').forEach(element => {
         const value = element.textContent.trim(); element.textContent = labels[value] || value;
         element.closest('.company-event-card').querySelector('[data-event-edit]').hidden = value !== 'FEEDBACK_REQUIRED';
     });
     document.querySelectorAll('[data-company-event-date]').forEach(element => { const value = element.textContent.trim(); if(/^\d{4}-\d{2}-\d{2}T/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.'); });
+    const search = document.getElementById('company-event-search'), filter = document.getElementById('company-event-filter');
+    const tabs = [...document.querySelectorAll('[data-event-tab]')];
+    const groups = {published:['PUBLISHED'],review:['PENDING_REVIEW','FEEDBACK_REQUIRED','PAID_READY'],closed:['COMPLETED','CANCELLED']};
+    const descriptions = {published:'현재 공개되어 운영 중인 행사입니다.',review:'심사 중이거나 보완·보증금 결제가 필요한 행사입니다.',closed:'종료되었거나 취소된 행사입니다.'};
+    let currentTab = 'published';
+    Object.entries(groups).forEach(([name, states]) => {
+        document.querySelector(`[data-event-tab-count="${name}"]`).textContent = cards.filter(card => states.includes(card.dataset.eventStatus)).length.toLocaleString('ko-KR');
+    });
+    const update = () => {
+        const keyword = search.value.trim().toLocaleLowerCase('ko-KR');
+        let count = 0;
+        cards.forEach(card => { const visible = groups[currentTab].includes(card.dataset.eventStatus) && (!filter.value || filter.value === card.dataset.eventStatus) && (!keyword || card.dataset.eventTitle.toLocaleLowerCase('ko-KR').includes(keyword)); card.hidden = !visible; if (visible) count++; });
+        document.getElementById('company-event-result').textContent = cards.length ? `조회 결과 ${count}개 · 탭 건수는 검색 전 기준` : '';
+        document.getElementById('company-event-filter-empty').hidden = !cards.length || count > 0;
+    };
+    const selectTab = (tab, focus = false) => {
+        currentTab = tab.dataset.eventTab;
+        filter.value = '';
+        [...filter.options].forEach(option => { option.hidden = Boolean(option.value) && !groups[currentTab].includes(option.value); });
+        tabs.forEach(button => { const selected = button === tab; button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1; });
+        document.getElementById('company-events-panel').setAttribute('aria-labelledby', tab.id);
+        document.getElementById('company-event-tab-description').textContent = descriptions[currentTab];
+        if (focus) tab.focus();
+        update();
+    };
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectTab(tab));
+        tab.addEventListener('keydown', event => {
+            let next;
+            if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+            else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+            else if (event.key === 'Home') next = 0;
+            else if (event.key === 'End') next = tabs.length - 1;
+            else return;
+            event.preventDefault(); selectTab(tabs[next], true);
+        });
+    });
+    search.addEventListener('input', update); filter.addEventListener('change', update);
+    document.getElementById('company-event-filter-reset').addEventListener('click', () => { search.value = ''; filter.value = ''; update(); search.focus(); });
+    selectTab(tabs[0]);
 })();
 </script>
 <script src="/js/company-session.js" defer></script>
