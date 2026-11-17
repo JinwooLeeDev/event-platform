@@ -100,7 +100,7 @@ public class GlobalExceptionHandler {
 
         String html = """
                 <script>
-                    alert('아직 관리자에게 승인받지 못했습니다. 승인 받은 후 다시 결제해주세요');
+                    alert('이미 결제되었거나 아직 관리자에게 승인받지 못했습니다. 다시 확인해주세요.');
                     history.back();
                 </script>
                 """   ;
