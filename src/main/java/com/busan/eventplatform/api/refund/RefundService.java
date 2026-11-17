@@ -57,14 +57,16 @@ public class RefundService {
         int refundAmount = RefundPolicy.forUserCancel(
                 purchase.getPrice() , beforeStatus , LocalDate.now() , registration.getEventSession().getStartsAt().toLocalDate());
 
+        User user = userRepository.LockFindById(userId).orElseThrow(() -> new Exception404("유저를 조회할 수 없습니다"));
+
         // 최종 통과 --> purchase내역의 상태 변경 + refund테이블에 이력 추가 + 유저에게 환불금액 돌려주기.
         Refund refund = Refund.builder()
-                .user(registration.getUser())
+                .user(user)
                 .amount(refundAmount)
                 .purchase(purchase)
                 .build();
 
-        registration.getUser().addPoint(refundAmount);
+        user.addPoint(refundAmount);
         refundRepository.save(refund);
         purchase.setPurchaseRefunded();
     }

@@ -5,6 +5,7 @@ import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserRepository;
@@ -33,9 +34,10 @@ public class PaymentService {
 
     // 처음 결제요청시 결제건 생성.
     @Transactional
-    public String createPayment(LoginIdentity loginIdentity, int amount) {
+    public String createPayment(LoginIdentity loginIdentity, int amount , String payType) {
         Payment payment;
         String paymentId = createPaymentId(loginIdentity.getId());
+        PaymentTypeStatus typeStatus = payType.equals(Define.NAVER) ? PaymentTypeStatus.NAVER : PaymentTypeStatus.KAKAO;
 
         if(loginIdentity.isUser()){
             User user = userRepository.findById(loginIdentity.getId())
@@ -45,6 +47,7 @@ public class PaymentService {
                     .user(user)
                     .amount(amount)
                     .paymentId(paymentId)
+                    .typeStatus(typeStatus)
                     .build();
         }
         else if (loginIdentity.isCompany()) {
@@ -55,6 +58,7 @@ public class PaymentService {
                     .company(company)
                     .amount(amount)
                     .paymentId(paymentId)
+                    .typeStatus(typeStatus)
                     .build();
         }
         else {

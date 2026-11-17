@@ -1,5 +1,6 @@
 package com.busan.eventplatform.api.payment;
 
+import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
 import jakarta.servlet.http.HttpSession;
@@ -31,24 +32,28 @@ public class PaymentController {
         return "point/charge-point";
     }
 
+    /// ==================================================naver==================================================
     @PostMapping("/api/naver/payment/prepare")
-    public ResponseEntity<?> prepare(@RequestBody PaymentReq.PrepareDto prepareDto , HttpSession session) {
+    public ResponseEntity<?> naverPrepare(@RequestBody PaymentReq.PrepareDto prepareDto , HttpSession session) {
         prepareDto.validate();
 
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
-        PaymentRes.PrepareDto body = paymentPortOneService.prepare(loginIdentity , prepareDto.getAmount());
+        PaymentRes.PrepareDto body = paymentPortOneService
+                .prepare(loginIdentity , prepareDto.getAmount() , Define.NAVER);
 
         return ResponseEntity.ok(body);
     }
 
     @PostMapping("/api/naver/payment/complete")
-    public ResponseEntity<?> complete(@RequestBody PaymentReq.CompleteDto completeDto , HttpSession session) {
+    public ResponseEntity<?> naverComplete(@RequestBody PaymentReq.CompleteDto completeDto , HttpSession session) {
         completeDto.validate();
 
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
 
-        PaymentRes.CompleteDto result = paymentPortOneService.complete(loginIdentity , completeDto.getPaymentId());
+        PaymentRes.CompleteDto result = paymentPortOneService
+                .complete(loginIdentity , completeDto.getPaymentId() , Define.NAVER);
+
         int currentPoint = paymentService.currentPoint(loginIdentity);
 
         String redirectUrl = loginIdentity.isUser() ? "/mypoint" : "/company/detail";
@@ -56,5 +61,39 @@ public class PaymentController {
         // 포인트 충전시 화면에 실시간으로 충전된 금액까지 포함하여 보여주기위해 "currentPoint"로 전달.
         return ResponseEntity.ok(Map.of("payment" , result , "currentPoint" , currentPoint , "redirectUrl" , redirectUrl));
     }
+
+
+/// ==================================================kakao==================================================
+    @PostMapping("/api/kakao/payment/prepare")
+    public ResponseEntity<?> kakaoPrepare(@RequestBody PaymentReq.PrepareDto prepareDto , HttpSession session) {
+        prepareDto.validate();
+
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        PaymentRes.PrepareDto body = paymentPortOneService
+                .prepare(loginIdentity , prepareDto.getAmount() , Define.KAKAO);
+
+        return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/api/kakao/payment/complete")
+    public ResponseEntity<?> kakaoComplete(@RequestBody PaymentReq.CompleteDto completeDto , HttpSession session) {
+        completeDto.validate();
+
+        LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
+
+        PaymentRes.CompleteDto result = paymentPortOneService
+                .complete(loginIdentity , completeDto.getPaymentId() , Define.KAKAO);
+
+        int currentPoint = paymentService.currentPoint(loginIdentity);
+
+        String redirectUrl = loginIdentity.isUser() ? "/mypoint" : "/company/detail";
+
+        // 포인트 충전시 화면에 실시간으로 충전된 금액까지 포함하여 보여주기위해 "currentPoint"로 전달.
+        return ResponseEntity.ok(Map.of("payment" , result , "currentPoint" , currentPoint , "redirectUrl" , redirectUrl));
+    }
+
+
+
 
 }
