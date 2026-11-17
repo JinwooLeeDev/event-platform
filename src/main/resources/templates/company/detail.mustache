@@ -1,212 +1,24 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    {{> layout/head-meta}}
-    <title>기업 마이페이지</title>
-</head>
+<head>{{> layout/head-meta}}<title>기업페이지 | Busan Play</title></head>
 <body>
-{{>layout/header}}
-{{> layout/company-style}}
+{{> layout/header}}
 {{> layout/account-style}}
-<style>
-    .company-home {
-        padding: 40px 24px 60px;
-        background: #f8f9fb;
-        color: #292f3d;
-        font-family: 'Pretendard', sans-serif;
-    }
-
-    .company-home .company-card {
-        max-width: none;
-        width: 100%;
-        padding: 30px;
-        background: white;
-        border: 1px solid #e6e7eb;
-        border-radius: 18px;
-        box-shadow: 0 3px 16px rgba(30, 35, 45, .025);
-    }
-
-    .company-home .company-card h1 {
-        margin: 0 0 10px;
-    }
-
-    .company-home .company-card h2 {
-        margin: 26px 0 16px;
-        font-size: 24px;
-    }
-
-    .company-home .company-card dl {
-        display: grid;
-        grid-template-columns: 140px minmax(0, 1fr);
-        margin: 0;
-    }
-
-    .company-home .company-card dt, .company-home .company-card dd {
-        margin: 0;
-        padding: 15px 0;
-        border-bottom: 1px solid #ececef;
-        font-size: 14px;
-        line-height: 1.7;
-        overflow-wrap: anywhere;
-    }
-
-    .company-home .company-card dt {
-        color: #72757e;
-        font-weight: 500;
-    }
-
-    .company-home .company-card > p {
-        color: #72757e;
-        font-size: 14px;
-        line-height: 1.75;
-    }
-
-    .company-home .company-note {
-        padding: 18px;
-        border-radius: 12px;
-        background: #f3efe8;
-        color: #64615a;
-        font-size: 13px;
-        line-height: 1.8;
-        margin: 24px 0;
-    }
-
-    .company-home .company-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .company-home .company-link {
-        display: inline-flex;
-        padding: 12px 20px;
-        border: 1px solid #0750d8;
-        border-radius: 10px;
-        background: #0750d8;
-        color: white;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .company-home .company-link.secondary {
-        background: white;
-        color: #555c68;
-        border-color: #d9dbe1;
-    }
-
-    .company-home .company-point-card { margin: 24px 0; padding: 24px; border: 1px solid #e7e1d7; border-radius: 16px; background: #f3efe8; }
-    .company-home .company-point-card h2 { margin: 0 0 12px; font-size: 15px; }
-    .company-home .company-point-balance { display: block; margin-bottom: 12px; font-size: 30px; letter-spacing: -.7px; color: #292f3d; }
-    .company-home .company-point-card p { margin: 0 0 18px; color: #72716e; font-size: 13px; line-height: 1.8; }
-    @media (max-width: 600px) {
-        .company-home {
-            padding: 28px 16px 40px;
-        }
-
-        .company-home .company-card {
-            padding: 22px;
-        }
-
-        .company-home .company-card dl {
-            grid-template-columns: 110px minmax(0, 1fr);
-        }
-    }
-
-    .company-review-feedback {
-        margin: 20px 0;
-        padding: 18px 20px;
-        border: 1px solid #f2c5c5;
-        border-radius: 12px;
-        background: #fff5f5;
-        color: #912626;
-    }
-
-    .company-review-feedback p {
-        margin: 8px 0 0;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        line-height: 1.7;
-    }
-
-</style>
-<main class="company-home">
-    <div class="account-layout">
-        {{> layout/company-nav}}
-        <section class="company-card account-content">
-
-            <span class="member-eyebrow">BUSAN PLAY · PARTNERS</span>
-            <h1>기업 정보</h1>
-            <p>등록된 기업 정보와 심사 상태를 확인하고 관리하세요.</p>
-
-            {{#company}}
-
-                {{#reviewReason}}
-                <div class="company-review-feedback" role="note">
-                    <strong>관리자 보완 요청</strong>
-                    <p>{{reviewReason}}</p>
-                </div>
-                {{/reviewReason}}
-
-                <section class="company-point-card" aria-labelledby="company-point-title">
-                    <h2 id="company-point-title">보유 포인트</h2>
-                    <strong class="company-point-balance">{{pointText}}</strong>
-                    <p>행사 승인 후 보증금 결제에 사용할 수 있는 기업 포인트입니다.</p>
-                    <a class="company-link" href="/charge">포인트 충전하기 →</a>
-                </section>
-                <h2>{{name}}</h2>
-
-                <dl>
-                    <dt>이메일</dt>
-                    <dd>{{email}}</dd>
-
-                    <dt>사업자등록번호</dt>
-                    <dd>{{businessNumber}}</dd>
-
-                    <dt>대표자명</dt>
-                    <dd>{{representativeName}}</dd>
-
-                    <dt>기업 주소</dt>
-                    <dd>{{address}}</dd>
-
-                    <dt>담당자 이름</dt>
-                    <dd>{{contactPersonName}}</dd>
-
-                    <dt>담당자 연락처</dt>
-                    <dd>{{contactPersonPhone}}</dd>
-
-                    <dt>기업 심사 상태</dt>
-                    <dd>
-                        {{#pending}}
-                            <span class="review-badge review-badge--pending">검토 중</span>
-                        {{/pending}}
-
-                        {{#approved}}
-                            <span class="review-badge review-badge--approved">승인</span>
-                        {{/approved}}
-
-                        {{#feedbackNeeded}}
-                            <span class="review-badge review-badge--danger">보완 필요</span>
-                        {{/feedbackNeeded}}
-
-                        {{#rejected}}
-                            <span class="review-badge review-badge--danger">반려</span>
-                        {{/rejected}}
-
-                        {{#suspended}}
-                            <span class="review-badge review-badge--danger">이용 정지</span>
-                        {{/suspended}}
-                    </dd>
-                </dl>
-            {{/company}}
-
-            <div class="company-note">등록된 기업 정보와 담당자 정보를 수정할 수 있습니다.<br>기업 인증 정보를 변경하면 새 사업자등록증 제출과 재심사가 필요합니다.</div>
-            <div class="company-actions"><a class="company-link" href="/company/update">기업 정보 수정</a><a
-                    class="company-link secondary" href="/">메인으로 이동</a></div>
-        </section>
+{{> company/workspace-style}}
+<main class="company-workspace company-home"><div class="account-layout">
+    {{> layout/company-nav}}
+    <div class="account-content">
+        <header class="company-heading"><div><p class="company-location">기업페이지</p><h1>기업의 다음 경험을 준비하세요</h1><p class="company-description">기업 정보와 심사 상태를 확인하고 주최 행사를 관리하세요.</p></div></header>
+        {{#company}}
+        {{#reviewReason}}<div class="company-feedback" role="note"><strong>관리자 보완 요청</strong><p>{{reviewReason}}</p><a class="company-button company-button--secondary" href="/company/update">기업 정보 수정</a></div>{{/reviewReason}}
+        <div class="company-overview"><section class="company-panel company-wallet" aria-labelledby="company-point-title"><span class="company-point-symbol" aria-hidden="true">P</span><h2 id="company-point-title">보유 포인트</h2><strong>{{pointText}}</strong><p>행사 보증금 결제에 사용할 기업 포인트입니다.</p><a class="company-button company-button--secondary" href="/charge">포인트 충전하기 <span aria-hidden="true">+</span></a></section>
+        <section class="company-panel company-quick"><h2>행사 운영 바로가기</h2><a href="/events"><span><strong>주최 행사</strong><small>행사 상태·회차 운영·참가자 관리</small></span><span aria-hidden="true">›</span></a><a href="/events/save"><span><strong>새 행사 주최 신청</strong><small>새로운 행사와 모집 일정을 등록하세요.</small></span><span aria-hidden="true">›</span></a></section></div>
+        <section class="company-panel company-profile"><div class="company-panel-heading"><div><h2>{{name}}</h2><p class="company-description">등록된 기업 정보</p></div><div>{{#pending}}<span class="company-state">검토 중</span>{{/pending}}{{#approved}}<span class="company-state company-state--approved">승인</span>{{/approved}}{{#feedbackNeeded}}<span class="company-state company-state--warning">보완 필요</span>{{/feedbackNeeded}}{{#rejected}}<span class="company-state company-state--danger">반려</span>{{/rejected}}{{#suspended}}<span class="company-state company-state--danger">이용 정지</span>{{/suspended}}</div></div><dl class="company-profile-facts"><div><dt>이메일</dt><dd>{{email}}</dd></div><div><dt>사업자등록번호</dt><dd>{{businessNumber}}</dd></div><div><dt>대표자명</dt><dd>{{representativeName}}</dd></div><div><dt>기업 주소</dt><dd>{{address}}</dd></div></dl><a class="company-button company-button--secondary" href="/company/update">기업 정보 수정</a></section>
+        <section class="company-panel company-profile"><h2>담당자 정보</h2><dl class="company-profile-facts"><div><dt>담당자 이름</dt><dd>{{contactPersonName}}</dd></div><div><dt>담당자 연락처</dt><dd>{{contactPersonPhone}}</dd></div></dl><p class="company-description">기업 인증 정보를 변경하면 새 사업자등록증 제출과 재심사가 필요합니다.</p></section>
+        {{/company}}
+        {{^company}}<div class="company-empty"><h2>기업 정보를 확인할 수 없습니다.</h2><p>로그인 상태를 확인한 뒤 다시 시도해주세요.</p><a class="company-button company-button--secondary" href="/login?type=company">기업회원 로그인</a></div>{{/company}}
     </div>
-</main>
-
-{{>layout/footer}}
+</div></main>
+{{> layout/footer}}
 </body>
 </html>

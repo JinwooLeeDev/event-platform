@@ -1,407 +1,74 @@
-
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>참가 신청·포인트 결제 | Busan Play</title>
+</head>
+<body>
 {{> layout/header}}
-
-<!-- Bootstrap 5.3 -->
-{{> layout/bootstrap}}
-
-<style>
-    .payment-page {
-        background: linear-gradient(#f7faff, #ffffff);
-        min-height: 85vh;
-        color: #1a2340;
-    }
-
-    .payment-container {
-        max-width: 1080px;
-    }
-
-    .payment-card {
-        border: 1px solid #e7edf5;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
-    }
-
-    .payment-card .card-header {
-        background: white;
-        border-bottom: 1px solid #edf0f5;
-        padding: 22px 25px;
-    }
-
-    .payment-card .card-body {
-        padding: 24px;
-    }
-
-    /* 결제 단계 */
-    .payment-steps {
-        border: 1px solid #e7edf5;
-        border-radius: 14px;
-        background: white;
-        padding: 18px;
-    }
-
-    .step-number {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #edf1f6;
-        color: #8795aa;
-        font-weight: 700;
-    }
-
-    .step-number.active {
-        background: #0044cc;
-        color: white;
-    }
-
-    .step-number.done {
-        background: #e0f3e8;
-        color: #198754;
-    }
-
-    .step-line {
-        width: 65px;
-        height: 1px;
-        background: #e0e6ed;
-    }
-
-    /* 행사 포스터 */
-    .event-poster {
-        background: linear-gradient(145deg, #144e86, #1689b6, #44c2bb);
-        color: white;
-        min-height: 185px;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    .event-poster h4 {
-        font-size: 23px;
-        font-weight: 800;
-        line-height: 1.15;
-    }
-
-    .event-poster small {
-        letter-spacing: 2px;
-    }
-
-    .event-info {
-        background: white;
-        padding: 22px;
-    }
-
-    .event-info p {
-        color: #75849a;
-        font-size: 14px;
-        margin-bottom: 9px;
-    }
-
-    /* 보유 포인트 */
-    .point-balance {
-        background: #eaf7f0;
-        border: 1px solid #d3ebde;
-        border-radius: 12px;
-        padding: 20px;
-    }
-
-    .point-balance h3 {
-        color: #198754;
-        font-weight: 800;
-    }
-
-    /* 결제 금액 */
-    .payment-price {
-        color: #0044cc;
-        font-size: 28px;
-        font-weight: 800;
-    }
-
-    .remaining-point {
-        background: #f2f6fc;
-        border-radius: 10px;
-        padding: 15px;
-    }
-
-    .pay-button {
-        padding: 16px;
-        font-size: 17px;
-        font-weight: 700;
-        border-radius: 10px;
-    }
-
-    @media (max-width: 576px) {
-        .step-line {
-            width: 14px;
-        }
-
-        .payment-steps {
-            font-size: 11px;
-        }
-
-        .event-poster {
-            min-height: 150px;
-        }
-    }
-</style>
-
-
-<main class="payment-page py-5">
-
-    <div class="container payment-container">
-        <nav class="mb-4 small text-secondary">
-            행사 찾기
-            <i class="bi bi-chevron-right mx-2"></i>
-            행사 상세
-            <i class="bi bi-chevron-right mx-2"></i>
-            <strong class="text-dark">포인트 결제</strong>
-        </nav>
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-2">
-                    <i class="bi bi-coin text-success me-2"></i>
-                    포인트 결제
-                </h2>
-
-                <p class="text-secondary mb-0">
-                    예약할 행사와 사용 포인트를 확인한 후 결제를 진행해 주세요.
-                </p>
+{{> point/purchase-style}}
+<main class="purchase-page">
+    <div class="purchase-wrap">
+        <nav class="purchase-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span><a href="/events/list">행사 둘러보기</a><span aria-hidden="true">/</span><span>참가 신청·결제</span></nav>
+        <header class="purchase-heading"><h1>참가 신청을 마무리하세요</h1><p>참가할 일정과 사용할 포인트를 확인해주세요.</p></header>
+        <ol class="purchase-progress" aria-label="참가 신청 진행 단계"><li class="is-done"><span aria-hidden="true">✓</span>행사·회차 선택</li><li class="is-current" aria-current="step"><span aria-hidden="true">2</span>포인트 결제</li><li><span aria-hidden="true">3</span>신청 완료</li></ol>
+        {{#view}}
+        <div class="purchase-layout">
+            <div class="purchase-content">
+                <section class="purchase-panel purchase-event" aria-labelledby="purchase-event-title">
+                    <div class="purchase-panel-heading"><h2 id="purchase-event-title">참가할 행사</h2><span class="purchase-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18m-13 5h3m3 0h3"/></svg></span></div>
+                    {{#category}}<span class="purchase-category">{{category}}</span>{{/category}}
+                    <h3>{{title}}</h3>
+                    <dl class="purchase-event-facts"><div><dt>참가 일정</dt><dd><time data-purchase-date>{{startsAt}}</time></dd></div><div><dt>장소</dt><dd>{{location}}</dd></div><div><dt>신청 내용</dt><dd>선택한 회차 참가 신청</dd></div></dl>
+                    <div class="purchase-event-fee"><span>회차 참가비</span><strong class="format-point" data-purchase-fee>{{eventPoint}}</strong></div>
+                </section>
+                <section class="purchase-panel purchase-guide" aria-labelledby="purchase-guide-title"><h2 id="purchase-guide-title">신청 전에 확인해주세요</h2><ul><li>결제를 완료해야 참가 신청이 접수됩니다.</li><li>정원이 마감된 회차는 대기 신청으로 접수될 수 있습니다. 최종 신청 가능 여부는 결제 시 다시 확인합니다.</li><li>신청 상태 확인과 참가 취소는 마이페이지의 ‘신청한 행사’에서 진행할 수 있습니다.</li></ul><details><summary>포인트 사용·취소 안내</summary><p>참가비는 보유 포인트에서 차감됩니다. 무료 회차도 아래 확인 및 결제 절차를 마쳐야 신청이 완료됩니다.</p><p>취소 시점과 신청 상태에 따라 환불 기준이 달라질 수 있습니다. 취소 전 신청 내역에 표시되는 안내를 확인해주세요.</p></details></section>
             </div>
-
-            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary p-3 d-none d-md-block">
-                <i class="bi bi-shield-check me-1"></i>
-                안전한 포인트 결제
-            </span>
+            <aside class="purchase-summary" aria-labelledby="purchase-summary-title">
+                <h2 id="purchase-summary-title">포인트 결제 정보</h2>
+                <div class="purchase-balance"><span class="purchase-point-icon" aria-hidden="true">P</span><div><span>현재 보유 포인트</span><strong class="format-point" id="currentPoint">{{currentPoint}}</strong></div></div>
+                <dl class="purchase-point-facts"><div><dt>참가비</dt><dd class="format-point">{{eventPoint}}</dd></div><div class="purchase-payment-total"><dt>사용할 포인트</dt><dd class="format-point">{{eventPoint}}</dd></div></dl>
+                <div class="purchase-remaining"><span>결제 후 예상 잔액</span><strong class="format-point" id="predict">{{predictedPoint}}</strong></div>
+                <p id="purchase-balance-warning" class="purchase-warning" role="status" hidden>포인트가 부족합니다. 포인트를 충전한 뒤 참가 신청을 진행해주세요.</p>
+                <form id="purchase-form" action="/event/purchase/{{id}}" method="post" onsubmit="return confirm('결제를 진행하시겠습니까?')">
+                    <div class="purchase-agreement"><input type="checkbox" id="agreeCheck" required><label for="agreeCheck">행사 정보, 사용할 포인트와 참가 취소 안내를 확인했습니다. <span>(필수)</span></label></div>
+                    <button type="submit" id="paymentBtn" class="purchase-pay-button" disabled><span class="format-point">{{eventPoint}}</span> 결제하고 신청하기</button>
+                </form>
+                <p class="purchase-payment-note">보유 포인트에서 차감됩니다.<br>결제 후 마이페이지에서 신청 결과를 확인해주세요.</p>
+                <a class="purchase-charge-link" href="/charge">포인트 충전하기 <span aria-hidden="true">+</span></a>
+            </aside>
         </div>
-
-        <div class="payment-steps d-flex justify-content-center align-items-center gap-3 mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <span class="step-number done">
-                    <i class="bi bi-check-lg"></i>
-                </span>
-                <span class="text-secondary">예약 정보 확인</span>
-            </div>
-
-            <div class="step-line"></div>
-
-            <div class="d-flex align-items-center gap-2">
-                <span class="step-number active">2</span>
-                <strong class="text-primary">포인트 결제</strong>
-            </div>
-
-            <div class="step-line"></div>
-
-            <div class="d-flex align-items-center gap-2">
-                <span class="step-number">3</span>
-                <span class="text-secondary">예매 완료</span>
-            </div>
-
-        </div>
-
-        <div class="row g-4 align-items-start">
-            <div class="col-12 col-lg-7">
-                <div class="card payment-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0">결제할 행사</h5>
-                        <small class="text-secondary">예약 정보</small>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="border rounded-4 overflow-hidden mb-4">
-                            <div class="row g-0">
-                                <div class="col-md-4">
-                                    <div class="event-poster h-100">
-                                        <small>BUSAN PLAY · FESTIVAL</small>
-                                        <div>
-                                            <h4 class="mb-2">
-                                                OCEAN<br>
-                                                MUSIC<br>
-                                                FESTIVAL
-                                            </h4>
-                                            <small>BUSAN 2026</small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                {{#view}}
-                                <div class="col-md-8">
-                                    <div class="event-info h-100">
-
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill mb-3">
-                                            {{category}}
-                                        </span>
-
-                                        <h5 class="fw-bold mb-3">
-                                            {{title}}
-                                        </h5>
-                                        <p>
-                                            <i class="bi bi-calendar-event me-2"></i>{{startsAt}}
-                                        </p>
-
-                                        <p>
-                                            <i class="bi bi-geo-alt me-2"></i>{{location}}
-                                        </p>
-
-                                        <p class="mb-0">
-                                            <i class="bi bi-ticket-perforated me-2"></i>일반 입장권 · 1매
-                                        </p>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <h6 class="fw-bold border-bottom pb-3 mb-4">
-                            <i class="bi bi-receipt text-success me-2"></i>
-                            예매 내역
-                        </h6>
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <strong>일반 입장권 × 1</strong>
-                                <p class="small text-secondary mb-0 mt-1">
-                                    티켓 가격은 해당 행사에서 정한 포인트입니다.
-                                </p>
-                            </div>
-
-                            <div class="text-end">
-                                <h5 class="fw-bold mb-0">{{eventPoint}}P</h5>
-                                <small class="text-secondary">/ 1매</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-footer bg-light border-0 p-4">
-                        <p class="small text-secondary mb-2">
-                            <i class="bi bi-info-circle text-primary me-2"></i>
-                            예매 취소는 행사 시작 3일 전까지 가능합니다.
-                        </p>
-                        <p class="small text-secondary mb-0">
-                            <i class="bi bi-info-circle text-primary me-2"></i>
-                            실제 예매 및 환불 기준은 행사 운영 정책을 확인해 주세요.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-lg-5">
-                <div class="card payment-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0">포인트 결제 정보</h5>
-                        <small class="text-secondary">
-                            <i class="bi bi-lock me-1"></i>POINT
-                        </small>
-                    </div>
-
-
-                    <div class="card-body">
-                        <div class="point-balance d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <small class="text-success fw-semibold">
-                                    현재 보유 포인트
-                                </small>
-
-                                <h3 class="format-point mb-0 mt-2" id="currentPoint">
-                                    {{currentPoint}}
-                                </h3>
-                            </div>
-                            <i class="bi bi-wallet2 fs-2 text-success"></i>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-secondary">일반 입장권 (1매)</span>
-                            <strong class="format-point">{{eventPoint}}</strong>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-4">
-                            <span class="text-secondary">할인 포인트</span>
-                            <strong>0P</strong>
-                        </div>
-
-                        <hr class="border-secondary-subtle">
-
-                        <div class="d-flex justify-content-between align-items-center my-4">
-                            <strong>최종 사용 포인트</strong>
-                            <span class="format-point payment-price">{{eventPoint}}</span>
-                        </div>
-
-                        <div class="remaining-point d-flex justify-content-between align-items-center mb-4">
-
-                            <span class="small text-secondary">결제 후 예상 잔액</span>
-                            <strong class="format-point text-primary" id="predict">{{predictedPoint}}</strong>
-                        </div>
-
-                        <div class="form-check mb-4">
-                            <input class="form-check-input" type="checkbox" id="agreeCheck">
-                            <label class="form-check-label small text-secondary" for="agreeCheck">
-                                (필수) 행사 정보, 포인트 차감 금액 및 예매 취소 안내를 확인했습니다.
-                            </label>
-                        </div>
-
-
-                    <form action="/event/purchase/{{id}}" method="post" onsubmit="return confirm('결제를 진행하시겠습니까?')">
-                        <button type="submit" id="paymentBtn" class="btn btn-success pay-button w-100" disabled>
-                            <i class="bi bi-check2-circle me-2"></i>
-                            <span class="format-point">{{eventPoint}}</span> 결제하기
-                        </button>
-                    </form>
-                    {{/view}}
-
-                        <p class="text-center small text-secondary mt-3">
-                            <i class="bi bi-shield-lock me-1"></i>
-                            보유 포인트에서 차감하는 방식 · 외부 결제창 없음
-                        </p>
-
-                        <div class="text-center small mt-3">
-                            <span class="text-secondary">
-                                포인트가 부족한가요?
-                            </span>
-                            <a href="/charge" class="text-primary fw-bold text-decoration-none ms-1">
-                                포인트 충전하러 가기
-                                <i class="bi bi-arrow-up-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="d-flex justify-content-between align-items-center mt-5">
-            <a href="/events/list" class="text-decoration-none text-secondary fw-semibold small">
-                <i class="bi bi-arrow-left me-1"></i>
-                행사 목록으로 돌아가기
-            </a>
-            <span class="small text-secondary">BUSAN PLAY · 행사 티켓 포인트 결제</span>
-        </div>
+        {{/view}}
+        {{^view}}<section class="purchase-panel purchase-empty"><h2>참가 정보를 확인할 수 없습니다.</h2><p>행사 상세에서 참가할 회차를 다시 선택해주세요.</p><a href="/events/list">행사 둘러보기</a></section>{{/view}}
+        <a class="purchase-back" href="/events/list"><span aria-hidden="true">←</span> 행사 목록으로 돌아가기</a>
     </div>
 </main>
-
-
-<script>
-    const agreeCheck = document.querySelector("#agreeCheck");
-    const paymentBtn = document.querySelector("#paymentBtn");
-    const predictedPoint = document.querySelector("#predict")
-    const point = Number(predictedPoint.textContent.trim().replace(/[^\d-]/g, ""));
-
-    document.querySelectorAll(".format-point").forEach(e => {
-        const thisPoint = Number(e.textContent.trim())
-        e.textContent = thisPoint.toLocaleString("ko-KR") + "P"
-    })
-
-    agreeCheck.addEventListener("change", function () {
-        if(point >= 0) {
-            paymentBtn.disabled = !this.checked;
-        } else {
-            paymentBtn.innerText = "포인트가 부족하여 결제할 수 없습니다"
-        }
-    });
-
-</script>
-
 {{> layout/footer}}
+<script>
+(() => {
+    const agreeCheck = document.querySelector('#agreeCheck');
+    const paymentBtn = document.querySelector('#paymentBtn');
+    const predictedPoint = document.querySelector('#predict');
+    if (!agreeCheck || !paymentBtn || !predictedPoint) return;
+    const point = Number(predictedPoint.textContent.trim());
+    const canPay = Number.isFinite(point) && point >= 0;
+    document.querySelectorAll('.format-point').forEach(element => {
+        const value = Number(element.textContent.trim());
+        if (Number.isFinite(value)) element.textContent = value.toLocaleString('ko-KR') + 'P';
+    });
+    document.querySelectorAll('[data-purchase-date]').forEach(element => {
+        const value = element.textContent.trim();
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.');
+    });
+    if (!canPay) {
+        document.getElementById('purchase-balance-warning').hidden = false;
+        paymentBtn.textContent = '포인트가 부족합니다';
+    }
+    const updatePaymentButton = () => { paymentBtn.disabled = !canPay || !agreeCheck.checked; };
+    agreeCheck.addEventListener('change', updatePaymentButton);
+    window.addEventListener('pageshow', updatePaymentButton);
+    updatePaymentButton();
+})();
+</script>
+</body>
+</html>

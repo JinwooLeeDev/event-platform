@@ -1,15 +1,15 @@
 <style>
     .account-layout {
-        --account-ink: #292f3d;
-        --account-muted: #72757e;
-        --account-line: #e6e7eb;
+        --account-ink: #142d4e;
+        --account-muted: #627084;
+        --account-line: #dce4ee;
         display: grid;
         grid-template-columns: 220px minmax(0, 1fr);
         align-items: start;
         gap: 36px;
         max-width: 1360px;
         margin: 0 auto;
-        font-family: 'Pretendard', sans-serif;
+        font-family: Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif;
         font-size: 14px;
         line-height: 1.65;
         color: var(--account-ink);
@@ -24,6 +24,8 @@
     }
 
     .account-sidebar {
+        position: sticky;
+        top: 24px;
         padding: 26px 18px;
         border: 1px solid var(--account-line);
         border-radius: 18px;
@@ -43,7 +45,7 @@
         color: #72757e;
         font-size: 10px;
         font-weight: 700;
-        letter-spacing: 1.5px;
+        letter-spacing: 0;
     }
 
     .account-brand strong {
@@ -62,6 +64,10 @@
         display: grid;
         gap: 6px;
     }
+
+    .account-nav-label--settings { margin-top: 26px; }
+    .account-nav a svg { width: 19px; height: 19px; flex-shrink: 0; }
+    .account-brand[aria-current='page'] strong { color: #174bc1; }
 
     .account-nav a {
         display: flex;
@@ -86,8 +92,8 @@
     }
 
     .account-nav a[aria-current='page'] {
-        background: #eef1f6;
-        color: #0750d8;
+        background: #edf3ff;
+        color: #174bc1;
     }
 
     .account-nav a[aria-current='page'] span {
@@ -241,6 +247,7 @@
         }
 
         .account-sidebar {
+            position: static;
             padding: 16px;
         }
 
@@ -254,12 +261,18 @@
 
         .account-nav {
             grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
         }
+
+        .account-nav + .account-nav-label--settings { display: block; margin: 14px 0 6px; padding-top: 12px; border-top: 1px solid var(--account-line); }
+        .account-nav-label--settings + .account-nav { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        .account-nav a svg { width: 16px; height: 16px; }
 
         .account-nav a {
             justify-content: center;
-            padding: 12px 6px;
-            font-size: 13px;
+            padding: 12px 5px;
+            gap: 6px;
+            font-size: 12px;
         }
 
         .account-nav a span, .account-nav-label, .account-sidebar-bottom {

@@ -2,27 +2,36 @@
 {{> layout/main-style}}
 {{> layout/favorite-assets}}
 
-<main class="main-page">
+<main class="main-page" id="main-content">
     <section class="main-hero" aria-labelledby="main-hero-title">
         <div class="main-hero__inner">
-            <h1 id="main-hero-title" class="main-hero__title">부산의 오늘을 더 특별하게,<span>문화가 만드는 새로운 일상</span></h1>
-            <p class="main-hero__description">팝업 · 전시 · 문화행사부터 축제까지,<br>지금, 부산에서 새로운 경험을 시작해보세요.</p>
+            <div class="main-hero__copy">
+                <p class="main-hero__location">부산에서 만나는 새로운 경험</p>
+                <h1 id="main-hero-title" class="main-hero__title">오늘은 부산에서,<br>무엇을 해볼까요?</h1>
+                <p class="main-hero__description">팝업과 전시, 공연부터 축제까지.<br>마음에 드는 행사를 찾고 나만의 하루를 계획해보세요.</p>
+                <div class="main-hero__actions">
+                    <a class="main-button main-button--primary" href="/events/list">전체 행사 보기 <span aria-hidden="true">↗</span></a>
+                    <a class="main-button main-button--text" href="#recent-events">최근 등록 행사 <span aria-hidden="true">↓</span></a>
+                </div>
+            </div>
+            <div class="main-hero__scene" role="img" aria-label="부산의 문화와 일상을 담은 풍경">
+                <span class="main-hero__scene-label">새로운 하루의 시작, Busan Play</span>
+            </div>
         </div>
     </section>
     <!-- 최근 등록된 행사 -->
-    <section class="main-events" aria-labelledby="main-events-title">
+    <section class="main-events" id="recent-events" aria-labelledby="main-events-title">
     <div class="main-events__heading">
-            <div><p class="main-events__eyebrow">DISCOVER BUSAN</p><h2 id="main-events-title">최근 등록된 행사</h2></div>
+            <div><h2 id="main-events-title">새로 만나는 부산</h2><p class="main-events__description">최근 등록된 행사부터 가볍게 둘러보세요.</p></div>
             <a class="main-events__more" href="/events/list">전체 보기 <span aria-hidden="true">→</span></a>
         </div>
-        <p class="main-events__notice">공개된 행사 중 최신 등록순으로 최대 8개를 보여드립니다. 대표 이미지는 준비 중입니다.</p>
         <div class="event-grid">
             {{#eventPage.eventList}}
             {{> layout/event-card}}
             {{/eventPage.eventList}}
         </div>
         {{^eventPage.eventList}}
-        <div class="main-events__empty"><h3>현재 공개된 행사가 없습니다.</h3><p>새로운 행사가 등록되면 이곳에서 확인할 수 있습니다.</p></div>
+        <div class="main-events__empty"><h3>새로운 만남을 준비하고 있어요.</h3><p>공개된 행사가 등록되면 이곳에서 확인할 수 있습니다.</p><a class="main-button main-button--primary" href="/events/list">전체 행사 확인하기</a></div>
         {{/eventPage.eventList}}
     </section>
 </main>
