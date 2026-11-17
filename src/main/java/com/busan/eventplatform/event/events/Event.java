@@ -84,8 +84,4 @@ public class Event {
         return this.getStatus() == EventStatus.PAID_READY;
     }
 
-    public boolean isPendingStatus() {
-        return this.getStatus() == EventStatus.PENDING_REVIEW;
-    }
-
 }
