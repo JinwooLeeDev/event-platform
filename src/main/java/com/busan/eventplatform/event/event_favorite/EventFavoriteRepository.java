@@ -34,9 +34,9 @@ public interface EventFavoriteRepository extends JpaRepository<EventFavorite, Lo
 
     // 회원별 좋아요 목록
     @Query("""
-                select f from EventFavorite f
+                select f from EventFavorite f join fetch f.event e left join fetch e.category
                 where f.user.id = :userId
-                order by f.createdAt desc
+                order by f.createdAt desc, f.id desc
             """)
     List<EventFavorite> findAllByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
