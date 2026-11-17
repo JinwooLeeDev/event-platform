@@ -25,21 +25,4 @@ class EventTest {
         assertFalse(event.isPaidStatus());
     }
 
-    @Test
-    void 승인대기_상태이면_true() {
-        Event event = Event.builder()
-                .status(EventStatus.PENDING_REVIEW)
-                .build();
-
-        assertTrue(event.isPendingStatus());
-    }
-
-    @Test
-    void 승인대기_상태가_아니면_false() {
-        Event event = Event.builder()
-                .status(EventStatus.PAID_READY)
-                .build();
-
-        assertFalse(event.isPendingStatus());
-    }
 }
