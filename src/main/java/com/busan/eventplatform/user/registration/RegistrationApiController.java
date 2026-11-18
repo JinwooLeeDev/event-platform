@@ -125,7 +125,7 @@ public class RegistrationApiController {
         return ResponseEntity.ok(registrationService.getParticipants(sessionId, loginIdentity));
     }
 
-    // 6. 반려 (주최 기업)
+    // 6. 거절 (주최 기업) — ★ [f/41] 반려 개념 없음, 거절 시 신청자에게 전액 환불
     @PostMapping("/reject/{registrationId}")
     public ResponseEntity<?> reject(
             @PathVariable Long registrationId,
@@ -135,12 +135,12 @@ public class RegistrationApiController {
             return unauthorized();
         }
         if (!loginIdentity.isCompany()) {
-            return forbidden("행사 주최 기업만 반려할 수 있습니다.");
+            return forbidden("행사 주최 기업만 거절할 수 있습니다.");
         }
 
         registrationService.reject(registrationId, loginIdentity);
-        log.info("신청 반려 성공 - registrationId={}, companyId={}", registrationId, loginIdentity.getId());
-        return ResponseEntity.ok(Map.of("message", "신청이 반려되었습니다."));
+        log.info("신청 거절 성공 - registrationId={}, companyId={}", registrationId, loginIdentity.getId());
+        return ResponseEntity.ok(Map.of("message", "신청을 거절했습니다. 결제한 포인트는 신청자에게 전액 환불됩니다."));
     }
 
     // ===== 공통 응답 =====

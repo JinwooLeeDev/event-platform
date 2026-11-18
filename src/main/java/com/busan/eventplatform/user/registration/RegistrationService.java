@@ -205,7 +205,7 @@ public class RegistrationService {
 
 
     // =========================================================
-    // 주최자 반려
+    // 주최자 거절
     // =========================================================
 
     /**
@@ -221,12 +221,17 @@ public class RegistrationService {
 
         validateOrganizer(session, loginIdentity);
 
+        // ★ [f/41] 회차가 시작된 뒤에는 거절 불가 (D-C) — 본인 취소와 같은 기준(회차 시작 전까지)
+        if (!LocalDateTime.now().isBefore(session.getStartsAt())) {
+            throw new Exception400("이미 시작된 회차의 신청은 거절할 수 없습니다");
+        }
+
         RegistrationStatus statusBefore = registration.getStatus(); // ★ [f/40] 거절 전 상태 기억
         boolean releasedSeat = statusBefore.isSeatOccupying();
         registration.reject();
         // 주최자는 Company 라 processedByUser(User 타입)에 넣을 수 없음 → null + 사유에 기업 id 기록
         recordHistory(registration, RegistrationStatus.REJECTED, null,
-                "주최자 반려 (companyId=" + loginIdentity.getId() + ")");
+                "주최자 거절 (companyId=" + loginIdentity.getId() + ")");
         publishStatusChanged(registration, statusBefore);   // ★ [f/40] 확정이었다면 커뮤니티 퇴장
 
         if (releasedSeat) {
@@ -485,7 +490,7 @@ public class RegistrationService {
      */
     public String getCancelBlockedReason(Registration registration, LocalDateTime now) {
         if (!registration.getStatus().isActive()) {
-            return "이미 취소되었거나 반려된 신청입니다";
+            return "이미 취소되었거나 거절된 신청입니다";
         }
         // ★ [f/41] 회차 취소 검토 중이면 본인 취소 불가 (D-R) — 지금 취소하면 부분 환불, 승인되면 전액 환불
         if (isCancelPending(registration.getEventSession().getId())) {
