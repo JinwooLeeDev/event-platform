@@ -7,6 +7,7 @@ import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.global.file.FileStorage;
 import com.busan.eventplatform.global.file.FileStorageResult;
+import com.busan.eventplatform.login.emailverification.EmailAvailabilityService;
 import com.busan.eventplatform.login.emailverification.EmailVerificationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class CompanyService {
     private final BusinessVerificationSessionService businessVerificationSessionService;
     private final FileStorage fileStorage;
     private final PlatformTransactionManager platformTransactionManager;
+    private final EmailAvailabilityService emailAvailabilityService;
 
     //    DB 수정 작업을 어디서 시작하고 끝낼지 정하는 설정
     private TransactionTemplate createWriteTransaction() {
@@ -104,13 +106,8 @@ public class CompanyService {
 
                 Instant verifiedAt = null;
                 if (emailChanged) { // 이메일이 변경되면, 이메일 인증을 필요로 한다.
+                    emailAvailabilityService.validateAvailable(updateDTO.getEmail());
                     verifiedAt = emailVerificationService.requireVerifiedEmail(updateDTO.getEmail(), session);
-
-                    companyRepository.findByEmail(updateDTO.getEmail()).ifPresent(c -> {
-                        if (!c.getId().equals(company.getId())) {
-                            throw new Exception400("이미 사용중인 이메일입니다.");
-                        }
-                    });
                 }
 
                 if (businessNumberChanged) { // 사업자 번호가 변경되면, 중복확인
