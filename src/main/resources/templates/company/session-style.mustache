@@ -34,6 +34,20 @@
 .session-table th, .session-table td { padding:15px 12px; border-bottom:1px solid #e5ebf2; text-align:left; overflow-wrap:anywhere; }
 .session-table th { color:#627084; font-size:12px; font-weight:600; background:#f3f6fa; white-space:nowrap; }
 .session-table td:nth-child(3) { color:#315b90; }
+.participant-reject-button { min-height:36px; padding:7px 14px; border:1px solid #e5c6c6; border-radius:7px; background:#fff; color:#a44848; font:inherit; font-size:12px; font-weight:600; white-space:nowrap; cursor:pointer; }
+.participant-reject-button:hover:not(:disabled) { background:#fff3f2; }
+.participant-reject-button:disabled { opacity:.55; cursor:wait; }
+.participant-reject-dialog { box-sizing:border-box; width:min(480px,calc(100% - 32px)); padding:26px; border:1px solid #dce4ee; border-radius:16px; color:#142d4e; background:#fff; font:14px/1.8 Pretendard,"Malgun Gothic",sans-serif; }
+.participant-reject-dialog::backdrop { background:rgba(20,45,78,.45); }
+.participant-reject-dialog h2 { margin:0 0 16px; font-size:20px; line-height:1.5; }
+.participant-reject-dialog p { overflow-wrap:anywhere; }
+.participant-reject-target { padding:14px 16px; border-radius:8px; background:#f3f6fa; font-weight:600; }
+.participant-reject-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:24px; }
+.participant-reject-actions .company-button { min-height:44px; padding:10px 18px; border:1px solid #c6d6eb; border-radius:8px; background:#f0f5fc; color:#244b7e; font:inherit; font-weight:600; cursor:pointer; }
+.participant-reject-actions .company-button--danger { border-color:#e5c6c6; background:#fff3f2; color:#a44848; }
+.participant-reject-actions button:disabled { opacity:.6; cursor:wait; }
+.participant-reject-dialog [hidden] { display:none!important; }
+.participant-reject-dialog button:focus-visible { outline:3px solid #9bb9ee; outline-offset:3px; }
 .company-session-danger { padding:16px 24px; border:1px solid #e5d8d8; background:#fff; border-radius:12px; }
 @media(max-width:1100px) { .session-choice-grid { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:600px) { .session-panel { padding:22px 18px; } .session-facts { grid-template-columns:1fr; gap:16px; } .session-table th, .session-table td { padding:12px 8px; } .session-table { min-width:410px; } .session-choice-metrics { gap:10px; } .session-choice-metrics strong { font-size:15px; } .session-participant-tools > label:last-child { flex:1 1 100%; } .session-create-form > label { flex-basis:100%; } }
