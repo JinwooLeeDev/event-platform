@@ -1,14 +1,11 @@
 package com.busan.eventplatform.company;
 
-import com.busan.eventplatform.company.businessverification.BusinessVerificationService;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationSessionService;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.global.file.FileStorage;
 import com.busan.eventplatform.global.file.FileStorageResult;
-import com.busan.eventplatform.login.emailverification.EmailAvailabilityService;
-import com.busan.eventplatform.login.emailverification.EmailVerificationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +18,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -33,11 +29,9 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailVerificationService emailVerificationService;
     private final BusinessVerificationSessionService businessVerificationSessionService;
     private final FileStorage fileStorage;
     private final PlatformTransactionManager platformTransactionManager;
-    private final EmailAvailabilityService emailAvailabilityService;
 
     //    DB 수정 작업을 어디서 시작하고 끝낼지 정하는 설정
     private TransactionTemplate createWriteTransaction() {
@@ -76,8 +70,6 @@ public class CompanyService {
                 boolean certificateUpload = updateDTO.hasBusinessCertificate();
 //        기업인증정보가 변경되었는지
                 boolean companyInformationChanged = updateDTO.requiresReview(company);
-//        이메일 변경 판단
-                boolean emailChanged = updateDTO.getEmail() != null && !company.getEmail().equals(updateDTO.getEmail());
 //        사업자번호 변경 판단
                 boolean businessNumberChanged = updateDTO.getBusinessNumber() != null && !company.getBusinessNumber().equals(updateDTO.getBusinessNumber());
 //        대표자 변경 판단
@@ -102,12 +94,6 @@ public class CompanyService {
 //        기업인증을 변경하고 사업자 등록증 첨부가 안되면 수정 불가.
                 if (companyInformationChanged && !certificateUpload) {
                     throw new Exception400("기업 인증 정보를 변경하려면 새 사업자 등록증을 첨부해주세요");
-                }
-
-                Instant verifiedAt = null;
-                if (emailChanged) { // 이메일이 변경되면, 이메일 인증을 필요로 한다.
-                    emailAvailabilityService.validateAvailable(updateDTO.getEmail());
-                    verifiedAt = emailVerificationService.requireVerifiedEmail(updateDTO.getEmail(), session);
                 }
 
                 if (businessNumberChanged) { // 사업자 번호가 변경되면, 중복확인
@@ -188,7 +174,6 @@ public class CompanyService {
 //                위 조건을 모두 통과하면 DB 데이터 수정이 이루어짐
                 company.update(
                         updateDTO.getName(),
-                        updateDTO.getEmail(),
                         updateDTO.getRepresentativeName(),
                         updateDTO.getBusinessNumber(),
                         updateDTO.getAddress(),
@@ -202,10 +187,6 @@ public class CompanyService {
                 if (updateDTO.getPassword() != null) {
                     String encodedPassword = passwordEncoder.encode(updateDTO.getPassword());
                     company.changePassword(encodedPassword);
-                }
-
-                if (emailChanged) {
-                    company.verifyEmail(verifiedAt);
                 }
 
                 return new CompanyResponse.DetailDTO(company);
