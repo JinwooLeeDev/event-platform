@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.eventCancel;
+package com.busan.eventplatform.event.event_cancel;
 
 public enum EventCancelStatus {
     PENDING,   // 검토 대기

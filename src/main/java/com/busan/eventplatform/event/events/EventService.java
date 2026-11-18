@@ -105,8 +105,10 @@ public class EventService {
         int pageIndex = Math.max(0, page - 1);
         // 페이지 크기 1 ~ 50
         int validSize = Math.max(1, Math.min(50, size));
-        // 최신 행사 먼저 오도록 id 내림차순 정렬
-        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
+        // 최신 행사 먼저 오도록 정렬
+        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(
+                Sort.Order.desc("createdAt"), Sort.Order.desc("id")
+        ));
         // 행사 조회
         Page<Event> eventPage;
         eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
@@ -220,36 +222,6 @@ public class EventService {
 
         return event;
     }
-
-//    // 행사 삭제 기능
-//    @Transactional
-//    public void delete(Long id, Long companyId) {
-//        Event event = eventRepository.findById(id)
-//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-//        if (companyId == null || !event.isOwner(companyId)) {
-//            throw new Exception403("삭제 권한이 없습니다.");
-//        }
-//        if (registrationRepository.existsByEventSessionEventId(id)) {
-//            throw new Exception400("신청자가 있는 행사는 삭제할 수 없습니다.");
-//        }
-//
-//        eventRepository.delete(event);
-//    }
-//
-//    // 행사 취소 기능
-//    @Transactional
-//    public Event cancel(Long id, EventRequest.CancelDto cancelDto) {
-//        Event event = eventRepository.findById(id)
-//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-//        if (EventStatus.CANCELLED.equals(event.getStatus())) {
-//            throw new Exception400("이미 취소된 행사입니다.");
-//        }
-//        event.setStatus(EventStatus.CANCELLED);
-//        event.setCancelledAt(LocalDateTime.now());
-//        event.setCancellationReason(cancelDto.getCancellationReason());
-//
-//        return event;
-//    }
 
     // 행사 승인 기능 (관리자)
     @Transactional

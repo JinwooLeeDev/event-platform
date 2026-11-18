@@ -64,6 +64,7 @@ public class EventResponse {
         private String categoryName;
         private String title;
         private String summary;
+        private String imageUrl;
         private LocalDateTime createdAt;
         private LocalDateTime publishedAt;
         private EventStatus status;
@@ -79,6 +80,7 @@ public class EventResponse {
 
         public EventDto(Event event, EventSession session) {
             this.id = event.getId();
+            this.imageUrl = "/event-files/" + event.getId();
             if (event.getCategory() != null) {
                 this.categoryId = event.getCategory().getId();
                 this.categoryName = event.getCategory().getName();
@@ -122,6 +124,7 @@ public class EventResponse {
         private Long categoryId;
         private String categoryName;
         private String summary;
+        private String imageUrl;
         private String description;
         private String address;
         private LocalDateTime publishedAt;
@@ -133,6 +136,7 @@ public class EventResponse {
 
         public DetailDto(Event event, boolean owner, Long confirmedCount, Long waitingCount, boolean chatAvailable) {
             this.id = event.getId();
+            this.imageUrl = "/event-files/" + event.getId();
             this.title = event.getTitle();
             if (event.getCompany() != null) {
                 this.companyName = event.getCompany().getName();
