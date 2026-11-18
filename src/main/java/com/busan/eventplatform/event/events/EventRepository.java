@@ -73,7 +73,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             join fetch e.category
             where e.company.id = :companyId
             and e.status = :status
-            order by e.id desc
+            order by e.createdAt desc
         """)
     List<Event> findAllByCompanyIdAndStatus(
             @Param("companyId") Long companyId,
@@ -86,7 +86,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                 join fetch e.company
                 join fetch e.category
                 where e.company.id = :companyId
-                order by e.id desc
+                order by e.createdAt desc
             """)
     List<Event> findAllByCompanyId(@Param("companyId") Long companyId);
 

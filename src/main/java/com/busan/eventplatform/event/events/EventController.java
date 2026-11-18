@@ -122,7 +122,7 @@ public class EventController {
         }
         eventService.save(saveDto, sessionCompanyDto.getId(), file);
 
-        return "redirect:/";
+        return "redirect:/events";
     }
 
     // 기업이 등록한 행사 전체 조회
@@ -195,15 +195,6 @@ public class EventController {
         return "redirect:/events";
     }
 
-//    // 기업 행사 삭제
-//    // POST - http://localhost:8080/company/events/delete/1
-//    @PostMapping("/events/delete/{id}")
-//    public String delete(@PathVariable Long id, HttpSession session) {
-//        SessionCompanyDto sessionCompanyDto = requireCompany(session);
-//        eventService.delete(id, sessionCompanyDto.getId());
-//        return "redirect:/events";
-//    }
-
     // 관리자 행사 승인
     // POST - http://localhost:8080/events/approve/1
     @PostMapping("/events/approve/{id}")
@@ -219,15 +210,6 @@ public class EventController {
         eventService.requestFeedback(id, feedbackMessage);
         return "redirect:/events";
     }
-
-//    // 관리자 행사 취소
-//    // POST - http://localhost:8080/events/cancel/1
-//    @PostMapping("/events/cancel/{id}")
-//    public String cancel(@PathVariable Long id, EventRequest.CancelDto cancelDto) {
-//        cancelDto.validate();
-//        eventService.cancel(id, cancelDto);
-//        return "redirect:/events";
-//    }
 
     private SessionCompanyDto requireCompany(HttpSession session) {
         Object value = session.getAttribute(Define.SESSION_COMPANY);
