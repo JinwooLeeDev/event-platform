@@ -1,6 +1,5 @@
 package com.busan.eventplatform.company;
 
-import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.LoginIdentity;
@@ -61,11 +60,6 @@ public class CompanyController {
                     .id(sessionCompanyDTO.getId())
                     .displayName(updatedCompany.getName())
                     .build());
-
-            // 화면에서는 이메일이 변경된 경우에만 email 필드를 전송
-            if (updateDTO.getEmail() != null) {
-                session.removeAttribute(Define.EMAIL_VERIFICATION);
-            }
 
             return "redirect:/company/detail";
         }

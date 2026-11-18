@@ -19,9 +19,13 @@ public class EmailVerificationService {
     private final EmailSender emailSender;
 
     private final PasswordEncoder codeEncoder = new BCryptPasswordEncoder();
+    private final EmailAvailabilityService emailAvailabilityService;
 
     // 1. 인증번호 발송
     public void sendCode(String email, HttpSession session) {
+
+//        개인·기업 중 이미 사용하는 이메일이면 발송하지 않는다.
+        emailAvailabilityService.validateAvailable(email);
         synchronized (session) {
             Instant now = Instant.now(); // 현재 시간을 now 에 저장
 
