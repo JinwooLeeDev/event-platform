@@ -1,5 +1,8 @@
 package com.busan.eventplatform.user.registration;
 
+import com.busan.eventplatform.event.eventCancel.EventCancelRepository;   // ★ [f/41] 회차 취소 검토 중 확인
+import com.busan.eventplatform.event.eventCancel.EventCancelStatus;
+
 import com.busan.eventplatform.api.purchase.Purchase;
 import com.busan.eventplatform.api.refund.RefundPolicy;
 import com.busan.eventplatform.api.refund.RefundService;   // ★ 추가: 참가 취소 시 포인트 환불 (포인트 파트)
@@ -51,6 +54,8 @@ public class RegistrationService {
     // [나의 신청 내역] 결제일 표시 형식
     private static final DateTimeFormatter HISTORY_DATE = DateTimeFormatter.ofPattern("yyyy. MM. dd");
     private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
+
+    private final EventCancelRepository eventCancelRepository;   // ★ [f/41] 회차 취소 검토 중 확인 (취소 신청 담당 제공)
 
     private final ApplicationEventPublisher eventPublisher;   // ★ [f/40] 상태 변경 알림 → 커뮤니티 입장·퇴장
 
@@ -448,6 +453,11 @@ public class RegistrationService {
                 default -> "신청할 수 없는 회차입니다";
             };
         }
+        // ★ [f/41] 기업이 회차 취소를 신청해 운영자 검토 중이면 신규 신청 불가 (조장님 결정 D-R)
+        if (isCancelPending(session.getId())) {
+            return "회차 취소 검토 중이라 지금은 신청할 수 없습니다";
+        }
+
         // 회차 시작 시각이 지났으면 신청 불가 (상태값이 아직 갱신되지 않은 경우 방어)
         if (!now.isBefore(session.getStartsAt())) {
             return "이미 시작된 회차입니다";
@@ -477,6 +487,11 @@ public class RegistrationService {
         if (!registration.getStatus().isActive()) {
             return "이미 취소되었거나 반려된 신청입니다";
         }
+        // ★ [f/41] 회차 취소 검토 중이면 본인 취소 불가 (D-R) — 지금 취소하면 부분 환불, 승인되면 전액 환불
+        if (isCancelPending(registration.getEventSession().getId())) {
+            return "회차 취소 검토 중이라 지금은 취소할 수 없습니다. 승인되면 결제한 포인트가 전액 환불됩니다.";
+        }
+
         if (!now.isBefore(registration.getEventSession().getStartsAt())) {
             return "이미 시작된 회차는 취소할 수 없습니다";
         }
@@ -547,6 +562,11 @@ public class RegistrationService {
      */
     private RegistrationStatus seatStatusFor(EventSession session) {
         return RegistrationStatus.CONFIRMED;
+    }
+
+    /** ★ [f/41] 기업이 회차 취소를 신청해 운영자 검토(PENDING) 중인지 */
+    private boolean isCancelPending(Long sessionId) {
+        return eventCancelRepository.existsBySessionIdAndStatus(sessionId, EventCancelStatus.PENDING);
     }
 
     /**
