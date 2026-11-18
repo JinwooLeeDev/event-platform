@@ -64,6 +64,5 @@ public class DepositService {
             event.setStatus(EventStatus.PUBLISHED); // 모든 세션이 결제됐다면 이벤트 상태 변경.
             event.setPublishedAt(LocalDateTime.now()); // 확정 시간 저장.
         }
-
     }
 }

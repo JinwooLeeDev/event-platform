@@ -19,7 +19,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByBusinessNumber(@Param("businessNumber") String businessNumber);
 
     @Query("""
-            SELECT c 
+            SELECT c
             FROM Company c
             WHERE c.status = :status
             AND c.businessVerificationStatus IN :verificationStatuses
@@ -34,5 +34,5 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> LockFindById(@Param("id") Long id);
 
 //    이메일 중복 여부만 확인할 때 사용
-    boolean existByEmail(String email);
+    boolean existsByEmail(String email);
 }

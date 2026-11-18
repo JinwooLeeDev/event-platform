@@ -17,7 +17,7 @@ public class EmailAvailabilityService {
             throw new Exception400("이메일을 입력해주세요.");
         }
 
-        boolean alreadyUsed = userRepository.existsByEmailNormalized(email) || companyRepository.existByEmail(email);
+        boolean alreadyUsed = userRepository.existsByEmailNormalized(email) || companyRepository.existsByEmail(email);
 
         if (alreadyUsed) {
             throw new Exception400("이미 사용중인 이메일입니다.");

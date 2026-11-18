@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>회차 취소 신청 | Busan Play</title>
+</head>
+<body>
+{{> layout/header}}
+{{> layout/account-style}}
+{{> event/save-form-style}}
+
+<main class="event-save-page">
+    <div class="account-layout">
+        {{> layout/company-nav}}
+
+        <div class="event-save-container account-content">
+
+            <div class="event-save-navigation">
+                <a href="/events">← 내 행사 목록으로</a>
+            </div>
+
+            <section class="event-save-header">
+                <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
+                <h1>회차 취소 신청</h1>
+                <p>
+                    취소를 원하는 회차의 신청서를 작성해 주세요.<br>
+                    제출한 신청서는 관리자 검토 후 승인 또는 거절됩니다.
+                </p>
+                <div class="event-save-guide">
+                    <span>01 취소 신청</span>
+                    <span>02 관리자 검토</span>
+                    <span>03 처리 결과 확인</span>
+                </div>
+            </section>
+
+            <form action="/event-cancels/save/{{sessionId}}"
+                  method="post"
+                  class="event-save-form">
+
+                <section class="event-save-section">
+                    <h2>
+                        <span class="event-section-number">01</span>
+                        취소 신청 정보
+                    </h2>
+
+                    <p class="section-description">
+                        취소하려는 회차와 신청 사유를 확인해 주세요.
+                    </p>
+
+                    <div class="form-group">
+                        <label>회차 번호</label>
+                        <input type="text"
+                               value="{{sessionId}}"
+                               readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">
+                            취소 신청 사유 <span>*</span>
+                        </label>
+                        <textarea
+                                id="reason"
+                                name="reason"
+                                rows="8"
+                                placeholder="회차 취소를 신청하는 사유를 구체적으로 작성해 주세요."
+                                required></textarea>
+                    </div>
+                </section>
+
+                <p class="event-save-notice">
+                    취소 신청을 제출해도 즉시 회차가 취소되지는 않습니다.
+                    관리자 검토 후 승인 결과에 따라 처리됩니다.
+                </p>
+
+                <div class="event-save-actions">
+                    <a href="/events" class="cancel-button">취소</a>
+                    <button type="submit" class="submit-button">
+                        취소 신청하기
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</main>
+
+{{> layout/footer}}
+</body>
+</html>
