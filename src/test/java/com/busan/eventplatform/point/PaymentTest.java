@@ -46,7 +46,7 @@ public class PaymentTest {
             em.clear();
 
             // when
-            Payment result = paymentRepository.findByPaymentId(paymentId)
+            Payment result = paymentRepository.LockFindByPaymentId(paymentId)
                     .orElseThrow();
 
             // then
@@ -62,7 +62,7 @@ public class PaymentTest {
 
             // when
             Optional<Payment> result =
-                    paymentRepository.findByPaymentId("not-exist-payment");
+                    paymentRepository.LockFindByPaymentId("not-exist-payment");
 
             // then
             assertThat(result).isEmpty();

@@ -80,7 +80,7 @@ public class PaymentService {
     @Transactional
     public PaymentRes.CompleteDto complete(LoginIdentity loginIdentity , PaymentRes.PortOnePayment portOnePayment , String paymentId) {
         // 1. 우리 서버가 요청한 결제가 맞는지 확인.
-        Payment payment = paymentRepository.findByPaymentId(paymentId)
+        Payment payment = paymentRepository.LockFindByPaymentId(paymentId)
                 .orElseThrow(() -> new Exception404("존재하지 않는 결제건입니다."));
 
         // 2. 현재 결제가 현재 세션이용자의 결제가 맞는지.
