@@ -87,6 +87,7 @@ public class RegistrationRes {
         private int waitingCount;    // 요약 카드·탭: 대기 중
         private int upcomingCount;   // 기존 응답 필드 유지: confirmedCount와 동일
         private int pastCount;       // 종료된 회차 신청 수
+        private int cancelledCount;  // ★ [f/41] 취소·환불 탭: 본인 취소 + 참가 거절 + 행사(회차) 취소
         private String currentTab;   // confirmed / waiting / past
         private String keyword;      // 검색어 (없으면 "")
         private List<MyHistoryItemDto> items;
@@ -104,7 +105,7 @@ public class RegistrationRes {
         private String sessionName;        // 회차명
         private String place;              // 행사 주소
         private String scheduleText;       // 2026. 12. 20 (일) · 오후 2:00
-        private String tab;                // confirmed / waiting / past (탭 필터용)
+        private String tab;                // confirmed / waiting / past / cancelled (탭 필터용)
         private String statusLabel;        // 참가 확정 / 대기열 등록 / 참가 취소 / 참가 거절 / 행사 종료
         private String statusClass;        // 배지 CSS 클래스 (status-confirmed 등)
         private String statusMessage;      // 상황별 안내 문구
@@ -120,6 +121,7 @@ public class RegistrationRes {
         private String detailUrl;          // /event/{eventId}
         private String refundPolicyText;   // [환불 정책 보기] 문구 (유료·취소 가능할 때만, 아니면 "" → 버튼 숨김)
         private String communityUrl; // [f/40] 참가 확정 + 운영 중이면 "/community/{회차id}", 아니면 null(버튼 숨김)
+        private boolean closed;      // ★ [f/41] 취소·거절·행사 취소 카드 → '취소 불가' 버튼 숨김, 결제·환불 정보 펼침
     }
 
 

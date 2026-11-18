@@ -211,8 +211,8 @@ public class RegistrationService {
     /**
      * 주최 기업의 참가 신청 거절. 기업 거절은 전액 환불 (조장님 결정 D5).
      * ★ [f/41] B안 — 신청 파트: 상태(REJECTED)·이력·이벤트(커뮤니티 퇴장) / 포인트 파트: 환불만 (refundByCompany)
-     *   refundByCompany 는 상태가 REJECTED 인지 검사하므로 registration.reject() '후'에 호출한다.
-     *   같은 트랜잭션이라 환불이 실패하면 거절도 롤백된다 (커뮤니티 퇴장은 커밋 후에만 실행되므로 함께 취소됨).
+     * refundByCompany 는 상태가 REJECTED 인지 검사하므로 registration.reject() '후'에 호출한다.
+     * 같은 트랜잭션이라 환불이 실패하면 거절도 롤백된다 (커뮤니티 퇴장은 커밋 후에만 실행되므로 함께 취소됨).
      */
     @Transactional
     public void reject(Long registrationId, LoginIdentity loginIdentity) {
@@ -252,20 +252,20 @@ public class RegistrationService {
     /**
      * ★ [f/41] 회차 삭제(취소) 승인 시 그 회차의 확정·대기 신청을 모두 정리한다.
      * 운영자 '삭제 승인' 메서드가 한 트랜잭션 안에서 아래 순서로 호출한다.
-     *   ① 회차 상태 CANCELLED
-     *   ② refundService.pointBackUser(session)   — 참가자 전원 전액 환불 (포인트 파트)
-     *   ③ registrationService.cancelAllBySession  — 이 메서드
-     *   ④ refundService.refundCompany(...)         — 기업 예약금 (포인트 파트, 삭제 신청일 기준)
+     * ① 회차 상태 CANCELLED
+     * ② refundService.pointBackUser(session)   — 참가자 전원 전액 환불 (포인트 파트)
+     * ③ registrationService.cancelAllBySession  — 이 메서드
+     * ④ refundService.refundCompany(...)         — 기업 예약금 (포인트 파트, 삭제 신청일 기준)
      * <p>
      * ⚠ 반드시 pointBackUser '다음'에 호출한다.
-     *   pointBackUser 는 신청이 아직 확정·대기(isActive)일 때만 환불하므로,
-     *   이 메서드를 먼저 부르면 예외 없이 아무도 환불받지 못한다. (다른 흐름과 순서가 반대인 이유)
+     * pointBackUser 는 신청이 아직 확정·대기(isActive)일 때만 환불하므로,
+     * 이 메서드를 먼저 부르면 예외 없이 아무도 환불받지 못한다. (다른 흐름과 순서가 반대인 이유)
      * <p>
      * - 상태: REJECTED (주최 측 사정) + 이력 "행사 회차 취소 (사유)"
      * - 환불: 하지 않음 (② 에서 이미 처리 → 이중 환불 방지)
      * - 좌석 반납·대기자 승격: 하지 않음 (회차 자체가 취소됨)
      * - 커뮤니티: 신청마다 이벤트를 보내지 않고 회차 단위 이벤트 1번 → 커밋 후 방 전체 종료·삭제
-     *   (신청마다 보내면 참가자마다 '주최자 거절' 퇴장 안내가 따로 나가고 메시지도 남는다)
+     * (신청마다 보내면 참가자마다 '주최자 거절' 퇴장 안내가 따로 나가고 메시지도 남는다)
      *
      * @param reason 운영자가 남긴 삭제 사유 (이력에 함께 기록, 없으면 생략)
      * @return 정리한 신청 수
@@ -364,16 +364,20 @@ public class RegistrationService {
             throw new RegistrationForbiddenException("개인 회원만 신청 내역을 조회할 수 있습니다");
         }
         LocalDateTime now = LocalDateTime.now();
-        String currentTab = "waiting".equals(tab) || "past".equals(tab) ? tab : "confirmed";
+        // ★ [f/41] 취소·환불 탭(cancelled) 추가 — 그 외 값은 참가 확정 탭
+        String currentTab = switch (tab == null ? "" : tab) {
+            case "waiting", "past", "cancelled" -> tab;
+            default -> "confirmed";
+        };
         String currentKeyword = keyword == null ? "" : keyword.trim();
 
         // 1. 내 신청 전체 → 카드 데이터 (요약 카드·탭 개수는 검색과 관계없이 전체 기준)
         List<Registration> registrations = registrationRepository.findAllByUserIdForHistory(loginIdentity.getId());
         Map<Long, Integer> refundAmounts = refundAmountsOf(registrations); // ★ 추가: 결제 id → 실제 환불 금액
         List<RegistrationRes.MyHistoryItemDto> all = registrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatus.CONFIRMED || r.getStatus() == RegistrationStatus.WAITING)
-                .filter(r -> r.getEventSession().getStatus() != EventSessionStatus.CANCELLED
-                        && r.getEventSession().getEvent().getStatus() != EventStatus.CANCELLED)
+                // ★ [f/41] 취소·거절·취소된 회차도 '취소·환불' 탭에 표시 (환불 여부 확인용, 담당자 요청)
+                //   승인 대기(PENDING)는 현재 쓰지 않는 상태라 제외
+                .filter(r -> r.getStatus() != RegistrationStatus.PENDING)
                 .map(r -> toHistoryItem(r, now, refundAmounts))            // ★ 변경: 환불 금액 전달
                 .toList();
 
@@ -384,12 +388,14 @@ public class RegistrationService {
                 .toList();
 
         int upcoming = countTab(all, "confirmed");
+        int cancelled = countTab(all, "cancelled");   // ★ [f/41]
         return RegistrationRes.MyHistoryDto.builder()
-                .totalCount(all.size())
+                .totalCount(all.size() - cancelled)    // ★ [f/41] 기존 의미 유지: 취소·거절 제외
                 .confirmedCount(upcoming)
                 .waitingCount(countTab(all, "waiting"))
                 .upcomingCount(upcoming)
                 .pastCount(countTab(all, "past"))
+                .cancelledCount(cancelled)             // ★ [f/41]
                 .currentTab(currentTab)
                 .keyword(currentKeyword)
                 .items(items)
@@ -569,7 +575,9 @@ public class RegistrationService {
         return RegistrationStatus.CONFIRMED;
     }
 
-    /** ★ [f/41] 기업이 회차 취소를 신청해 운영자 검토(PENDING) 중인지 */
+    /**
+     * ★ [f/41] 기업이 회차 취소를 신청해 운영자 검토(PENDING) 중인지
+     */
     private boolean isCancelPending(Long sessionId) {
         return eventCancelRepository.existsBySessionIdAndStatus(sessionId, EventCancelStatus.PENDING);
     }
@@ -645,7 +653,10 @@ public class RegistrationService {
         boolean ended = session.getStatus() == EventSessionStatus.COMPLETED
                 || event.getStatus() == EventStatus.COMPLETED
                 || (session.getEndsAt() != null && !now.isBefore(session.getEndsAt()));
-        boolean cancelable = !ended && isCancelable(r, now);
+        // ★ [f/41] 회차·행사가 취소됐으면 신청 상태와 관계없이 '행사 취소' (취소 버튼·커뮤니티 버튼 숨김)
+        boolean eventCancelled = session.getStatus() == EventSessionStatus.CANCELLED
+                || event.getStatus() == EventStatus.CANCELLED;
+        boolean cancelable = !ended && !eventCancelled && isCancelable(r, now);
 
         //  1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RefundPolicy)
         int expectedRefund = cancelable
@@ -655,22 +666,23 @@ public class RegistrationService {
         // 2. 표시 상태 결정 — 종료 시각·종료 상태를 기준으로 분류 (진행 중은 확정 탭에 유지)
         String tab, label, cssClass, message;
         Integer waitingNumber = null;
-        if (status == RegistrationStatus.REJECTED && session.getStatus() == EventSessionStatus.CANCELLED) {
-            // ★ [f/41] 회차 삭제 승인으로 정리된 신청 — '거절'로 오해하지 않게 따로 표시
-            tab = "past";
+        if (status == RegistrationStatus.CANCELLED) {
+            // 본인이 먼저 취소한 건은 나중에 회차가 취소돼도 '참가 취소'로 표시
+            tab = "cancelled";   // ★ [f/41] past → cancelled (취소·환불 탭)
+            label = "참가 취소";
+            cssClass = "status-cancelled";
+            message = "참가 신청을 취소했습니다. 환불 금액은 결제·환불 정보에서 확인할 수 있습니다.";
+        } else if (eventCancelled) {
+            // ★ [f/41] 회차 삭제 승인·행사 취소로 정리된 신청 — '거절'로 오해하지 않게 따로 표시
+            tab = "cancelled";
             label = "행사 취소";
             cssClass = "status-rejected";
             message = "주최 측 사정으로 행사 회차가 취소되었습니다. 결제한 포인트는 전액 환불됩니다.";
         } else if (status == RegistrationStatus.REJECTED) {
-            tab = "past";
+            tab = "cancelled";   // ★ [f/41] past → cancelled
             label = "참가 거절";
             cssClass = "status-rejected";
             message = "주최자가 참가를 거절했습니다. 결제한 포인트는 전액 환불됩니다.";
-        } else if (status == RegistrationStatus.CANCELLED) {
-            tab = "past";
-            label = "참가 취소";
-            cssClass = "status-cancelled";
-            message = "참가 신청을 취소했습니다.";
         } else if (ended) {
             tab = "past";
             label = "행사 종료";
@@ -726,8 +738,10 @@ public class RegistrationService {
                 .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
                 // ★ [f/40] 참가 확정 + 커뮤니티 운영 중(회차 종료일 24시 전)일 때만 입장 주소, 아니면 null → 버튼 숨김
                 .communityUrl(status == RegistrationStatus.CONFIRMED
+                        && !eventCancelled                                                      // ★ [f/41] 취소된 회차·행사는 입장 버튼 숨김
                         && CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())  // ★ 한국 시각 기준
                         ? "/community/" + session.getId() : null)
+                .closed("cancelled".equals(tab))   // ★ [f/41] 취소·환불 카드 → '취소 불가' 버튼 숨김
                 .build();
     }
 
