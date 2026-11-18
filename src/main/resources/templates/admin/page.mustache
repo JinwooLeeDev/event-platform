@@ -4,6 +4,7 @@
     {{> layout/head-meta}}
     <title>{{pageTitle}} | Busan Play 관리자</title>
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/event-cancel.css">
 </head>
 <body class="admin-body">
 <a class="admin-skip" href="#admin-main">본문으로 이동</a>
@@ -32,11 +33,13 @@
                 </div>
             {{/dashboardPage}}
             {{^dashboardPage}}
+                {{#cancelsPage}}{{> admin/event-cancels}}{{/cancelsPage}}
                 {{#membersPage}}{{> admin/members}}{{/membersPage}}
                 {{#companiesPage}}{{> admin/companies}}{{/companiesPage}}
                 {{#eventsPage}}{{> admin/events}}{{/eventsPage}}
                 {{#sessionsPage}}{{> admin/sessions}}{{/sessionsPage}}
                 {{#categoriesPage}}{{> admin/categories}}{{/categoriesPage}}
+                {{^cancelsPage}}
                 {{^membersPage}}
                 {{^companiesPage}}
                 {{^eventsPage}}
@@ -48,11 +51,13 @@
                 {{/eventsPage}}
                 {{/companiesPage}}
                 {{/membersPage}}
+                {{/cancelsPage}}
             {{/dashboardPage}}
         </main>
         <footer class="admin-footer">Busan Play · 관리자 운영 공간</footer>
     </div>
 </div>
 {{> admin/interaction}}
+{{#cancelsPage}}<script src="/js/admin-event-cancels.js" defer></script>{{/cancelsPage}}
 </body>
 </html>

@@ -1,90 +1,40 @@
-
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    {{> layout/head-meta}}
-    <title>회차 취소 신청 | Busan Play</title>
-</head>
+<head>{{> layout/head-meta}}<title>회차 취소 신청 | Busan Play</title><link rel="stylesheet" href="/css/event-cancel.css"></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
-{{> event/save-form-style}}
-
-<main class="event-save-page">
-    <div class="account-layout">
-        {{> layout/company-nav}}
-
-        <div class="event-save-container account-content">
-
-            <div class="event-save-navigation">
-                <a href="/events">← 내 행사 목록으로</a>
-            </div>
-
-            <section class="event-save-header">
-                <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
-                <h1>회차 취소 신청</h1>
-                <p>
-                    취소를 원하는 회차의 신청서를 작성해 주세요.<br>
-                    제출한 신청서는 관리자 검토 후 승인 또는 거절됩니다.
-                </p>
-                <div class="event-save-guide">
-                    <span>01 취소 신청</span>
-                    <span>02 관리자 검토</span>
-                    <span>03 처리 결과 확인</span>
-                </div>
-            </section>
-
-            <form action="/event-cancels/save/{{sessionId}}"
-                  method="post"
-                  class="event-save-form">
-
-                <section class="event-save-section">
-                    <h2>
-                        <span class="event-section-number">01</span>
-                        취소 신청 정보
-                    </h2>
-
-                    <p class="section-description">
-                        취소하려는 회차와 신청 사유를 확인해 주세요.
-                    </p>
-
-                    <div class="form-group">
-                        <label>회차 번호</label>
-                        <input type="text"
-                               value="{{sessionId}}"
-                               readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reason">
-                            취소 신청 사유 <span>*</span>
-                        </label>
-                        <textarea
-                                id="reason"
-                                name="reason"
-                                rows="8"
-                                placeholder="회차 취소를 신청하는 사유를 구체적으로 작성해 주세요."
-                                required></textarea>
-                    </div>
-                </section>
-
-                <p class="event-save-notice">
-                    취소 신청을 제출해도 즉시 회차가 취소되지는 않습니다.
-                    관리자 검토 후 승인 결과에 따라 처리됩니다.
-                </p>
-
-                <div class="event-save-actions">
-                    <a href="/events" class="cancel-button">취소</a>
-                    <button type="submit" class="submit-button">
-                        취소 신청하기
-                    </button>
-                </div>
-
+{{> company/session-style}}
+<main class="company-workspace session-page"><div class="account-layout">
+    {{> layout/company-nav}}
+    <section class="account-content">
+        <header class="company-heading"><div><p class="company-location">기업페이지 / 주최 행사 / 회차 취소</p><h1>회차 취소 신청</h1><p class="company-description">취소 사유를 제출하면 운영자가 내용을 검토합니다.</p></div></header>
+        <section class="session-panel cancel-panel" aria-labelledby="cancel-context-title">
+            <h2 id="cancel-context-title">취소할 회차를 확인해주세요</h2>
+            {{#cancelSession}}
+            <dl class="cancel-context"><div><dt>행사</dt><dd>{{event.title}}</dd></div><div><dt>회차</dt><dd>{{name}}</dd></div><div><dt>개최 일정</dt><dd>{{startsAt}}<br>~ {{endsAt}}</dd></div><div><dt>현재 점유 인원</dt><dd>{{occupiedCount}}명</dd></div></dl>
+            {{/cancelSession}}
+            {{#latestCancel}}<div class="cancel-result cancel-result--{{cancelStatusTone}}"><strong>최근 신청 · {{cancelStatusLabel}}</strong><p class="cancel-reason">{{reason}}</p></div>{{/latestCancel}}
+            {{#canRequestCancel}}
+            <p class="cancel-notice">신청만으로 회차가 취소되지는 않습니다. 운영자 승인 후 회차가 취소되며, 참가비와 기업 보증금은 환불 정책에 따라 처리됩니다.</p>
+            <form action="/event-cancels/save/{{sessionId}}" method="post" id="cancel-request-form">
+                <div class="cancel-field"><label for="cancel-reason">취소 신청 사유 <span aria-hidden="true">*</span></label><textarea id="cancel-reason" name="reason" rows="7" maxlength="255" required aria-describedby="cancel-reason-help" placeholder="취소가 필요한 이유와 운영 상황을 구체적으로 작성해주세요."></textarea><small id="cancel-reason-help">최대 255자 · 운영자가 검토할 사유를 입력해주세요.</small></div>
+                <div class="cancel-actions"><a class="company-button company-button--secondary" href="/event-sessions/{{sessionId}}">회차 관리로 돌아가기</a><button type="submit" class="company-button cancel-submit">취소 신청하기</button></div>
             </form>
-        </div>
-    </div>
-</main>
-
+            {{/canRequestCancel}}
+            {{^canRequestCancel}}<p class="cancel-notice">승인 대기 중이거나 진행 중·종료·취소된 회차는 새로 신청할 수 없습니다. 회차 관리에서 처리 상태를 확인해주세요.</p><a class="company-button company-button--secondary" href="/event-sessions/{{sessionId}}">회차 관리로 돌아가기</a>{{/canRequestCancel}}
+        </section>
+    </section>
+</div></main>
 {{> layout/footer}}
-</body>
-</html>
+<script>
+document.getElementById('cancel-request-form')?.addEventListener('submit', function(event) {
+    const reason = this.elements.reason;
+    reason.setCustomValidity(reason.value.trim() ? '' : '취소 사유를 입력해주세요.');
+    if (!this.reportValidity()) { event.preventDefault(); return; }
+    const button = this.querySelector('button[type="submit"]'); button.disabled = true; button.textContent = '신청 접수 중…';
+});
+document.getElementById('cancel-reason')?.addEventListener('input', function() { this.setCustomValidity(''); });
+window.addEventListener('pageshow', () => { const button = document.querySelector('.cancel-submit'); if (button) { button.disabled = false; button.textContent = '취소 신청하기'; } });
+</script>
+</body></html>
