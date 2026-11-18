@@ -35,7 +35,7 @@ import org.springframework.context.ApplicationEventPublisher;   // ★ [f/40] �
  * 결제 정책: "신청 시 결제"
  * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 결제 (RegistrationPurchaseService → PurchaseService.pay).
  * - 대기열 승격 시에는 추가 결제 없이 상태만 변경.
- * - 본인 취소 환불은 RefundService.refundUser() 에 위임, 기업 거절 환불은 refundCompany 구현 후 연결.
+ * - 본인 취소 환불은 refundUser(), 기업 반려 환불은 refundByCompany()에 위임한다.
  * <p>
  * 결제·환불 로직은 이 클래스에서 직접 처리하지 않는다.
  */
@@ -214,9 +214,9 @@ public class RegistrationService {
 
     /**
      * 주최 기업의 참가 신청 거절. 기업 거절은 전액 환불 (조장님 결정 D5).
-     * 포인트는 여기서 돌려주지 않는다 — 반환된 RefundRequest 로 흐름 클래스가 환불 처리 (진행 순서 8)
+     * 반려와 전액 환불을 같은 트랜잭션으로 처리한다. 환불에 실패하면 반려도 롤백된다.
      *
-     * @return 환불 요청 (결제 금액 전액)
+     * @return 처리한 환불 정보 (결제 금액 전액, 결제 없는 기존 신청은 0)
      */
     @Transactional
     public RefundRequest reject(Long registrationId, LoginIdentity loginIdentity) {
@@ -228,6 +228,10 @@ public class RegistrationService {
         RegistrationStatus statusBefore = registration.getStatus(); // ★ [f/40] 거절 전 상태 기억
         boolean releasedSeat = statusBefore.isSeatOccupying();
         registration.reject();
+        // 무료(0P) 구매도 환불 이력과 구매 상태를 정리한다. 결제 연결이 없는 기존 신청은 생략한다.
+        if (registration.getPurchase() != null) {
+            refundService.refundByCompany(registration);
+        }
         // 주최자는 Company 라 processedByUser(User 타입)에 넣을 수 없음 → null + 사유에 기업 id 기록
         recordHistory(registration, RegistrationStatus.REJECTED, null,
                 "주최자 반려 (companyId=" + loginIdentity.getId() + ")");

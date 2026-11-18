@@ -16,7 +16,7 @@
     <dl class="cancel-context"><div><dt>신청 기업</dt><dd>{{eventSession.event.company.name}}</dd></div><div><dt>신청 일시</dt><dd>{{createdAt}}</dd></div><div><dt>개최 일정</dt><dd>{{eventSession.startsAt}}<br>~ {{eventSession.endsAt}}</dd></div><div><dt>현재 점유 인원</dt><dd>{{eventSession.occupiedCount}}명</dd></div></dl>
     <section class="cancel-request-reason" aria-label="취소 신청 사유"><h3>취소 신청 사유</h3><p class="cancel-reason">{{reason}}</p></section>
     <div class="cancel-actions">
-        <a class="admin-primary-link" href="/admin/events/{{eventSession.event.id}}">행사 정보 확인</a>
+        <a class="admin-status-button cancel-detail-link" href="/admin/events/{{eventSession.event.id}}">행사 정보 확인</a>
         {{#pending}}
         <form action="/admin/event-cancels/{{id}}/approve" method="post" data-admin-confirm="회차 취소 승인" data-admin-target="{{eventSession.name}}" data-admin-danger="true"><button type="submit" class="admin-status-button admin-status-button-danger">취소 승인</button></form>
         <form action="/admin/event-cancels/{{id}}/reject" method="post" data-admin-confirm="취소 신청 거절" data-admin-target="{{eventSession.name}}"><button type="submit" class="admin-status-button">신청 거절</button></form>
