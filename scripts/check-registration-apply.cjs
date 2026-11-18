@@ -9,9 +9,10 @@ assert.match(template, /\{\{> registration\/apply-button-script\}\}/);
 const source = fs.readFileSync('src/main/resources/templates/registration/apply-button-script.mustache', 'utf8')
     .replace(/^<script>\s*/, '').replace(/\s*<\/script>\s*$/, '');
 
-async function scenario({ picked = true, status = 200, check = {}, confirm = true, networkError = false } = {}) {
+async function scenario({ picked = true, status = 200, check = {}, confirm = true, networkError = false, loginModal = false } = {}) {
     let handler;
     const calls = [], alerts = [], confirmations = [];
+    const modalOpens = [];
     const button = { dataset: {}, disabled: false };
     const location = { href: '' };
     const context = {
@@ -21,6 +22,7 @@ async function scenario({ picked = true, status = 200, check = {}, confirm = tru
                 ? { value: '42', dataset: { sessionName: '저녁 회차' } } : null
         },
         location,
+        window: { BusanLogin: loginModal ? { open: () => modalOpens.push(true) } : undefined },
         alert: message => alerts.push(message),
         confirm: message => { confirmations.push(message); return confirm; },
         fetch: async url => {
@@ -33,7 +35,7 @@ async function scenario({ picked = true, status = 200, check = {}, confirm = tru
     vm.runInNewContext(source, context);
     await handler({ target: { closest: () => button }, preventDefault() {} });
     assert.equal(button.disabled, false);
-    return { calls, alerts, confirmations, location };
+    return { calls, alerts, confirmations, location, modalOpens };
 }
 
 (async () => {
@@ -50,6 +52,10 @@ async function scenario({ picked = true, status = 200, check = {}, confirm = tru
     assert.equal(result.location.href, '/event/purchase/42');
     result = await scenario({ status: 401 });
     assert.equal(result.location.href, '/login');
+    result = await scenario({ status: 401, loginModal: true });
+    assert.equal(result.modalOpens.length, 1);
+    assert.equal(result.location.href, '');
+    assert.equal(result.alerts.length, 0);
     result = await scenario({ status: 403, check: { message: '개인 회원만 가능' } });
     assert.equal(result.alerts[0], '개인 회원만 가능');
     assert.equal(result.location.href, '');
