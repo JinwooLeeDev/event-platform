@@ -15,6 +15,7 @@ public final class AdminPageView {
         model.addAttribute("sessionsPage", section.equals("sessions"));
         model.addAttribute("categoriesPage", section.equals("categories"));
         model.addAttribute("membersPage", section.equals("members"));
+        model.addAttribute("cancelsPage", section.equals("cancels"));
         return "admin/page";
     }
 }

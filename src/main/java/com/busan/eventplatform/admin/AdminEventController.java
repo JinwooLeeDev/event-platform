@@ -56,12 +56,8 @@ public class AdminEventController {
 
     @PostMapping("/{id}/cancel")
     public String cancel(@PathVariable Long id, EventRequest.CancelDto cancelDto, RedirectAttributes redirect) {
-        cancelDto.validate();
-        if (cancelDto.getCancellationReason().length() > 255)
-            throw new com.busan.eventplatform.global.error.exception.Exception400("취소 사유를 255자 이내로 입력해주세요.");
-        // eventService.cancel(id, cancelDto);
-        redirect.addFlashAttribute("reviewSuccess", "행사를 취소했습니다.");
-        return "redirect:/admin/events/" + id;
+        redirect.addFlashAttribute("reviewSuccess", "회차별 취소 신청을 확인한 후 승인 또는 거절해주세요.");
+        return "redirect:/admin/event-cancels";
     }
 
     private static String statusLabel(EventStatus status) {

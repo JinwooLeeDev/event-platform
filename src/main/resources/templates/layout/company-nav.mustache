@@ -16,6 +16,6 @@
 <script>
 document.querySelectorAll('[data-company-nav]').forEach(link => {
     const current = window.location.pathname;
-    if (link.dataset.companyNav === current || (link.dataset.companyNav === '/events' && /^\/(?:events\/(?:sessions\/|update\/)|event-sessions\/)/.test(current))) link.setAttribute('aria-current', 'page');
+    if (link.dataset.companyNav === current || (link.dataset.companyNav === '/events' && /^\/(?:events\/(?:sessions\/|update\/)|event-sessions\/|event-cancels\/)/.test(current))) link.setAttribute('aria-current', 'page');
 });
 </script>
