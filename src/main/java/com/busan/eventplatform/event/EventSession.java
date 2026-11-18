@@ -184,11 +184,11 @@ public class EventSession {
                 applyStartAt == null || applyEndAt == null) {
             throw new Exception400("날짜는 모두 필수입니다.");
         }
-        if (startsAt.isBefore(now)) {
-            throw new Exception400("행사 시작일은 현재 날짜보다 이전일 수 없습니다.");
+        if (startsAt.toLocalDate().isBefore(now.toLocalDate())) {
+            throw new Exception400("행사 시작일은 오늘 이전일 수 없습니다.");
         }
-        if (applyStartAt.isBefore(now)) {
-            throw new Exception400("모집 시작일은 현재 날짜보다 이전일 수 없습니다.");
+        if (applyStartAt.toLocalDate().isBefore(now.toLocalDate())) {
+            throw new Exception400("모집 시작일은 오늘 이전일 수 없습니다.");
         }
         if (endsAt.isBefore(startsAt)) {
             throw new Exception400("행사 종료일은 행사 시작일보다 이전일 수 없습니다.");
@@ -196,8 +196,8 @@ public class EventSession {
         if (applyEndAt.isBefore(applyStartAt)) {
             throw new Exception400("모집 마감일은 모집 시작일보다 이전일 수 없습니다.");
         }
-        if (!startsAt.isAfter(applyEndAt)) {
-            throw new Exception400("행사 시작일은 모집 마감일 이후여야 합니다.");
+        if (!applyEndAt.toLocalDate().isBefore(startsAt.toLocalDate())) {
+            throw new Exception400("모집 마감일은 행사 시작일보다 빨라야 합니다.");
         }
 
     }

@@ -57,7 +57,8 @@
             } catch (error) {
                 if (error.status === 401) {
                     message(group, '좋아요를 변경하려면 개인 계정으로 로그인해 주세요.');
-                    if (confirm('로그인이 필요합니다. 로그인 화면으로 이동할까요?')) location.assign('/login');
+                    if (window.BusanLogin) window.BusanLogin.open();
+                    else if (confirm('로그인이 필요합니다. 로그인 화면으로 이동할까요?')) location.assign('/login');
                 } else if (error.status === 400 || error.status === 404) {
                     try { apply(group, await request(id)); message(group, '변경된 좋아요 상태를 반영했습니다. 다시 확인해 주세요.'); }
                     catch (_) { message(group, '좋아요를 처리하지 못했습니다. 다시 시도해 주세요.'); }

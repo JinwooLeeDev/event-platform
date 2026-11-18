@@ -52,8 +52,8 @@ public class EventRequest {
             // 회차가 있는 행사
             if (hasSessions) {
 
-                if (sessions == null || sessions.isEmpty()) {
-                    throw new Exception400("회차 정보를 하나 이상 등록해주세요.");
+                if (sessions == null || sessions.size() < 2) {
+                    throw new Exception400("회차 정보를 최소 2개 이상 등록해주세요.");
                 }
 
                 sessions.forEach(EventSessionRequest.SaveDto::validate);

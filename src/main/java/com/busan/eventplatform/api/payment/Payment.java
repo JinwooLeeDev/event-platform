@@ -59,13 +59,10 @@ public class Payment {
 
     // 받은 유저가 현재 세션의 유저와 같은지?
     public boolean isOwner(LoginIdentity loginIdentity) {
-        if((loginIdentity != null) && (loginIdentity.isUser())){
-           return this.user.getId().equals(loginIdentity.getId());
-        }
-        else if ((loginIdentity != null) && (loginIdentity.isCompany())) {
-            return this.company.getId().equals(loginIdentity.getId());
-        }
-        else return false;
+        if (loginIdentity == null || loginIdentity.getId() == null)  return false;
+        if (loginIdentity.isUser())   return user != null && loginIdentity.getId().equals(user.getId());
+        if (loginIdentity.isCompany())   return company != null && loginIdentity.getId().equals(company.getId());
+        else  return false;
     }
 
     // 현재 결제상태가 "결제완료" 인지?

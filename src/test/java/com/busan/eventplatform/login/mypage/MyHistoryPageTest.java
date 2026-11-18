@@ -19,6 +19,33 @@ import static org.mockito.Mockito.*;
 
 class MyHistoryPageTest {
     @Test
+    void defaultsLegacyAndInvalidTabsToConfirmedAndShowsOnlyThreeCategories() {
+        var registration = mock(RegistrationService.class);
+        var myPage = mock(MyPageService.class);
+        var identity = LoginIdentity.builder().id(2L).loginType(LoginType.USER).build();
+        var history = RegistrationRes.MyHistoryDto.builder().totalCount(4).confirmedCount(2)
+                .waitingCount(1).pastCount(1).currentTab("confirmed").keyword("")
+                .items(List.of()).empty(true).build();
+        when(registration.getMyHistory(identity, "confirmed", "")).thenReturn(history);
+        when(myPage.getMyPage(2L)).thenReturn(MyPageResDto.builder().point(0).build());
+        var controller = new MyPageController(myPage, mock(PurchaseService.class), mock(PaymentService.class), registration);
+        for (String tab : java.util.Arrays.asList(null, "", "all", "upcoming", "invalid", "confirmed")) {
+            var model = new ExtendedModelMap();
+            controller.myHistory(identity, tab, "", model);
+            var tabs = (List<?>) model.get("historyTabs");
+            assertEquals(3, tabs.size());
+            assertTrue(tabs.toString().contains("label=참가 확정"));
+            assertTrue(tabs.toString().contains("label=대기 중"));
+            assertTrue(tabs.toString().contains("label=종료된 행사"));
+            String html = render(model);
+            assertTrue(html.contains("name=\"tab\" value=\"confirmed\""));
+            assertFalse(html.contains("전체 내역"));
+            assertFalse(html.contains("예정 행사"));
+            assertFalse(html.contains("지난 · 취소"));
+        }
+    }
+
+    @Test
     void usesRegistrationHistoryAndDatabaseBalanceWithEncodedTabLinks() {
         var registration = mock(RegistrationService.class);
         var myPage = mock(MyPageService.class);

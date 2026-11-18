@@ -1,168 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>포인트 충전 | Busan Play</title>
+</head>
+<body>
 {{> layout/header}}
-
-{{> layout/bootstrap}}
-
-
-<div class="container py-5" style="max-width: 1050px;">
-    <!-- 페이지 제목 및 보유 포인트 -->
-    <div class="row align-items-center mb-4 g-3">
-        <div class="col-md-7">
-            <h2 class="fw-bold mb-2">
-                <i class="bi bi-coin text-success me-2"></i>
-                포인트 충전
-            </h2>
-            <p class="text-secondary mb-0">
-                티켓 예매와 서비스 이용에 사용할 포인트를 충전하세요.
-            </p>
-        </div>
-
-        <div class="col-md-5">
-            <div class="bg-success bg-opacity-10 rounded-4 p-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-semibold">
-                        <i class="bi bi-wallet2 text-success me-2"></i>
-                        현재 보유 포인트
-                    </span>
-                    <h4 class="fw-bold text-success mb-0" id="myPoint">
-                        {{myPoint}}
-                    </h4>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4 p-md-5">
-            <div class="mb-4">
-                <h5 class="fw-bold mb-3">충전할 금액</h5>
-
-                <div class="input-group input-group-lg">
-                    <input type="number" class="form-control" id="chargeAmount" min="1000"
-                           placeholder="충전할 금액을 입력하세요">
-                    <span class="input-group-text">원</span>
-                </div>
-
-                <small class="text-secondary">
-                    <i class="bi bi-info-circle me-1"></i>
-                    1,000원 이상 입력해 주세요.
-                </small>
-            </div>
-
-            <div class="row g-2 mb-4" id="amount-btn-group">
-                <div class="col-6 col-md-3">
-                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="10000">
-                        +10,000원
-                    </button>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="30000">
-                        +30,000원
-                    </button>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="50000">
-                        +50,000원
-                    </button>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <button type="button" class="btn btn-light border w-100 py-3 amount-btn" data-amount="100000">
-                        +100,000원
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-success bg-opacity-10 rounded-4 p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold mb-1">충전 예정 포인트</h5>
-                        <small class="text-secondary">1원 = 1P</small>
+{{> point/charge-style}}
+<main class="charge-page">
+    <div class="charge-wrap">
+        <nav class="charge-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span>{{#isPersonal}}<a href="/mypoint">포인트 관리</a>{{/isPersonal}}{{#isCorporate}}<a href="/company/detail">기업페이지</a>{{/isCorporate}}<span aria-hidden="true">/</span><span>포인트 충전</span></nav>
+        <header class="charge-heading">
+            <div><h1>다음 경험을 위한 포인트 충전</h1><p>필요한 만큼 충전하고, 부산에서의 새로운 만남을 준비하세요.</p></div>
+            <div class="charge-balance"><span class="charge-point-icon" aria-hidden="true">P</span><div><span>현재 보유 포인트</span><strong id="myPoint">{{myPoint}}</strong></div></div>
+        </header>
+        <div class="charge-layout">
+            <div class="charge-content">
+                <section class="charge-panel" aria-labelledby="charge-amount-title">
+                    <div class="charge-section-heading"><h2 id="charge-amount-title">얼마를 충전할까요?</h2><p>금액을 직접 입력하거나 아래에서 선택하세요.</p></div>
+                    <label for="chargeAmount">충전 금액</label>
+                    <div class="charge-input-wrap"><input type="number" inputmode="numeric" id="chargeAmount" min="1000" step="1" placeholder="금액 입력" aria-describedby="charge-amount-help"><span>원</span></div>
+                    <p class="charge-help" id="charge-amount-help">1,000원 이상 입력해주세요. 1원은 1포인트로 충전됩니다.</p>
+                    <div class="charge-amount-buttons" id="amount-btn-group" role="group" aria-label="충전 금액 빠른 선택">
+                        <button type="button" class="amount-btn" data-amount="10000" aria-pressed="false">10,000원</button>
+                        <button type="button" class="amount-btn" data-amount="30000" aria-pressed="false">30,000원</button>
+                        <button type="button" class="amount-btn" data-amount="50000" aria-pressed="false">50,000원</button>
+                        <button type="button" class="amount-btn" data-amount="100000" aria-pressed="false">100,000원</button>
                     </div>
-
-                    <h3 class="fw-bold text-success mb-0" id="expectedPoint">0P</h3>
-                </div>
+                </section>
+                <section class="charge-panel" aria-labelledby="charge-method-title">
+                    <div class="charge-section-heading"><h2 id="charge-method-title">결제 수단</h2><p>사용할 간편결제를 아래 충전 버튼에서 선택해주세요.</p></div>
+                    <div class="charge-method"><span class="charge-npay" aria-label="네이버페이"><b>N</b> pay</span><div><strong>네이버페이</strong><p>연결된 네이버페이로 간편하게 결제</p></div></div>
+                    <div class="charge-method charge-method--kakao"><span class="charge-kpay" aria-label="카카오페이">pay</span><div><strong>카카오페이</strong><p>연결된 카카오페이로 간편하게 결제</p></div></div>
+                </section>
+                <details class="charge-guide"><summary>충전 전에 확인해주세요</summary><ul><li>충전한 포인트는 행사 신청 및 서비스 이용에 사용할 수 있습니다.</li><li>간편결제가 완료되어야 포인트가 충전됩니다.</li><li>충전 및 환불에 관한 사항은 운영정책을 확인해주세요.</li></ul></details>
             </div>
-
-            <hr class="my-4">
-
-            <div class="mb-4">
-                <h5 class="fw-bold mb-3">결제 수단</h5>
-
-                <div class="border rounded-3 p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="fw-bold fs-4">
-                            <span class="text-success">N</span> pay
-                        </span>
-
-                        <div>
-                            <div class="fw-semibold">네이버페이</div>
-                            <small class="text-secondary">
-                                네이버페이로 간편하게 결제할 수 있습니다.
-                            </small>
-                        </div>
-                    </div>
+            <aside class="charge-summary" aria-labelledby="charge-summary-title">
+                <h2 id="charge-summary-title">충전 내역 확인</h2>
+                <div class="charge-preview" role="status" aria-live="polite" aria-atomic="true"><span>충전 예정 포인트</span><strong id="expectedPoint">0P</strong><small>1원 = 1P</small></div>
+                <dl class="charge-summary-facts"><div><dt>결제 수단</dt><dd>네이버페이 · 카카오페이</dd></div><div class="charge-summary-total"><dt>결제 금액</dt><dd id="chargeTotal">0원</dd></div></dl>
+                <div class="charge-payment-buttons">
+                    <button type="button" class="charge-pay-button" id="naverPayBtn">네이버페이로 충전</button>
+                    <button type="button" class="charge-pay-button charge-pay-button--kakao" id="kakaoPayBtn">카카오페이로 충전</button>
                 </div>
-            </div>
-
-            <button type="button" class="btn btn-success btn-lg w-100 py-3 fw-bold" id="naverPayBtn">
-                N pay | 포인트 충전하기
-            </button>
-
-            <button type="button" class="btn btn-warning btn-lg w-100 py-3 fw-bold mt-2" id="kakaoPayBtn">
-                카카오페이로 충전하기
-            </button>
-
-            <p class="text-center text-secondary small mt-3 mb-0">
-                <i class="bi bi-info-circle me-1"></i>버튼 클릭 시 결제창으로 이동합니다.
-            </p>
-
+                <p class="charge-payment-note">선택한 간편결제의 결제창으로 이동합니다.<br>결제를 완료한 뒤 충전 내역을 확인해주세요.</p>
+                {{#isPersonal}}<a class="charge-back" href="/mypoint">포인트 관리로 돌아가기</a>{{/isPersonal}}
+                {{#isCorporate}}<a class="charge-back" href="/company/detail">기업페이지로 돌아가기</a>{{/isCorporate}}
+            </aside>
         </div>
     </div>
-
-    <div class="bg-light rounded-4 p-4 mt-4">
-        <p class="mb-2">
-            <i class="bi bi-info-circle text-success me-2"></i>충전한 포인트는 티켓 예매 및 서비스 이용에 사용할 수 있습니다.
-        </p>
-
-        <p class="mb-0">
-            <i class="bi bi-info-circle text-success me-2"></i>충전 및 환불 정책은 운영정책을 확인해 주세요.
-        </p>
-    </div>
-</div>
-
-
+</main>
 <script src="https://nsp.pay.naver.com/sdk/js/naverpay.min.js"></script>
 <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-
-
 <script>
     let selectedPoint = 0;
     const naverPayBtn = document.querySelector("#naverPayBtn");
     const kakaoPayBtn = document.querySelector("#kakaoPayBtn");
     const pointBtns = document.querySelectorAll(".amount-btn");
-    const expectedPoint = document.querySelector("#expectedPoint")
-    const inputPoint = document.querySelector("#chargeAmount")
-    const myPoint = document.querySelector("#myPoint")
+    const expectedPoint = document.querySelector("#expectedPoint");
+    const inputPoint = document.querySelector("#chargeAmount");
+    const myPoint = document.querySelector("#myPoint");
+    const point = Number(myPoint.textContent.trim());
+    myPoint.innerText = point.toLocaleString("ko-KR") + "P";
 
-    const point = Number(myPoint.textContent.trim())
-    myPoint.innerText = point.toLocaleString() + "P"
-
-    document.querySelector("#amount-btn-group").addEventListener("click" , function (e) {
-        const clickBtn = e.target.closest(".amount-btn")
-        pointBtns.forEach(b => b.classList.remove("active"))
-        clickBtn.classList.add("active")
-        selectedPoint = Number(clickBtn.dataset.amount)
-
-        expectedPoint.innerText = selectedPoint.toLocaleString() + "P"
-    })
-
-    inputPoint.addEventListener("input" , function () {
+    function updateChargePreview() {
+        const formatted = selectedPoint.toLocaleString("ko-KR");
+        expectedPoint.innerText = formatted + "P";
+        document.getElementById("chargeTotal").textContent = formatted + "원";
+        pointBtns.forEach(button => {
+            const active = Number(button.dataset.amount) === selectedPoint;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
+    }
+    document.querySelector("#amount-btn-group").addEventListener("click", function (event) {
+        const button = event.target.closest(".amount-btn");
+        if (!button) return;
+        selectedPoint = Number(button.dataset.amount);
+        inputPoint.value = selectedPoint;
+        updateChargePreview();
+    });
+    inputPoint.addEventListener("input", function () {
         selectedPoint = Number(inputPoint.value);
-        expectedPoint.innerText = selectedPoint.toLocaleString() + "P"
-    })
-
+        updateChargePreview();
+    });
     // '네이버 충전하기' 버튼 클릭
     naverPayBtn.addEventListener("click", async function() {
        if(selectedPoint <= 0 || selectedPoint === null) {
@@ -189,7 +110,7 @@
                channelKey: prepareReq.channelKey,
                paymentId: prepareReq.paymentId,
                orderName: "POINT",
-               totalAmount: selectedPoint,
+               totalAmount: prepareReq.amount,
                currency: "CURRENCY_KRW",
                payMethod: "EASY_PAY"
            })
@@ -215,7 +136,7 @@
            window.location.href = completeReq.redirectUrl
 
        }catch (e) {
-            throw new Error("결제에 실패하였습니다")
+            throw new Error("결제 실패하였습니다")
        }
     })
 
@@ -241,7 +162,7 @@
                 channelKey : prepareReq.channelKey ,
                 paymentId : prepareReq.paymentId ,
                 orderName : "POINT" ,
-                totalAmount :  selectedPoint ,
+                totalAmount :  prepareReq.amount ,
                 currency: "CURRENCY_KRW" ,
                 payMethod: "EASY_PAY"
             })
@@ -271,5 +192,6 @@
     })
 
 </script>
-
 {{> layout/footer}}
+</body>
+</html>
