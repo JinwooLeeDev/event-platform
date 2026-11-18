@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
  * - 방 전체 안내에는 퇴장 사유(취소·거절)를 넣지 않는다 — 다른 참가자에게 사유가 드러나지 않게, 사유는 본인 알림에만
  * - ★ [5-2] 종료일 당일 11:00 안내(REMINDER) — 방 전체
  * - ★ [5단계] 커뮤니티 종료(CLOSED) — 방 전체에 한 번 → 화면이 연결을 끊고 내 행사로 이동
+ * - ★ [f/41] 회차 삭제 승인(CLOSED, 취소 문구) — 방 전체에 한 번
  */
 @Component
 @RequiredArgsConstructor
@@ -47,6 +48,16 @@ public class CommunityNotifier {
         messagingTemplate.convertAndSend(topic(sessionId),
                 CommunityMessage.system(CommunityMessage.Type.CLOSED, sessionId, null,
                         "행사가 끝나 커뮤니티가 종료되었습니다."));
+    }
+
+    /**
+     * ★ [f/41] 회차 삭제 승인으로 커뮤니티 종료 — DB 정리(커밋)를 마친 뒤 호출
+     * 화면은 CLOSED 와 같게 처리 (연결 종료 → 3초 뒤 회원은 /myhistory, 기업은 /community)
+     */
+    public void notifySessionCancelled(Long sessionId) {
+        messagingTemplate.convertAndSend(topic(sessionId),
+                CommunityMessage.system(CommunityMessage.Type.CLOSED, sessionId, null,
+                        "행사 회차가 취소되어 커뮤니티가 종료되었습니다. 결제한 포인트는 전액 환불됩니다."));
     }
 
     /** ★ [5-2] 종료일 당일 안내 — 방 전체, 화면은 상단 배너로 표시 */
