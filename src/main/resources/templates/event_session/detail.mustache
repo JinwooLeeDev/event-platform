@@ -5,6 +5,7 @@
 {{> layout/header}}
 {{> layout/account-style}}
 {{> company/session-style}}
+<link rel="stylesheet" href="/css/event-cancel.css">
 <main class="company-workspace session-page"><div class="account-layout">
     {{> layout/company-nav}}
     <section class="account-content">
@@ -17,7 +18,14 @@
             <div class="session-table-wrap"><table class="session-table" aria-busy="true"><caption>전체 신청 내역 · 취소·반려 포함</caption><thead><tr><th scope="col">신청 번호</th><th scope="col">참가자</th><th scope="col">신청 상태</th><th scope="col">신청 일시</th></tr></thead><tbody data-participant-rows></tbody></table></div><noscript><p class="company-description">참가자 목록을 확인하려면 JavaScript를 활성화해주세요.</p></noscript>
         </section>
         {{> event_session/create-form}}
-        <details class="company-danger company-session-danger"><summary>회차 삭제</summary><p>신청·구매 이력이 연결된 회차는 삭제할 수 없습니다. 삭제한 회차는 복구할 수 없습니다.</p><form action="/event-sessions/delete/{{id}}" method="post" data-delete-form data-confirm="이 회차를 삭제하시겠습니까? 삭제한 회차는 복구할 수 없습니다."><button type="submit" class="company-button company-button--danger">회차 삭제</button><p class="company-error" data-delete-error role="alert" hidden></p></form></details>
+        <section class="session-panel cancel-panel" aria-labelledby="session-cancel-title">
+            <div class="company-panel-heading"><div><h2 id="session-cancel-title">회차 취소 신청</h2><p class="company-description">운영자에게 취소를 신청하고 처리 결과를 확인하세요.</p></div></div>
+            {{#successMessage}}<p class="cancel-notice" role="status">{{successMessage}}</p>{{/successMessage}}
+            {{#latestCancel}}<div class="cancel-result cancel-result--{{cancelStatusTone}}"><strong>{{cancelStatusLabel}}</strong><p>신청일 <span data-session-date>{{createdAt}}</span></p><p class="cancel-reason">{{reason}}</p></div>{{/latestCancel}}
+            {{^latestCancel}}<p class="company-description">접수된 취소 신청이 없습니다.</p>{{/latestCancel}}
+            {{#canRequestCancel}}<p class="company-description">신청만으로 회차가 취소되지는 않습니다. 운영자 승인 후 취소와 환불 처리가 진행됩니다.</p><a class="company-button company-button--secondary" href="/event-cancels/save/{{id}}">취소 사유 작성</a>{{/canRequestCancel}}
+            {{^canRequestCancel}}<p class="company-description">승인 대기 중이거나 진행 중·종료·취소된 회차는 새로 취소를 신청할 수 없습니다.</p>{{/canRequestCancel}}
+        </section>
         {{/eventSession}}
     </section>
 </div></main>
