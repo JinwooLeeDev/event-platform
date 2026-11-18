@@ -11,7 +11,6 @@ public class CompanyRequest {
 
     @Data
     public static class UpdateDTO {
-        private String email; //기업 이메일
         private String password; //기업 비밀번호
         private String contactPersonName; // 담당자 명
         private String contactPersonPhone; // 담당자 연락처
@@ -39,8 +38,7 @@ public class CompanyRequest {
 
         public void validate() {
             // 1. 전부 미전달이면 거부
-            if (email == null
-                    && password == null
+            if (password == null
                     && contactPersonName == null
                     && contactPersonPhone == null
                     && name == null
@@ -60,12 +58,6 @@ public class CompanyRequest {
                     || (contactPersonName != null && contactPersonName.isBlank())
                     || (contactPersonPhone != null && contactPersonPhone.isBlank())) {
                 throw new Exception400("입력한 수정 정보는 공백일 수 없습니다.");
-            }
-
-            if (email != null) {
-                if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-                    throw new Exception400("이메일 형식이 올바르지 않습니다.");
-                }
             }
 
             if (password != null) {

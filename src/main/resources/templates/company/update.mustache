@@ -75,49 +75,17 @@
                     <div class="auth-field">
                         <label for="email">이메일</label>
 
-                        <div class="auth-row company-verification-row">
-                            <input id="email"
-                                   name="email"
-                                   type="email"
-                                   value="{{email}}"
-                                   maxlength="254"
-                                   autocomplete="username"
-                                   required>
+                        <input id="email"
+                               type="email"
+                               value="{{email}}"
+                               autocomplete="username"
+                               readonly
+                               aria-describedby="email-help">
 
-                            <button id="sendEmailCode"
-                                    class="auth-button secondary"
-                                    type="button"
-                                    hidden>
-                                인증번호 발송
-                            </button>
-                        </div>
+                        <p id="email-help" class="auth-message">
+                            가입한 이메일은 변경할 수 없습니다.
+                        </p>
                     </div>
-
-                    <div id="emailVerificationSection" class="auth-field" hidden>
-                        <label for="emailCode">인증번호</label>
-
-                        <div class="auth-row company-verification-row">
-                            <input id="emailCode"
-                                   type="text"
-                                   inputmode="numeric"
-                                   autocomplete="one-time-code"
-                                   maxlength="6"
-                                   placeholder="숫자 6자리">
-
-                            <button id="confirmEmailCode"
-                                    class="auth-button secondary"
-                                    type="button">
-                                인증 확인
-                            </button>
-                        </div>
-                    </div>
-
-                    <p id="emailMessage"
-                       class="auth-message"
-                       role="status"
-                       aria-live="polite">
-                        이메일을 변경하려면 새 주소를 인증해주세요.
-                    </p>
 
                     <p>
                         <label for="password">새 비밀번호</label><br>
@@ -213,7 +181,8 @@
                         <button id="checkBusinessButton"
                                 class="auth-button secondary"
                                 type="button"
-                                {{#pending}}disabled{{/pending}}>
+                                {{#pending}}disabled{{
+                        /pending}}>
                         사업자 정보 검증
                         </button>
 
@@ -247,7 +216,9 @@
 
                 {{/company}}
                 <p id="formMessage" class="auth-message" role="alert"></p>
-                <div class="company-form-actions"><button id="company-save" type="submit">수정 저장</button><a class="company-cancel-button" href="/company/detail">취소</a></div>
+                <div class="company-form-actions">
+                    <button id="company-save" type="submit">수정 저장</button>
+                    <a class="company-cancel-button" href="/company/detail">취소</a></div>
 
             </form>
 
@@ -259,23 +230,15 @@
     (() => {
         const get = id => document.getElementById(id);
 
-        // 수정 폼과 계정 정보
+        // 수정 폼과 비밀번호 입력 요소
         const form = get("updateForm");
-        const email = get("email");
         const password = get("password");
         const confirmation = get("passwordConfirm");
         const save = get("company-save");
         const formMessage = get("formMessage");
         const passwordMessage = get("passwordMatchMessage");
 
-        // 이메일 인증 요소
-        const send = get("sendEmailCode");
-        const confirm = get("confirmEmailCode");
-        const code = get("emailCode");
-        const emailMessage = get("emailMessage");
-        const emailSection = get("emailVerificationSection");
-
-        // 사업자 검증 요소
+        // 사업자 인증 대상과 버튼
         const businessSection = get("businessInformation");
         const businessNumber = get("businessNumber");
         const representativeName = get("representativeName");
@@ -283,14 +246,15 @@
         const businessButton = get("checkBusinessButton");
         const businessMessage = get("businessVerificationMessage");
 
-        // 사업자등록증 파일
+        // 사업자등록증 입력과 오류 안내
         const certificate = get("certificate");
         const certificateMessage = get("certificateMessage");
 
-        // 서버가 렌더링한 현재 심사 대기 여부
+        // 서버가 전달한 심사 대기 상태
         const pending = businessSection.dataset.pending === "true";
 
-        // 파일은 value가 아닌 files로 검사하므로 별도 처리
+        // 이메일은 name이 없으므로 수정·전송 대상에 포함되지 않는다.
+        // 파일은 files 속성으로 별도 검사한다.
         const fields = Array.from(
             form.querySelectorAll('input[name]:not([type="file"])')
         );
@@ -301,31 +265,28 @@
             openedOn
         ];
 
-        // 인증 성공 기록과 요청 진행 상태
-        let verifiedEmail = null;
+        // 사업자 인증 성공 정보와 만료 시각
         let verifiedBusiness = null;
         let businessVerifiedUntil = 0;
+
+        // 사업자 인증 요청 중인지, 최종 제출 중인지 구분
         let busy = false;
         let submitting = false;
 
-        // 안내 문구와 표시 상태 변경
+        // 안내 메시지와 표시 상태를 변경한다.
         function message(element, text, state = "") {
             element.textContent = text;
             element.dataset.state = state;
         }
 
-        function emailChanged() {
-            return email.value !== email.defaultValue;
-        }
-
-        // 서버에 저장돼 있던 값과 현재 입력값 비교
+        // 사업자 인증 대상이 기존 값과 달라졌는지 확인한다.
         function businessChanged() {
             return businessFields.some(
                 input => input.value !== input.defaultValue
             );
         }
 
-        // 한 항목만 변경했어도 API 검사에는 세 항목 모두 전달
+        // API에는 변경하지 않은 항목까지 포함한 최종 정보를 전달한다.
         function currentBusinessInfo() {
             return {
                 businessNumber: businessNumber.value,
@@ -334,58 +295,33 @@
             };
         }
 
-        // 현재 정보로 검증받았고 유효시간이 남아 있는지 확인
+        // 현재 입력 정보로 인증받았으며 유효시간이 남았는지 확인한다.
         function isBusinessVerified() {
             return verifiedBusiness !== null
                 && verifiedBusiness === JSON.stringify(currentBusinessInfo())
                 && Date.now() < businessVerifiedUntil;
         }
 
-        // 화면에 보관한 사업자 검증 성공 기록 초기화
+        // 입력 정보 변경 시 이전 인증 결과를 무효화한다.
         function resetBusinessVerification() {
             verifiedBusiness = null;
             businessVerifiedUntil = 0;
         }
 
-        // 인증 요청 중에는 다른 요청과 저장을 막음
+        // 요청·제출 상태에 따라 버튼과 파일 입력을 제어한다.
         function syncButtons() {
             const blocked = busy || submitting;
-
-            send.hidden = !emailChanged();
-            send.disabled = blocked || verifiedEmail === email.value;
-
-            confirm.disabled =
-                blocked
-                || emailSection.hidden
-                || verifiedEmail === email.value;
 
             businessButton.disabled = blocked || pending;
 
             save.disabled = blocked;
             save.textContent = submitting ? "저장 중…" : "수정 저장";
 
-            // 사업자 정보 변경 시에만 새 파일 필수
             certificate.required = !pending && businessChanged();
             certificate.disabled = pending || submitting;
         }
 
-        // 이메일 변경 시 이전 인증 결과 초기화
-        function syncEmail() {
-            verifiedEmail = null;
-            code.value = "";
-            emailSection.hidden = true;
-
-            message(
-                emailMessage,
-                emailChanged()
-                    ? "새 이메일 주소로 인증을 완료해주세요."
-                    : "이메일을 변경하려면 새 주소를 인증해주세요."
-            );
-
-            syncButtons();
-        }
-
-        // 파일 오류 안내와 붉은 테두리·애니메이션 표시
+        // 파일 입력란에 오류 테두리와 강조 애니메이션을 표시한다.
         function showCertificateError(text) {
             message(certificateMessage, text, "error");
             certificate.setAttribute("aria-invalid", "true");
@@ -401,7 +337,7 @@
             certificate.classList.remove("certificate-error");
         }
 
-        // 파일이 정상이면 null, 문제가 있으면 안내 문구 반환
+        // 정상 파일이면 null, 문제가 있으면 안내 문구를 반환한다.
         function validateCertificate() {
             const file = certificate.files[0];
 
@@ -426,7 +362,7 @@
             return null;
         }
 
-        // 이메일·사업자 인증에서 공통으로 사용하는 JSON 요청
+        // 사업자 검증 API에 JSON 요청을 보낸다.
         async function post(url, body) {
             const response = await fetch(url, {
                 method: "POST",
@@ -454,99 +390,7 @@
             return result;
         }
 
-        email.addEventListener("input", syncEmail);
-
-        // 이메일 인증번호 발송
-        send.addEventListener("click", async () => {
-            if (busy || submitting || !email.reportValidity()) {
-                return;
-            }
-
-            const target = email.value;
-
-            verifiedEmail = null;
-            busy = true;
-            email.readOnly = true;
-
-            syncButtons();
-            message(emailMessage, "인증번호를 발송하고 있습니다.");
-
-            try {
-                const result = await post(
-                    "/api/v1/email-verifications",
-                    { email: target }
-                );
-
-                if (email.value !== target) {
-                    return;
-                }
-
-                code.value = "";
-                emailSection.hidden = false;
-
-                message(emailMessage, result.message, "success");
-                code.focus();
-            } catch (error) {
-                message(emailMessage, error.message, "error");
-            } finally {
-                email.readOnly = false;
-                busy = false;
-                syncButtons();
-            }
-        });
-
-        // 이메일 인증번호 확인
-        confirm.addEventListener("click", async () => {
-            if (busy || submitting) {
-                return;
-            }
-
-            if (!/^[0-9]{6}$/.test(code.value)) {
-                message(
-                    emailMessage,
-                    "인증번호 숫자 6자리를 입력해주세요.",
-                    "error"
-                );
-                code.focus();
-                return;
-            }
-
-            const target = email.value;
-
-            busy = true;
-            email.readOnly = true;
-            syncButtons();
-
-            try {
-                const result = await post(
-                    "/api/v1/email-verifications/confirm",
-                    {
-                        email: target,
-                        code: code.value
-                    }
-                );
-
-                if (email.value !== target) {
-                    return;
-                }
-
-                verifiedEmail = result.verified ? target : null;
-
-                message(
-                    emailMessage,
-                    result.message,
-                    result.verified ? "success" : "error"
-                );
-            } catch (error) {
-                message(emailMessage, error.message, "error");
-            } finally {
-                email.readOnly = false;
-                busy = false;
-                syncButtons();
-            }
-        });
-
-        // 사업자 정보 변경 시 검증 성공 상태 초기화
+        // 사업자 정보 변경 시 인증 상태와 안내를 초기화한다.
         function syncBusiness() {
             resetBusinessVerification();
 
@@ -568,7 +412,7 @@
             input.addEventListener("change", syncBusiness);
         });
 
-        // 사업자 검증 버튼
+        // 사업자 정보 검증
         businessButton.addEventListener("click", async () => {
             if (busy || submitting || pending) {
                 return;
@@ -576,7 +420,7 @@
 
             resetBusinessVerification();
 
-            // 서버의 검증 요청 DTO와 앞뒤 공백 처리 기준을 맞춤
+            // 서버와 대표자명 공백 처리 기준을 맞춘다.
             representativeName.value = representativeName.value.trim();
 
             for (const input of businessFields) {
@@ -600,7 +444,7 @@
 
             busy = true;
 
-            // 응답이 올 때까지 검증 대상 정보 수정 방지
+            // 요청 도중 인증 대상 정보가 바뀌지 않도록 잠근다.
             businessFields.forEach(input => {
                 input.readOnly = true;
             });
@@ -614,7 +458,7 @@
                     request
                 );
 
-                // 요청 당시와 정보가 다르면 해당 응답을 사용하지 않음
+                // 요청 당시와 다른 정보라면 해당 결과를 사용하지 않는다.
                 if (requestedInfo !== JSON.stringify(currentBusinessInfo())) {
                     message(
                         businessMessage,
@@ -627,7 +471,8 @@
                 if (result.status === "MATCHED") {
                     verifiedBusiness = requestedInfo;
 
-                    // 실제 만료 여부는 최종 저장 시 서버에서도 검사
+                    // 기존 화면의 10분 기준 유지.
+                    // 최종 인증 유효성은 서버에서도 검사한다.
                     businessVerifiedUntil = requestedAt + 10 * 60 * 1000;
 
                     message(businessMessage, result.message, "success");
@@ -646,7 +491,7 @@
             }
         });
 
-        // 브라우저의 required 검사에서 차단돼도 파일 오류 강조
+        // 브라우저 필수값 검사에서 막혀도 파일 오류를 강조한다.
         certificate.addEventListener("invalid", () => {
             if (certificate.validity.valueMissing) {
                 showCertificateError(
@@ -655,6 +500,7 @@
             }
         });
 
+        // 파일을 다시 선택하면 오류를 초기화하고 재검사한다.
         certificate.addEventListener("change", () => {
             clearCertificateError();
 
@@ -665,7 +511,7 @@
             }
         });
 
-        // 새 비밀번호와 확인값 실시간 비교
+        // 새 비밀번호와 확인값을 실시간으로 비교한다.
         function passwordMatch() {
             const mismatch = password.value !== confirmation.value;
 
@@ -687,7 +533,7 @@
         password.addEventListener("input", passwordMatch);
         confirmation.addEventListener("input", passwordMatch);
 
-        // 최종 수정 제출
+        // 최종 수정 요청 전 검증
         form.addEventListener("submit", event => {
             message(formMessage, "");
 
@@ -695,7 +541,7 @@
                 event.preventDefault();
                 message(
                     formMessage,
-                    "인증 처리가 끝난 뒤 저장해주세요.",
+                    "사업자 검증 처리가 끝난 뒤 저장해주세요.",
                     "error"
                 );
                 return;
@@ -708,15 +554,6 @@
                 return;
             }
 
-            // 이메일을 바꿨을 때만 이메일 인증 필수
-            if (emailChanged() && verifiedEmail !== email.value) {
-                event.preventDefault();
-                message(formMessage, "새 이메일 인증을 완료해주세요.", "error");
-                email.focus();
-                return;
-            }
-
-            // 사업자 정보가 바뀌었을 때만 사업자 검증 필수
             if (businessChanged() && !isBusinessVerified()) {
                 event.preventDefault();
                 message(
@@ -751,7 +588,7 @@
                 return;
             }
 
-            // 기본값과 비교해 실제 변경된 일반 입력만 선택
+            // 기존 값과 비교해 실제 변경된 입력만 선택한다.
             const changed = fields.filter(
                 input => input.value !== input.defaultValue
             );
@@ -760,16 +597,12 @@
 
             if (!changed.length && !hasFile) {
                 event.preventDefault();
-                message(
-                    formMessage,
-                    "변경할 정보를 입력해주세요.",
-                    "error"
-                );
+                message(formMessage, "변경할 정보를 입력해주세요.", "error");
                 return;
             }
 
-            // 변경하지 않은 값은 전송하지 않음
-            // 서버에서는 전송되지 않은 사업자 정보를 기존 값으로 보완
+            // 변경하지 않은 값은 전송하지 않는다.
+            // 서버가 미전달 값을 기존 정보로 유지한다.
             fields.forEach(input => {
                 input.disabled = !changed.includes(input);
             });
@@ -777,12 +610,11 @@
             submitting = true;
             syncButtons();
 
-            // 선택한 파일은 전송돼야 하므로 다시 활성화
-            // disabled 상태의 입력은 폼 데이터에 포함되지 않음
+            // 선택한 파일은 최종 요청에 포함되어야 한다.
             certificate.disabled = pending || !hasFile;
         });
 
-        // 뒤로 가기로 돌아왔을 때 비활성화된 입력·버튼 복원
+        // 뒤로 가기 시 브라우저에 남은 비활성화 상태를 복원한다.
         window.addEventListener("pageshow", () => {
             fields.forEach(input => {
                 input.disabled = false;
@@ -807,7 +639,6 @@
             );
         });
 
-        syncEmail();
         syncBusiness();
         passwordMatch();
     })();
