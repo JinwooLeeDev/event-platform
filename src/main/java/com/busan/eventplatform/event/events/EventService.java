@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.api.purchase.Deposit;
 import com.busan.eventplatform.api.purchase.DepositRepository;
+import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.company.CompanyStatus;
@@ -393,6 +394,26 @@ public class EventService {
             // 행사 DTO에 회차 목록과 회차 수 설정
             event.setSessionPeriods(periods);
             event.setSessionCount(periods.size());
+
+            // 기업 목록에서만 기존 조회 결과로 납부·미납 건수 집계
+            if (companyId != null) {
+                int paidCount = 0;
+                int unpaidCount = 0;
+
+                for(EventResponse.SessionPeriodDto period : periods) {
+                    Deposit deposit = depositBySessionId.get(period.getSessionId());
+
+                    if (deposit == null || deposit.getStatus() == DepositStatus.READY) {
+                        unpaidCount++;
+                    } else if (deposit.getStatus() == DepositStatus.PAID) {
+                        paidCount++;
+                    }
+                    // 환불·반환된 기록은 미납으로 계산하지 않음
+                }
+
+                event.setPaidSessionCount(paidCount);
+                event.setUnpaidSessionCount(unpaidCount);
+            }
         }
     }
 

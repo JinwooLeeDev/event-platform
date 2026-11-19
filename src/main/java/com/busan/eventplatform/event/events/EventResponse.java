@@ -70,6 +70,8 @@ public class EventResponse {
         private String feedbackMessage;
         private boolean paidReadyEvent; // 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
         private int sessionCount; // 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private int paidSessionCount;   // 현재 납부 완료 회차 수
+        private int unpaidSessionCount; // 미납 회차 수
         private LocalDateTime applyStartAt;
         private LocalDateTime applyEndAt;
 
