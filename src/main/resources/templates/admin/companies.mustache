@@ -16,7 +16,7 @@
 {{/companyListPage}}
 {{#companyDetailPage}}
 {{#company}}
-<nav class="admin-context-nav" aria-label="기업 검토 항목"><a href="#admin-company-information">기업·증빙 정보</a><a href="#admin-company-decision">심사 처리</a></nav>
+<nav class="admin-context-nav" aria-label="기업 검토 항목"><a href="#admin-company-information">기업·증빙 정보</a><a href="#admin-company-history">심사 이력</a><a href="#admin-company-decision">심사 처리</a></nav>
 <div class="admin-review-layout"><div class="admin-review-content">
 <section class="admin-panel" id="admin-company-information">
     <div class="admin-panel-heading"><h2>{{name}}</h2><a href="/admin/companies">심사 목록 →</a></div>
@@ -35,6 +35,14 @@
         <div><dt>사업자등록증</dt><dd><a class="admin-company-certificate" href="/admin/companies/{{id}}/certificate" target="_blank" rel="noopener">증빙 열기 ↗<span class="admin-sr-only"> (새 창)</span></a></dd></div>
         {{#reviewFeedback}}<div><dt>최근 보완 사유</dt><dd class="admin-company-feedback">{{reviewFeedback}}</dd></div>{{/reviewFeedback}}
     </dl>
+</section>
+<section class="admin-panel" id="admin-company-history" aria-labelledby="admin-company-history-title">
+    <div class="admin-panel-heading"><h2 id="admin-company-history-title">심사 이력</h2><span class="admin-badge">최신 처리순</span></div>
+    <p class="admin-company-note">관리자가 처리한 심사 결과입니다. 기업의 정보 수정·재제출 단계는 포함되지 않습니다.</p>
+    <ol class="admin-review-history">
+        {{#reviewHistoryRows}}<li><strong>{{fromLabel}} → {{toLabel}}</strong><p><time>{{createdAtText}}</time> · 처리자 {{reviewerName}}</p>{{#hasFeedback}}<p class="admin-company-feedback">{{feedback}}</p>{{/hasFeedback}}</li>{{/reviewHistoryRows}}
+    </ol>
+    {{^reviewHistoryRows}}<p class="admin-company-note">저장된 심사 이력이 없습니다.</p>{{/reviewHistoryRows}}
 </section>
 </div><aside class="admin-review-actions" aria-label="기업 심사 작업">
 <section class="admin-panel" id="admin-company-decision">

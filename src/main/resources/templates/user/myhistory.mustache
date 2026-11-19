@@ -9,8 +9,9 @@
     <div class="account-layout">
         {{> layout/account-nav}}
         <div class="account-content">
-            <header class="account-heading"><div><p class="account-location">마이페이지 / 내 활동</p><h1>신청한 행사</h1><p class="account-description">참가 확정·대기 중·종료된 행사 내역을 확인하세요.</p></div><a class="account-button account-button--secondary" href="/events/list">행사 둘러보기 <span aria-hidden="true">↗</span></a></header>
-            {{> user/history-content}}
+            <header class="account-heading"><div><p class="account-location">마이페이지 / 내 활동</p><h1>신청한 행사</h1><p class="account-description">참가 확정·대기 중·종료된 행사와 취소·환불 내역을 확인하세요.</p></div><a class="account-button account-button--secondary" href="/events/list">행사 둘러보기 <span aria-hidden="true">↗</span></a></header>
+            {{! ★ [f/41] 탭 전환·검색 시 이 영역만 비동기로 교체 }}
+            <div id="history-area" aria-live="polite">{{> user/history-content}}</div>
         </div>
     </div>
 </main>
@@ -21,6 +22,58 @@ document.querySelectorAll('.format-point').forEach(element => {
     const value = Number(element.textContent.trim());
     if (Number.isFinite(value)) element.textContent = value.toLocaleString('ko-KR') + 'P';
 });
+</script>
+<script>
+    // ★ [f/41] 신청 내역 탭 전환·검색 비동기 처리 — 영역(#history-area)만 교체, 실패하면 일반 페이지 이동
+    (() => {
+        const area = document.getElementById('history-area');
+        if (!area || !window.fetch) return;
+        let pending = null;
+
+        // 포인트 숫자 → "92,000P" (새로 받은 영역에도 다시 적용)
+        const formatPoints = root => root.querySelectorAll('.format-point').forEach(element => {
+            const value = Number(element.textContent.trim());
+            if (Number.isFinite(value)) element.textContent = value.toLocaleString('ko-KR') + 'P';
+        });
+
+        async function load(url, push) {
+            const target = new URL(url, location.origin);
+            pending?.abort();                      // 연속 클릭 시 이전 요청 취소
+            pending = new AbortController();
+            area.setAttribute('aria-busy', 'true');
+            try {
+                const response = await fetch('/myhistory/content' + target.search, { signal: pending.signal });
+                if (!response.ok) throw new Error(response.status);
+                area.innerHTML = await response.text();
+                formatPoints(area);
+                if (push) history.pushState(null, '', target.pathname + target.search);
+                area.querySelector('.history-tabs .active')?.focus();
+            } catch (error) {
+                if (error.name !== 'AbortError') location.href = target.href; // 실패 시 기존 방식(페이지 이동)
+            } finally {
+                area.removeAttribute('aria-busy');
+            }
+        }
+
+        // 탭·빈 화면의 [참가 확정 내역 보기] 클릭 (새 탭 열기·Ctrl 클릭은 기본 동작 유지)
+        area.addEventListener('click', event => {
+            const link = event.target.closest('.history-tabs a, .account-empty a');
+            if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey) return;
+            event.preventDefault();
+            load(link.href, true);
+        });
+
+        // 검색 (현재 탭 유지 — form 안의 hidden tab 값 사용)
+        area.addEventListener('submit', event => {
+            const form = event.target.closest('.history-search');
+            if (!form) return;
+            event.preventDefault();
+            load('/myhistory?' + new URLSearchParams(new FormData(form)), true);
+        });
+
+        // 브라우저 뒤로 가기·앞으로 가기
+        window.addEventListener('popstate', () => load(location.href, false));
+    })();
 </script>
 </body>
 </html>

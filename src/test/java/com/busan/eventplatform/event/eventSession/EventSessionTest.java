@@ -2,8 +2,6 @@
 package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionRequest;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import org.junit.jupiter.api.Test;
 

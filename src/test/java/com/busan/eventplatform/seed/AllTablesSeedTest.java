@@ -3,7 +3,7 @@ package com.busan.eventplatform.seed;
 import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.event.events.EventStatus;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.user.UserStatus;
 import com.busan.eventplatform.user.Role;
 import com.busan.eventplatform.user.registration.RegistrationStatus;

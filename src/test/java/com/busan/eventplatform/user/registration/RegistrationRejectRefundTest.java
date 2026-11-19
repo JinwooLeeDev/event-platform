@@ -4,7 +4,8 @@ import com.busan.eventplatform.api.purchase.*;
 import com.busan.eventplatform.api.refund.*;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
+import com.busan.eventplatform.event.eventCancel.EventCancelRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.login.*;
 import com.busan.eventplatform.user.*;
@@ -26,7 +27,7 @@ class RegistrationRejectRefundTest {
         final RefundRepository refundRecords = mock(RefundRepository.class);
         final ApplicationEventPublisher events = mock(ApplicationEventPublisher.class);
         final RefundService refunds = new RefundService(purchases, refundRecords, sessions, mock(DepositRepository.class), registrations, users);
-        final RegistrationService service = new RegistrationService(registrations, history, sessions, users, refunds, events);
+        final RegistrationService service = new RegistrationService(registrations, history, sessions, users, refunds, mock(EventCancelRepository.class), events);
         final LoginIdentity company = LoginIdentity.builder().id(9L).loginType(LoginType.COMPANY).build();
         final User user = User.builder().point(1000).build();
         final EventSession session;

@@ -136,7 +136,8 @@ public class CompanyReviewService {
 //        findReviewableCompany 써선 안 됨. 승인·보완 처리 후에도 상세 조회가 가능하므로 심사 가능 상태는 검사하지 않음
         Company company = findCompany(companyId);
 
-        return new AdminReviewResponse.DetailDTO(company);
+        return new AdminReviewResponse.DetailDTO(company,
+                companyReviewHistoryRepository.findByCompanyIdOrderByCreatedAtDesc(companyId));
     }
 
     public Resource findCertificate(Long companyId, Long adminId) {
