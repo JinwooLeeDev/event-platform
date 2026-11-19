@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.eventCancel;
+package com.busan.eventplatform.event.event_cancel;
 
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;

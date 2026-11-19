@@ -1,9 +1,6 @@
 
-package com.busan.eventplatform.event.eventFile;
+package com.busan.eventplatform.event.event_file;
 
-import com.busan.eventplatform.event.event_file.EventFile;
-import com.busan.eventplatform.event.event_file.EventFileController;
-import com.busan.eventplatform.event.event_file.EventFileService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

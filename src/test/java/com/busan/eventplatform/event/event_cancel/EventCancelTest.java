@@ -1,5 +1,5 @@
 
-package com.busan.eventplatform.event.eventCancel;
+package com.busan.eventplatform.event.event_cancel;
 
 import com.busan.eventplatform.event.EventSession;
 import org.junit.jupiter.api.Test;

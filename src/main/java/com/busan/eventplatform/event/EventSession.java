@@ -187,7 +187,7 @@ public class EventSession {
         if (startsAt.toLocalDate().isBefore(now.toLocalDate())) {
             throw new Exception400("행사 시작일은 오늘 이전일 수 없습니다.");
         }
-        if (applyStartAt.toLocalDate().isBefore(now.toLocalDate())) {
+        if (applyStartAt.isBefore(now)) {
             throw new Exception400("모집 시작일은 오늘 이전일 수 없습니다.");
         }
         if (endsAt.isBefore(startsAt)) {

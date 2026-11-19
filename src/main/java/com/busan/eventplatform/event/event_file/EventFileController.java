@@ -4,6 +4,7 @@ package com.busan.eventplatform.event.event_file;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +23,12 @@ public class EventFileController {
 
         Resource resource = eventFileService.loadFile(eventFile.getStorageKey());
 
+        MediaType contentType = MediaTypeFactory
+                .getMediaType(resource)
+                .orElse(MediaType.APPLICATION_OCTET_STREAM);
+
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(contentType)
                 .body(resource);
     }
 }
