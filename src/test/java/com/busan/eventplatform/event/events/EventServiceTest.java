@@ -3,9 +3,9 @@ package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
-import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.event.event_category.EventCategoryRepository;
-import com.busan.eventplatform.event.event_file.EventFileService;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
+import com.busan.eventplatform.event.eventCategory.EventCategoryRepository;
+import com.busan.eventplatform.event.eventFile.EventFileService;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.event.eventSession.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception400;

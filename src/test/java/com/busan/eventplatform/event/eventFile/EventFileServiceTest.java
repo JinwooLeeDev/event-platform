@@ -1,9 +1,6 @@
 
 package com.busan.eventplatform.event.eventFile;
 
-import com.busan.eventplatform.event.event_file.EventFile;
-import com.busan.eventplatform.event.event_file.EventFileRepository;
-import com.busan.eventplatform.event.event_file.EventFileService;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
 import com.busan.eventplatform.global.error.exception.Exception404;

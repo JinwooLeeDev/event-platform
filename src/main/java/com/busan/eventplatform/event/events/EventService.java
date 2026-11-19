@@ -3,8 +3,8 @@ package com.busan.eventplatform.event.events;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.company.CompanyStatus;
-import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.event.event_category.EventCategoryRepository;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
+import com.busan.eventplatform.event.eventCategory.EventCategoryRepository;
 import com.busan.eventplatform.event.eventSession.EventSessionRequest;
 import com.busan.eventplatform.event.eventSession.EventSessionService;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
@@ -36,7 +36,7 @@ public class EventService {
     private final RegistrationRepository registrationRepository;
     private final EventSessionService eventSessionService;
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
-    private final com.busan.eventplatform.event.event_file.EventFileService eventFileService;
+    private final com.busan.eventplatform.event.eventFile.EventFileService eventFileService;
 
     // 행사 등록 기능
     @Transactional

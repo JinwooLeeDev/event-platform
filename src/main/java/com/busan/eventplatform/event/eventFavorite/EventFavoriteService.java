@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_favorite;
+package com.busan.eventplatform.event.eventFavorite;
 
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
@@ -7,7 +7,6 @@ import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

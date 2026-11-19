@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_file;
+package com.busan.eventplatform.event.eventFile;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

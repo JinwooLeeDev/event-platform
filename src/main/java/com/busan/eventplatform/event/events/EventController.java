@@ -1,6 +1,6 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.event_category.EventCategoryService;
+import com.busan.eventplatform.event.eventCategory.EventCategoryService;
 import com.busan.eventplatform.event.eventSession.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;

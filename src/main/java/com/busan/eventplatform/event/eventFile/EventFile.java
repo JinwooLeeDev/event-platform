@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_file;
+package com.busan.eventplatform.event.eventFile;
 
 import com.busan.eventplatform.event.events.Event;
 import jakarta.persistence.*;

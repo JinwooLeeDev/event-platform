@@ -2,8 +2,8 @@ package com.busan.eventplatform.event;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyStatus;
-import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.event.event_file.EventFileService;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
+import com.busan.eventplatform.event.eventFile.EventFileService;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.login.*;

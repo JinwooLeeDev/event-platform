@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_favorite;
+package com.busan.eventplatform.event.eventFavorite;
 
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.LoginSession;

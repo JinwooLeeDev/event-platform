@@ -38,7 +38,7 @@ class CompanyEventPaymentViewTest {
         }
     }
     @Test void editFormRendersExistingValuesCategoriesAndEscapedFeedback() throws Exception {
-        var category = com.busan.eventplatform.event.event_category.EventCategory.builder().id(3L).name("Culture").build();
+        var category = com.busan.eventplatform.event.eventCategory.EventCategory.builder().id(3L).name("Culture").build();
         var event = Event.builder().id(7L).category(category).title("<script>title</script>")
                 .summary("Summary").description("</textarea><script>description</script>").address("Busan")
                 .feedbackMessage("<script>feedback</script>").build();

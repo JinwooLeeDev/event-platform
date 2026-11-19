@@ -1,5 +1,5 @@
 
-package com.busan.eventplatform.event.event_file;
+package com.busan.eventplatform.event.eventFile;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;

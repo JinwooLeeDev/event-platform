@@ -1,7 +1,7 @@
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
-import com.busan.eventplatform.event.event_category.EventCategory;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

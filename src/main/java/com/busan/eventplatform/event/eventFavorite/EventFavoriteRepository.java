@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_favorite;
+package com.busan.eventplatform.event.eventFavorite;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

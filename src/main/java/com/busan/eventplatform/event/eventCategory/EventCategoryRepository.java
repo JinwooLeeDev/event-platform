@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_category;
+package com.busan.eventplatform.event.eventCategory;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

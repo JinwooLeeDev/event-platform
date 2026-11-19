@@ -1,10 +1,9 @@
-package com.busan.eventplatform.event.event_favorite;
+package com.busan.eventplatform.event.eventFavorite;
 
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,9 +1,8 @@
-package com.busan.eventplatform.event.event_category;
+package com.busan.eventplatform.event.eventCategory;
 
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

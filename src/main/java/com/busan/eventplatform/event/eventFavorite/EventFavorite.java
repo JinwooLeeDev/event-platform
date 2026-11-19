@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_favorite;
+package com.busan.eventplatform.event.eventFavorite;
 
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.user.User;

@@ -2,7 +2,7 @@ package com.busan.eventplatform.admin;
 
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_category.*;
+import com.busan.eventplatform.event.eventCategory.*;
 import com.busan.eventplatform.event.eventSession.*;
 import com.busan.eventplatform.event.events.Event;
 import org.junit.jupiter.api.Test;
