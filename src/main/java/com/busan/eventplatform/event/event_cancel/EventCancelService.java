@@ -5,7 +5,10 @@ import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.event_session.EventSessionRepository;
 import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.events.Event;
+import com.busan.eventplatform.event.events.EventRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.global.error.exception.Exception404;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ public class EventCancelService {
     private final EventCancelRepository eventCancelRepository;
     private final EventSessionRepository eventSessionRepository;
     private final RefundService refundService;
+    private final EventRepository eventRepository;
 
     // 회차 취소 신청
     @Transactional
