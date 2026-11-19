@@ -1,7 +1,7 @@
 package com.busan.eventplatform.user.attendance;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.login.LoginIdentity;
