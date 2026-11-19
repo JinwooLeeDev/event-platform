@@ -11,6 +11,7 @@ import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.file.FileStorage;
 import com.busan.eventplatform.global.file.FileStorageResult;
 import com.busan.eventplatform.login.LoginReqDto;
+import com.busan.eventplatform.login.emailverification.EmailAvailabilityService;
 import com.busan.eventplatform.login.emailverification.EmailVerificationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +37,13 @@ public class CompanyAuthService {
     private final FileStorage fileStorage;
     private final PlatformTransactionManager transactionManager;
     private final BusinessVerificationSessionService businessVerificationSessionService;
+    private final EmailAvailabilityService emailAvailabilityService;
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void signup(CompanySignupReqDto request, HttpSession session) {
         request.validate();
 
-        companyRepository.findByEmail(request.getEmail()).ifPresent(company -> {
-            throw new Exception400("이미 가입되어있는 이메일입니다.");
-        });
+        emailAvailabilityService.validateAvailable(request.getEmail());
 
         Instant verifiedAt = emailVerificationService.requireVerifiedEmail(request.getEmail(), session);
 

@@ -5,24 +5,35 @@
 {{> layout/header}}
 {{> layout/account-style}}
 {{> company/session-style}}
+<link rel="stylesheet" href="/css/event-cancel.css">
 <main class="company-workspace session-page"><div class="account-layout">
     {{> layout/company-nav}}
     <section class="account-content">
         {{#eventSession}}
         <header class="company-heading"><div><p class="company-location">기업페이지 / 주최 행사 / 회차 관리</p><h1>{{name}}</h1><p class="company-description">운영 일정과 참가 신청 현황을 확인하세요.</p></div><a class="company-button company-button--secondary" href="/events/sessions/list/{{eventId}}?select=1">다른 회차 선택</a></header>
         <nav class="company-section-links" aria-label="회차 관리 메뉴"><a href="#session-information">운영 정보</a><a href="#participants-panel">참가자 목록</a><a href="#session-create">회차 추가</a><a href="/events">주최 행사 목록</a></nav>
-        <section class="session-panel" id="session-information" aria-labelledby="session-information-title"><div class="company-panel-heading"><h2 id="session-information-title">회차 운영 정보</h2><span class="company-state" data-session-status>{{status}}</span></div><dl class="session-facts"><div><dt>개최 일정</dt><dd><span data-session-date>{{startsAt}}</span><br>~ <span data-session-date>{{endsAt}}</span></dd></div><div><dt>모집 기간</dt><dd><span data-session-date>{{applyStartAt}}</span><br>~ <span data-session-date>{{applyEndAt}}</span></dd></div></dl><div class="session-choice-metrics"><div><span>정원</span><strong data-session-capacity>{{capacity}}</strong></div><div><span>현재 점유 인원</span><strong>{{occupiedCount}}명</strong></div><div><span>참가비</span><strong data-session-point>{{fee}}</strong></div></div></section>
-        <section class="session-panel" id="participants-panel" data-participants="{{id}}" aria-labelledby="participants-title"><div class="company-panel-heading"><div><h2 id="participants-title">참가자 목록</h2><p class="company-description">이 회차에 접수된 신청 내역입니다.</p></div><button class="company-button company-button--secondary" type="button" data-participant-refresh>새로고침</button></div><div class="session-tools session-participant-tools"><label>참가자 검색<input type="search" data-participant-search placeholder="닉네임 또는 신청 번호" disabled></label><label>신청 상태<select data-participant-filter disabled><option value="">전체</option><option value="CONFIRMED">참가 확정</option><option value="PENDING">승인 대기</option><option value="WAITING">대기</option><option value="CANCELLED">취소</option><option value="REJECTED">반려</option></select></label></div>
+        <section class="session-panel" id="session-information" aria-labelledby="session-information-title"><div class="company-panel-heading"><h2 id="session-information-title">회차 운영 정보</h2><span class="company-state" data-session-status>{{status}}</span></div><dl class="session-facts"><div><dt>개최 일정</dt><dd><span data-session-date>{{startsAt}}</span><br>~ <span data-session-date>{{endsAt}}</span></dd></div><div><dt>모집 기간</dt><dd><span data-session-date>{{applyStartAt}}</span><br>~ <span data-session-date>{{applyEndAt}}</span></dd></div></dl><div class="session-choice-metrics"><div><span>정원</span><strong data-session-capacity>{{capacity}}</strong></div><div><span>현재 점유 인원</span><strong data-session-occupied>{{occupiedCount}}명</strong></div><div><span>참가비</span><strong data-session-point>{{fee}}</strong></div></div></section>
+        <section class="session-panel" id="participants-panel" data-participants="{{id}}" aria-labelledby="participants-title"><div class="company-panel-heading"><div><h2 id="participants-title">참가자 목록</h2><p class="company-description">확정·승인 대기·대기 인원을 관리합니다. 취소·반려된 신청은 표시하지 않습니다.</p></div><button class="company-button company-button--secondary" type="button" data-participant-refresh>새로고침</button></div><div class="session-tools session-participant-tools"><label>참가자 검색<input type="search" data-participant-search placeholder="닉네임 또는 신청 번호" disabled></label><label>신청 상태<select data-participant-filter disabled><option value="">전체</option><option value="CONFIRMED">참가 확정</option><option value="PENDING">승인 대기</option><option value="WAITING">대기</option></select></label></div>
             <p class="company-result" data-participant-summary role="status">참가자 목록을 불러오는 중입니다.</p><p class="company-error" data-participant-error role="alert" hidden></p><p data-participant-login hidden><a class="company-text-link" href="/login?type=company">기업 계정으로 로그인</a></p>
-            <div class="session-table-wrap"><table class="session-table" aria-busy="true"><caption>전체 신청 내역 · 취소·반려 포함</caption><thead><tr><th scope="col">신청 번호</th><th scope="col">참가자</th><th scope="col">신청 상태</th><th scope="col">신청 일시</th></tr></thead><tbody data-participant-rows></tbody></table></div><noscript><p class="company-description">참가자 목록을 확인하려면 JavaScript를 활성화해주세요.</p></noscript>
+            <p class="company-success" data-participant-notice role="status" hidden></p>
+            <div class="session-table-wrap"><table class="session-table" aria-busy="true"><caption>유효한 참가 신청 · 반려 시 결제한 참가비는 포인트로 전액 환불됩니다.</caption><thead><tr><th scope="col">신청 번호</th><th scope="col">참가자</th><th scope="col">신청 상태</th><th scope="col">신청 일시</th><th scope="col">신청 관리</th></tr></thead><tbody data-participant-rows></tbody></table></div><noscript><p class="company-description">참가자 목록을 확인하려면 JavaScript를 활성화해주세요.</p></noscript>
         </section>
         {{> event_session/create-form}}
-        <details class="company-danger company-session-danger"><summary>회차 삭제</summary><p>신청·구매 이력이 연결된 회차는 삭제할 수 없습니다. 삭제한 회차는 복구할 수 없습니다.</p><form action="/event-sessions/delete/{{id}}" method="post" data-delete-form data-confirm="이 회차를 삭제하시겠습니까? 삭제한 회차는 복구할 수 없습니다."><button type="submit" class="company-button company-button--danger">회차 삭제</button><p class="company-error" data-delete-error role="alert" hidden></p></form></details>
+        <section class="session-panel cancel-panel" aria-labelledby="session-cancel-title">
+            <div class="company-panel-heading"><div><h2 id="session-cancel-title">회차 취소 신청</h2><p class="company-description">운영자에게 취소를 신청하고 처리 결과를 확인하세요.</p></div></div>
+            {{#successMessage}}<p class="cancel-notice" role="status">{{successMessage}}</p>{{/successMessage}}
+            {{#latestCancel}}<div class="cancel-result cancel-result--{{cancelStatusTone}}"><strong>{{cancelStatusLabel}}</strong><p>신청일 <span data-session-date>{{createdAt}}</span></p><p class="cancel-reason">{{reason}}</p></div>{{/latestCancel}}
+            {{^latestCancel}}<p class="company-description">접수된 취소 신청이 없습니다.</p>{{/latestCancel}}
+            {{#canRequestCancel}}<p class="company-description">신청만으로 회차가 취소되지는 않습니다. 운영자 승인 후 취소와 환불 처리가 진행됩니다.</p><a class="company-button company-button--secondary" href="/event-cancels/save/{{id}}">취소 사유 작성</a>{{/canRequestCancel}}
+            {{^canRequestCancel}}<p class="company-description">승인 대기 중이거나 진행 중·종료·취소된 회차는 새로 취소를 신청할 수 없습니다.</p>{{/canRequestCancel}}
+        </section>
         {{/eventSession}}
     </section>
 </div></main>
 {{> layout/footer}}
+{{> company/participant-reject-dialog}}
 <script src="/js/company-session.js" defer></script>
+<script src="/js/company-participants.js" defer></script>
 <script>document.querySelector('a[href="#session-create"]')?.addEventListener('click', () => { const panel = document.getElementById('session-create'); if (panel) panel.open = true; });</script>
 </body>
 </html>

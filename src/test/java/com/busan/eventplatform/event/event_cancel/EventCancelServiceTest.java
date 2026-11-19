@@ -43,6 +43,7 @@ class EventCancelServiceTest {
     @BeforeEach
     void setUp() {
         eventSession = mock(EventSession.class);
+        lenient().when(eventSession.getStatus()).thenReturn(EventSessionStatus.SCHEDULED);
     }
 
     @Test

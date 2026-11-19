@@ -5,6 +5,7 @@ import com.busan.eventplatform.login.LoginReqDto;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
+import com.busan.eventplatform.login.emailverification.EmailAvailabilityService;
 import com.busan.eventplatform.login.emailverification.EmailVerificationService;
 import com.busan.eventplatform.user.Role;
 import com.busan.eventplatform.user.User;
@@ -24,6 +25,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
+    private final EmailAvailabilityService emailAvailabilityService;
 
     @Transactional
     public void signup(SignupReqDto request, HttpSession session) {
@@ -33,9 +35,9 @@ public class AuthService {
                         request.getEmail(),
                         session
                 );
-        if (userRepository.existsByEmailNormalized(request.getEmail())) {
-            throw new Exception400("이미 가입된 이메일입니다.");
-        }
+
+        emailAvailabilityService.validateAvailable(request.getEmail());
+
         User user = User.builder()
                 .emailNormalized(request.getEmail())
                 .passwordHash(

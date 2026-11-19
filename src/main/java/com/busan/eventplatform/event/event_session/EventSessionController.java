@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class EventSessionController {
 
     private final EventSessionService eventSessionService;
+    private final com.busan.eventplatform.event.eventCancel.EventCancelService eventCancelService;
 
     // 회차 등록
     // POST - http://localhost:8080/events/sessions/save/{eventId}
@@ -34,7 +35,9 @@ public class EventSessionController {
     // 회차 단건 조회
     // GET - http://localhost:8080/event-sessions/{id}
     @GetMapping("/event-sessions/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable Long id, Model model, HttpSession session) {
+        model.addAllAttributes(eventCancelService.context(
+                com.busan.eventplatform.event.eventCancel.EventCancelController.companyId(session), id));
         EventSessionResponse.DetailDto detailDto = eventSessionService.findById(id);
         model.addAttribute("eventSession", detailDto);
 
@@ -75,10 +78,9 @@ public class EventSessionController {
     // POST - http://localhost:8080/event-sessions/delete/{id}
     @PostMapping("/event-sessions/delete/{id}")
     public String delete(@PathVariable Long id, HttpSession session) {
-        SessionCompanyDto sessionCompanyDto = (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
-        eventSessionService.delete(id, sessionCompanyDto.getId());
-
-        return "redirect:/events";
+        eventCancelService.context(
+                com.busan.eventplatform.event.eventCancel.EventCancelController.companyId(session), id);
+        return "redirect:/event-cancels/save/" + id;
     }
 
 }

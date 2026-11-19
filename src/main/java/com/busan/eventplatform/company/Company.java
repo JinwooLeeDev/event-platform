@@ -121,7 +121,6 @@ public class Company {
 
     public void update(
             String name,
-            String email,
             String representativeName,
             String businessNumber,
             String address,
@@ -133,10 +132,6 @@ public class Company {
 
         if (name != null) {
             this.name = name;
-        }
-
-        if (email != null) {
-            this.email = email;
         }
 
         if (representativeName != null) {

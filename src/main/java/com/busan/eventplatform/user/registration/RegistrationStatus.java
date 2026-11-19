@@ -12,7 +12,7 @@ public enum RegistrationStatus {
     PENDING("승인 대기"),
     WAITING("대기열"),
     CANCELLED("신청 취소"),
-    REJECTED("거절");
+    REJECTED("참가 거절");
 
     private final String description;
 

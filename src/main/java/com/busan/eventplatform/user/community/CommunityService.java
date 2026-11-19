@@ -28,6 +28,7 @@ import java.util.Set;
 /**
  * [f/40] 커뮤니티 — 멤버십 입장·퇴장(2단계) + 채팅방·메시지·내 커뮤니티(4단계) + 종료(5단계) + 종료일 안내(5-2)
  *       + 주최 기업 참여·상단 고정 공지·참여자 목록(6단계)
+ *       + ★ [f/41] 회차 삭제 승인 시 방 종료·삭제
  *
  * join/leave 가 REQUIRES_NEW 인 이유:
  * - 신청 트랜잭션이 '커밋된 뒤'(AFTER_COMMIT) 리스너에서 불리므로, 이미 끝난 트랜잭션에 합류하지 않고 새 트랜잭션으로 저장한다.
@@ -62,8 +63,9 @@ public class CommunityService {
     public boolean join(Long sessionId, Long userId) {
         LocalDateTime now = CommunityPolicy.now();
         EventSession session = eventSessionRepository.findById(sessionId).orElse(null);
-        if (session == null || !CommunityPolicy.isOpen(session.getEndsAt(), now)) {
-            log.debug("[community] 종료된 회차라 입장 생략 회차={} 회원={}", sessionId, userId);
+        if (session == null || !CommunityPolicy.isOpen(session.getEndsAt(), now)
+                || session.getStatus() == EventSessionStatus.CANCELLED) {          // ★ [f/41] 취소된 회차도 입장 생략
+            log.debug("[community] 종료·취소된 회차라 입장 생략 회차={} 회원={}", sessionId, userId);
             return false;
         }
         CommunityMember member = communityMemberRepository.findByEventSessionIdAndUserId(sessionId, userId).orElse(null);
@@ -144,6 +146,9 @@ public class CommunityService {
         EventSession session = eventSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new Exception404("커뮤니티를 찾을 수 없습니다"));
         LocalDateTime now = CommunityPolicy.now();
+        if (session.getStatus() == EventSessionStatus.CANCELLED) {               // ★ [f/41] 회차 삭제 승인됨
+            throw new Exception400("행사 회차가 취소되어 커뮤니티가 종료되었습니다");
+        }
         if (!CommunityPolicy.isOpen(session.getEndsAt(), now)) {
             throw new Exception400("행사가 끝나 커뮤니티가 종료되었습니다");
         }
@@ -339,5 +344,24 @@ public class CommunityService {
                     endedBefore, roomsToClose, closedMembers, deletedMessages, deletedNotices);
         }
         return roomsToClose;
+    }
+
+    // =========================================================
+    // ★ [f/41] 회차 삭제 승인 — 방 하나를 즉시 종료·삭제
+    // =========================================================
+
+    /**
+     * ★ [f/41] 회차 삭제 승인으로 방 정리 — 리스너(커밋 후)에서 호출하므로 새 트랜잭션
+     * 1. 활성 멤버 전원 비활성 (left_reason = EVENT_CANCELLED, 행은 기록으로 남김)
+     * 2. 메시지(입장·퇴장 기록 포함)·상단 공지 삭제 — 자정 종료(closeExpired)와 같은 정리
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void closeCancelledSession(Long sessionId) {
+        LocalDateTime now = CommunityPolicy.now();
+        List<Long> target = List.of(sessionId);
+        int closedMembers = communityMemberRepository.closeAll(target, CommunityLeaveReason.EVENT_CANCELLED, now);
+        int deletedMessages = communityChatMessageRepository.deleteAllBySessionIds(target);
+        communityNoticeRepository.findByEventSessionId(sessionId).ifPresent(communityNoticeRepository::delete);
+        log.info("[community] 회차 취소로 방 종료 회차={} 멤버 비활성={}명 메시지 삭제={}건", sessionId, closedMembers, deletedMessages);
     }
 }
