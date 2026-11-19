@@ -128,6 +128,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // ★[f/40] 상태별 신청 전체 - 서버 시작 시 확정자 커뮤니티 멤버십 동기화
     List<Registration> findAllByStatus(RegistrationStatus status);
 
+    // ★ [f/42] 출석: 회원의 해당 회차 신청 중 지정 상태 1건 (참가 확정 신청 찾기)
+    Optional<Registration> findFirstByUserIdAndEventSessionIdAndStatus(Long userId, Long eventSessionId, RegistrationStatus status);
 
 
 }

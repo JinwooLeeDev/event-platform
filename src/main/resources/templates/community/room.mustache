@@ -11,7 +11,11 @@
         <div id="community-pin" class="community-pin" {{^notice}}hidden{{/notice}}><div class="label">주최 측 공지</div><p id="community-pin-text" class="text">{{#notice}}{{.}}{{/notice}}</p><div id="community-pin-time" class="time">{{#noticeUpdatedAt}}{{.}} 등록{{/noticeUpdatedAt}}</div></div>
         <div class="community-tools">
             <details class="community-people"><summary>참여자 <span id="community-people-count">{{participantCount}}</span>명</summary><ul id="community-people">{{#participants}}<li data-user-id="{{userId}}">{{nickname}}</li>{{/participants}}</ul></details>
-            {{#host}}<details class="community-notice-editor"><summary>주최 공지 관리</summary><form id="community-notice-form" class="community-notice-form" autocomplete="off"><label for="community-notice-input">참가자에게 안내할 내용</label><textarea id="community-notice-input" maxlength="500" rows="3" aria-describedby="community-notice-help" disabled>{{#notice}}{{.}}{{/notice}}</textarea><p id="community-notice-help">최대 500자. 내용을 비우고 등록하면 공지를 내립니다.</p><button id="community-notice-send" class="community-button" type="submit" disabled>공지 등록·수정</button></form></details>{{/host}}
+            {{#host}}
+                <details class="community-notice-editor"><summary>주최 공지 관리</summary><form id="community-notice-form" class="community-notice-form" autocomplete="off"><label for="community-notice-input">참가자에게 안내할 내용</label><textarea id="community-notice-input" maxlength="500" rows="3" aria-describedby="community-notice-help" disabled>{{#notice}}{{.}}{{/notice}}</textarea><p id="community-notice-help">최대 500자. 내용을 비우고 등록하면 공지를 내립니다.</p><button id="community-notice-send" class="community-button" type="submit" disabled>공지 등록·수정</button></form></details>
+                <!-- ★ [f/42] 주최 기업만: 현장 출석 QR 열기 (사이트가 QR 생성, 새 창) -->
+                <a class="community-button" href="/attendance/qr/{{sessionId}}" target="_blank" rel="noopener">출석 QR 열기</a>
+            {{/host}}
         </div>
         <ul id="community-messages" class="community-messages" role="log" aria-label="회차 대화 내역" aria-live="polite" aria-relevant="additions" data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
             {{#empty}}<li class="community-system">아직 대화가 없어요. 함께할 참가자들에게 먼저 인사해보세요.</li>{{/empty}}

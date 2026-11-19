@@ -31,6 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.busan.eventplatform.user.attendance.AttendancePolicy;    // ★ [f/42]
+import com.busan.eventplatform.user.attendance.AttendanceRepository; // ★ [f/42]
+
 
 /**
  * 참가 신청 도메인.
@@ -56,6 +59,8 @@ public class RegistrationService {
     private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
 
     private final EventCancelRepository eventCancelRepository;   // ★ [f/41] 회차 취소 검토 중 확인 (취소 신청 담당 제공)
+    private final AttendanceRepository attendanceRepository;   // ★ [f/42] 출석 여부 표시 (/myhistory · 참가자 관리)
+
 
     private final ApplicationEventPublisher eventPublisher;   // ★ [f/40] 상태 변경 알림 → 커뮤니티 입장·퇴장
 
@@ -298,7 +303,7 @@ public class RegistrationService {
 
     /**
      * [행사 파트 제공] 회차 정원이 늘어났을 때 대기자 승격.
-     * 행사 파트에서 회차 수정(정원 증가) 후 호출한다.
+     * 현재 호출부 없음 (F08에서 회차 수정 API 삭제). 정원 변경 기능을 다시 만들면 변경 직후 이 메서드를 호출한다.
      */
     @Transactional
     public void promoteWaitingUsers(Long sessionId) {
@@ -375,11 +380,12 @@ public class RegistrationService {
         // 1. 내 신청 전체 → 카드 데이터 (요약 카드·탭 개수는 검색과 관계없이 전체 기준)
         List<Registration> registrations = registrationRepository.findAllByUserIdForHistory(loginIdentity.getId());
         Map<Long, Integer> refundAmounts = refundAmountsOf(registrations); // ★ 추가: 결제 id → 실제 환불 금액
+        Map<Long, LocalDateTime> attendedAt = attendedAtOf(registrations);   // ★ [f/42] 신청 id → 출석 시각
         List<RegistrationRes.MyHistoryItemDto> all = registrations.stream()
                 // ★ [f/41] 취소·거절·취소된 회차도 '취소·환불' 탭에 표시 (환불 여부 확인용, 담당자 요청)
                 //   승인 대기(PENDING)는 현재 쓰지 않는 상태라 제외
                 .filter(r -> r.getStatus() != RegistrationStatus.PENDING)
-                .map(r -> toHistoryItem(r, now, refundAmounts))            // ★ 변경: 환불 금액 전달
+                .map(r -> toHistoryItem(r, now, refundAmounts, attendedAt))   // ★ [f/42] 출석 시각 전달            // ★ 변경: 환불 금액 전달
                 .toList();
 
         // 2. 탭 + 행사명 검색 적용
@@ -418,8 +424,11 @@ public class RegistrationService {
                 .orElseThrow(() -> new Exception404("행사 회차가 존재하지 않습니다"));
         validateOrganizer(session, loginIdentity);
 
-        return registrationRepository.findAllBySessionIdWithUser(sessionId).stream()
-                .map(RegistrationRes.ParticipantDto::of)
+        // ★ [f/42] 출석 시각을 쿼리 1번으로 붙여 참가자 관리에 출석 열 표시
+        List<Registration> registrations = registrationRepository.findAllBySessionIdWithUser(sessionId);
+        Map<Long, LocalDateTime> attendedAt = attendedAtOf(registrations);
+        return registrations.stream()
+                .map(r -> RegistrationRes.ParticipantDto.of(r, attendedAt.get(r.getId())))
                 .toList();
     }
 
@@ -635,6 +644,23 @@ public class RegistrationService {
     }
 
     /**
+     * ★ [f/42] 신청 목록의 출석 시각 — key: 신청 id, value: 출석 시각 (출석 기록이 없으면 key 없음)
+     * 카드·참가자마다 조회하지 않고 목록 전체를 쿼리 1번으로 가져온다
+     */
+    private Map<Long, LocalDateTime> attendedAtOf(List<Registration> registrations) {
+        List<Long> ids = registrations.stream().map(Registration::getId).toList();
+        Map<Long, LocalDateTime> result = new HashMap<>();
+        if (ids.isEmpty()) {
+            return result;   // 빈 IN 절 방지
+        }
+        for (Object[] row : attendanceRepository.findAttendedAtByRegistrationIds(ids)) {
+            result.put((Long) row[0], (LocalDateTime) row[1]);
+        }
+        return result;
+    }
+
+
+    /**
      * ★ 추가: [나의 신청 내역] '환불 내역' 문구 — 환불 기록이 있을 때만 "환불 완료 7,000P", 없으면 null (제목 숨김)
      * 무료 취소는 0P 기록이 남으므로 "환불 완료 0P"로 표시된다
      */
@@ -654,7 +680,8 @@ public class RegistrationService {
 
     // [나의 신청 내역] 신청 한 건 → 카드 (상태 라벨·상황별 문구·예상 환불액 계산)
     private RegistrationRes.MyHistoryItemDto toHistoryItem(Registration r, LocalDateTime now,
-                                                           Map<Long, Integer> refundAmounts) { // ★ 추가: 실제 환불 금액
+                                                           Map<Long, Integer> refundAmounts,
+                                                           Map<Long, LocalDateTime> attendedAt) { // ★ [f/42] 출석 시각
         EventSession session = r.getEventSession();
         Event event = session.getEvent();
         RegistrationStatus status = r.getStatus();
@@ -666,6 +693,10 @@ public class RegistrationService {
         boolean eventCancelled = session.getStatus() == EventSessionStatus.CANCELLED
                 || event.getStatus() == EventStatus.CANCELLED;
         boolean cancelable = !ended && !eventCancelled && isCancelable(r, now);
+
+        // ★ [f/42] 출석 — 참가 확정 + 회차·행사 정상일 때만 표시, 출석했으면 [후기 남기러 가기]
+        LocalDateTime attendedTime = status == RegistrationStatus.CONFIRMED && !eventCancelled
+                ? attendedAt.get(r.getId()) : null;
 
         //  1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RefundPolicy)
         int expectedRefund = cancelable
@@ -751,6 +782,11 @@ public class RegistrationService {
                         && CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())  // ★ 한국 시각 기준
                         ? "/community/" + session.getId() : null)
                 .closed("cancelled".equals(tab))   // ★ [f/41] 취소·환불 카드 → '취소 불가' 버튼 숨김
+                .attended(attendedTime != null)                                                  // ★ [f/42]
+                .attendanceText(attendedTime == null ? null
+                        : "출석 체크 완료 · " + attendedTime.format(RegistrationRes.ATTENDED_AT_FORMAT))
+                .reviewUrl(attendedTime == null ? null : AttendancePolicy.reviewUrl(session.getId()))
+
                 .build();
     }
 
