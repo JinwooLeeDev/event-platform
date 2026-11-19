@@ -48,6 +48,7 @@
                         <dd>{{waitingRank}}번</dd>
                     </div>{{/waiting}}</dl>
                 <p class="status-note">{{statusMessage}}</p>
+                {{#attendanceText}}<p class="status-note history-attended" role="status">✔ {{attendanceText}}</p>{{/attendanceText}}
                 <details class="history-payment-details">
                     <summary>신청 변경 이력</summary>
                     <ol class="history-change-list" aria-label="오래된 순 신청 변경 이력">
@@ -80,15 +81,15 @@
                 <div class="history-ticket-bottom">
                     <div><span class="account-caption">결제 포인트</span><strong
                             class="history-paid-point">{{paidPointText}}</strong></div>
-                    <div class="event-actions">{{#communityUrl}}
+                    <div class="event-actions">{{#reviewUrl}}<a class="btn btn-primary" href="{{reviewUrl}}">후기 남기러 가기</a>{{/reviewUrl}}{{#communityUrl}}
                         <a class="btn btn-primary" href="{{communityUrl}}">&#52964;&#48036;&#45768;&#54000; &#51077;&#51109;</a>{{/communityUrl}}
                         <a class="btn btn-primary" href="{{detailUrl}}">행사 상세</a>{{#cancelable}}
                             <button class="btn btn-outline-danger reg-cancel-btn" type="button"
                                     data-cancel-url="{{cancelUrl}}" data-confirm="{{cancelConfirmText}}"
                                     data-refund-policy="{{refundPolicyText}}">참가 취소
-                            </button>{{/cancelable}}{{^cancelable}}{{^closed}}
+                            </button>{{/cancelable}}{{^cancelable}}{{^closed}}{{^attended}}
                             <button class="btn btn-outline-secondary" type="button" disabled>취소 불가
-                            </button>{{/closed}}{{/cancelable}}</div>
+                            </button>{{/attended}}{{/closed}}{{/cancelable}}</div>
                 </div>
             </article>
         {{/items}}
@@ -103,7 +104,7 @@
     <summary>신청 내역 안내</summary>
     <ul>
         <li>참가 확정 내역을 기본으로 표시합니다. 종료된 회차는 ‘종료된 행사’에서 확인할 수 있습니다.</li>
-        <li>취소·거절된 신청과 취소된 행사는 표시하지 않습니다. 요약 숫자와 탭의 건수는 검색 조건과 관계없이 표시 대상 전체를 기준으로 집계합니다.</li>
+        <li>취소·거절된 신청과 취소된 행사는 ‘취소·환불’ 탭에서 환불 내역과 함께 확인할 수 있습니다. 요약 숫자와 탭의 건수는 검색 조건과 관계없이 전체를 기준으로 집계합니다.</li>
         <li>포인트 충전·구매 내역은 포인트 관리 화면에서 확인할 수 있습니다.</li>
         <li>취소 전 예상 환불액과 환불 정책을 확인해주세요.</li>
     </ul>
