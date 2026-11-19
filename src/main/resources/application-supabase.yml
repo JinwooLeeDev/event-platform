@@ -11,4 +11,9 @@ spring:
         sslmode: require
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      data-locations: classpath:db/supabase/test-accounts.sql
