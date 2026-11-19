@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -26,7 +27,7 @@ public class DepositService {
     private final DepositRepository depositRepository;
 
     @Transactional
-    public void payDeposit(Long companyId , Long sessionId){
+    public List<EventSession> payDeposit(Long companyId , Long sessionId){
         // 1. 받은 eventId로 이벤트 조회.
         EventSession eventSession = eventSessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new Exception404("해당 행사에 조회된 회차가 없습니다"));
@@ -34,6 +35,7 @@ public class DepositService {
 
         // 2. 조회된 회차가 현재 기업이 신청한 이벤트와 같은지.
         if(!eventSession.isOwner(companyId)) throw new Exception400("해당 이벤트 신청은 타기업 신청 이벤트입니다");
+        if (depositRepository.findByCompanyIdAndSessionId(companyId, sessionId).isPresent()) throw new Exception400("이미 보증금을 납부한 회차입니다");
 
         // 3. 이벤트 현재 상태가 '결제대기' 이고 세션 상태가 "진행 예정"인지.
         if(!eventSession.forSessionDeposit()) throw new NotApproveException("이미 결제되었거나 아직 관리자에게 승인받지 못했습니다. 다시 확인해주세요");
@@ -63,6 +65,9 @@ public class DepositService {
         if(eventSessionRepository.countNotPaidSession(event.getId() , DepositStatus.PAID) == 0){
             event.setStatus(EventStatus.PUBLISHED); // 모든 세션이 결제됐다면 이벤트 상태 변경.
             event.setPublishedAt(LocalDateTime.now()); // 확정 시간 저장.
+
+            return eventSessionRepository.findByEventId(event.getId());
         }
+        return List.of();
     }
 }

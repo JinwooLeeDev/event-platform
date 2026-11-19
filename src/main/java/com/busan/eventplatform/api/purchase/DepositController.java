@@ -1,6 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
 
+import com.busan.eventplatform.event.event_session.EventSessionScheduler;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
@@ -10,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class DepositController {
     private final DepositService depositService;
+    private final EventSessionScheduler eventSessionScheduler;
 
     @PostMapping("/event/deposit/{id}")
     public String payDeposit(@PathVariable(name = "id") Long sessionId ,
@@ -25,7 +26,7 @@ public class DepositController {
         LoginIdentity loginIdentity = LoginSession.requireIdentity(session);
         if(!loginIdentity.isCompany()) throw new Exception403("기업 세션만 이용가능합니다");
 
-        depositService.payDeposit(loginIdentity.getId() , sessionId);
+        depositService.payDeposit(loginIdentity.getId() , sessionId).forEach(eventSessionScheduler::processEventStarted);
         redirectAttributes.addFlashAttribute("successMessage" , "결제가 완료되었습니다. 해당 행사가 최종 확정됩니다.");
 
         return "redirect:/events";

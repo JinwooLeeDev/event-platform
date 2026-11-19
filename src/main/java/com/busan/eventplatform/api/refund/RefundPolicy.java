@@ -112,5 +112,4 @@ public final class RefundPolicy {
 
             ※ 날짜 기준으로 계산하며, 1P 미만은 버립니다.
             ※ 회차가 시작된 뒤에는 취소할 수 없습니다.""";
-
 }

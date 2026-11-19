@@ -1,11 +1,17 @@
 package com.busan.eventplatform.event.event_session;
 
+import com.busan.eventplatform.api.purchase.DepositStatus;
+import com.busan.eventplatform.api.refund.RefundService;
+import com.busan.eventplatform.company.Company;
+import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
+import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
+import com.busan.eventplatform.user.community.CommunityPolicy;
 import com.busan.eventplatform.user.registration.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +26,11 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 public class EventSessionService {
-
+    private final CompanyRepository companyRepository;
     private final EventSessionRepository eventSessionRepository;
     private final EventRepository eventRepository;
     private final RegistrationService registrationService;
+    private final RefundService refundService;
 
     // 회차 등록
     @Transactional
@@ -115,5 +122,42 @@ public class EventSessionService {
         if (deletedCount == 0) {
             eventSession.setStatus(EventSessionStatus.CANCELLED);
         }
+    }
+
+
+    /// 현재 정상 종료된 이벤트의 세션 id를 찾음.(event가 확정된 이벤트 + 세션이 진행중인 세션 + 보증금이 결제된 ) -- 편의메서드
+    public List<Long> completedSessionIds(LocalDateTime now){
+        return eventSessionRepository.findBySessionIdsAsCompleted(now , EventStatus.PUBLISHED , EventSessionStatus.IN_PROGRESS , DepositStatus.PAID);
+    }
+
+    /// 행사 정상 종료시 그 세션의 상태 변경과 기업에게 자동환불.
+    @Transactional
+    public void completedSession(Long sessionId , LocalDateTime now){
+        EventSession es = eventSessionRepository.findByIdForUpdate(sessionId)
+                .orElseThrow(() -> new Exception404("현재 행사를 찾을 수 없습니다"));
+
+        if(es.getEndsAt().isAfter(now) || es.getStatus() != EventSessionStatus.IN_PROGRESS || es.getEvent().getStatus() != EventStatus.PUBLISHED) {
+            throw new Exception404("정상 종료된 행사가 없습니다");
+        }
+
+        Company company = companyRepository.LockFindById(es.getEvent().getCompany().getId())
+                .orElseThrow(() -> new Exception404("해당 기업은 행사를 개최한 기업이 아닙니다 "));
+
+        es.setCompleted();
+        refundService.refundEventCompleted(company.getId() , es.getId());
+    }
+
+
+    @Transactional
+    public void startSession(Long sessionId) {
+        EventSession es = eventSessionRepository.findByIdForUpdate(sessionId)
+                .orElseThrow(() -> new Exception404("회차를 찾을 수 없습니다"));
+        LocalDateTime now = CommunityPolicy.now();
+
+        if(es.getStatus() != EventSessionStatus.SCHEDULED || es.getStartsAt().isAfter(now) || !es.getEndsAt().isAfter(now)) {
+            return;
+        }
+
+        es.setInProgress();
     }
 }
