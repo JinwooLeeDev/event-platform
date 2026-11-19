@@ -249,11 +249,15 @@ public class EventService {
     }
 
     // 기업이 보완 요청받은 행사 목록 조회
-    public List<Event> findAllFeedback(Long companyId) {
-        return eventRepository.findAllByCompanyIdAndStatus(
+    public EventResponse.ListDto findAllFeedback(Long companyId) {
+        List<Event> eventList = eventRepository.findAllByCompanyIdAndStatus(
                 companyId,
                 EventStatus.FEEDBACK_REQUIRED
         );
+        var response = new EventResponse.ListDto(eventList);
+        populateSessionPeriods(response.getEventList());
+
+        return response;
     }
 
     // 기업이 등록한 행사 전체 내역 조회

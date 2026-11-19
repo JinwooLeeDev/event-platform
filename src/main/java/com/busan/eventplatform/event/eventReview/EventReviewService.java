@@ -46,6 +46,13 @@ public class EventReviewService {
             throw new Exception400("이미 후기를 작성했습니다.");
         }
 
+        // 해당 회차에 출석했는지 확인
+        boolean attended = eventReviewRepository.existsAttendance(eventSessionId, userId);
+
+        if (!attended) {
+            throw new Exception403("출석 확인된 회원만 후기를 작성할 수 있습니다.");
+        }
+
         EventSession eventSession = eventSessionRepository.findById(eventSessionId)
                 .orElseThrow(() -> new Exception404("행사 회차를 찾을 수 없습니다."));
 
