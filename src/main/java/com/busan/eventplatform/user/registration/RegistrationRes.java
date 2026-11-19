@@ -2,8 +2,10 @@ package com.busan.eventplatform.user.registration;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -130,6 +132,25 @@ public class RegistrationRes {
         private String attendanceText;     // ★ [f/42] "출석 체크 완료 · 11. 27 오후 1:42" (출석 전이면 null → 숨김)
         private String reviewUrl;          // ★ [f/42] [후기 남기러 가기] 주소 (출석 전이면 null → 버튼 숨김)
 
+        @Setter
+        @Builder.Default
+        private List<ChangeHistoryDto> changeHistory = List.of();
+    }
+
+    @Getter
+    public static class ChangeHistoryDto {
+        private final String statusLabel;
+        private final String reason;
+        private final String occurredAtText;
+
+        public ChangeHistoryDto(RegistrationHistory history) {
+            this.statusLabel = history.getChangedStatus().getDescription();
+            // 개인 화면에는 처리자 엔티티나 사유에 기록된 내부 기업 ID를 노출하지 않는다.
+            this.reason = history.getReason() == null ? null
+                    : history.getReason().replaceAll("\\s*\\(companyId=\\d+\\)", "");
+            this.occurredAtText = history.getCreatedAt() == null ? "기록 시각 없음"
+                    : CHANGE_TIME.format(history.getCreatedAt());
+        }
     }
 
 
@@ -205,6 +226,8 @@ public class RegistrationRes {
     // 사용처: 임시 테스트 상세 화면(/test/events/{id}), 구매내역 카드(MyHistoryItemDto, 10단계 예정)
     private static final DateTimeFormatter SCHEDULE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy. MM. dd (E) · a h:mm", Locale.KOREAN);
+    private static final DateTimeFormatter CHANGE_TIME =
+            DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
 
     // ★ [f/42] 출석 시각 표시 — 예: 11. 27 오후 1:42 (참가자 관리 출석 열 · /myhistory 출석 문구)
     static final DateTimeFormatter ATTENDED_AT_FORMAT =

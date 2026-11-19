@@ -1,7 +1,7 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.event.event_session.EventSessionRequest;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
+import com.busan.eventplatform.event.eventSession.EventSessionRequest;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.Data;
 
@@ -18,6 +18,8 @@ public class EventRequest {
         private String summary; // 목록에 표시할 짧은 소개
         private String description; // 상세 페이지에 표시할 설명
         private String address; // 행사 주소
+        private String postalCode;
+        private String placeName;
         private Long categoryId; // 선택한 카테고리 ID
         private boolean hasSessions; // 회차 사용 여부
         private String pricingType;
@@ -45,6 +47,9 @@ public class EventRequest {
             }
             if (address == null || address.trim().isEmpty()) {
                 throw new Exception400("행사 주소는 필수 입니다.");
+            }
+            if (postalCode == null || !postalCode.matches("\\d{5}")) {
+                throw new Exception400("올바른 우편번호를 선택해주세요.");
             }
             if (categoryId == null) {
                 throw new Exception400("행사 카테고리는 필수 입니다.");
@@ -93,6 +98,8 @@ public class EventRequest {
                     .summary(this.summary)
                     .description(this.description)
                     .address(this.address)
+                    .postalCode(this.postalCode)
+                    .placeName(this.placeName)
                     .build();
         }
     }

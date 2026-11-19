@@ -7,8 +7,8 @@ import com.busan.eventplatform.api.purchase.Purchase;
 import com.busan.eventplatform.api.refund.RefundPolicy;
 import com.busan.eventplatform.api.refund.RefundService;   // ★ 추가: 참가 취소 시 포인트 환불 (포인트 파트)
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.busan.eventplatform.user.attendance.AttendancePolicy;    // ★ [f/42]
 import com.busan.eventplatform.user.attendance.AttendanceRepository; // ★ [f/42]
@@ -40,7 +41,7 @@ import com.busan.eventplatform.user.attendance.AttendanceRepository; // ★ [f/4
  * 결제 정책: "신청 시 결제"
  * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 결제 (RegistrationPurchaseService → PurchaseService.pay).
  * - 대기열 승격 시에는 추가 결제 없이 상태만 변경.
- * - 본인 취소 환불은 refundUser(), 기업 반려 환불은 refundByCompany()에 위임한다.
+ * - 본인 취소 환불은 refundUser(), 기업 거절 환불은 refundByCompany()에 위임한다.
  * <p>
  * 결제·환불 로직은 이 클래스에서 직접 처리하지 않는다.
  */
@@ -214,9 +215,9 @@ public class RegistrationService {
 
     /**
      * 주최 기업의 참가 신청 거절. 기업 거절은 전액 환불 (조장님 결정 D5).
-     * 반려와 전액 환불을 같은 트랜잭션으로 처리한다. 환불에 실패하면 반려도 롤백된다.
-     *
-     * @return 처리한 환불 정보 (결제 금액 전액, 결제 없는 기존 신청은 0)
+     * ★ [f/41] B안 — 신청 파트: 상태(REJECTED)·이력·이벤트(커뮤니티 퇴장) / 포인트 파트: 환불만 (refundByCompany)
+     * 거절과 전액 환불은 같은 트랜잭션 — 환불이 실패하면 거절도 롤백된다.
+     * refundByCompany 는 상태가 REJECTED 인지 검사하므로 registration.reject() '후', 메서드 끝에서 한 번만 호출한다.
      */
     @Transactional
     public void reject(Long registrationId, LoginIdentity loginIdentity) {
@@ -233,10 +234,7 @@ public class RegistrationService {
         RegistrationStatus statusBefore = registration.getStatus(); // ★ [f/40] 거절 전 상태 기억
         boolean releasedSeat = statusBefore.isSeatOccupying();
         registration.reject();
-        // 무료(0P) 구매도 환불 이력과 구매 상태를 정리한다. 결제 연결이 없는 기존 신청은 생략한다.
-        if (registration.getPurchase() != null) {
-            refundService.refundByCompany(registration);
-        }
+
         // 주최자는 Company 라 processedByUser(User 타입)에 넣을 수 없음 → null + 사유에 기업 id 기록
         recordHistory(registration, RegistrationStatus.REJECTED, null,
                 "주최자 거절 (companyId=" + loginIdentity.getId() + ")");
@@ -395,6 +393,14 @@ public class RegistrationService {
                 .filter(i -> currentTab.equals(i.getTab()))
                 .filter(i -> currentKeyword.isEmpty() || i.getTitle().contains(currentKeyword))
                 .toList();
+
+        if (!items.isEmpty()) {
+            var changes = registrationHistoryRepository.findByUserIdAndRegistrationIds(loginIdentity.getId(),
+                    items.stream().map(RegistrationRes.MyHistoryItemDto::getRegistrationId).toList())
+                    .stream().collect(Collectors.groupingBy(h -> h.getRegistration().getId(),
+                            Collectors.mapping(RegistrationRes.ChangeHistoryDto::new, Collectors.toList())));
+            items.forEach(item -> item.setChangeHistory(changes.getOrDefault(item.getRegistrationId(), List.of())));
+        }
 
         int upcoming = countTab(all, "confirmed");
         int cancelled = countTab(all, "cancelled");   // ★ [f/41]

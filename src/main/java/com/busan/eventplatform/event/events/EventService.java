@@ -3,19 +3,17 @@ package com.busan.eventplatform.event.events;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.company.CompanyStatus;
-import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.event.event_category.EventCategoryRepository;
-import com.busan.eventplatform.event.event_session.EventSessionRequest;
-import com.busan.eventplatform.event.event_session.EventSessionService;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
+import com.busan.eventplatform.event.eventCategory.EventCategoryRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionRequest;
+import com.busan.eventplatform.event.eventSession.EventSessionService;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.registration.RegistrationRepository;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -41,7 +36,7 @@ public class EventService {
     private final RegistrationRepository registrationRepository;
     private final EventSessionService eventSessionService;
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
-    private final com.busan.eventplatform.event.event_file.EventFileService eventFileService;
+    private final com.busan.eventplatform.event.eventFile.EventFileService eventFileService;
 
     // 행사 등록 기능
     @Transactional
@@ -105,8 +100,10 @@ public class EventService {
         int pageIndex = Math.max(0, page - 1);
         // 페이지 크기 1 ~ 50
         int validSize = Math.max(1, Math.min(50, size));
-        // 최신 행사 먼저 오도록 id 내림차순 정렬
-        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
+        // 최신 행사 먼저 오도록 정렬
+        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(
+                Sort.Order.desc("createdAt"), Sort.Order.desc("id")
+        ));
         // 행사 조회
         Page<Event> eventPage;
         eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
@@ -220,36 +217,6 @@ public class EventService {
 
         return event;
     }
-
-//    // 행사 삭제 기능
-//    @Transactional
-//    public void delete(Long id, Long companyId) {
-//        Event event = eventRepository.findById(id)
-//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-//        if (companyId == null || !event.isOwner(companyId)) {
-//            throw new Exception403("삭제 권한이 없습니다.");
-//        }
-//        if (registrationRepository.existsByEventSessionEventId(id)) {
-//            throw new Exception400("신청자가 있는 행사는 삭제할 수 없습니다.");
-//        }
-//
-//        eventRepository.delete(event);
-//    }
-//
-//    // 행사 취소 기능
-//    @Transactional
-//    public Event cancel(Long id, EventRequest.CancelDto cancelDto) {
-//        Event event = eventRepository.findById(id)
-//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-//        if (EventStatus.CANCELLED.equals(event.getStatus())) {
-//            throw new Exception400("이미 취소된 행사입니다.");
-//        }
-//        event.setStatus(EventStatus.CANCELLED);
-//        event.setCancelledAt(LocalDateTime.now());
-//        event.setCancellationReason(cancelDto.getCancellationReason());
-//
-//        return event;
-//    }
 
     // 행사 승인 기능 (관리자)
     @Transactional

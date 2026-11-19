@@ -1,7 +1,7 @@
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.company.Company;
-import com.busan.eventplatform.event.event_category.EventCategory;
+import com.busan.eventplatform.event.eventCategory.EventCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,8 +32,16 @@ public class Event {
     private EventCategory category;
 
     // 행사 주소
-    @Column(nullable = false)
+    @Column(nullable = false, length = 300)
     private String address;
+
+    // 우편번호
+    @Column(length = 5)
+    private String postalCode;
+
+    // 장소명
+    @Column(length = 200)
+    private String placeName;
 
     // 행사 제목
     @Column(nullable = false)

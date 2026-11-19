@@ -1,7 +1,6 @@
 package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.user.registration.Registration;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
@@ -9,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class PurchaseRes {
@@ -39,6 +37,7 @@ public class PurchaseRes {
 
     @Data
     public static class PurchaseListDto {
+        private Long purchaseId;
         private String category;
         private String title;
         private String location;
@@ -56,6 +55,8 @@ public class PurchaseRes {
             EventSession session = purchase.getEventSession();
             Event event = session.getEvent();
 
+            this.purchaseId = purchase.getId();
+            this.detailUrl = "/event/" + event.getId();
             this.category = session.getEvent().getCategory().getName();
             this.title = event.getTitle();
             this.eventDate = Timestamp.valueOf(session.getStartsAt());
@@ -76,7 +77,7 @@ public class PurchaseRes {
                 };
                 this.canCancel = selectCancel();
 
-                // TODO cancelURL ,detailUrl은 추후.
+                // cancelUrl은 신청 내역 화면에서 제공한다.
             }
         }
 
@@ -87,5 +88,18 @@ public class PurchaseRes {
                     status == RegistrationStatus.WAITING;
         }
 
+    }
+
+    @Data
+    @Builder
+    public static class PointHistoryDto {
+        private Timestamp occurredAt;
+        private String typeLabel;
+        private String title;
+        private String sessionName;
+        private String statusLabel;
+        private String detailUrl;
+        private int amount;
+        private boolean debit;
     }
 }

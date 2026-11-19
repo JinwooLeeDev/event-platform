@@ -70,9 +70,9 @@ class AdminPageTest {
         for (String section : List.of("dashboard", "events", "sessions")) {
             var model = new ExtendedModelMap();
             String view = switch (section) {
-                case "events" -> new AdminEventController(org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventService.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.event_session.EventSessionService.class)).list(model, com.busan.eventplatform.event.events.EventStatus.PENDING_REVIEW);
+                case "events" -> new AdminEventController(org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventRepository.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.events.EventService.class), org.mockito.Mockito.mock(com.busan.eventplatform.event.eventSession.EventSessionService.class)).list(model, com.busan.eventplatform.event.events.EventStatus.PENDING_REVIEW);
                 case "sessions" -> {
-                    var sessions = org.mockito.Mockito.mock(com.busan.eventplatform.event.event_session.EventSessionRepository.class);
+                    var sessions = org.mockito.Mockito.mock(com.busan.eventplatform.event.eventSession.EventSessionRepository.class);
                     org.mockito.Mockito.when(sessions.findForAdmin(org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.any()))
                             .thenReturn(org.springframework.data.domain.Page.empty());
                     yield new AdminSessionController(sessions).sessions(null, 1, model);

@@ -49,6 +49,13 @@
                     </div>{{/waiting}}</dl>
                 <p class="status-note">{{statusMessage}}</p>
                 {{#attendanceText}}<p class="status-note history-attended" role="status">✔ {{attendanceText}}</p>{{/attendanceText}}
+                <details class="history-payment-details">
+                    <summary>신청 변경 이력</summary>
+                    <ol class="history-change-list" aria-label="오래된 순 신청 변경 이력">
+                        {{#changeHistory}}<li><strong>{{statusLabel}}</strong><time>{{occurredAtText}}</time>{{#reason}}<p>{{reason}}</p>{{/reason}}</li>{{/changeHistory}}
+                    </ol>
+                    {{^changeHistory}}<p class="account-description">저장된 변경 이력이 없습니다.</p>{{/changeHistory}}
+                </details>
                 {{! ★ [f/41] 취소·환불 카드(closed)는 결제·환불 정보를 펼쳐서 표시 }}
                 <details class="history-payment-details" {{#closed}}open{{/closed}}>
                     <summary>결제·환불 정보 확인</summary>
