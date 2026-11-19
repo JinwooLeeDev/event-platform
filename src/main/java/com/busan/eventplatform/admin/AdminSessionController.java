@@ -1,8 +1,8 @@
 package com.busan.eventplatform.admin;
 
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
-import com.busan.eventplatform.event.event_session.EventSessionResponse;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionResponse;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
