@@ -1,36 +1,110 @@
 <section class="account-balance-strip" aria-label="보유 포인트">
-    <div><span class="account-point-symbol" aria-hidden="true">P</span><div><span class="account-caption">보유 포인트</span><strong class="point-value format-point">{{myPoint}}</strong></div></div>
+    <div><span class="account-point-symbol" aria-hidden="true">P</span>
+        <div><span class="account-caption">보유 포인트</span><strong class="point-value format-point">{{myPoint}}</strong>
+        </div>
+    </div>
     <a class="account-text-link" href="/mypoint">포인트 관리 <span aria-hidden="true">›</span></a>
 </section>
 {{#history}}
-<section class="history-summary" aria-label="참가 현황 요약">
-    <div><span>참가 확정</span><strong>{{confirmedCount}}<small>건</small></strong></div>
-    <div><span>대기 중</span><strong>{{waitingCount}}<small>건</small></strong></div>
-    <div><span>종료된 행사</span><strong>{{pastCount}}<small>건</small></strong></div>
-</section>
-<section class="account-panel history-filter" aria-label="신청 내역 검색과 분류">
-    <nav class="history-tabs" aria-label="나의 행사 분류">
-        {{#historyTabs}}<a class="nav-link {{#active}}active{{/active}}" href="{{url}}" {{#active}}aria-current="page"{{/active}}>{{label}} <span>{{count}}</span></a>{{/historyTabs}}
-    </nav>
-    <form class="history-search" action="/myhistory" method="get" role="search" aria-label="신청 행사 검색">
-        <input type="hidden" name="tab" value="{{currentTab}}">
-        <label for="history-keyword" class="account-sr-only">행사명 검색</label>
-        <input id="history-keyword" type="search" name="keyword" value="{{keyword}}" placeholder="행사명으로 검색">
-        <button type="submit" class="account-button">검색</button>
-    </form>
-</section>
-<div class="account-result-line"><span role="status">조회 결과 <strong>{{resultCount}}</strong>건</span><span>최신 신청순</span></div>
-<div id="history-results" class="history-results">
-    {{#items}}
-    <article class="account-panel history-ticket">
-        <div class="history-ticket-heading"><div>{{#category}}<span class="account-category">{{category}}</span>{{/category}}<h2 class="event-title"><a href="{{detailUrl}}">{{title}}</a></h2><p class="history-session-name">{{sessionName}}</p></div><span class="status-badge {{statusClass}}">{{statusLabel}}</span></div>
-        <dl class="history-event-facts"><div><dt>개최 일시</dt><dd>{{scheduleText}}</dd></div><div><dt>장소</dt><dd>{{place}}</dd></div>{{#waiting}}<div class="history-waiting"><dt>대기 순번</dt><dd>{{waitingRank}}번</dd></div>{{/waiting}}</dl>
-        <p class="status-note">{{statusMessage}}</p>
-        <details class="history-payment-details"><summary>결제·환불 정보 확인</summary><dl>{{#purchasedAtText}}<div><dt>결제일</dt><dd>{{purchasedAtText}}</dd></div>{{/purchasedAtText}}<div><dt>결제 포인트</dt><dd>{{paidPointText}}</dd></div>{{#expectedRefundText}}<div><dt>취소 시 예상 환불</dt><dd>{{expectedRefundText}}</dd></div>{{/expectedRefundText}}{{#refundText}}<div><dt>환불 내역</dt><dd>{{refundText}}</dd></div>{{/refundText}}</dl></details>
-        <div class="history-ticket-bottom"><div><span class="account-caption">결제 포인트</span><strong class="history-paid-point">{{paidPointText}}</strong></div><div class="event-actions">{{#communityUrl}}<a class="btn btn-primary" href="{{communityUrl}}">&#52964;&#48036;&#45768;&#54000; &#51077;&#51109;</a>{{/communityUrl}}<a class="btn btn-primary" href="{{detailUrl}}">행사 상세</a>{{#cancelable}}<button class="btn btn-outline-danger reg-cancel-btn" type="button" data-cancel-url="{{cancelUrl}}" data-confirm="{{cancelConfirmText}}" data-refund-policy="{{refundPolicyText}}">참가 취소</button>{{/cancelable}}{{^cancelable}}<button class="btn btn-outline-secondary" type="button" disabled>취소 불가</button>{{/cancelable}}</div></div>
-    </article>
-    {{/items}}
-    {{#empty}}<div class="account-empty"><span class="account-empty-symbol" aria-hidden="true">▦</span><h2>조건에 맞는 신청 내역이 없습니다.</h2><p>다른 분류나 검색어로 확인해주세요.</p><a href="/myhistory" class="account-button account-button--secondary">참가 확정 내역 보기</a></div>{{/empty}}
-</div>
+    <section class="history-summary" aria-label="참가 현황 요약">
+        <div><span>참가 확정</span><strong>{{confirmedCount}}<small>건</small></strong></div>
+        <div><span>대기 중</span><strong>{{waitingCount}}<small>건</small></strong></div>
+        <div><span>종료된 행사</span><strong>{{pastCount}}<small>건</small></strong></div>
+    </section>
+    <section class="account-panel history-filter" aria-label="신청 내역 검색과 분류">
+        <nav class="history-tabs" aria-label="나의 행사 분류">
+            {{#historyTabs}}
+                <a class="nav-link {{#active}}active{{/active}}" href="{{url}}"
+                   {{#active}}aria-current="page"{{/active}}>{{label}} <span>{{count}}</span></a>{{/historyTabs}}
+        </nav>
+        <form class="history-search" action="/myhistory" method="get" role="search" aria-label="신청 행사 검색">
+            <input type="hidden" name="tab" value="{{currentTab}}">
+            <label for="history-keyword" class="account-sr-only">행사명 검색</label>
+            <input id="history-keyword" type="search" name="keyword" value="{{keyword}}" placeholder="행사명으로 검색">
+            <button type="submit" class="account-button">검색</button>
+        </form>
+    </section>
+    <div class="account-result-line"><span
+            role="status">조회 결과 <strong>{{resultCount}}</strong>건</span><span>최신 신청순</span></div>
+    <div id="history-results" class="history-results">
+        {{#items}}
+            <article class="account-panel history-ticket">
+                <div class="history-ticket-heading">
+                    <div>{{#category}}<span class="account-category">{{category}}</span>{{/category}}<h2
+                            class="event-title"><a href="{{detailUrl}}">{{title}}</a></h2>
+                        <p class="history-session-name">{{sessionName}}</p></div>
+                    <span class="status-badge {{statusClass}}">{{statusLabel}}</span></div>
+                <dl class="history-event-facts">
+                    <div>
+                        <dt>개최 일시</dt>
+                        <dd>{{scheduleText}}</dd>
+                    </div>
+                    <div>
+                        <dt>장소</dt>
+                        <dd>{{place}}</dd>
+                    </div>{{#waiting}}
+                    <div class="history-waiting">
+                        <dt>대기 순번</dt>
+                        <dd>{{waitingRank}}번</dd>
+                    </div>{{/waiting}}</dl>
+                <p class="status-note">{{statusMessage}}</p>
+                <details class="history-payment-details">
+                    <summary>신청 변경 이력</summary>
+                    <ol class="history-change-list" aria-label="오래된 순 신청 변경 이력">
+                        {{#changeHistory}}<li><strong>{{statusLabel}}</strong><time>{{occurredAtText}}</time>{{#reason}}<p>{{reason}}</p>{{/reason}}</li>{{/changeHistory}}
+                    </ol>
+                    {{^changeHistory}}<p class="account-description">저장된 변경 이력이 없습니다.</p>{{/changeHistory}}
+                </details>
+                {{! ★ [f/41] 취소·환불 카드(closed)는 결제·환불 정보를 펼쳐서 표시 }}
+                <details class="history-payment-details" {{#closed}}open{{/closed}}>
+                    <summary>결제·환불 정보 확인</summary>
+                    <dl>{{#purchasedAtText}}
+                        <div>
+                            <dt>결제일</dt>
+                            <dd>{{purchasedAtText}}</dd>
+                        </div>{{/purchasedAtText}}
+                        <div>
+                            <dt>결제 포인트</dt>
+                            <dd>{{paidPointText}}</dd>
+                        </div>{{#expectedRefundText}}
+                            <div>
+                                <dt>취소 시 예상 환불</dt>
+                                <dd>{{expectedRefundText}}</dd>
+                            </div>{{/expectedRefundText}}{{#refundText}}
+                            <div>
+                                <dt>환불 내역</dt>
+                                <dd>{{refundText}}</dd>
+                            </div>{{/refundText}}</dl>
+                </details>
+                {{! ★ [f/41] 취소·환불 카드(closed)는 '취소 불가' 버튼 숨김 }}
+                <div class="history-ticket-bottom">
+                    <div><span class="account-caption">결제 포인트</span><strong
+                            class="history-paid-point">{{paidPointText}}</strong></div>
+                    <div class="event-actions">{{#communityUrl}}
+                        <a class="btn btn-primary" href="{{communityUrl}}">&#52964;&#48036;&#45768;&#54000; &#51077;&#51109;</a>{{/communityUrl}}
+                        <a class="btn btn-primary" href="{{detailUrl}}">행사 상세</a>{{#cancelable}}
+                            <button class="btn btn-outline-danger reg-cancel-btn" type="button"
+                                    data-cancel-url="{{cancelUrl}}" data-confirm="{{cancelConfirmText}}"
+                                    data-refund-policy="{{refundPolicyText}}">참가 취소
+                            </button>{{/cancelable}}{{^cancelable}}{{^closed}}
+                            <button class="btn btn-outline-secondary" type="button" disabled>취소 불가
+                            </button>{{/closed}}{{/cancelable}}</div>
+                </div>
+            </article>
+        {{/items}}
+        {{#empty}}
+            <div class="account-empty"><span class="account-empty-symbol" aria-hidden="true">▦</span>
+                <h2>조건에 맞는 신청 내역이 없습니다.</h2>
+                <p>다른 분류나 검색어로 확인해주세요.</p><a href="/myhistory" class="account-button account-button--secondary">참가 확정 내역
+                    보기</a></div>{{/empty}}
+    </div>
 {{/history}}
-<details class="account-guide"><summary>신청 내역 안내</summary><ul><li>참가 확정 내역을 기본으로 표시합니다. 종료된 회차는 ‘종료된 행사’에서 확인할 수 있습니다.</li><li>취소·거절된 신청과 취소된 행사는 표시하지 않습니다. 요약 숫자와 탭의 건수는 검색 조건과 관계없이 표시 대상 전체를 기준으로 집계합니다.</li><li>포인트 충전·구매 내역은 포인트 관리 화면에서 확인할 수 있습니다.</li><li>취소 전 예상 환불액과 환불 정책을 확인해주세요.</li></ul></details>
+<details class="account-guide">
+    <summary>신청 내역 안내</summary>
+    <ul>
+        <li>참가 확정 내역을 기본으로 표시합니다. 종료된 회차는 ‘종료된 행사’에서 확인할 수 있습니다.</li>
+        <li>취소·거절된 신청과 취소된 행사는 표시하지 않습니다. 요약 숫자와 탭의 건수는 검색 조건과 관계없이 표시 대상 전체를 기준으로 집계합니다.</li>
+        <li>포인트 충전·구매 내역은 포인트 관리 화면에서 확인할 수 있습니다.</li>
+        <li>취소 전 예상 환불액과 환불 정책을 확인해주세요.</li>
+    </ul>
+</details>

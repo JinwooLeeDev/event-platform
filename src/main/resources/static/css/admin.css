@@ -95,6 +95,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .admin-member-facts dt { color:#72808d; font-weight:400; }
 .admin-member-facts dd { margin:0; overflow-wrap:anywhere; }
 .admin-company-feedback { white-space:pre-wrap; line-height:1.9; }
+.admin-review-history { list-style:none; margin:0; padding:0 24px 20px; }
+.admin-review-history li { padding:16px 0; border-top:1px solid #e5eaee; overflow-wrap:anywhere; }
+.admin-review-history strong { font-size:14px; }
+.admin-review-history p { margin:6px 0 0; color:#72808d; font-size:12px; }
 .admin-company-certificate { display:inline-flex; align-items:center; padding:8px 12px; min-height:38px; border:1px solid #bdd5db; border-radius:6px; background:#f1f8f9; color:#087e8b; font-size:12px; font-weight:600; }
 .admin-history { margin-top:24px; }
 .admin-context-nav { display:flex; flex-wrap:wrap; gap:10px 24px; margin-bottom:20px; }

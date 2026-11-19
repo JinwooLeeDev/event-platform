@@ -1,7 +1,7 @@
 package com.busan.eventplatform.user.community;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,9 +25,12 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
     /**
      * ★ [5단계] 활성 멤버라면 그 회차의 종료 시각 (멤버가 아니면 빈 값)
      * STOMP 구독·전송 때마다 불리므로 '멤버 여부 + 종료 시각'을 쿼리 1번으로 확인
+     * ★ [f/41] 취소된 회차면 빈 값 (멤버 정리가 실패해도 이중으로 막음, 상태가 비어 있는 시드는 허용)
      */
     @Query("select m.eventSession.endsAt from CommunityMember m " +
-            "where m.eventSession.id = :sessionId and m.user.id = :userId and m.leftAt is null")
+            "where m.eventSession.id = :sessionId and m.user.id = :userId and m.leftAt is null " +
+            "and (m.eventSession.status is null " +                                   // ★ [f/41] 취소된 회차 차단
+            "or m.eventSession.status <> com.busan.eventplatform.event.eventSession.EventSessionStatus.CANCELLED)")
     Optional<LocalDateTime> findActiveSessionEndsAt(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 
     /** ★ [5단계] 종료 대상 — 활성 멤버가 남아 있고 회차 종료 시각이 기준 이전인 방 */
@@ -50,8 +53,11 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
      * ★ [6단계] 이 기업이 주최한 회차라면 그 회차의 종료 시각 (아니면 빈 값)
      * 주최 기업의 STOMP 구독·전송 권한 — '주최 여부 + 종료 시각'을 쿼리 1번으로 (EventSession.isOwner 와 같은 기준)
      * (행사 파트 Repository 를 수정하지 않기 위해 커뮤니티 Repository 에 둔다)
+     * ★ [f/41] 취소된 회차면 빈 값 — 주최 기업도 더 이상 들어갈 수 없음
      */
-    @Query("select s.endsAt from EventSession s where s.id = :sessionId and s.event.company.id = :companyId")
+    @Query("select s.endsAt from EventSession s where s.id = :sessionId and s.event.company.id = :companyId " +
+            "and (s.status is null " +                                                // ★ [f/41] 취소된 회차 차단
+            "or s.status <> com.busan.eventplatform.event.eventSession.EventSessionStatus.CANCELLED)")
     Optional<LocalDateTime> findOwnedSessionEndsAt(@Param("sessionId") Long sessionId,
                                                    @Param("companyId") Long companyId);
 

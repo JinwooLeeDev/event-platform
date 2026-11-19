@@ -6,6 +6,8 @@ import com.busan.eventplatform.company.businessverification.BusinessVerification
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.util.List;
 
 public class AdminReviewResponse {
 
@@ -40,8 +42,13 @@ public class AdminReviewResponse {
         private final CompanyStatus status;
         private final BusinessVerificationStatus verificationStatus;
         private final String reviewFeedback;
+        private final List<ReviewHistoryDTO> reviewHistory;
 
         public DetailDTO(Company company) {
+            this(company, List.of());
+        }
+
+        public DetailDTO(Company company, List<CompanyReviewHistory> histories) {
             this.id = company.getId();
             this.name = company.getName();
             this.email = company.getEmail();
@@ -54,6 +61,7 @@ public class AdminReviewResponse {
             this.status = company.getStatus();
             this.verificationStatus = company.getBusinessVerificationStatus();
             this.reviewFeedback = company.getReviewFeedback();
+            this.reviewHistory = histories.stream().map(ReviewHistoryDTO::new).toList();
         }
 
 //        관리자 요청이 가능한 상태
@@ -70,6 +78,24 @@ public class AdminReviewResponse {
 
         public boolean isVerificationError() {
             return verificationStatus == BusinessVerificationStatus.ERROR;
+        }
+    }
+
+    @Getter
+    public static class ReviewHistoryDTO {
+        private final CompanyStatus fromStatus;
+        private final CompanyStatus toStatus;
+        private final String reviewerName;
+        private final String feedback;
+        private final Timestamp createdAt;
+
+        public ReviewHistoryDTO(CompanyReviewHistory history) {
+            this.fromStatus = history.getFromStatus();
+            this.toStatus = history.getToStatus();
+            this.reviewerName = history.getReviewer() == null || history.getReviewer().getDisplayName() == null
+                    ? "관리자 정보 없음" : history.getReviewer().getDisplayName();
+            this.feedback = history.getFeedback();
+            this.createdAt = history.getCreatedAt();
         }
     }
 }

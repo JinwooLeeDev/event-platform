@@ -92,7 +92,7 @@
        }
 
        try {
-           const prepareRes = await fetch("/api/payment/prepare" , {
+           const prepareRes = await fetch("/api/naver/payment/prepare" , {
                method : "post" ,
                headers : {"Content-Type" : "application/json"} ,
                body : JSON.stringify({amount : selectedPoint})
@@ -110,7 +110,7 @@
                channelKey: prepareReq.channelKey,
                paymentId: prepareReq.paymentId,
                orderName: "POINT",
-               totalAmount: selectedPoint,
+               totalAmount: prepareReq.amount,
                currency: "CURRENCY_KRW",
                payMethod: "EASY_PAY"
            })
@@ -120,7 +120,7 @@
                return;
            }
 
-           const completeRes = await fetch("/api/payment/complete" , {
+           const completeRes = await fetch("/api/naver/payment/complete" , {
                method : "post" ,
                headers : {"Content-Type" : "application/json"} ,
                body : JSON.stringify({paymentId : payment.paymentId})
@@ -162,7 +162,7 @@
                 channelKey : prepareReq.channelKey ,
                 paymentId : prepareReq.paymentId ,
                 orderName : "POINT" ,
-                totalAmount :  selectedPoint ,
+                totalAmount :  prepareReq.amount ,
                 currency: "CURRENCY_KRW" ,
                 payMethod: "EASY_PAY"
             })

@@ -67,19 +67,7 @@
     {{^reviewable}}<p class="admin-company-note">이미 심사가 처리되어 현재 승인 또는 보완 요청을 할 수 없습니다.</p>{{/reviewable}}
     </div>
 </section>
-{{#cancellable}}
-<details class="admin-panel admin-history admin-danger-panel">
-    <summary class="admin-danger-summary">행사 취소 <span>공개·참가 신청 중단</span></summary>
-    <div class="admin-company-review">
-    <form action="/admin/events/{{id}}/cancel" method="post" class="admin-company-correction admin-event-cancel-form" data-admin-confirm="행사 취소" data-admin-target="{{title}}" data-admin-danger="true">
-        <label for="event-cancellation-reason">취소 사유</label>
-        <p id="event-cancel-help">취소 사유를 입력해주세요. 행사 공개와 참가 신청이 중단되며, 보증금·참가비 환불은 자동으로 처리되지 않습니다.</p>
-        <textarea id="event-cancellation-reason" name="cancellationReason" rows="4" maxlength="255" required aria-describedby="event-cancel-help"></textarea>
-        <button type="submit" class="admin-status-button admin-status-button-danger">행사 취소</button>
-    </form>
-    </div>
-</details>
-{{/cancellable}}
+
 </aside></div>
 {{/reviewEvent}}
 {{/eventDetailPage}}

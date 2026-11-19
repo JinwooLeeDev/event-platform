@@ -56,3 +56,4 @@ portone:
 naver-map:
   client-id: ${NAVER_MAP_CLIENT_ID:}
   client-secret: ${NAVER_MAP_CLIENT_SECRET:}
+

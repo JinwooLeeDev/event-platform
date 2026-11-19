@@ -3,6 +3,7 @@ package com.busan.eventplatform.admin;
 import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.company.companyAdminReview.AdminReviewResponse;
+import com.busan.eventplatform.global.util.MyDateUtil;
 import org.springframework.ui.Model;
 
 import java.util.List;
@@ -35,6 +36,13 @@ public final class AdminCompanyView {
         model.addAttribute("company", company);
         model.addAttribute("companyStatusLabel", statusLabel(company.getStatus()));
         model.addAttribute("companyVerificationLabel", verificationLabel(company.getVerificationStatus()));
+        model.addAttribute("reviewHistoryRows", company.getReviewHistory().stream().map(history -> Map.of(
+                "fromLabel", statusLabel(history.getFromStatus()), "toLabel", statusLabel(history.getToStatus()),
+                "reviewerName", history.getReviewerName(),
+                "feedback", history.getFeedback() == null ? "" : history.getFeedback(),
+                "hasFeedback", history.getFeedback() != null && !history.getFeedback().isBlank(),
+                "createdAtText", history.getCreatedAt() == null ? "기록 시각 없음" : MyDateUtil.timestampFormat(history.getCreatedAt())
+        )).toList());
         return view;
     }
 
