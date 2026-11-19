@@ -61,11 +61,28 @@
                                placeholder="어떤 경험을 할 수 있는 행사인가요?" required>
                     </div>
 
-                    <div class="form-group">
-                        <label>행사 주소 <span>*</span></label>
-                        <input type="text" name="address"
-                               placeholder="행사가 열리는 상세 주소를 입력해 주세요" required>
+                <div class="form-group">
+                    <label>행사 주소 <span>*</span></label>
+
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text"
+                               id="address"
+                               name="address"
+                               placeholder="주소 검색 버튼을 눌러 주세요."
+                               readonly
+                               required
+                               style="flex: 1;">
+
+                        <button type="button"
+                                id="address-search-button"
+                                class="submit-button">
+                            주소 검색
+                        </button>
                     </div>
+
+                    <input type="hidden" id="postalCode" name="postalCode">
+                    <input type="hidden" id="placeName" name="placeName">
+                </div>
 
                     <div class="form-group">
                         <label>상세 설명 <span>*</span></label>
@@ -312,7 +329,51 @@
     </div>
 </template>
 
+<!-- 카카오 우편번호 서비스 -->
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
 <script>
+    let addressSelected = false;
+
+    document.getElementById("address-search-button")
+            .addEventListener("click", function () {
+
+                new daum.Postcode({
+                    oncomplete: function (data) {
+
+                        // 도로명 주소 우선, 없으면 지번 주소
+                        const address = data.roadAddress || data.jibunAddress;
+
+                        if (!address) {
+                            alert("주소를 확인할 수 없습니다.");
+                            return;
+                        }
+
+                        // 주소 입력
+                        document.getElementById("address").value = address;
+
+                        // 우편번호 저장
+                        document.getElementById("postalCode").value = data.zonecode;
+
+                        // 건물명이 제공되면 장소명으로 사용
+                        document.getElementById("placeName").value =
+                                data.buildingName || "";
+
+                        addressSelected = true;
+                    }
+                }).open();
+            });
+
+    // 주소를 선택하지 않으면 행사 등록 차단
+    document.getElementById("event-save-form")
+            .addEventListener("submit", function (event) {
+
+                if (!addressSelected) {
+                    event.preventDefault();
+                    alert("주소 검색을 통해 행사 장소를 선택해 주세요.");
+                }
+            }, true);
+
     const form = document.getElementById("event-save-form");
 
     const sessionArea = document.getElementById("session-area");

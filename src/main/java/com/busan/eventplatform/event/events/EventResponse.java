@@ -127,6 +127,8 @@ public class EventResponse {
         private String imageUrl;
         private String description;
         private String address;
+        private String postalCode;
+        private String placeName;
         private LocalDateTime publishedAt;
         private LocalDateTime createdAt;
         private boolean owner;
@@ -148,6 +150,8 @@ public class EventResponse {
             this.summary = event.getSummary();
             this.description = event.getDescription();
             this.address = event.getAddress();
+            this.postalCode = event.getPostalCode();
+            this.placeName = event.getPlaceName();
             this.publishedAt = event.getPublishedAt();
             this.createdAt = event.getCreatedAt();
             this.owner = owner;
