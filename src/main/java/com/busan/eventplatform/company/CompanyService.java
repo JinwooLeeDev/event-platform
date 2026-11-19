@@ -64,7 +64,7 @@ public class CompanyService {
 
         try {
             return transactionTemplate.execute(transactionStatus -> {
-                Company company = companyRepository.findById(id).orElseThrow(() -> new Exception404("해당 기업을 찾을 수 없습니다."));
+                Company company = companyRepository.LockFindById(id).orElseThrow(() -> new Exception404("해당 기업을 찾을 수 없습니다."));
 
 //        새 사업자 등록증을 첨부했는지
                 boolean certificateUpload = updateDTO.hasBusinessCertificate();

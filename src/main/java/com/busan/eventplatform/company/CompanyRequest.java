@@ -60,6 +60,12 @@ public class CompanyRequest {
                 throw new Exception400("입력한 수정 정보는 공백일 수 없습니다.");
             }
 
+            // 3. DB 컬럼 제한을 넘는 값은 저장 전에 거부
+            validateLength(name, "기업명", 50);
+            validateLength(representativeName, "대표자명", 50);
+            validateLength(contactPersonName, "담당자명", 20);
+            validateLength(address, "주소", 255);
+
             if (password != null) {
                 if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$")) {
                     throw new Exception400("비밀번호 형식이 올바르지 않습니다.");
@@ -74,12 +80,30 @@ public class CompanyRequest {
 
             if (contactPersonPhone != null) {
 //                유연한 국내 및 해외 통합 검증
-                if (!contactPersonPhone.matches("^(?:\\\\+?[1-9]\\\\d{0,2}[\\\\s.-]?)?(?:\\\\(?\\\\d{1,4}\\\\)?[\\\\s.-]?)?\\\\d{2,4}[\\\\s.-]?\\\\d{3,4}(?:[\\\\s.-]?\\\\d{3,4})?$")) {
+                if (!contactPersonPhone.matches("[0-9+\\- ]{7,13}")) {
                     throw new Exception400("전화번호 형식이 올바르지 않습니다.");
                 }
             }
         }
+
+        private void validateLength(
+                String value,
+                String fieldName,
+                int maxLength
+        ) {
+            // 미전달 값은 기존 정보를 유지하므로 검사하지 않는다.
+            if (value == null) {
+                return;
+            }
+
+            if (value.length() > maxLength) {
+                throw new Exception400(
+                        fieldName + " 항목은 " + maxLength + "자 이하로 입력해주세요."
+                );
+            }
+        }
     }
+
 
 
 }

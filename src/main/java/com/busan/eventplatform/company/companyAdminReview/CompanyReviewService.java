@@ -38,7 +38,7 @@ public class CompanyReviewService {
 
     private Company findReviewableCompany(Long companyId) {
 
-        Company company = findCompany(companyId);
+        Company company = companyRepository.LockFindById(companyId).orElseThrow(() -> new Exception404("해당 기업을 찾을 수 없습니다."));
 
         if (company.getStatus() != CompanyStatus.PENDING) {
             throw new Exception400("심사 대기중인 기업만 처리할 수 있습니다.");
