@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_session;
+package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.user.community.CommunityPolicy;

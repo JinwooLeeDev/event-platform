@@ -28,7 +28,7 @@ class AdminMappingContextTest {
     private RequestMappingHandlerMapping mappings;
 
     @Autowired
-    private com.busan.eventplatform.event.event_session.EventSessionRepository sessions;
+    private com.busan.eventplatform.event.eventSession.EventSessionRepository sessions;
     @Autowired
     private com.busan.eventplatform.event.event_category.EventCategoryService categories;
     @Autowired
@@ -37,7 +37,7 @@ class AdminMappingContextTest {
     @Test
     void sessionQueryExecutesAndCategoriesPersistUpdatesAndDeletes() {
         assertNotNull(sessions.findForAdmin(null, org.springframework.data.domain.PageRequest.of(0, 20)));
-        assertNotNull(sessions.findForAdmin(com.busan.eventplatform.event.event_session.EventSessionStatus.SCHEDULED,
+        assertNotNull(sessions.findForAdmin(com.busan.eventplatform.event.eventSession.EventSessionStatus.SCHEDULED,
                 org.springframework.data.domain.PageRequest.of(0, 20)));
         var save = new com.busan.eventplatform.event.event_category.EventCategoryRequest.SaveDto();
         save.setName("Admin category persistence test");

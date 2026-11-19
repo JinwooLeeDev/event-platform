@@ -1,7 +1,7 @@
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.event.event_category.EventCategory;
-import com.busan.eventplatform.event.event_session.EventSessionRequest;
+import com.busan.eventplatform.event.eventSession.EventSessionRequest;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import lombok.Data;
 

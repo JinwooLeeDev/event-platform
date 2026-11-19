@@ -1,8 +1,6 @@
 package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionScheduler;
-import com.busan.eventplatform.event.event_session.EventSessionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

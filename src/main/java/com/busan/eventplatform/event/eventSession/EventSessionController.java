@@ -1,11 +1,9 @@
-package com.busan.eventplatform.event.event_session;
+package com.busan.eventplatform.event.eventSession;
 
-import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

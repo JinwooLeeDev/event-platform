@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_session;
+package com.busan.eventplatform.event.eventSession;
 
 public enum EventSessionStatus {
     SCHEDULED, // 행사 진행 예정

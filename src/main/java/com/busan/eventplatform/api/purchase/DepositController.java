@@ -1,7 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
 
-import com.busan.eventplatform.event.event_session.EventSessionScheduler;
+import com.busan.eventplatform.event.eventSession.EventSessionScheduler;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;

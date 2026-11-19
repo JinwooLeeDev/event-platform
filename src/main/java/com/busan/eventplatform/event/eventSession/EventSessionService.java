@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_session;
+package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.api.refund.RefundService;
@@ -8,19 +8,16 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventRepository;
 import com.busan.eventplatform.event.events.EventStatus;
-import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.community.CommunityPolicy;
 import com.busan.eventplatform.user.registration.RegistrationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service

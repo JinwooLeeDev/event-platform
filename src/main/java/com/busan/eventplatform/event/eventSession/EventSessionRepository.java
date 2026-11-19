@@ -1,4 +1,4 @@
-package com.busan.eventplatform.event.event_session;
+package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.event.EventSession;

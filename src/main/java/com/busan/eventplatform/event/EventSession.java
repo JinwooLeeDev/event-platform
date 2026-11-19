@@ -1,7 +1,7 @@
 package com.busan.eventplatform.event;
 
-import com.busan.eventplatform.event.event_session.EventSessionRequest;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionRequest;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
