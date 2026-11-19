@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -386,6 +387,14 @@ public class RegistrationService {
                 .filter(i -> currentTab.equals(i.getTab()))
                 .filter(i -> currentKeyword.isEmpty() || i.getTitle().contains(currentKeyword))
                 .toList();
+
+        if (!items.isEmpty()) {
+            var changes = registrationHistoryRepository.findByUserIdAndRegistrationIds(loginIdentity.getId(),
+                    items.stream().map(RegistrationRes.MyHistoryItemDto::getRegistrationId).toList())
+                    .stream().collect(Collectors.groupingBy(h -> h.getRegistration().getId(),
+                            Collectors.mapping(RegistrationRes.ChangeHistoryDto::new, Collectors.toList())));
+            items.forEach(item -> item.setChangeHistory(changes.getOrDefault(item.getRegistrationId(), List.of())));
+        }
 
         int upcoming = countTab(all, "confirmed");
         int cancelled = countTab(all, "cancelled");   // ★ [f/41]

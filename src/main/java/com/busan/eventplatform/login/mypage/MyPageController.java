@@ -109,12 +109,7 @@ public class MyPageController {
                 myPageService.getMyPage(sessionUser.getId())
         );
 
-        model.addAttribute(
-                "purchaseList",
-                purchaseService.purchaseList(sessionUser.getId())
-        );
-
-        model.addAttribute("paymentList" , paymentService.paymentList(sessionUser.getId()));
+        model.addAttribute("pointHistory", purchaseService.pointHistory(sessionUser.getId()));
 
         return "user/mypoint";
     }

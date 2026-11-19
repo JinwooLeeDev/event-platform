@@ -2,8 +2,10 @@ package com.busan.eventplatform.user.registration;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -122,8 +124,26 @@ public class RegistrationRes {
         private String refundPolicyText;   // [환불 정책 보기] 문구 (유료·취소 가능할 때만, 아니면 "" → 버튼 숨김)
         private String communityUrl; // [f/40] 참가 확정 + 운영 중이면 "/community/{회차id}", 아니면 null(버튼 숨김)
         private boolean closed;      // ★ [f/41] 취소·거절·행사 취소 카드 → '취소 불가' 버튼 숨김, 결제·환불 정보 펼침
+        @Setter
+        @Builder.Default
+        private List<ChangeHistoryDto> changeHistory = List.of();
     }
 
+    @Getter
+    public static class ChangeHistoryDto {
+        private final String statusLabel;
+        private final String reason;
+        private final String occurredAtText;
+
+        public ChangeHistoryDto(RegistrationHistory history) {
+            this.statusLabel = history.getChangedStatus().getDescription();
+            // 개인 화면에는 처리자 엔티티나 사유에 기록된 내부 기업 ID를 노출하지 않는다.
+            this.reason = history.getReason() == null ? null
+                    : history.getReason().replaceAll("\\s*\\(companyId=\\d+\\)", "");
+            this.occurredAtText = history.getCreatedAt() == null ? "기록 시각 없음"
+                    : CHANGE_TIME.format(history.getCreatedAt());
+        }
+    }
 
 
     /**
@@ -185,6 +205,8 @@ public class RegistrationRes {
     // 사용처: 임시 테스트 상세 화면(/test/events/{id}), 구매내역 카드(MyHistoryItemDto, 10단계 예정)
     private static final DateTimeFormatter SCHEDULE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy. MM. dd (E) · a h:mm", Locale.KOREAN);
+    private static final DateTimeFormatter CHANGE_TIME =
+            DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
 
     /**
      * 회차 일정 표시 문자열 (시안에 맞춰 시작 시각만 표시)
