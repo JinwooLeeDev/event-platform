@@ -7,8 +7,8 @@ import com.busan.eventplatform.api.purchase.Purchase;
 import com.busan.eventplatform.api.refund.RefundPolicy;
 import com.busan.eventplatform.api.refund.RefundService;   // ★ 추가: 참가 취소 시 포인트 환불 (포인트 파트)
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
-import com.busan.eventplatform.event.event_session.EventSessionStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;

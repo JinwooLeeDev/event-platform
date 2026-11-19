@@ -1,7 +1,6 @@
 package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_category.EventCategory;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.user.registration.Registration;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
@@ -9,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class PurchaseRes {

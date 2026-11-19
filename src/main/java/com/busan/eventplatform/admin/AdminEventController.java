@@ -1,7 +1,7 @@
 package com.busan.eventplatform.admin;
 
 import com.busan.eventplatform.event.events.*;
-import com.busan.eventplatform.event.event_session.EventSessionService;
+import com.busan.eventplatform.event.eventSession.EventSessionService;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

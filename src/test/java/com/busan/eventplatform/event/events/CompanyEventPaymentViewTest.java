@@ -1,7 +1,7 @@
 package com.busan.eventplatform.event.events;
 
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionResponse;
+import com.busan.eventplatform.event.eventSession.EventSessionResponse;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ class CompanyEventPaymentViewTest {
         var date = LocalDateTime.of(2026, 12, 20, 10, 0);
         var session = EventSession.builder().id(12L).event(event).name("<script>session</script>")
                 .startsAt(date).endsAt(date.plusHours(2)).applyStartAt(date.minusDays(5)).applyEndAt(date.minusDays(1))
-                .capacity(Integer.MAX_VALUE).pricingType("FREE").status(com.busan.eventplatform.event.event_session.EventSessionStatus.SCHEDULED).build();
+                .capacity(Integer.MAX_VALUE).pricingType("FREE").status(com.busan.eventplatform.event.eventSession.EventSessionStatus.SCHEDULED).build();
         var compiler = com.samskivert.mustache.Mustache.compiler().withLoader(name -> new java.io.InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), java.nio.charset.StandardCharsets.UTF_8));
         for (int count : new int[]{0, 1, 2}) {
@@ -38,7 +38,7 @@ class CompanyEventPaymentViewTest {
         }
     }
     @Test void editFormRendersExistingValuesCategoriesAndEscapedFeedback() throws Exception {
-        var category = com.busan.eventplatform.event.event_category.EventCategory.builder().id(3L).name("Culture").build();
+        var category = com.busan.eventplatform.event.eventCategory.EventCategory.builder().id(3L).name("Culture").build();
         var event = Event.builder().id(7L).category(category).title("<script>title</script>")
                 .summary("Summary").description("</textarea><script>description</script>").address("Busan")
                 .feedbackMessage("<script>feedback</script>").build();
@@ -106,7 +106,7 @@ class CompanyEventPaymentViewTest {
 
     @Test void realSessionCountReachesPaymentFormAndAmount() {
         var repository = mock(EventRepository.class);
-        var sessions = mock(com.busan.eventplatform.event.event_session.EventSessionRepository.class);
+        var sessions = mock(com.busan.eventplatform.event.eventSession.EventSessionRepository.class);
         var service = new EventService(repository, null, null, null, null, sessions, null);
         var event = Event.builder().id(7L).status(EventStatus.PAID_READY).build();
         var session = mock(EventSession.class);

@@ -4,7 +4,7 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.api.payment.PaymentService;
 import com.busan.eventplatform.api.refund.RefundRepository;
 import com.busan.eventplatform.api.refund.RefundStatus;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.User;

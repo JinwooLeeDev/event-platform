@@ -7,7 +7,7 @@ import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.event.EventSession;
-import com.busan.eventplatform.event.event_session.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.event.events.EventStatus;
 import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;

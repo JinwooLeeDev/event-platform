@@ -1,6 +1,6 @@
 package com.busan.eventplatform.event.events;
 
-import com.busan.eventplatform.event.event_favorite.*;
+import com.busan.eventplatform.event.eventFavorite.*;
 import com.busan.eventplatform.login.*;
 import com.busan.eventplatform.global.error.exception.*;
 import org.junit.jupiter.api.Test;
