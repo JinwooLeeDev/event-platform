@@ -15,7 +15,18 @@
             <h1>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}행사 상세{{/event.title}}</h1>
             {{#event.summary}}<p class="detail-summary">{{event.summary}}</p>{{/event.summary}}
             <div class="detail-at-a-glance">
-                <div><span>행사 장소</span><strong>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}장소 안내 준비 중{{/event.address}}</strong></div>
+                <div>
+                    <span>행사 장소</span>
+                    <strong>
+                        {{#event.placeName}}
+                            {{event.placeName}}
+                        {{/event.placeName}}
+                        {{^event.placeName}}
+                            {{#event.address}}{{event.address}}{{/event.address}}
+                            {{^event.address}}장소 안내 준비 중{{/event.address}}
+                        {{/event.placeName}}
+                    </strong>
+                </div>
                 <div><span>주최 기업</span><strong>{{#event.companyName}}{{event.companyName}}{{/event.companyName}}{{^event.companyName}}주최 정보 준비 중{{/event.companyName}}</strong></div>
                 <a href="#sessions">회차별 일정·참가비 확인 <span aria-hidden="true">↓</span></a>
             </div>
@@ -45,7 +56,25 @@
                 </section>
                 <section class="detail-section" id="location" aria-labelledby="location-title">
                     <h2 id="location-title">어디에서 만나나요?</h2>
-                    <div class="detail-address"><span aria-hidden="true">⌖</span><p>{{#event.address}}{{event.address}}{{/event.address}}{{^event.address}}장소 안내를 준비하고 있습니다.{{/event.address}}</p></div>
+                    <div class="detail-address">
+                        <span aria-hidden="true">⌖</span>
+                        <div>
+                            {{#event.placeName}}
+                                <strong>{{event.placeName}}</strong>
+                            {{/event.placeName}}
+                            <p>
+                                {{#event.address}}
+                                    {{event.address}}
+                                {{/event.address}}
+                                {{^event.address}}
+                                    장소 안내를 준비하고 있습니다.
+                                {{/event.address}}
+                            </p>
+                            {{#event.postalCode}}
+                                <p>우편번호: {{event.postalCode}}</p>
+                            {{/event.postalCode}}
+                        </div>
+                    </div>
                     <div id="event-map" class="detail-map" data-address="{{event.address}}" data-title="{{event.title}}" data-client-id="{{naverMapClientId}}" aria-label="행사 장소 지도" hidden></div>
                     <p id="event-map-status" class="detail-map-placeholder" role="status">지도를 불러오는 중입니다.</p>
                 </section>

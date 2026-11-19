@@ -30,7 +30,7 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
     @Query("select m.eventSession.endsAt from CommunityMember m " +
             "where m.eventSession.id = :sessionId and m.user.id = :userId and m.leftAt is null " +
             "and (m.eventSession.status is null " +                                   // ★ [f/41] 취소된 회차 차단
-            "or m.eventSession.status <> com.busan.eventplatform.event.event_session.EventSessionStatus.CANCELLED)")
+            "or m.eventSession.status <> com.busan.eventplatform.event.eventSession.EventSessionStatus.CANCELLED)")
     Optional<LocalDateTime> findActiveSessionEndsAt(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 
     /** ★ [5단계] 종료 대상 — 활성 멤버가 남아 있고 회차 종료 시각이 기준 이전인 방 */
@@ -57,7 +57,7 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
      */
     @Query("select s.endsAt from EventSession s where s.id = :sessionId and s.event.company.id = :companyId " +
             "and (s.status is null " +                                                // ★ [f/41] 취소된 회차 차단
-            "or s.status <> com.busan.eventplatform.event.event_session.EventSessionStatus.CANCELLED)")
+            "or s.status <> com.busan.eventplatform.event.eventSession.EventSessionStatus.CANCELLED)")
     Optional<LocalDateTime> findOwnedSessionEndsAt(@Param("sessionId") Long sessionId,
                                                    @Param("companyId") Long companyId);
 

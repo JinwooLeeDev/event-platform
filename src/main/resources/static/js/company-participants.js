@@ -15,6 +15,8 @@
     const labels = {CONFIRMED:'참가 확정', PENDING:'승인 대기', WAITING:'대기'};
     let participants = [], loading = false, rejecting = false, selected = null;
     const formatDate = value => value ? String(value).replace('T', ' ').slice(0, 16).replaceAll('-', '.') : '—';
+    // ★ [f/42] 출석 열 — 출석: "출석 11. 27 오후 1:42" / 참가 확정 미출석: "미출석" / 대기·승인 대기: "—"
+    const attendanceText = p => p.attended ? '출석 ' + (p.attendedAtText || '') : (p.status === 'CONFIRMED' ? '미출석' : '—');
 
     function render() {
         const keyword = search.value.trim().toLocaleLowerCase('ko-KR');
@@ -23,15 +25,18 @@
         body.replaceChildren();
         rows.forEach(p => {
             const tr = document.createElement('tr');
-            [p.registrationId, p.displayName, labels[p.status], formatDate(p.createdAt)].forEach(value => {
+            [p.registrationId, p.displayName, labels[p.status], formatDate(p.createdAt), attendanceText(p)].forEach(value => {   // ★ [f/42] 출석 열 추가
                 const td = document.createElement('td'); td.textContent = value == null ? '—' : String(value); tr.appendChild(td);
             });
             const action = document.createElement('td'), button = document.createElement('button');
             button.type = 'button'; button.className = 'participant-reject-button'; button.textContent = '반려';
             button.setAttribute('aria-label', `${p.displayName || '참가자'} · 신청 ${p.registrationId} 반려`);
-            button.disabled = loading || rejecting;
+            // ★ [f/42] 회차가 시작된 신청은 반려 불가 (서버 rejectable — reject() 의 시작 시각 검사와 같은 기준)
+            const rejectable = p.rejectable !== false;
+            if (!rejectable) button.title = '이미 시작된 회차의 신청은 반려할 수 없습니다.';
+            button.disabled = loading || rejecting || !rejectable;
             button.addEventListener('click', () => {
-                if (loading || rejecting) return;
+                if (loading || rejecting || !rejectable) return;
                 selected = p;
                 target.textContent = `${p.displayName || '참가자'} · 신청 번호 ${p.registrationId}`;
                 dialogError.hidden = true;
@@ -40,12 +45,13 @@
             action.appendChild(button); tr.appendChild(action); body.appendChild(tr);
         });
         if (!rows.length) {
-            const tr = document.createElement('tr'), td = document.createElement('td'); td.colSpan = 5;
+            const tr = document.createElement('tr'), td = document.createElement('td'); td.colSpan = 6;   // ★ [f/42] 열 5 → 6
             td.textContent = participants.length ? '검색 조건에 맞는 참가자가 없습니다.' : '확정 또는 대기 중인 참가자가 없습니다.';
             tr.appendChild(td); body.appendChild(tr);
         }
         const count = status => participants.filter(p => p.status === status).length;
-        summary.textContent = `전체 ${participants.length}명 · 확정 ${count('CONFIRMED')}명 · 승인 대기 ${count('PENDING')}명 · 대기 ${count('WAITING')}명 · 조회 결과 ${rows.length}명`;
+        const attended = participants.filter(p => p.attended).length;   // ★ [f/42] 출석 인원
+        summary.textContent = `전체 ${participants.length}명 · 확정 ${count('CONFIRMED')}명 · 승인 대기 ${count('PENDING')}명 · 대기 ${count('WAITING')}명 · 출석 ${attended}명 · 조회 결과 ${rows.length}명`;
     }
 
     async function load(afterReject = false) {

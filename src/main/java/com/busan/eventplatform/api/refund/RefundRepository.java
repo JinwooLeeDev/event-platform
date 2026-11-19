@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 /**
  * [임시 생성]
@@ -15,6 +16,16 @@ import java.util.Optional;
 
 @Repository
 public interface RefundRepository extends JpaRepository<Refund, Long> {
+
+    @Query("""
+        select r from Refund r
+        join fetch r.purchase p
+        join fetch p.eventSession s
+        join fetch s.event
+        where r.user.id = :userId and p.user.id = :userId
+          and r.company is null and r.deposit is null and r.status = :status
+        """)
+    List<Refund> findByUserIdWithPurchase(@Param("userId") Long userId, @Param("status") RefundStatus status);
 
     @Query("""
         select r from Refund r where r.deposit.id = :depositId and r.status = :status

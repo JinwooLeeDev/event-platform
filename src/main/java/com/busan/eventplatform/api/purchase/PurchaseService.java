@@ -2,6 +2,10 @@ package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
+import com.busan.eventplatform.api.payment.PaymentService;
+import com.busan.eventplatform.api.refund.RefundRepository;
+import com.busan.eventplatform.api.refund.RefundStatus;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.global.error.exception.AlreadyPurchaseException;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.User;
@@ -15,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,8 @@ public class PurchaseService {
     private final UserRepository userRepository;
     private final RegistrationRepository registrationRepository;
     private final EventSessionRepository eventSessionRepository;
+    private final PaymentService paymentService;
+    private final RefundRepository refundRepository;
 
     // 결제창에 필요한 행사 결제 포인트와 행사 정보 조회.
     public PurchaseRes.PurchasePointDto calcPointAndEvent(Long userId, Long eventSessionId) {
@@ -62,7 +70,7 @@ public class PurchaseService {
 
     public List<PurchaseRes.PurchaseListDto> purchaseList(Long userId) {
         List<Purchase> purchaseList = purchaseRepository.findByUserIdWithPurchaseList(userId);
-        if (purchaseList == null) return List.of(); // 구매내역 없으면 그냥 빈 목록으로.
+        if (purchaseList == null || purchaseList.isEmpty()) return List.of();
 
         // registrationList 조회할때 동일 userId로 조회하므로 이벤트세션ID만 필요. --> map으로
         List<Long> sessionIds =purchaseList.stream()
@@ -88,5 +96,42 @@ public class PurchaseService {
                 .map(p ->
                         new PurchaseRes.PurchaseListDto(p , registrationMap.get(p.getEventSession().getId())))
                 .toList();
+    }
+
+    public List<PurchaseRes.PointHistoryDto> pointHistory(Long userId) {
+        var refundList = refundRepository.findByUserIdWithPurchase(userId, RefundStatus.REFUND);
+        Map<Long, Integer> refundedAmounts = new HashMap<>();
+        refundList.forEach(refund -> refundedAmounts.merge(refund.getPurchase().getId(), refund.getAmount(), Integer::sum));
+        var history = new ArrayList<PurchaseRes.PointHistoryDto>();
+
+        paymentService.paymentList(userId).forEach(payment -> history.add(PurchaseRes.PointHistoryDto.builder()
+                .occurredAt(payment.getPaidAt()).typeLabel("충전").title("포인트 충전")
+                .statusLabel("충전 완료").amount(payment.getAmount()).build()));
+
+        purchaseList(userId).forEach(purchase -> history.add(PurchaseRes.PointHistoryDto.builder()
+                .occurredAt(purchase.getPurchaseDate()).typeLabel("행사 구매").title(purchase.getTitle())
+                .sessionName(purchase.getSessionName()).detailUrl(purchase.getDetailUrl())
+                .statusLabel(refundLabel(refundedAmounts.get(purchase.getPurchaseId()), purchase.getPrice()))
+                .amount(purchase.getPrice()).debit(true).build()));
+
+        refundList.forEach(refund -> {
+            var purchase = refund.getPurchase();
+            var session = purchase.getEventSession();
+            history.add(PurchaseRes.PointHistoryDto.builder()
+                    .occurredAt(refund.getCreatedAt()).typeLabel("환불").title(session.getEvent().getTitle())
+                    .sessionName(session.getName()).detailUrl("/event/" + session.getEvent().getId())
+                    .statusLabel(refundLabel(refund.getAmount(), purchase.getPrice()))
+                    .amount(refund.getAmount()).build());
+        });
+
+        history.sort(Comparator.comparing(PurchaseRes.PointHistoryDto::getOccurredAt,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+        return history;
+    }
+
+    private String refundLabel(Integer amount, int purchasePrice) {
+        if (amount == null) return "구매 완료";
+        if (amount == 0) return "환불액 0P";
+        return amount >= purchasePrice ? "전액 환불" : "부분 환불";
     }
 }

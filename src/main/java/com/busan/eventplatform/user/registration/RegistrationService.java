@@ -29,6 +29,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.busan.eventplatform.user.attendance.AttendancePolicy;    // ★ [f/42]
+import com.busan.eventplatform.user.attendance.AttendanceRepository; // ★ [f/42]
 
 
 /**
@@ -37,7 +41,7 @@ import java.util.Map;
  * 결제 정책: "신청 시 결제"
  * - CONFIRMED / PENDING / WAITING 모두 신청 시점에 결제 (RegistrationPurchaseService → PurchaseService.pay).
  * - 대기열 승격 시에는 추가 결제 없이 상태만 변경.
- * - 본인 취소 환불은 refundUser(), 기업 반려 환불은 refundByCompany()에 위임한다.
+ * - 본인 취소 환불은 refundUser(), 기업 거절 환불은 refundByCompany()에 위임한다.
  * <p>
  * 결제·환불 로직은 이 클래스에서 직접 처리하지 않는다.
  */
@@ -55,6 +59,8 @@ public class RegistrationService {
     private final RefundService refundService;   // ★ 추가: 환불 금액 계산·포인트 반환은 포인트 파트가 담당
 
     private final EventCancelRepository eventCancelRepository;   // ★ [f/41] 회차 취소 검토 중 확인 (취소 신청 담당 제공)
+    private final AttendanceRepository attendanceRepository;   // ★ [f/42] 출석 여부 표시 (/myhistory · 참가자 관리)
+
 
     private final ApplicationEventPublisher eventPublisher;   // ★ [f/40] 상태 변경 알림 → 커뮤니티 입장·퇴장
 
@@ -209,9 +215,9 @@ public class RegistrationService {
 
     /**
      * 주최 기업의 참가 신청 거절. 기업 거절은 전액 환불 (조장님 결정 D5).
-     * 반려와 전액 환불을 같은 트랜잭션으로 처리한다. 환불에 실패하면 반려도 롤백된다.
-     *
-     * @return 처리한 환불 정보 (결제 금액 전액, 결제 없는 기존 신청은 0)
+     * ★ [f/41] B안 — 신청 파트: 상태(REJECTED)·이력·이벤트(커뮤니티 퇴장) / 포인트 파트: 환불만 (refundByCompany)
+     * 거절과 전액 환불은 같은 트랜잭션 — 환불이 실패하면 거절도 롤백된다.
+     * refundByCompany 는 상태가 REJECTED 인지 검사하므로 registration.reject() '후', 메서드 끝에서 한 번만 호출한다.
      */
     @Transactional
     public void reject(Long registrationId, LoginIdentity loginIdentity) {
@@ -228,10 +234,7 @@ public class RegistrationService {
         RegistrationStatus statusBefore = registration.getStatus(); // ★ [f/40] 거절 전 상태 기억
         boolean releasedSeat = statusBefore.isSeatOccupying();
         registration.reject();
-        // 무료(0P) 구매도 환불 이력과 구매 상태를 정리한다. 결제 연결이 없는 기존 신청은 생략한다.
-        if (registration.getPurchase() != null) {
-            refundService.refundByCompany(registration);
-        }
+
         // 주최자는 Company 라 processedByUser(User 타입)에 넣을 수 없음 → null + 사유에 기업 id 기록
         recordHistory(registration, RegistrationStatus.REJECTED, null,
                 "주최자 거절 (companyId=" + loginIdentity.getId() + ")");
@@ -300,7 +303,7 @@ public class RegistrationService {
 
     /**
      * [행사 파트 제공] 회차 정원이 늘어났을 때 대기자 승격.
-     * 행사 파트에서 회차 수정(정원 증가) 후 호출한다.
+     * 현재 호출부 없음 (F08에서 회차 수정 API 삭제). 정원 변경 기능을 다시 만들면 변경 직후 이 메서드를 호출한다.
      */
     @Transactional
     public void promoteWaitingUsers(Long sessionId) {
@@ -377,11 +380,12 @@ public class RegistrationService {
         // 1. 내 신청 전체 → 카드 데이터 (요약 카드·탭 개수는 검색과 관계없이 전체 기준)
         List<Registration> registrations = registrationRepository.findAllByUserIdForHistory(loginIdentity.getId());
         Map<Long, Integer> refundAmounts = refundAmountsOf(registrations); // ★ 추가: 결제 id → 실제 환불 금액
+        Map<Long, LocalDateTime> attendedAt = attendedAtOf(registrations);   // ★ [f/42] 신청 id → 출석 시각
         List<RegistrationRes.MyHistoryItemDto> all = registrations.stream()
                 // ★ [f/41] 취소·거절·취소된 회차도 '취소·환불' 탭에 표시 (환불 여부 확인용, 담당자 요청)
                 //   승인 대기(PENDING)는 현재 쓰지 않는 상태라 제외
                 .filter(r -> r.getStatus() != RegistrationStatus.PENDING)
-                .map(r -> toHistoryItem(r, now, refundAmounts))            // ★ 변경: 환불 금액 전달
+                .map(r -> toHistoryItem(r, now, refundAmounts, attendedAt))   // ★ [f/42] 출석 시각 전달            // ★ 변경: 환불 금액 전달
                 .toList();
 
         // 2. 탭 + 행사명 검색 적용
@@ -389,6 +393,14 @@ public class RegistrationService {
                 .filter(i -> currentTab.equals(i.getTab()))
                 .filter(i -> currentKeyword.isEmpty() || i.getTitle().contains(currentKeyword))
                 .toList();
+
+        if (!items.isEmpty()) {
+            var changes = registrationHistoryRepository.findByUserIdAndRegistrationIds(loginIdentity.getId(),
+                    items.stream().map(RegistrationRes.MyHistoryItemDto::getRegistrationId).toList())
+                    .stream().collect(Collectors.groupingBy(h -> h.getRegistration().getId(),
+                            Collectors.mapping(RegistrationRes.ChangeHistoryDto::new, Collectors.toList())));
+            items.forEach(item -> item.setChangeHistory(changes.getOrDefault(item.getRegistrationId(), List.of())));
+        }
 
         int upcoming = countTab(all, "confirmed");
         int cancelled = countTab(all, "cancelled");   // ★ [f/41]
@@ -412,8 +424,11 @@ public class RegistrationService {
                 .orElseThrow(() -> new Exception404("행사 회차가 존재하지 않습니다"));
         validateOrganizer(session, loginIdentity);
 
-        return registrationRepository.findAllBySessionIdWithUser(sessionId).stream()
-                .map(RegistrationRes.ParticipantDto::of)
+        // ★ [f/42] 출석 시각을 쿼리 1번으로 붙여 참가자 관리에 출석 열 표시
+        List<Registration> registrations = registrationRepository.findAllBySessionIdWithUser(sessionId);
+        Map<Long, LocalDateTime> attendedAt = attendedAtOf(registrations);
+        return registrations.stream()
+                .map(r -> RegistrationRes.ParticipantDto.of(r, attendedAt.get(r.getId())))
                 .toList();
     }
 
@@ -629,6 +644,23 @@ public class RegistrationService {
     }
 
     /**
+     * ★ [f/42] 신청 목록의 출석 시각 — key: 신청 id, value: 출석 시각 (출석 기록이 없으면 key 없음)
+     * 카드·참가자마다 조회하지 않고 목록 전체를 쿼리 1번으로 가져온다
+     */
+    private Map<Long, LocalDateTime> attendedAtOf(List<Registration> registrations) {
+        List<Long> ids = registrations.stream().map(Registration::getId).toList();
+        Map<Long, LocalDateTime> result = new HashMap<>();
+        if (ids.isEmpty()) {
+            return result;   // 빈 IN 절 방지
+        }
+        for (Object[] row : attendanceRepository.findAttendedAtByRegistrationIds(ids)) {
+            result.put((Long) row[0], (LocalDateTime) row[1]);
+        }
+        return result;
+    }
+
+
+    /**
      * ★ 추가: [나의 신청 내역] '환불 내역' 문구 — 환불 기록이 있을 때만 "환불 완료 7,000P", 없으면 null (제목 숨김)
      * 무료 취소는 0P 기록이 남으므로 "환불 완료 0P"로 표시된다
      */
@@ -648,7 +680,8 @@ public class RegistrationService {
 
     // [나의 신청 내역] 신청 한 건 → 카드 (상태 라벨·상황별 문구·예상 환불액 계산)
     private RegistrationRes.MyHistoryItemDto toHistoryItem(Registration r, LocalDateTime now,
-                                                           Map<Long, Integer> refundAmounts) { // ★ 추가: 실제 환불 금액
+                                                           Map<Long, Integer> refundAmounts,
+                                                           Map<Long, LocalDateTime> attendedAt) { // ★ [f/42] 출석 시각
         EventSession session = r.getEventSession();
         Event event = session.getEvent();
         RegistrationStatus status = r.getStatus();
@@ -660,6 +693,10 @@ public class RegistrationService {
         boolean eventCancelled = session.getStatus() == EventSessionStatus.CANCELLED
                 || event.getStatus() == EventStatus.CANCELLED;
         boolean cancelable = !ended && !eventCancelled && isCancelable(r, now);
+
+        // ★ [f/42] 출석 — 참가 확정 + 회차·행사 정상일 때만 표시, 출석했으면 [후기 남기러 가기]
+        LocalDateTime attendedTime = status == RegistrationStatus.CONFIRMED && !eventCancelled
+                ? attendedAt.get(r.getId()) : null;
 
         //  1. 지금 취소하면 받을 환불액 (취소 가능할 때만 계산, 규칙은 RefundPolicy)
         int expectedRefund = cancelable
@@ -745,6 +782,11 @@ public class RegistrationService {
                         && CommunityPolicy.isOpen(session.getEndsAt(), CommunityPolicy.now())  // ★ 한국 시각 기준
                         ? "/community/" + session.getId() : null)
                 .closed("cancelled".equals(tab))   // ★ [f/41] 취소·환불 카드 → '취소 불가' 버튼 숨김
+                .attended(attendedTime != null)                                                  // ★ [f/42]
+                .attendanceText(attendedTime == null ? null
+                        : "출석 체크 완료 · " + attendedTime.format(RegistrationRes.ATTENDED_AT_FORMAT))
+                .reviewUrl(attendedTime == null ? null : AttendancePolicy.reviewUrl(session.getId()))
+
                 .build();
     }
 

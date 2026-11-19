@@ -1,8 +1,12 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.api.purchase.Deposit;
+import com.busan.eventplatform.api.purchase.DepositRepository;
+import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyRepository;
 import com.busan.eventplatform.company.CompanyStatus;
+import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.eventCategory.EventCategory;
 import com.busan.eventplatform.event.eventCategory.EventCategoryRepository;
 import com.busan.eventplatform.event.eventSession.EventSessionRequest;
@@ -23,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -37,6 +44,7 @@ public class EventService {
     private final EventSessionService eventSessionService;
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
     private final com.busan.eventplatform.event.eventFile.EventFileService eventFileService;
+    private final DepositRepository depositRepository;
 
     // 행사 등록 기능
     @Transactional
@@ -100,8 +108,10 @@ public class EventService {
         int pageIndex = Math.max(0, page - 1);
         // 페이지 크기 1 ~ 50
         int validSize = Math.max(1, Math.min(50, size));
-        // 최신 행사 먼저 오도록 id 내림차순 정렬
-        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
+        // 최신 행사 먼저 오도록 정렬
+        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(
+                Sort.Order.desc("createdAt"), Sort.Order.desc("id")
+        ));
         // 행사 조회
         Page<Event> eventPage;
         eventPage = eventRepository.findPublishedFiltered(EventStatus.PUBLISHED, categoryId,
@@ -216,36 +226,6 @@ public class EventService {
         return event;
     }
 
-//    // 행사 삭제 기능
-//    @Transactional
-//    public void delete(Long id, Long companyId) {
-//        Event event = eventRepository.findById(id)
-//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-//        if (companyId == null || !event.isOwner(companyId)) {
-//            throw new Exception403("삭제 권한이 없습니다.");
-//        }
-//        if (registrationRepository.existsByEventSessionEventId(id)) {
-//            throw new Exception400("신청자가 있는 행사는 삭제할 수 없습니다.");
-//        }
-//
-//        eventRepository.delete(event);
-//    }
-//
-//    // 행사 취소 기능
-//    @Transactional
-//    public Event cancel(Long id, EventRequest.CancelDto cancelDto) {
-//        Event event = eventRepository.findById(id)
-//                .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-//        if (EventStatus.CANCELLED.equals(event.getStatus())) {
-//            throw new Exception400("이미 취소된 행사입니다.");
-//        }
-//        event.setStatus(EventStatus.CANCELLED);
-//        event.setCancelledAt(LocalDateTime.now());
-//        event.setCancellationReason(cancelDto.getCancellationReason());
-//
-//        return event;
-//    }
-
     // 행사 승인 기능 (관리자)
     @Transactional
     public Event approve(Long id) {
@@ -289,22 +269,124 @@ public class EventService {
     public EventResponse.ListDto findAllByCompanyId(Long companyId) {
         List<Event> eventList = eventRepository.findAllByCompanyId(companyId);
         var response = new EventResponse.ListDto(eventList);
-        populateSessionPeriods(response.getEventList());
+        populateSessionPeriods(response.getEventList(), companyId);
         return response;
     }
 
-    private void populateSessionPeriods(List<EventResponse.EventDto> events) {
-        if (events.isEmpty()) return;
-        var sessions = eventSessionRepository.findAllByEventIds(
-                events.stream().map(EventResponse.EventDto::getId).toList());
-        var byEvent = sessions.stream().collect(Collectors.groupingBy(
-                session -> session.getEvent().getId(),
-                Collectors.mapping(EventResponse.SessionPeriodDto::new, Collectors.toList())));
-        events.forEach(event -> {
-            var periods = byEvent.getOrDefault(event.getId(), List.of());
+    // 일반 목록: 기존 회차 일정 정보만 구성
+    private void populateSessionPeriods(
+            List<EventResponse.EventDto> events
+    ) {
+        populateSessionPeriods(events, null); // 기업 보증금 조회는 하지 않는다
+    }
+
+    // 기업 행사 목록에서 호출: 회차 일정과 보증금 정보를 함께 구성
+    private void populateSessionPeriods(List<EventResponse.EventDto> events, Long companyId) {
+        if (events.isEmpty()) return; // 행사가 없으면 조회할 회차도 없으므로 종료
+
+//        화면에 필요한 회차를 한 번에 조회
+        List<Long> eventIds = events.stream().map(EventResponse.EventDto::getId).toList();
+
+        List<EventSession> sessions = eventSessionRepository.findAllByEventIds(eventIds);
+        Map<Long, Deposit> depositBySessionId = new HashMap<>();
+        boolean companyApproved = false;
+
+        // 기업 목록에서만 보증금 정보 조회
+        if (companyId != null && !sessions.isEmpty()) {
+            Company company = companyRepository.findById(companyId).orElseThrow(() -> new Exception404("기업을 찾을 수 없습니다."));
+
+            companyApproved = company.getStatus() == CompanyStatus.APPROVED;
+
+            // 해당 행사들에 속한 회차를 한 번에 조회
+            List<Long> sessionIds = sessions.stream().map(EventSession::getId).toList();
+            // 현재 기업의 해당 회차 보증금 기록을 한 번에 조회
+            List<Deposit> deposits = depositRepository.findAllByCompanyIdAndSessionIds(companyId, sessionIds);
+
+            // [회차 ID → Deposit] 형태로 보관
+            for (Deposit deposit : deposits) {
+                depositBySessionId.put(deposit.getEventSession().getId(), deposit);
+            }
+        }
+
+        // 완성한 회차 DTO들을 행사별로 묶기 위한 저장 공간
+        Map<Long, List<EventResponse.SessionPeriodDto>> byEvent = new HashMap<>();
+
+        // 화면에 표시할 납부 시각 형식
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+
+        for (EventSession session : sessions) {
+            // 기존 생성자로 회차 이름·모집 기간·ID 설정
+            EventResponse.SessionPeriodDto dto = new EventResponse.SessionPeriodDto(session);
+
+            // 기업 목록에만 보증금 표시 정보를 추가
+            if (companyId != null) {
+                // 현재 회차의 보증금 기록 조회. 기록이 없으면 null
+                Deposit deposit = depositBySessionId.get(session.getId());
+
+                // 기록이 있으면 실제 금액, 없으면 기본 보증금 표시
+                dto.setDepositAmountText(
+                        String.format(
+                                Locale.KOREA,
+                                "%,d",
+                                deposit == null ? Deposit.SESSION_DEPOSIT : deposit.getAmount()
+                        )
+                );
+
+                // 기록이 없으면 미납, 있으면 기록의 상태명 표시
+                dto.setDepositStatusName(
+                        deposit == null ? "미납" : deposit.getStatus().getDisplayName()
+                );
+
+                // 기록에 납부 시각이 있으면 화면용 문자열로 변환
+                if (deposit != null && deposit.getPaidAt() != null) {
+                    dto.setDepositPaidAt(
+                            deposit.getPaidAt().toLocalDateTime().format(format)
+                    );
+                }
+
+                // 현재 결제 Service는 기존 Deposit을 재사용하지 않으므로
+                // 납부 기록이 없는 회차만 신규 결제 허용
+                dto.setDepositPayable(
+                        companyApproved && session.forSessionDeposit() && deposit == null
+                );
+            }
+
+            // 해당 행사의 회차 목록에 DTO 추가
+            // 목록이 아직 없으면 새로 생성
+            byEvent.computeIfAbsent(
+                    session.getEvent().getId(),
+                    key -> new ArrayList<>()
+            ).add(dto);
+        }
+
+        for (EventResponse.EventDto event : events) {
+            // 해당 행사에 속한 회차 DTO 목록 조회. 없으면 빈 목록 사용
+            List<EventResponse.SessionPeriodDto> periods = byEvent.getOrDefault(event.getId(), List.of());
+
+            // 행사 DTO에 회차 목록과 회차 수 설정
             event.setSessionPeriods(periods);
             event.setSessionCount(periods.size());
-        });
+
+            // 기업 목록에서만 기존 조회 결과로 납부·미납 건수 집계
+            if (companyId != null) {
+                int paidCount = 0;
+                int unpaidCount = 0;
+
+                for(EventResponse.SessionPeriodDto period : periods) {
+                    Deposit deposit = depositBySessionId.get(period.getSessionId());
+
+                    if (deposit == null || deposit.getStatus() == DepositStatus.READY) {
+                        unpaidCount++;
+                    } else if (deposit.getStatus() == DepositStatus.PAID) {
+                        paidCount++;
+                    }
+                    // 환불·반환된 기록은 미납으로 계산하지 않음
+                }
+
+                event.setPaidSessionCount(paidCount);
+                event.setUnpaidSessionCount(unpaidCount);
+            }
+        }
     }
 
     public void validateRegistrationPermission(Long companyId) {

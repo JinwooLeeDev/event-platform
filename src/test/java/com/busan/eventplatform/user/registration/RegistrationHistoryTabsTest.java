@@ -20,9 +20,9 @@
 //
 //class RegistrationHistoryTabsTest {
 //    private final RegistrationRepository repository = mock(RegistrationRepository.class);
-//    private final RegistrationService service = new RegistrationService(repository,
-//            mock(RegistrationHistoryRepository.class), mock(EventSessionRepository.class),
-//            mock(UserRepository.class), mock(RefundService.class));
+////    private final RegistrationService service = new RegistrationService(repository,
+////            mock(RegistrationHistoryRepository.class), mock(EventSessionRepository.class),
+////            mock(UserRepository.class), mock(RefundService.class));
 //    private final LoginIdentity identity = LoginIdentity.builder().id(1L).loginType(LoginType.USER).build();
 //    private final LocalDateTime now = LocalDateTime.now();
 //

@@ -12,6 +12,7 @@ public interface CompanyReviewHistoryRepository extends JpaRepository<CompanyRev
             SELECT crh
             from CompanyReviewHistory crh
             JOIN FETCH crh.company
+            JOIN FETCH crh.reviewer
             WHERE crh.company.id = :companyId
             ORDER BY crh.createdAt DESC, crh.id DESC
             """)

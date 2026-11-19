@@ -32,8 +32,16 @@ public class Event {
     private EventCategory category;
 
     // 행사 주소
-    @Column(nullable = false)
+    @Column(nullable = false, length = 300)
     private String address;
+
+    // 우편번호
+    @Column(length = 5)
+    private String postalCode;
+
+    // 장소명
+    @Column(length = 200)
+    private String placeName;
 
     // 행사 제목
     @Column(nullable = false)
