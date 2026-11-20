@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class EventCancelController {
 
-    private final EventCancelService eventCancelService;
+    private final com.busan.eventplatform.event.eventCancel.EventCancelService eventCancelService;
 
     // GET - http://localhost:8080/event-cancels/save/1
     @GetMapping("/event-cancels/save/{sessionId}")
