@@ -31,10 +31,14 @@ body:has(.charge-page) { margin: 0; }
 .charge-page .amount-btn { padding: 12px 6px; min-height: 46px; border: 1px solid #ccd8e7; border-radius: 8px; background: #fff; color: #344f72; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .charge-page .amount-btn:hover { background: #f0f5fc; border-color: #91afd5; }
 .charge-page .amount-btn.active { border-color: #174bc1; background: #edf3ff; color: #174bc1; box-shadow: inset 0 0 0 1px #174bc1; }
-.charge-method { display: flex; align-items: center; gap: 18px; padding: 20px; border: 1px solid #b9cce3; border-radius: 10px; background: #fbfcfe; }
-.charge-method > div { min-width: 0; }
+.charge-method { display: flex; align-items: center; gap: 18px; width:100%; padding: 20px; border: 1px solid #cbd8e8; border-radius: 10px; background: #fff; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.charge-method:hover { border-color:#91afd5; background:#f7faff; }
+.charge-method[aria-pressed="true"] { border-color:#174bc1; background:#edf3ff; box-shadow:inset 0 0 0 1px #174bc1; }
+.charge-method-description { min-width:0; }
+.charge-method-description > span { display:block; margin-top:4px; color:#627084; font-size:12px; }
+.charge-method:not([aria-pressed="true"]) .charge-method-check { background:#fff; color:transparent; border:1px solid #b9cce3; }
+.charge-page button:disabled { opacity:.6; cursor:wait; }
 .charge-method strong { font-size: 15px; }
-.charge-method p { margin: 4px 0 0; color: #627084; font-size: 12px; }
 .charge-npay { flex-shrink: 0; color: #252e3b; white-space: nowrap; font-size: 21px; font-weight: 700; }
 .charge-npay b { color: #03a94d; }
 .charge-method-check { display: inline-flex; justify-content: center; align-items: center; margin-left: auto; flex-shrink: 0; width: 24px; height: 24px; background: #174bc1; color: #fff; border-radius: 50%; font-size: 13px; }
@@ -52,7 +56,7 @@ body:has(.charge-page) { margin: 0; }
 .charge-summary-facts dd { margin: 0; font-size: 14px; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
 .charge-summary-facts .charge-summary-total { border-top: 1px solid #e3eaf3; margin-top: 10px; padding-top: 18px; }
 .charge-summary-total dd { font-size: 23px; font-weight: 800; }
-.charge-pay-button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 52px; padding: 12px 18px; border: 1px solid #174bc1; border-radius: 9px; background: #174bc1; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.charge-pay-button { width: 100%; display: flex; justify-content: center; align-items: center; gap: 16px; min-height: 52px; padding: 12px 18px; border: 1px solid #174bc1; border-radius: 9px; background: #174bc1; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
 .charge-pay-button:hover { background: #123b99; border-color: #123b99; }
 .charge-payment-note { margin: 14px 0 0; color: #627084; font-size: 12px; line-height: 1.8; text-align: center; }
 .charge-back { display: block; border-top: 1px solid #e3eaf3; padding-top: 18px; margin-top: 22px; color: #4b6382; text-align: center; font-size: 12px; text-underline-offset: 4px; }
@@ -90,6 +94,4 @@ body:has(.charge-page) .copyright-warning { text-align: left; }
 .charge-method--kakao { margin-top:12px; }
 .charge-kpay { display:grid; place-items:center; flex-shrink:0; width:64px; height:38px; border-radius:8px; background:#fee500; color:#302821; font-size:22px; font-weight:800; }
 .charge-payment-buttons { display:grid; gap:10px; }
-.charge-pay-button--kakao { background:#fff; color:#273b55; border-color:#cbd7e7; }
-.charge-pay-button--kakao:hover { background:#f3f6fb; color:#174bc1; border-color:#174bc1; }
 </style>

@@ -14,7 +14,7 @@
             {{#host}}
                 <details class="community-notice-editor"><summary>주최 공지 관리</summary><form id="community-notice-form" class="community-notice-form" autocomplete="off"><label for="community-notice-input">참가자에게 안내할 내용</label><textarea id="community-notice-input" maxlength="500" rows="3" aria-describedby="community-notice-help" disabled>{{#notice}}{{.}}{{/notice}}</textarea><p id="community-notice-help">최대 500자. 내용을 비우고 등록하면 공지를 내립니다.</p><button id="community-notice-send" class="community-button" type="submit" disabled>공지 등록·수정</button></form></details>
                 <!-- ★ [f/42] 주최 기업만: 현장 출석 QR 열기 (사이트가 QR 생성, 새 창) -->
-                <a class="community-button" href="/attendance/qr/{{sessionId}}" target="_blank" rel="noopener">출석 QR 열기</a>
+                <a class="community-button community-qr-button" href="/attendance/qr/{{sessionId}}" target="_blank" rel="noopener">출석 QR 열기</a>
             {{/host}}
         </div>
         <ul id="community-messages" class="community-messages" role="log" aria-label="회차 대화 내역" aria-live="polite" aria-relevant="additions" data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
