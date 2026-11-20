@@ -22,6 +22,12 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
+import com.busan.eventplatform.event.events.EventStatus;
+import com.busan.eventplatform.user.registration.RegistrationStatus;
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -104,6 +110,12 @@ public class PurchaseService {
         refundList.forEach(refund -> refundedAmounts.merge(refund.getPurchase().getId(), refund.getAmount(), Integer::sum));
         var history = new ArrayList<PurchaseRes.PointHistoryDto>();
 
+        // ★ 기업 거절로 생긴 환불 구분 — 환불된 결제 중 신청이 '거절(REJECTED)'인 결제 id (쿼리 1번)
+        List<Long> refundedPurchaseIds = refundList.stream().map(refund -> refund.getPurchase().getId()).distinct().toList();
+        Set<Long> rejectedPurchaseIds = refundedPurchaseIds.isEmpty() ? Set.of()
+                : new HashSet<>(registrationRepository.findPurchaseIdsByStatus(refundedPurchaseIds, RegistrationStatus.REJECTED));
+
+
         paymentService.paymentList(userId).forEach(payment -> history.add(PurchaseRes.PointHistoryDto.builder()
                 .occurredAt(payment.getPaidAt()).typeLabel("충전").title("포인트 충전")
                 .statusLabel("충전 완료").amount(payment.getAmount()).build()));
@@ -117,8 +129,15 @@ public class PurchaseService {
         refundList.forEach(refund -> {
             var purchase = refund.getPurchase();
             var session = purchase.getEventSession();
+
+            // ★ 기업 거절 = 신청이 거절됐고 회차·행사는 취소되지 않음 (행사 취소도 신청 상태는 REJECTED라 제외)
+            boolean rejectedByCompany = rejectedPurchaseIds.contains(purchase.getId())
+                    && session.getStatus() != EventSessionStatus.CANCELLED
+                    && session.getEvent().getStatus() != EventStatus.CANCELLED;
+
             history.add(PurchaseRes.PointHistoryDto.builder()
-                    .occurredAt(refund.getCreatedAt()).typeLabel("환불").title(session.getEvent().getTitle())
+                    .occurredAt(refund.getCreatedAt()).typeLabel(rejectedByCompany ? "기업 거절" : "환불")   // ★ 변경
+                    .title(session.getEvent().getTitle())
                     .sessionName(session.getName()).detailUrl("/event/" + session.getEvent().getId())
                     .statusLabel(refundLabel(refund.getAmount(), purchase.getPrice()))
                     .amount(refund.getAmount()).build());
