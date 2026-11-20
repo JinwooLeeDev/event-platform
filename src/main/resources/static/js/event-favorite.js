@@ -42,30 +42,43 @@
         catch (_) { message(group, '좋아요를 불러오지 못했습니다. 하트를 눌러 다시 시도해 주세요.'); }
         finally { busy(group, false); }
     }
-    document.querySelectorAll('[data-favorite-event]').forEach(button => {
-        const id = button.dataset.favoriteEvent;
-        if (!groups.has(id)) groups.set(id, {id, buttons:[], state:null, busy:false});
-        const group = groups.get(id); group.buttons.push(button);
-        button.addEventListener('click', async event => {
-            event.preventDefault(); event.stopPropagation();
-            if (group.busy) return;
-            if (button.dataset.favoriteCompany === 'true') { message(group, '개인 회원만 좋아요를 등록할 수 있습니다.'); return; }
-            busy(group, true); message(group);
-            try {
-                if (!group.state) apply(group, await request(id));
-                apply(group, await request(id, group.state.favorite ? 'DELETE' : 'POST'));
-            } catch (error) {
-                if (error.status === 401) {
-                    message(group, '좋아요를 변경하려면 개인 계정으로 로그인해 주세요.');
-                    if (window.BusanLogin) window.BusanLogin.open();
-                    else if (confirm('로그인이 필요합니다. 로그인 화면으로 이동할까요?')) location.assign('/login');
-                } else if (error.status === 400 || error.status === 404) {
-                    try { apply(group, await request(id)); message(group, '변경된 좋아요 상태를 반영했습니다. 다시 확인해 주세요.'); }
-                    catch (_) { message(group, '좋아요를 처리하지 못했습니다. 다시 시도해 주세요.'); }
-                } else { message(group, '좋아요를 처리하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.'); }
-            } finally { busy(group, false); }
+    const initialized = new WeakSet();
+    function initialize() {
+        groups.forEach((group, id) => {
+            group.buttons = group.buttons.filter(button => button.isConnected !== false);
+            if (!group.buttons.length) groups.delete(id);
         });
-    });
-    groups.forEach(load);
+        const addedGroups = new Set();
+        document.querySelectorAll('[data-favorite-event]').forEach(button => {
+            if (initialized.has(button)) return;
+            initialized.add(button);
+            const id = button.dataset.favoriteEvent;
+            if (!groups.has(id)) groups.set(id, {id, buttons:[], state:null, busy:false});
+            const group = groups.get(id); group.buttons.push(button);
+            addedGroups.add(group);
+            button.addEventListener('click', async event => {
+                event.preventDefault(); event.stopPropagation();
+                if (group.busy) return;
+                if (button.dataset.favoriteCompany === 'true') { message(group, '개인 회원만 좋아요를 등록할 수 있습니다.'); return; }
+                busy(group, true); message(group);
+                try {
+                    if (!group.state) apply(group, await request(id));
+                    apply(group, await request(id, group.state.favorite ? 'DELETE' : 'POST'));
+                } catch (error) {
+                    if (error.status === 401) {
+                        message(group, '좋아요를 변경하려면 개인 계정으로 로그인해 주세요.');
+                        if (window.BusanLogin) window.BusanLogin.open();
+                        else if (confirm('로그인이 필요합니다. 로그인 화면으로 이동할까요?')) location.assign('/login');
+                    } else if (error.status === 400 || error.status === 404) {
+                        try { apply(group, await request(id)); message(group, '변경된 좋아요 상태를 반영했습니다. 다시 확인해 주세요.'); }
+                        catch (_) { message(group, '좋아요를 처리하지 못했습니다. 다시 시도해 주세요.'); }
+                    } else { message(group, '좋아요를 처리하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.'); }
+                } finally { busy(group, false); }
+            });
+        });
+        addedGroups.forEach(load);
+    }
+    initialize();
+    window.addEventListener('busan:events-updated', initialize);
     window.addEventListener('pageshow', event => { if (event.persisted) groups.forEach(load); });
 })();
