@@ -55,7 +55,7 @@ public class EventSessionController {
     // GET - http://localhost:8080/events/sessions/status/{eventId}
     @GetMapping("/events/sessions/status/{eventId}")
     public String listByStatus(@PathVariable Long eventId, @RequestParam EventSessionStatus status, Model model) {
-        model.addAttribute("eventSessions", eventSessionService.findAllByEventIdAndStatus(eventId, status));
+        model.addAttribute("eventSession", eventSessionService.findAllByEventIdAndStatus(eventId, status));
         model.addAttribute("status", status);
 
         return "event_session/list";

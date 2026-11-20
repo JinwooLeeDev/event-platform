@@ -6,6 +6,7 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
+import com.busan.eventplatform.user.registration.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ public class EventCancelService {
     private final EventCancelRepository eventCancelRepository;
     private final EventSessionRepository eventSessionRepository;
     private final RefundService refundService;
+    private final RegistrationService registrationService;
 
     @Transactional(readOnly = true)
     public java.util.Map<String, Object> context(Long companyId, Long sessionId) {
@@ -120,7 +122,11 @@ public class EventCancelService {
         refundService.pointBackUser(eventSession);
 
         // 참가 신청 일괄 취소
-        // Todo - 메서드 구현 후 연결 예정 - registrationService.cancelAllBySession 이름으로 추가예정
+        registrationService.cancelAllBySession(
+                eventSession.getId(),
+                eventCancel.getReason()
+        );
+
 
         // 기업 보증금 환불 -- 승인일이 아니라 취소 신청일 기준으로 환불
         refundService.refundCompany(

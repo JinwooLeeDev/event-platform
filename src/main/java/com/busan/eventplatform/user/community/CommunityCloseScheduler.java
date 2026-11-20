@@ -61,4 +61,5 @@ public class CommunityCloseScheduler {
             log.error("[community] 종료 처리({}) 실패", trigger, e);
         }
     }
+
 }

@@ -1,6 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.api.payment.PaymentService;
 import com.busan.eventplatform.api.refund.RefundRepository;
 import com.busan.eventplatform.api.refund.RefundStatus;

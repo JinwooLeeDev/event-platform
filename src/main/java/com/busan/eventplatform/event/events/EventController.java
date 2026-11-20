@@ -152,7 +152,7 @@ public class EventController {
         model.addAttribute("eventList",
                 eventService.findAllFeedback(sessionCompanyDto.getId()));
 
-        return "company/event-feedback-list";
+        return "company/event-list";
     }
 
     // 행사 수정 화면
