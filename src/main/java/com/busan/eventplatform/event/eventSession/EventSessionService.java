@@ -37,9 +37,9 @@ public class EventSessionService {
         saveDto.validate();
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new Exception404("해당 행사를 찾을 수 없습니다."));
-        if (!event.getCompany().getId().equals(companyId)) {
-            throw new Exception403("해당 행사에 회차를 등록할 권한이 없습니다.");
-        }
+        // 기업 소유권 + 행사 상태 검사
+        validateSessionManagePermission(event, companyId);
+
         // 날짜 검증
         EventSession.validateDates(
                 saveDto.getStartsAt(),
@@ -90,9 +90,8 @@ public class EventSessionService {
         EventSession eventSession = eventSessionRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new Exception404("해당 회차를 찾을 수 없습니다."));
         Event event = eventSession.getEvent();
-        if (!event.getCompany().getId().equals(companyId)) {
-            throw new Exception403("해당 행사에 회차를 수정할 권한이 없습니다.");
-        }
+        // 기업 소유권 + 행사 상태 검사
+        validateSessionManagePermission(event, companyId);
         // 수정 전 정원 저장
         int previousCapacity = eventSession.getCapacity();
 
@@ -112,9 +111,8 @@ public class EventSessionService {
                 .orElseThrow(() -> new Exception404("해당 회차를 찾을 수 없습니다."));
 
         Event event = eventSession.getEvent();
-        if (!event.getCompany().getId().equals(companyId)) {
-            throw new Exception403("해당 행사에 회차를 삭제할 권한이 없습니다.");
-        }
+        // 기업 소유권 + 행사 상태 검사
+        validateSessionManagePermission(event, companyId);
 
         // 신청 이력이 없는 경우 실제 삭제
         int deletedCount = eventSessionRepository.deleteIfNoRegistrationHistory(id);
@@ -160,5 +158,19 @@ public class EventSessionService {
         }
 
         es.setInProgress();
+    }
+
+    // 기업의 회차 관리 권한 검사
+    private void validateSessionManagePermission(Event event, Long companyId) {
+
+        // 해당 기업의 행사인지 확인
+        if (!event.getCompany().getId().equals(companyId)) {
+            throw new Exception403("해당 행사에 회차를 관리할 권한이 없습니다.");
+        }
+
+        // 관리자 보완 요청 상태에서만 회차 관리 가능
+        if (event.getStatus() != EventStatus.FEEDBACK_REQUIRED) {
+            throw new Exception403("관리자 보완 요청 상태에서만 회차를 관리할 수 있습니다.");
+        }
     }
 }
