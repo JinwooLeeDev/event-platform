@@ -93,7 +93,7 @@ public class RefundService {
         if(deposit.getStatus() != DepositStatus.PAID) throw new Exception400("이 행사는 환불을 진행할 수 없습니다");
 
         Refund refund = refundRepository.findByDepositId(deposit.getId() , RefundStatus.PENDING)
-                .orElseThrow(() -> new Exception404("해당 행사는 결제한 내역이 없습니다 "));
+                .orElseThrow(() -> new Exception404("해당 행사는 기업이 자체취소했거나 결제한 내역이 없습니다"));
 
         // 3. 환불 정책에 맞게 환불요금 계산.
         int amount = RefundPolicy.forCompanyCancel(Deposit.SESSION_DEPOSIT , cancelReqTime , LocalDate.from(eventSession.getStartsAt()));
