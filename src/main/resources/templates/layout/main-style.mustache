@@ -68,6 +68,8 @@ body:has(.main-page) { margin: 0; background: #fff; }
     color: #536c88;
 }
 .main-page .event-card__visual::before { content: ""; position: absolute; width: 180px; height: 100px; border: 2px solid currentColor; border-radius: 50%; transform: rotate(-25deg); opacity: .12; }
+.main-page .event-card__image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; }
+.main-page .event-card__image[hidden] { display:none; }
 .main-page .event-card__visual[data-category*="전시"] { background: #eceaf6; color: #71608c; }
 .main-page .event-card__visual[data-category*="공연"] { background: #e3e9f5; color: #485d95; }
 .main-page .event-card__visual[data-category*="체험"] { background: #e2efe9; color: #467360; }

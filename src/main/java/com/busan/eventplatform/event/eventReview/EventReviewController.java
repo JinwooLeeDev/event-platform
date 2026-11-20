@@ -1,5 +1,6 @@
 package com.busan.eventplatform.event.eventReview;
 
+import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.util.Define;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,18 +29,33 @@ public class EventReviewController {
     // 특정 회차 후기 목록 조회
     // GET - http://localhost:8080/event-review/1
     @GetMapping("/event-review/{eventSessionId}")
-    public String list(@PathVariable Long eventSessionId,
-                       @RequestParam(defaultValue = "latest") String sort,
-                       Model model) {
+    public String list(
+            @PathVariable Long eventSessionId,
+            @RequestParam(defaultValue = "latest") String sort,
+            HttpSession session,
+            Model model
+    ) {
 
+        // 로그인 회원 ID 확인
+        Long userId = null;
+
+        Object value = session.getAttribute(Define.SESSION_USER);
+
+        if (value instanceof SessionUserDto sessionUserDto) {
+            userId = sessionUserDto.getId();
+        }
+
+        // 후기 목록 조회 및 좋아요 여부 확인
         List<EventReviewResponse.ListDto> reviewList =
-                eventReviewService.findAllByEventSessionId(eventSessionId, sort)
-                        .stream()
-                        .map(EventReviewResponse.ListDto::new)
-                        .toList();
+                eventReviewService.findAllByEventSessionId(
+                        eventSessionId, sort, userId
+                );
 
         model.addAttribute("reviewList", reviewList);
         model.addAttribute("sort", sort);
+        model.addAttribute("eventSessionId", eventSessionId);
+        model.addAttribute("isLatest", !"like".equals(sort));
+        model.addAttribute("isLike", "like".equals(sort));
 
         return "event/review-list";
     }
@@ -47,8 +64,8 @@ public class EventReviewController {
     // POST - http://localhost:8080/event-review/save/1
     @PostMapping("/event-review/save/{eventSessionId}")
     public String save(
-            @PathVariable Long eventSessionId,
-            EventReviewRequest.SaveDto saveDto, HttpSession session) {
+            @PathVariable Long eventSessionId, EventReviewRequest.SaveDto saveDto,
+            HttpSession session, RedirectAttributes redirectAttributes) {
 
         // 로그인 사용자 확인
         LoginIdentity identity = LoginSession.requireIdentity(session);
@@ -64,11 +81,17 @@ public class EventReviewController {
             throw new Exception401("회원 계정으로 다시 로그인해주세요");
         }
 
-        eventReviewService.save(
-                eventSessionId,
-                sessionUserDto.getId(),
-                saveDto.getContent()
-        );
+        try {
+            eventReviewService.save(
+                    eventSessionId,
+                    sessionUserDto.getId(),
+                    saveDto.getContent()
+            );
+
+            redirectAttributes.addFlashAttribute("message", "후기가 등록되었습니다.");
+        } catch (Exception400 e) {
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
+        }
 
         return "redirect:/event-review/" + eventSessionId;
     }
