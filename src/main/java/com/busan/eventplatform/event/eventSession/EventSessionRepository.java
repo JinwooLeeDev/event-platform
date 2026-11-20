@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.events.EventStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,4 +92,15 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
             """)
     int deleteIfNoRegistrationHistory(@Param("sessionId") Long sessionId);
 
+    // 정상 종료된 행사를 찾아 id 반환.
+    @Query("""
+        select es.id from EventSession es 
+        where es.endsAt <= :now and es.event.status = :eventStatus and es.status = :sessionStatus and 
+        exists (select d.id from Deposit d 
+        where d.eventSession = es and d.status = :depositStatus)
+""")
+    List<Long> findBySessionIdsAsCompleted(@Param("now") LocalDateTime now ,
+                                           @Param("eventStatus") EventStatus eventStatus ,
+                                           @Param("sessionStatus") EventSessionStatus sessionStatus ,
+                                           @Param("depositStatus") DepositStatus depositStatus);
 }

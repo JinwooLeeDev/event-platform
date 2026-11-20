@@ -31,9 +31,71 @@
                     {{#feedbackMessage}}<div class="company-feedback"><strong>보완 요청을 확인해주세요</strong><p>{{feedbackMessage}}</p><div data-event-edit hidden><a class="company-button company-button--secondary" href="/events/update/{{id}}">행사 정보 수정·재심사</a></div></div>{{/feedbackMessage}}
                     {{^feedbackMessage}}<div data-event-edit hidden class="company-feedback"><strong>행사 정보 보완이 필요합니다.</strong><p>제출 내용을 확인하고 수정해주세요.</p><a class="company-button company-button--secondary" href="/events/update/{{id}}">행사 정보 수정·재심사</a></div>{{/feedbackMessage}}
                     {{#paidReadyEvent}}
-                    <section class="company-deposit" aria-label="행사 보증금 결제"><div class="company-deposit-heading"><div><h3>승인 완료 · 보증금 결제</h3><p>기업 보유 포인트로 결제합니다. 결제 후 행사가 공개됩니다.</p></div><span>회차당 <strong>150,000 P</strong></span></div>
-                        <div class="company-deposit-sessions">{{#sessionPeriods}}<div class="company-deposit-row"><div><strong>{{name}}</strong><small>회차 보증금 150,000 P</small></div><form action="/event/deposit/{{sessionId}}" method="post" onsubmit="return confirm('선택한 회차의 행사 보증금 150,000 P를 결제하시겠습니까? 결제 완료 후 행사가 공개됩니다.')"><button type="submit" class="company-button">보증금 결제</button></form></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">결제할 회차가 없습니다. 회차 정보를 먼저 확인해주세요.</p>{{/sessionPeriods}}</div>
-                        <a class="company-text-link" href="/charge">포인트가 부족하다면 충전하기 <span aria-hidden="true">↗</span></a>
+                    <section class="company-deposit" aria-label="행사 보증금 결제">
+
+                        <div class="company-deposit-heading">
+                            <div>
+                                <h3>승인 완료 · 보증금 결제</h3>
+                                <p>
+                                    전체 {{sessionCount}}회차
+                                    · 납부 완료 {{paidSessionCount}}회차
+                                    · 미납 {{unpaidSessionCount}}회차
+                                </p>
+                                <p>
+                                    기업 보유 포인트로 결제합니다.
+                                    모든 회차의 보증금 납부가 완료되면 행사가 공개됩니다.
+                                </p>
+                            </div>
+                            <span>회차당 <strong>150,000 P</strong></span>
+                        </div>
+
+                        <div class="company-deposit-sessions">
+
+                            {{! Service에서 구성한 회차 목록 반복 }}
+                            {{#sessionPeriods}}
+                            <div class="company-deposit-row">
+                                <div>
+                                    <strong>{{name}}</strong>
+
+                                    {{! 회차별 실제 금액과 보증금 상태 표시 }}
+                                    <small>
+                                        회차 보증금 {{depositAmountText}} P
+                                        · {{depositStatusName}}
+                                    </small>
+
+                                    {{! 납부 시각이 있는 경우에만 표시 }}
+                                    {{#depositPaidAt}}
+                                    <small>납부 시각: {{depositPaidAt}}</small>
+                                    {{/depositPaidAt}}
+                                </div>
+
+                                {{! Service가 결제 가능하다고 판단한 회차에만 버튼 표시 }}
+                                {{#depositPayable}}
+                                <form
+                                        action="/event/deposit/{{sessionId}}"
+                                        method="post"
+                                        onsubmit="return confirm('선택한 회차의 보증금을 결제하시겠습니까? 모든 회차 납부 후 행사가 공개됩니다.')"
+                                >
+                                    <button type="submit" class="company-button">
+                                        보증금 결제
+                                    </button>
+                                </form>
+                                {{/depositPayable}}
+                            </div>
+                            {{/sessionPeriods}}
+
+                            {{! 회차 목록이 비어 있을 때 표시 }}
+                            {{^sessionPeriods}}
+                            <p class="company-description">
+                                결제할 회차가 없습니다. 회차 정보를 먼저 확인해주세요.
+                            </p>
+                            {{/sessionPeriods}}
+                        </div>
+
+                        <a class="company-text-link" href="/charge">
+                            포인트가 부족하다면 충전하기
+                            <span aria-hidden="true">↗</span>
+                        </a>
                     </section>
                     {{/paidReadyEvent}}
                     <section class="company-operation" aria-label="회차 운영"><div><h3>회차 운영</h3><p>회차별 일정과 모집 현황, 참가자 목록을 확인하세요.</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">회차·참가자 관리</a><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?add=1">회차 추가</a></div></section>

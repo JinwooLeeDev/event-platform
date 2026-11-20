@@ -71,6 +71,8 @@ public class EventResponse {
         private String feedbackMessage;
         private boolean paidReadyEvent; // 신청한 행사중 "결제대기" 행사는 결제하기 버튼 보이게 하기위해 추가.
         private int sessionCount; // 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
+        private int paidSessionCount;   // 현재 납부 완료 회차 수
+        private int unpaidSessionCount; // 미납 회차 수
         private LocalDateTime applyStartAt;
         private LocalDateTime applyEndAt;
 
@@ -105,6 +107,17 @@ public class EventResponse {
         private String applyStartAt;
         private String applyEndAt;
         private Long sessionId; /// 행사 회차마다 환불 , 결제를 진행해야하므로 sessionId 추가.
+        // 보증금 처리 상태: 미납, 결제 완료, 환불됨, 반환 완료 등
+        private String depositStatusName;
+
+        // 표시할 보증금액
+        private String depositAmountText;
+
+        // 납부 시각. 미납이면 null
+        private String depositPaidAt;
+
+        // 결제 버튼 표시 여부
+        private boolean depositPayable;
 
         public SessionPeriodDto(EventSession session) {
             var format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
