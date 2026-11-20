@@ -1,5 +1,6 @@
 package com.busan.eventplatform.api.purchase;
 
+import com.busan.eventplatform.api.payment.PaymentTypeStatus;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
 import com.busan.eventplatform.user.registration.Registration;
@@ -99,6 +100,7 @@ public class PurchaseRes {
         private String sessionName;
         private String statusLabel;
         private String detailUrl;
+        private PaymentTypeStatus typeStatus;
         private int amount;
         private boolean debit;
     }

@@ -117,7 +117,7 @@ public class PurchaseService {
 
 
         paymentService.paymentList(userId).forEach(payment -> history.add(PurchaseRes.PointHistoryDto.builder()
-                .occurredAt(payment.getPaidAt()).typeLabel("충전").title("포인트 충전")
+                .occurredAt(payment.getPaidAt()).typeLabel("충전").title("포인트 충전").typeStatus(payment.getTypeStatus())
                 .statusLabel("충전 완료").amount(payment.getAmount()).build()));
 
         purchaseList(userId).forEach(purchase -> history.add(PurchaseRes.PointHistoryDto.builder()
