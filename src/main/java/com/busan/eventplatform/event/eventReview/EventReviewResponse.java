@@ -14,8 +14,9 @@ public class EventReviewResponse {
         private String content;
         private int likeCount;
         private LocalDateTime createdAt;
+        private boolean isLiked;
 
-        public ListDto(EventReview eventReview) {
+        public ListDto(EventReview eventReview, boolean isLiked) {
             this.id = eventReview.getId();
             if (eventReview.getUser() != null) {
                 this.displayName = eventReview.getUser().getDisplayName();
@@ -23,6 +24,7 @@ public class EventReviewResponse {
             this.content = eventReview.getContent();
             this.likeCount = eventReview.getLikeCount();
             this.createdAt = eventReview.getCreatedAt();
+            this.isLiked = isLiked;
         }
     }
 }

@@ -25,4 +25,15 @@ public interface DepositRepository extends JpaRepository<Deposit , Long> {
             @Param("companyId") Long companyId,
             @Param("sessionIds") List<Long> sessionIds
     );
+
+    @Query("""
+            select d
+            from Deposit d
+            join fetch d.eventSession s
+            join fetch s.event e
+            where d.company.id = :companyId
+              and e.company.id = :companyId
+            order by d.paidAt desc, d.id desc
+            """)
+    List<Deposit> findHistoryByCompanyId(@Param("companyId") Long companyId);
 }

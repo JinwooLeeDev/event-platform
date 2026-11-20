@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Slf4j
-@Component  // @Scheduled가 자동으로 bean에 등록이 안되므로 @Component로 빈에 등록해줌.
+@Component
 @RequiredArgsConstructor
 public class EventSessionScheduler {
     private final EventSessionService eventSessionService;
