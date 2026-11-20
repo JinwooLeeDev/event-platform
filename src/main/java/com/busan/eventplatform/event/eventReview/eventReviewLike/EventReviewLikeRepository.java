@@ -27,4 +27,16 @@ public interface EventReviewLikeRepository extends JpaRepository<EventReviewLike
             """)
     @Modifying
     void deleteAllByReviewId(@Param("reviewId") Long reviewId);
+
+    // 해당 회원이 해당 후기에 좋아요를 눌렀는지 확인
+    @Query("""
+        select count(erl) > 0
+        from EventReviewLike erl
+        where erl.eventReview.id = :reviewId
+        and erl.user.id = :userId
+        """)
+    boolean existsLike(
+            @Param("reviewId") Long reviewId,
+            @Param("userId") Long userId
+    );
 }
