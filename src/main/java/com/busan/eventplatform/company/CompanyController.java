@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final CompanyPointQueryService companyPointQueryService;
 
     @GetMapping("/company/join")
     public String joinForm() {
@@ -75,5 +76,19 @@ public class CompanyController {
             throw new Exception401("기업 계정으로 다시 로그인해주세요.");
         }
         return company;
+    }
+
+    @GetMapping("/company/points")
+    public String pointHistory(Model model, HttpSession session) {
+        // 기존 공통 메서드로 기업 로그인 여부 확인
+        SessionCompanyDto company = requireCompany(session);
+
+        // 요청 파라미터 대신 로그인한 기업 ID로 본인 내역 조회
+        CompanyPointResponse.Detail pointHistory = companyPointQueryService.findHistory(company.getId());
+
+        // 화면에 전달
+        model.addAttribute("pointHistory", pointHistory);
+
+        return "company/point-history";
     }
 }
