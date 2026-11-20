@@ -84,7 +84,7 @@ public class PaymentService {
                 .orElseThrow(() -> new Exception404("존재하지 않는 결제건입니다."));
 
         // 2. 현재 결제가 현재 세션이용자의 결제가 맞는지.
-        if(!payment.isOwner(loginIdentity)) throw new Exception400("");
+        if(!payment.isOwner(loginIdentity)) throw new Exception400("신청한 결제건이 아닙니다");
 
         // 3. 중복지급 방지(이미 "PAID"라면 거절.)
         if(payment.isPaid()) throw new RuntimeException("이미 결제완료된 요청");

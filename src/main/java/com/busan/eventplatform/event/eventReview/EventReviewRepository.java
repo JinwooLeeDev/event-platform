@@ -44,6 +44,16 @@ public interface EventReviewRepository extends JpaRepository<EventReview, Long> 
             """)
     List<EventReview> findAllByEventSessionIdOrderByLikeCount(@Param("eventSessionId") Long eventSessionId);
 
-    // Todo - 출석 테이블 생성 후 출석 여부 검증 쿼리 추가
+    // 특정 회원의 해당 회차 출석 여부 확인 -- 출석한 회원만 후기 작성 허용
+    @Query("""
+        select count(a) > 0
+        from Attendance a
+        where a.registration.eventSession.id = :eventSessionId
+        and a.registration.user.id = :userId
+        """)
+    boolean existsAttendance(
+            @Param("eventSessionId") Long eventSessionId,
+            @Param("userId") Long userId
+    );
 
 }

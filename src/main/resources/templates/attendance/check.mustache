@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>{{> layout/head-meta}}<title>출석 체크 | Busan Play</title></head>
+<body>
+{{> layout/header}}
+{{> attendance/style}}
+<main class="attendance-page">
+    {{#page}}
+        <!-- ★ [f/42] 참가자: QR 인식 후 출석 확인·결과 (휴대폰 화면 기준) -->
+        <section class="attendance-card" aria-labelledby="attendance-title">
+            <span class="attendance-tag">출석 체크</span>
+            {{#eventTitle}}<h1 id="attendance-title">{{eventTitle}}</h1>{{/eventTitle}}
+            {{^eventTitle}}<h1 id="attendance-title">출석 체크</h1>{{/eventTitle}}
+            {{#sessionName}}<p class="attendance-sub">{{sessionName}} · {{scheduleText}}</p>{{/sessionName}}
+            {{#checkTimeText}}<p class="attendance-time">{{checkTimeText}}</p>{{/checkTimeText}}
+
+            {{#message}}<p class="attendance-message {{messageClass}}" role="status">{{message}}</p>{{/message}}
+
+            <div class="attendance-actions">
+                {{#canSubmit}}
+                    <form method="post" action="/attendance/check/{{sessionId}}" id="attendance-form">
+                        <input type="hidden" name="code" value="{{code}}">
+                        <button id="attendance-submit" type="submit" class="attendance-button">출석 체크</button>
+                    </form>
+                {{/canSubmit}}
+                {{#done}}<a class="attendance-button" href="/myhistory">신청 내역에서 확인</a>{{/done}}
+                {{#loginRequired}}<a class="attendance-button" href="/login">로그인하기</a>{{/loginRequired}}
+                {{^done}}<a class="attendance-button attendance-button--secondary" href="/myhistory">신청 내역</a>{{/done}}
+            </div>
+        </section>
+    {{/page}}
+</main>
+{{> layout/footer}}
+<script>
+    // ★ [f/42] [출석 체크] 연속 클릭 방지 (서버도 회차 락으로 1건만 저장)
+    (() => {
+        const form = document.getElementById('attendance-form');
+        if (!form) return;
+        form.addEventListener('submit', () => {
+            const button = document.getElementById('attendance-submit');
+            button.disabled = true;
+            button.textContent = '처리 중…';
+        });
+    })();
+</script>
+</body>
+</html>

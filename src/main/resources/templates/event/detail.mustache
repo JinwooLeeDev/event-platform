@@ -14,6 +14,13 @@
             {{#event.categoryName}}<span class="detail-category">{{event.categoryName}}</span>{{/event.categoryName}}
             <h1>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}행사 상세{{/event.title}}</h1>
             {{#event.summary}}<p class="detail-summary">{{event.summary}}</p>{{/event.summary}}
+            {{#event.id}}
+                <div class="detail-main-image">
+                    <img src="/event-files/{{event.id}}"
+                         alt="{{event.title}} 대표 이미지"
+                         onerror="this.parentElement.style.display='none'">
+                </div>
+            {{/event.id}}
             <div class="detail-at-a-glance">
                 <div>
                     <span>행사 장소</span>
@@ -54,6 +61,73 @@
                     <h2 id="description-title">어떤 행사인가요?</h2>
                     <div class="detail-description">{{#event.description}}{{event.description}}{{/event.description}}{{^event.description}}자세한 행사 소개를 준비하고 있습니다.{{/event.description}}</div>
                 </section>
+
+                <!-- 행사 리뷰 -->
+                <section class="detail-section review-section" id="reviews"
+                         aria-labelledby="review-title">
+
+                    <div class="detail-section-heading">
+                        <div>
+                            <h2 id="review-title">참가자 리뷰</h2>
+                            <p class="detail-muted">행사에 참여한 사람들의 생생한 후기입니다.</p>
+                        </div>
+                    </div>
+
+                    <!-- 리뷰 작성 -->
+                    {{#canWriteReview}}
+                        <div class="review-write">
+                            <h3>리뷰 작성하기</h3>
+
+                            <form action="/event-reviews/save" method="post">
+                                <input type="hidden" name="eventId" value="{{event.id}}">
+
+                                <label for="review-rating">별점</label>
+                                <select id="review-rating" name="rating" required>
+                                    <option value="5">★★★★★ 5점</option>
+                                    <option value="4">★★★★☆ 4점</option>
+                                    <option value="3">★★★☆☆ 3점</option>
+                                    <option value="2">★★☆☆☆ 2점</option>
+                                    <option value="1">★☆☆☆☆ 1점</option>
+                                </select>
+
+                                <label for="review-content">후기 내용</label>
+                                <textarea id="review-content" name="content"
+                                          placeholder="행사에 참여한 후기를 작성해주세요."
+                                          required></textarea>
+
+                                <button type="submit">리뷰 등록</button>
+                            </form>
+                        </div>
+                    {{/canWriteReview}}
+
+                    <!-- 리뷰 목록 -->
+                    <div class="review-list">
+                        {{#reviewList}}
+                            <article class="review-item">
+                                <div class="review-header">
+                                    <strong>{{username}}</strong>
+                                    <span>★ {{rating}}점</span>
+                                </div>
+
+                                <p>{{content}}</p>
+                                <small>{{createdAt}}</small>
+
+                                {{#isOwner}}
+                                    <form action="/event-reviews/delete/{{id}}" method="post">
+                                        <button type="submit">삭제</button>
+                                    </form>
+                                {{/isOwner}}
+                            </article>
+                        {{/reviewList}}
+
+                        {{^reviewList}}
+                            <div class="detail-empty">
+                                <p>아직 등록된 리뷰가 없습니다.</p>
+                            </div>
+                        {{/reviewList}}
+                    </div>
+                </section>
+
                 <section class="detail-section" id="location" aria-labelledby="location-title">
                     <h2 id="location-title">어디에서 만나나요?</h2>
                     <div class="detail-address">

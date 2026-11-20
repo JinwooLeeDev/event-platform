@@ -26,11 +26,31 @@ public class EventReviewService {
     private final EventReviewLikeRepository eventReviewLikeRepository;
 
     // 특정 회차 후기 목록 조회 (최신순 / 좋아요순)
-    public List<EventReview> findAllByEventSessionId(Long eventSessionId, String sort) {
+    public List<EventReviewResponse.ListDto> findAllByEventSessionId(
+            Long eventSessionId,
+            String sort,
+            Long userId
+    ) {
+        List<EventReview> reviewList;
+
         if ("like".equals(sort)) {
-            return eventReviewRepository.findAllByEventSessionIdOrderByLikeCount(eventSessionId);
+            reviewList = eventReviewRepository
+                    .findAllByEventSessionIdOrderByLikeCount(eventSessionId);
+        } else {
+            reviewList = eventReviewRepository
+                    .findAllByEventSessionId(eventSessionId);
         }
-        return eventReviewRepository.findAllByEventSessionId(eventSessionId);
+
+        return reviewList.stream()
+                .map(review -> {
+                    boolean isLiked = userId != null
+                            && eventReviewLikeRepository.existsLike(
+                            review.getId(), userId
+                    );
+
+                    return new EventReviewResponse.ListDto(review, isLiked);
+                })
+                .toList();
     }
 
     // 후기 작성
@@ -44,6 +64,13 @@ public class EventReviewService {
 
         if (exists) {
             throw new Exception400("이미 후기를 작성했습니다.");
+        }
+
+        // 해당 회차에 출석했는지 확인
+        boolean attended = eventReviewRepository.existsAttendance(eventSessionId, userId);
+
+        if (!attended) {
+            throw new Exception403("출석 확인된 회원만 후기를 작성할 수 있습니다.");
         }
 
         EventSession eventSession = eventSessionRepository.findById(eventSessionId)
