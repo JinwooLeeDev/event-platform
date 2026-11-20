@@ -1,6 +1,7 @@
 package com.busan.eventplatform.global.error.exception;
 
 import com.busan.eventplatform.login.LoginViewAdvice;
+import com.busan.eventplatform.global.i18n.LocaleViewAdvice;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private final LoginViewAdvice loginViewAdvice;
+    private final LocaleViewAdvice localeViewAdvice;
 
     @ExceptionHandler(Exception400.class)
     public ModelAndView handle400(Exception400 exception, HttpServletRequest request) {
@@ -125,6 +127,7 @@ public class GlobalExceptionHandler {
         // 정상 화면과 동일한 기준으로 헤더 로그인 정보 구성
         Model loginModel = new ExtendedModelMap();
         loginViewAdvice.addLoginUser(request, loginModel);
+        localeViewAdvice.addLocale(request, loginModel);
 
         modelAndView.addAllObjects(loginModel.asMap());
 

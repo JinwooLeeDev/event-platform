@@ -1,6 +1,7 @@
 <header class="admin-header">
     <div class="admin-header-context"><span class="admin-console-label">운영 관리</span><span class="admin-header-divider" aria-hidden="true">/</span><span>{{pageTitle}}</span></div>
     <div class="admin-account">
+        {{> layout/locale}}
         {{#loginUser}}<span class="admin-avatar" aria-hidden="true">A</span><span>{{displayName}}<small>관리자 계정</small></span>{{/loginUser}}
         <form action="/logout" method="post"><button type="submit">로그아웃</button></form>
     </div>

@@ -1,0 +1,146 @@
+Busan Play 다국어 기반 시스템 1-A — 구현 및 검증 보고
+작성일: 2026-11-19
+작업 브랜치: feat/다국어지원
+
+1. 구현 결과
+
+ko, en, ja, zh-CN만 허용한다. 쿠키가 없거나 잘못된 경우 한국어로 표시하고 최초 선택 모달을 제공한다.
+Accept-Language는 언어 결정에 사용하지 않는다. 유효한 쿠키가 있으면 모달 자동 표시를 생략한다.
+공통 헤더와 관리자 헤더에 언어 선택 버튼을 추가했다. 로그인·가입·일반 오류 화면에서도 선택할 수 있다.
+최초 언어 선택 모달이 로그인 모달보다 먼저 표시되며, 모달을 열고 닫는 것만으로 가입 폼 입력값이 초기화되지 않는다.
+전체 화면 번역, Gemini, 콘텐츠 번역, 번역 테이블은 구현하지 않았다.
+
+2. 신규 파일
+
+src/main/java/com/busan/eventplatform/global/i18n/
+  SupportedLocale.java          언어 코드 허용 목록 및 기본값
+  LocaleCookieResolver.java     쿠키 기반 LocaleResolver 및 쿠키 읽기·쓰기
+  LocaleSelectionState.java     세션 CSRF 토큰과 이번 방문의 명시적 선택
+  I18nConfig.java               LocaleResolver 및 MessageSource 빈
+  LocaleMessages.java           공통 메시지 조회 및 누락 키 대체
+  LocalePreferenceService.java  개인 회원 언어 동기화 트랜잭션
+  LocaleController.java         POST /locale, CSRF 및 내부 리다이렉트 검증
+  LocaleViewAdvice.java          Mustache 공통 언어 모델
+src/main/resources/messages.properties
+src/main/resources/messages_en.properties
+src/main/resources/messages_ja.properties
+src/main/resources/messages_zh_CN.properties
+src/main/resources/templates/layout/locale.mustache
+src/main/resources/static/css/locale.css
+src/main/resources/static/js/locale.js
+src/test/java/com/busan/eventplatform/global/i18n/LocaleFlowTest.java
+src/test/java/com/busan/eventplatform/global/i18n/LocaleInfrastructureTest.java
+src/test/resources/i18n-fallback-test.properties
+src/test/resources/i18n-fallback-test_en.properties
+scripts/check-locale-ui.cjs
+docs/i18n-1a.txt
+
+3. 수정한 기존 파일
+
+src/main/java/com/busan/eventplatform/
+  global/error/exception/GlobalExceptionHandler.java
+  login/personallogin/AuthService.java
+  login/personallogin/AuthController.java
+  login/companylogin/CompanyAuthController.java
+  login/mypage/MyPageController.java
+  login/mypage/MyPageUpdateReqDto.java
+src/main/resources/templates/
+  layout/header.mustache
+  layout/footer.mustache
+  admin/layout/header.mustache
+  login/modal-script.mustache
+  login/mypage.mustache
+
+4. 설정 및 메시지 구조
+
+별도 I18nConfig가 기존 WebMvcConfig를 변경하지 않고 localeResolver와 messageSource를 등록한다.
+MessageSource는 UTF-8 messages 리소스를 사용하고 시스템 Locale 대체를 끈다.
+번역 누락은 기본 한국어 파일로 대체하며 기본 파일에도 키가 없으면 키 자체를 반환한다.
+Java에서는 LocaleMessages.get(key, args...)를 사용한다.
+Mustache에서는 LocaleViewAdvice가 제공한 i18n 맵을 사용한다. 예: {{i18n.language}}.
+현재 맵에는 모달·공통 헤더·푸터에 필요한 키만 포함된다.
+LoginViewAdvice는 기존 로그인 표시 역할을 유지한다.
+직접 생성하는 오류 ModelAndView에도 언어 모델을 제공한다.
+API·정적 리소스 및 해당 요청의 오류 dispatch에는 언어 모달 모델을 제공하지 않는다.
+공통 언어 모델 없이 직접 렌더링하는 기존 템플릿에는 한국어 대체 표시를 유지한다.
+
+5. 쿠키 및 DB 동기화
+
+BUSAN_PLAY_LOCALE: Path=/, SameSite=Lax, HttpOnly, Max-Age=31536000(365일).
+HTTPS로 인식된 요청에는 Secure를 적용한다.
+TLS 종료 프록시 뒤에서 운영할 때에는 애플리케이션이 HTTPS 요청을 올바르게 인식하도록
+신뢰된 프록시의 전달 헤더 처리를 배포 환경에서 설정해야 한다. 임의 헤더를 신뢰하도록 변경하지 않았다.
+
+개인 가입: 서버가 쿠키를 읽고 허용 목록으로 검증하여 기존 User.preferredLocale에 저장한다.
+쿠키가 없거나 잘못되면 ko를 저장한다. 클라이언트의 preferredLocale 폼 필드는 가입에 사용하지 않는다.
+기존 이메일 인증, 중복 검사, 암호화, 상태 설정과 인증 정보 소모 순서는 유지한다.
+
+개인 로그인:
+  인증 검증 → 언어 DB 트랜잭션 → 세션 ID 교체 → 기업 세션 정리 → 개인 세션/identity 저장 → 쿠키 반영.
+  이번 세션에서 명시적으로 선택했으면 해당 언어를 DB에 저장한다.
+  명시적 선택이 없으면 유효한 DB 언어 > 유효한 쿠키 > ko 순서로 결정한다.
+  기존 쿠키가 있다는 이유만으로 DB를 덮어쓰지 않는다.
+  성공 시 임시 선택을 소비한다. 인증 또는 언어 DB 저장 실패 시 소비하지 않는다.
+
+로그인 후 변경:
+  POST /locale에서 세션 CSRF 토큰, 언어 코드와 인증 주체를 검증한다.
+  개인 회원은 DB 커밋 성공 후 SessionUserDto와 쿠키를 갱신한다.
+  DB 실패 시 변경을 롤백하고 기존 세션·쿠키를 유지한다.
+  기존 마이페이지의 선호 언어 변경도 쿠키와 동기화하며 동일한 CSRF 토큰을 검증한다.
+  리다이렉트는 내부 경로만 허용한다. 외부 URL, //, 역슬래시, 제어 문자와 인코딩된 경로 우회는 /로 대체한다.
+  검색어 등 인코딩된 쿼리 파라미터는 유지한다.
+
+기업 회원:
+  Company에는 선호 언어 필드가 없어 영구 저장을 지원하지 않는다. 쿠키만 유지한다.
+  스키마와 기업 가입·로그인 정책은 변경하지 않았다.
+  기업 로그인 성공 시 개인 세션 정리 및 identity 저장 흐름을 유지하면서 임시 언어 선택을 소비한다.
+
+로그아웃:
+  기존 세션 무효화 동작을 유지한다. 언어 쿠키를 삭제하지 않는다.
+  다른 계정으로 로그인하면 새 계정의 DB 언어를 기준으로 다시 동기화한다.
+
+6. 검증 결과
+
+Gradle wrapper JAR가 없어 설치된 Gradle 9.8.2를 사용했다.
+사용한 실행 파일:
+C:/Users/10203/.gradle/wrapper/dists/gradle-9.8.2-bin/8wepis63pzuhrlfaiy04bagwu/gradle-9.8.2/bin/gradle.bat
+
+test --tests '*Locale*Test': 총 38개 신규 테스트 통과(전체 test 실행에서도 모두 통과).
+test: 총 367개 중 26개 실패. 기존 329개 검증에서 확인된 26개 실패와 테스트명·오류 유형이 동일하다.
+assemble: 성공. bootJar 및 jar 생성 확인.
+git diff --check: 통과.
+node scripts/check-locale-ui.cjs http://localhost:18081: 통과.
+
+서비스·MVC 검증:
+  네 언어 선택·영속 쿠키·재방문, 잘못된 쿠키, CSRF, 안전한 리다이렉트, HTTPS Secure,
+  가입 언어 저장·기본값·임의 폼 언어 무시·이메일 인증·암호화,
+  DB 언어 복원·명시적 선택 우선·다른 계정 전환·실패 로그인 불변,
+  로그인 및 언어 변경 DB 실패 롤백·세션/쿠키 보존,
+  로그인 후 변경·마이페이지 변경·로그아웃 유지,
+  기업 로그인 세션 및 임시 선택 소비, 이메일 인증 JSON 응답,
+  정적 리소스/API 오류 dispatch의 모달 제외, 메시지 누락 대체를 검증했다.
+
+실제 Edge 브라우저 검증:
+  네 언어의 첫 선택과 헤더 표시, 언어 모달/로그인 모달 순서, 가입 이메일 입력값 보존,
+  브라우저 상태 복원을 통한 재방문, 실제 404 화면, API/정적 파일 오류의 모달 제외,
+  390px 모바일 화면 배치와 JavaScript 오류 부재를 확인했다.
+  브라우저 도구는 build/locale-browser 아래에만 설치했고 운영 의존성은 추가하지 않았다.
+  테스트 서버는 별도 포트 18081 및 인메모리 H2를 사용했다.
+
+기존 실패 상세: build/locale-test-failures.md
+전체 테스트 로그: build/locale-full-final.log
+빌드 로그: build/locale-assemble.log
+모바일 확인 이미지: build/locale-mobile.png
+
+7. 기존 기능 영향 및 다음 단계
+
+행사·신청·결제·환불 서비스는 변경하지 않았다. User/Company 스키마, 기존 API 계약,
+환경 변수, 세션 인증 방식, WebMvcConfig의 인증·인가 인터셉터는 변경하지 않았다.
+새 엔드포인트는 POST /locale이며 마이페이지 언어 저장 폼에는 _localeCsrf가 추가되었다.
+기존 전체 테스트의 26개 실패는 별도로 해결해야 하며 이번 작업에서 해당 도메인을 수정하지 않았다.
+전체 화면 번역 시에는 화면별 정적 문구의 메시지 키 분리와 번역, 동적 콘텐츠 처리 정책,
+추가 Mustache 메시지 모델 확장이 필요하다. 기업 영구 언어 저장은 후속 요구사항으로 남긴다.
+본 작업은 1-A에서 종료하며 Gemini API 또는 전체 정적 UI 번역으로 진행하지 않는다.
+커밋·푸시·브랜치 전환·reset·clean·stash는 수행하지 않았다.
+
+참고: docs/superpowers 아래 설계·계획 Markdown은 기존 *.md ignore 규칙에 따라 로컬 문서이다.

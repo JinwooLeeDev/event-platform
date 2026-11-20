@@ -1,6 +1,7 @@
 package com.busan.eventplatform.login.personallogin;
 
 import com.busan.eventplatform.login.LoginReqDto;
+import com.busan.eventplatform.global.i18n.SupportedLocale;
 
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
@@ -29,6 +30,11 @@ public class AuthService {
 
     @Transactional
     public void signup(SignupReqDto request, HttpSession session) {
+        signup(request, session, SupportedLocale.DEFAULT);
+    }
+
+    @Transactional
+    public void signup(SignupReqDto request, HttpSession session, String locale) {
         request.validate();
         Instant verifiedAt =
                 emailVerificationService.requireVerifiedEmail(
@@ -45,7 +51,7 @@ public class AuthService {
                 )
                 .displayName(request.getDisplayName())
                 .role(Role.MEMBER)
-                .preferredLocale("ko")
+                .preferredLocale(SupportedLocale.normalize(locale))
                 .build();
         user.verifyEmail(verifiedAt);
          userRepository.saveAndFlush(user);

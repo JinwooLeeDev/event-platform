@@ -4,6 +4,7 @@ import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginReqDto;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.LoginType;
+import com.busan.eventplatform.global.i18n.LocaleSelectionState;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -40,6 +41,7 @@ public class CompanyAuthController {
     @PostMapping({"/login/company", "/company/login"})
     public String login(@ModelAttribute LoginReqDto request, HttpServletRequest servletRequest, HttpSession session) {
         SessionCompanyDto sessionCompany = companyAuthService.login(request);
+        LocaleSelectionState.clear(session);
 
         // 인증 성공 후 세션 ID 교체
         servletRequest.changeSessionId();

@@ -12,6 +12,10 @@ import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.personallogin.AuthController;
 import com.busan.eventplatform.login.personallogin.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import com.busan.eventplatform.global.i18n.LocaleCookieResolver;
+import com.busan.eventplatform.global.i18n.LocaleSelectionState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -120,8 +124,13 @@ public class MyPageController {
             SessionUserDto sessionUser,
             @ModelAttribute MyPageUpdateReqDto request,
             HttpSession session,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest servletRequest, HttpServletResponse response,
+            @RequestParam(required = false) String _localeCsrf) {
         if (sessionUser == null) {throw new Exception401("로그인 후 이용해주세요.");}
+        if (!LocaleSelectionState.validToken(session, _localeCsrf)) {
+            throw new Exception403("요청을 확인할 수 없습니다. 페이지를 새로고침한 후 다시 시도해주세요.");
+        }
 
         SessionUserDto updatedUser = myPageService.updateMyPage(
                         sessionUser.getId(),
@@ -133,6 +142,8 @@ public class MyPageController {
                 AuthController.SESSION_USER,
                 updatedUser
         );
+        LocaleSelectionState.clear(session);
+        LocaleCookieResolver.writeCookie(servletRequest, response, updatedUser.getPreferredLocale());
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",

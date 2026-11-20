@@ -160,11 +160,11 @@
 
         <!-- 중앙-좌측: 회사 정보 -->
         <div class="footer-info-section">
-            <p class="company-address">부산광역시 해운대구 센텀중앙로 97, 벡스코 제1전시장 3층</p>
+            <p class="company-address">{{#i18n}}{{address}}{{/i18n}}{{^i18n}}부산광역시 해운대구 센텀중앙로 97, 벡스코 제1전시장 3층{{/i18n}}</p>
             <p class="company-details">
-                <span>사업자등록번호 123-45-67890</span>
+                <span>{{#i18n}}{{businessNumber}}{{/i18n}}{{^i18n}}사업자등록번호 123-45-67890{{/i18n}}</span>
                 <span class="info-separator"></span>
-                <span>대표이사 김부산</span>
+                <span>{{#i18n}}{{representative}}{{/i18n}}{{^i18n}}대표이사 김부산{{/i18n}}</span>
             </p>
         </div>
 
@@ -186,11 +186,11 @@
         <!-- 우측: 약관 버튼 및 카피라이트 -->
         <div class="footer-policy-section">
             <div class="policy-buttons">
-                <button type="button" class="btn-policy" onclick="location.href='/terms'">이용약관</button>
-                <button type="button" class="btn-policy" onclick="location.href='/privacy'">개인정보 처리 방침</button>
+                <button type="button" class="btn-policy" onclick="location.href='/terms'">{{#i18n}}{{terms}}{{/i18n}}{{^i18n}}이용약관{{/i18n}}</button>
+                <button type="button" class="btn-policy" onclick="location.href='/privacy'">{{#i18n}}{{privacy}}{{/i18n}}{{^i18n}}개인정보 처리 방침{{/i18n}}</button>
             </div>
             <p class="copyright">copyright© 2019 Contestkorea Inc. All rights reserved</p>
-            <p class="copyright-warning">본 콘텐츠의 저작권은 저자 또는 제공기관에 있으며, 이를 무단 이용하는 경우 저작권법 등에 따라 법적 책임을 질 수 있습니다.</p>
+            <p class="copyright-warning">{{#i18n}}{{copyrightWarning}}{{/i18n}}{{^i18n}}본 콘텐츠의 저작권은 저자 또는 제공기관에 있으며, 이를 무단 이용하는 경우 저작권법 등에 따라 법적 책임을 질 수 있습니다.{{/i18n}}</p>
         </div>
     </div>
 </footer>

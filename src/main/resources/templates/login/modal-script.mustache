@@ -125,7 +125,12 @@
         }
     });
     const autoOpen = () => {
-        if (location.pathname === '/login') open({type: new URLSearchParams(location.search).get('type')});
+        if (location.pathname !== '/login') return;
+        const showLogin = () => open({type: new URLSearchParams(location.search).get('type')});
+        const localeWidget = document.querySelector('.bp-locale');
+        if (localeWidget?.dataset.firstVisit === 'true') {
+            document.addEventListener('busan:locale-ready', showLogin, {once: true});
+        } else showLogin();
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', autoOpen, {once: true});
     else autoOpen();
