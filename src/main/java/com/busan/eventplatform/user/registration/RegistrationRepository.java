@@ -131,5 +131,12 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // ★ [f/42] 출석: 회원의 해당 회차 신청 중 지정 상태 1건 (참가 확정 신청 찾기)
     Optional<Registration> findFirstByUserIdAndEventSessionIdAndStatus(Long userId, Long eventSessionId, RegistrationStatus status);
 
+    /**
+     * ★ [포인트 거래 내역] 결제 id 중 해당 상태인 신청의 결제 id만 조회 — 환불이 '기업 거절' 때문인지 구분용 (쿼리 1번)
+     */
+    @Query("select r.purchase.id from Registration r where r.purchase.id in :purchaseIds and r.status = :status")
+    List<Long> findPurchaseIdsByStatus(@Param("purchaseIds") List<Long> purchaseIds,
+                                       @Param("status") RegistrationStatus status);
+
 
 }

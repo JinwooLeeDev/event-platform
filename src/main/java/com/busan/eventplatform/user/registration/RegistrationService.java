@@ -663,11 +663,14 @@ public class RegistrationService {
     /**
      * ★ 추가: [나의 신청 내역] '환불 내역' 문구 — 환불 기록이 있을 때만 "환불 완료 7,000P", 없으면 null (제목 숨김)
      * 무료 취소는 0P 기록이 남으므로 "환불 완료 0P"로 표시된다
+     * ★ 변경: 기업 거절은 사유를 앞에 붙인다 ("기업 거절로 환불 완료 5,000P") — 본인 취소 환불과 구분
      */
-    private String refundTextOf(Registration r, Map<Long, Integer> refundAmounts) {
+    private String refundTextOf(Registration r, Map<Long, Integer> refundAmounts, String refundReason) {
         Long purchaseId = purchaseIdOf(r);
         Integer refunded = purchaseId == null ? null : refundAmounts.get(purchaseId);
-        return refunded == null ? null : "환불 완료 " + point(refunded);
+        if (refunded == null) return null;
+        String prefix = refundReason == null ? "" : refundReason + "로 ";
+        return prefix + "환불 완료 " + point(refunded);
     }
 
     private Integer waitingNumberOf(Registration registration) {
@@ -705,6 +708,7 @@ public class RegistrationService {
 
         // 2. 표시 상태 결정 — 종료 시각·종료 상태를 기준으로 분류 (진행 중은 확정 탭에 유지)
         String tab, label, cssClass, message;
+        String refundReason = null;   // ★ 환불 내역 앞에 붙일 사유 (기업 거절만) — 그 외는 null
         Integer waitingNumber = null;
         if (status == RegistrationStatus.CANCELLED) {
             // 본인이 먼저 취소한 건은 나중에 회차가 취소돼도 '참가 취소'로 표시
@@ -720,9 +724,10 @@ public class RegistrationService {
             message = "주최 측 사정으로 행사 회차가 취소되었습니다. 결제한 포인트는 전액 환불됩니다.";
         } else if (status == RegistrationStatus.REJECTED) {
             tab = "cancelled";   // ★ [f/41] past → cancelled
-            label = "참가 거절";
+            label = "기업 거절";   // ★ 변경: '참가 거절' → '기업 거절' (본인 취소 환불과 구분, 팀장님 요청)
             cssClass = "status-rejected";
-            message = "주최자가 참가를 거절했습니다. 결제한 포인트는 전액 환불됩니다.";
+            message = "주최 기업이 참가를 거절했습니다. 결제한 포인트는 전액 환불됩니다.";
+            refundReason = "기업 거절";   // ★ 추가
         } else if (ended) {
             tab = "past";
             label = "행사 종료";
@@ -770,7 +775,7 @@ public class RegistrationService {
                 .purchasedAtText(blankToNull(r.getPurchase() == null || r.getPurchase().getPurchasedAt() == null
                         ? "" : r.getPurchase().getPurchasedAt().toLocalDateTime().format(HISTORY_DATE))) // ★ 빈 값 → null (제목만 나오는 것 방지)
                 .expectedRefundText(blankToNull(cancelable ? point(expectedRefund) : "")) // ★ 취소 불가 건은 '취소 시 예상 환불' 숨김
-                .refundText(refundTextOf(r, refundAmounts)) // ★ 실제 환불 기록(refund_tb)이 있으면 "환불 완료 7,000P", 없으면 null
+                .refundText(refundTextOf(r, refundAmounts, refundReason)) // ★ 실제 환불 기록이 있으면 "환불 완료 7,000P" (기업 거절은 사유 표시), 없으면 null
                 .cancelable(cancelable)
                 .cancelConfirmText(cancelConfirm)
                 .refundPolicyText(cancelable && paid > 0 ? RefundPolicy.REGISTRATION_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
