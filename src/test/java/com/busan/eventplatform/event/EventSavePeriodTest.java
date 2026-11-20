@@ -36,7 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties={"spring.config.import=","spring.sql.init.mode=never",
         "spring.datasource.url=jdbc:h2:mem:event-save-period;DB_CLOSE_DELAY=-1","spring.datasource.username=sa","spring.datasource.password=",
         "app.mail.from=test@example.test","spring.mail.host=localhost","spring.mail.username=test","spring.mail.password=test",
-        "app.business-verification.service-key=test","portone.store-id=test","portone.channel-key=test","portone.secret-key=test",
+        "app.business-verification.service-key=test",
+        "portone.naver-store-id=test","portone.naver-channel-key=test","portone.naver-secret-key=test",
+        "portone.kakao-store-id=test","portone.kakao-channel-key=test","portone.kakao-secret-key=test",
         "naver-map.client-id=test","naver-map.client-secret=test"})
 @Transactional
 class EventSavePeriodTest {
@@ -63,14 +65,29 @@ class EventSavePeriodTest {
 
     @Test
     void defaultSessionKeepsEventDatesAndSavesSeparateApplicationPeriod() throws Exception {
-        var request=form().param("hasSessions","false").param("startDate","2030-12-20").param("endDate","2030-12-21")
-                .param("applyStartAt","2030-12-01T09:00").param("applyEndAt","2030-12-18T18:00").param("pricingType","FREE");
-        mvc.perform(request).andExpect(status().is3xxRedirection());
+        mvc.perform(noSessionForm()).andExpect(status().is3xxRedirection());
         var saved=savedSession();
-        assertEquals(LocalDateTime.parse("2030-12-20T00:00"),saved.getStartsAt());
-        assertEquals(LocalDateTime.parse("2030-12-21T23:59:59"),saved.getEndsAt());
+        assertEquals(LocalDateTime.parse("2030-12-20T09:30"),saved.getStartsAt());
+        assertEquals(LocalDateTime.parse("2030-12-21T18:15"),saved.getEndsAt());
+        assertEquals(17, saved.getCapacity());
         assertEquals(LocalDateTime.parse("2030-12-01T09:00"),saved.getApplyStartAt());
         assertEquals(LocalDateTime.parse("2030-12-18T18:00"),saved.getApplyEndAt());
+    }
+
+    @Test
+    void noSessionRejectsMissingCapacityTimeAndReversedTime() throws Exception {
+        for (String field : new String[]{"sessions[0].capacity", "sessions[0].startsAt", "sessions[0].endsAt"}) {
+            mvc.perform(noSessionForm().with(request -> { request.setParameter(field, ""); return request; }))
+                    .andExpect(status().isBadRequest());
+        }
+        mvc.perform(noSessionForm().with(request -> { request.setParameter("sessions[0].capacity", "0"); return request; }))
+                .andExpect(status().isBadRequest());
+        mvc.perform(noSessionForm().with(request -> { request.setParameter("sessions[0].endsAt", "2030-12-20T08:00"); return request; }))
+                .andExpect(status().isBadRequest());
+        mvc.perform(noSessionForm().with(request -> {
+            request.removeParameter("sessions[0].capacity"); request.removeParameter("sessions[0].startsAt");
+            request.removeParameter("sessions[0].endsAt"); return request;
+        })).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -115,14 +132,25 @@ class EventSavePeriodTest {
     private MockMultipartHttpServletRequestBuilder form() {
         return multipart("/events/save").file(new MockMultipartFile("file","poster.png","image/png",new byte[]{1}))
                 .session(login).param("categoryId",categoryId.toString()).param("title","행사").param("summary","소개")
-                .param("description","상세 소개").param("address","부산");
+                .param("description","상세 소개").param("address","부산").param("postalCode","48058");
+    }
+    private MockMultipartHttpServletRequestBuilder noSessionForm() {
+        return form().param("hasSessions","false").param("startDate","2030-12-20").param("endDate","2030-12-21")
+                .param("applyStartAt","2030-12-01T09:00").param("applyEndAt","2030-12-18T18:00").param("pricingType","FREE")
+                .param("sessions[0].startsAt","2030-12-20T09:30").param("sessions[0].endsAt","2030-12-21T18:15")
+                .param("sessions[0].capacity","17");
     }
     private MockMultipartHttpServletRequestBuilder nestedForm() {
-        return form().param("hasSessions","true").param("sessions[0].name","오후 회차")
-                .param("sessions[0].startsAt","2030-12-20T14:00").param("sessions[0].endsAt","2030-12-20T16:00")
-                .param("sessions[0].applyStartAt","2030-12-01T09:00").param("sessions[0].applyEndAt","2030-12-18T18:00")
-                .param("sessions[0].capacity","10").param("sessions[0].pricingType","FREE")
-                .param("sessions[0].minimumParticipants","1").param("sessions[0].minimumCheckAt","2030-12-20T14:00");
+        var request = form().param("hasSessions","true");
+        for (int index = 0; index < 2; index++) {
+            String prefix = "sessions[" + index + "].";
+            request.param(prefix+"name","오후 회차").param(prefix+"startsAt","2030-12-20T14:00")
+                    .param(prefix+"endsAt","2030-12-20T16:00").param(prefix+"applyStartAt","2030-12-01T09:00")
+                    .param(prefix+"applyEndAt","2030-12-18T18:00").param(prefix+"capacity","10")
+                    .param(prefix+"pricingType","FREE").param(prefix+"minimumParticipants","1")
+                    .param(prefix+"minimumCheckAt","2030-12-20T14:00");
+        }
+        return request;
     }
     private EventSession savedSession() {
         em.flush(); em.clear();
