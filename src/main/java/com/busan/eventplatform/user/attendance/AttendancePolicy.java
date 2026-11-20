@@ -50,6 +50,6 @@ public final class AttendancePolicy {
      * ⚠ 후기 담당이 주소를 확정하면 이 한 줄만 바꾼다
      */
     public static String reviewUrl(Long sessionId) {
-        return "/reviews/write/" + sessionId;
+        return "/event-review/" + sessionId;
     }
 }
