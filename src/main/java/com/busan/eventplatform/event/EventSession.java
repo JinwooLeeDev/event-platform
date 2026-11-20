@@ -166,6 +166,10 @@ public class EventSession {
 
     public void setScheduled() {this.status = EventSessionStatus.SCHEDULED;}
 
+    public void setCompleted() {this.status = EventSessionStatus.COMPLETED;}
+
+    public void setInProgress() {this.status = EventSessionStatus.IN_PROGRESS;}
+
     public boolean isOwner(Long companyId) {return this.event.getCompany().getId().equals(companyId);}
 
     public void setStatus(EventSessionStatus status) {

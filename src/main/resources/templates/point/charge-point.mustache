@@ -19,8 +19,8 @@
                 <section class="charge-panel" aria-labelledby="charge-amount-title">
                     <div class="charge-section-heading"><h2 id="charge-amount-title">얼마를 충전할까요?</h2><p>금액을 직접 입력하거나 아래에서 선택하세요.</p></div>
                     <label for="chargeAmount">충전 금액</label>
-                    <div class="charge-input-wrap"><input type="number" inputmode="numeric" id="chargeAmount" min="1000" step="1" placeholder="금액 입력" aria-describedby="charge-amount-help"><span>원</span></div>
-                    <p class="charge-help" id="charge-amount-help">1,000원 이상 입력해주세요. 1원은 1포인트로 충전됩니다.</p>
+                    <div class="charge-input-wrap"><input type="number" inputmode="numeric" id="chargeAmount" min="1" step="1" placeholder="금액 입력" aria-describedby="charge-amount-help"><span>원</span></div>
+                    <p class="charge-help" id="charge-amount-help">1원 이상 입력해주세요. 1원은 1포인트로 충전됩니다.</p>
                     <div class="charge-amount-buttons" id="amount-btn-group" role="group" aria-label="충전 금액 빠른 선택">
                         <button type="button" class="amount-btn" data-amount="10000" aria-pressed="false">10,000원</button>
                         <button type="button" class="amount-btn" data-amount="30000" aria-pressed="false">30,000원</button>
@@ -90,6 +90,8 @@
            alert("충전할 포인트를 입력하세요(0포인트 이상)");
            return;
        }
+        naverPayBtn.disabled = true
+        kakaoPayBtn.disabled = true
 
        try {
            const prepareRes = await fetch("/api/naver/payment/prepare" , {
@@ -137,14 +139,20 @@
 
        }catch (e) {
             throw new Error("결제 실패하였습니다")
+       }finally {
+           naverPayBtn.disabled = false
+           kakaoPayBtn.disabled = false
        }
     })
+
 
     kakaoPayBtn.addEventListener("click" , async function() {
         if(selectedPoint <= 0 || selectedPoint === null) {
             alert("충전할 포인트를 입력하세요(0포인트 이상)");
             return;
         }
+        naverPayBtn.disabled = true
+        kakaoPayBtn.disabled = true
         try {
             const prepareRes = await fetch('/api/kakao/payment/prepare' , {
                 method : "post" ,
@@ -186,8 +194,11 @@
             alert("충전 완료되었습니다")
             window.location.href = completeReq.redirectUrl
 
-        }catch (e) {
+        }catch (error) {
             throw new Error("결제에 실패하였습니다")
+        }finally{
+            naverPayBtn.disabled = false
+            kakaoPayBtn.disabled = false
         }
     })
 

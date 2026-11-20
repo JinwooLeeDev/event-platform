@@ -17,7 +17,7 @@ public class PaymentReq {
     public static class CompleteDto {
         private String paymentId;
         public void validate() {
-//            if(paymentId == 0) throw new Exception400("충전금액은 0포인트 이상이어야합니다");
+
         }
     }
 }

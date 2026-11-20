@@ -9,8 +9,6 @@ import java.util.Optional;
 
 public interface DepositRepository extends JpaRepository<Deposit , Long> {
 
-
-
     @Query("""
         select d from Deposit d where d.company.id = :companyId and d.eventSession.id = :sessionId
 """)
