@@ -65,6 +65,9 @@ public class EventRequest {
 
             } else {
                 // 회차 없는 행사
+                if (sessions == null || sessions.size() != 1) {
+                    throw new Exception400("행사 정원과 시작·종료 시간을 입력해주세요.");
+                }
                 if (startDate == null || endDate == null) {
                     throw new Exception400("행사 시작일과 마감일을 입력해주세요.");
                 }

@@ -120,17 +120,35 @@
                     <div id="no-session-area" hidden>
                         <h3>행사 전체 일정</h3>
 
-                        <div class="form-group">
-                            <label>행사 시작일 <span>*</span></label>
-                            <input type="date" name="startDate"
-                                   id="startDate" disabled required>
+                        <div class="date-time-group">
+                            <div class="form-group">
+                                <label for="startDate">행사 시작일 <span>*</span></label>
+                                <input type="date" name="startDate" id="startDate" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="startTime">행사 시작 시간 <span>*</span></label>
+                                <input type="time" id="startTime" disabled required>
+                            </div>
+                        </div>
+
+                        <div class="date-time-group">
+                            <div class="form-group">
+                                <label for="endDate">행사 종료일 <span>*</span></label>
+                                <input type="date" name="endDate" id="endDate" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endTime">행사 종료 시간 <span>*</span></label>
+                                <input type="time" id="endTime" disabled required>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label>행사 종료일 <span>*</span></label>
-                            <input type="date" name="endDate"
-                                   id="endDate" disabled required>
+                            <label for="capacity">모집 정원 <span>*</span></label>
+                            <input type="number" name="sessions[0].capacity" id="capacity"
+                                   min="1" max="2147483647" step="1" placeholder="참가 가능한 인원 수" disabled required>
                         </div>
+                        <input type="hidden" name="sessions[0].startsAt" id="noSessionStartsAt" disabled>
+                        <input type="hidden" name="sessions[0].endsAt" id="noSessionEndsAt" disabled>
 
                         <div class="date-time-group">
                             <div class="form-group">
@@ -385,6 +403,11 @@
 
     const startDate = document.getElementById("startDate");
     const endDate = document.getElementById("endDate");
+    const startTime = document.getElementById("startTime");
+    const endTime = document.getElementById("endTime");
+    const capacity = document.getElementById("capacity");
+    const noSessionStartsAt = document.getElementById("noSessionStartsAt");
+    const noSessionEndsAt = document.getElementById("noSessionEndsAt");
 
     const applyStartDate = document.getElementById("applyStartDate");
     const applyStartTime = document.getElementById("applyStartTime");
@@ -438,6 +461,9 @@
         const inputs = [
             startDate,
             endDate,
+            startTime,
+            endTime,
+            capacity,
             applyStartDate,
             applyStartTime,
             applyEndDate,
@@ -452,6 +478,8 @@
 
         applyStartAt.disabled = !enabled;
         applyEndAt.disabled = !enabled;
+        noSessionStartsAt.disabled = !enabled;
+        noSessionEndsAt.disabled = !enabled;
 
         updateNoSessionFee();
     }
@@ -628,10 +656,13 @@
                 }
             }
 
-            // 행사 시작일과 종료일 비교
-            if (startDate.value > endDate.value) {
+            noSessionStartsAt.value = combineDateTime(startDate.value, startTime.value);
+            noSessionEndsAt.value = combineDateTime(endDate.value, endTime.value);
+
+            // 같은 날짜에도 종료 시간이 시작 시간보다 빠를 수 없음
+            if (noSessionStartsAt.value > noSessionEndsAt.value) {
                 event.preventDefault();
-                alert("행사 종료일은 시작일보다 빠를 수 없습니다.");
+                alert("행사 종료 일시는 시작 일시보다 빠를 수 없습니다.");
                 return;
             }
 
