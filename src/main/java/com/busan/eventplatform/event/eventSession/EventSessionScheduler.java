@@ -6,15 +6,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Slf4j
+@Component  // @Scheduled가 자동으로 bean에 등록이 안되므로 @Component로 빈에 등록해줌.
 @RequiredArgsConstructor
 public class EventSessionScheduler {
     private final EventSessionService eventSessionService;
     private final TaskScheduler taskScheduler;
-
 
     /**
      *  4시간마다 종료된 행사가 있는지 조회. --> 정상종료된 기업에게 보증금을 돌려주는 refundEventCompleted에서 DepositStatus를 Refund로 변경하므로

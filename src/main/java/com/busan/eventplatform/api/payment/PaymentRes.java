@@ -47,10 +47,12 @@ public class PaymentRes {
     public static class ListDto {
         private Timestamp paidAt;
         private int amount;
+        private PaymentTypeStatus typeStatus;
 
         public ListDto(Payment payment) {
             this.paidAt = payment.getPaidAt();
             this.amount = payment.getAmount();
+            this.typeStatus = payment.getTypeStatus();
         }
     }
 }

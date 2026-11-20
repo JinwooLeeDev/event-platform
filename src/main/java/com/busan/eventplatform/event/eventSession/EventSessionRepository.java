@@ -2,6 +2,7 @@ package com.busan.eventplatform.event.eventSession;
 
 import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.event.EventSession;
+import com.busan.eventplatform.event.events.EventStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
