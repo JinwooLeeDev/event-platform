@@ -14,11 +14,11 @@ spring:
   config:
     import: optional:file:.env[.properties]
   profiles:
-    default: h2
+    default: supabase
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         jdbc:

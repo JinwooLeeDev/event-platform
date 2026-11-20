@@ -144,7 +144,11 @@ public class RegistrationRes {
         private final String occurredAtText;
 
         public ChangeHistoryDto(RegistrationHistory history) {
-            this.statusLabel = history.getChangedStatus().getDescription();
+            // ★ 기업이 거절한 이력은 카드 배지와 같이 '기업 거절'로 표시 (행사 취소로 정리된 REJECTED 이력은 기존 '참가 거절' 유지)
+            boolean rejectedByCompany = history.getChangedStatus() == RegistrationStatus.REJECTED
+                    && history.getReason() != null
+                    && history.getReason().startsWith("주최자");
+            this.statusLabel = rejectedByCompany ? "기업 거절" : history.getChangedStatus().getDescription();
             // 개인 화면에는 처리자 엔티티나 사유에 기록된 내부 기업 ID를 노출하지 않는다.
             this.reason = history.getReason() == null ? null
                     : history.getReason().replaceAll("\\s*\\(companyId=\\d+\\)", "");

@@ -75,9 +75,12 @@ public class EventSessionService {
                 .toList();
     }
 
-    // 행사별 상태별 회차 조회
-    public List<EventSession> findAllByEventIdAndStatus(Long eventId, EventSessionStatus status) {
-        return eventSessionRepository.findAllByEventIdAndStatus(eventId, status);
+    // 행사별 상태별 회차 조회 — ★ [F02] 일반 목록(findByEventId)과 같은 화면용 DTO로 반환 (capacityLabel·신청 가능 여부 포함)
+    public List<EventSessionResponse.EventSessionDto> findAllByEventIdAndStatus(Long eventId, EventSessionStatus status) {
+        return eventSessionRepository.findAllByEventIdAndStatus(eventId, status)
+                .stream()
+                .map(session -> new EventSessionResponse.EventSessionDto(session, registrationService.getClosedReason(session)))
+                .toList();
     }
 
     // 회차 수정

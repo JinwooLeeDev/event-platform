@@ -1,13 +1,21 @@
 <style>
     /* ★ [f/42] 출석 화면 공통 스타일 — 마이페이지(personal-account) 색·버튼과 통일 */
     body:has(.attendance-page) { margin: 0; }
+    body:has(.attendance-page) .header-container,body:has(.attendance-page) .footer-container { box-sizing:border-box; max-width:1304px; padding-left:32px; padding-right:32px; }
+    body:has(.attendance-page) .footer-container { flex-wrap:wrap; }
+    body:has(.attendance-page) .footer-divider { display:none; }
+    body:has(.attendance-page) .footer-info-section { flex:2 1 260px; }
+    body:has(.attendance-page) .footer-contact-section { flex:1 1 160px; }
+    body:has(.attendance-page) .footer-policy-section { flex:1 1 100%; align-items:flex-start; }
+    body:has(.attendance-page) .copyright-warning { text-align:left; }
     .attendance-page { min-height: 70vh; padding: 40px 20px 56px; background: #f6f8fb; color: #142d4e; font-family: Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif; }
     .attendance-card { box-sizing: border-box; max-width: 520px; margin: 0 auto; padding: 32px 28px; border: 1px solid #dce4ee; border-radius: 16px; background: #fff; text-align: center; }
     .attendance-tag { display: inline-block; padding: 4px 10px; border-radius: 6px; background: #edf3ff; color: #174bc1; font-size: 12px; font-weight: 700; }
     .attendance-card h1 { margin: 14px 0 6px; font-size: 24px; line-height: 1.4; letter-spacing: -.5px; overflow-wrap: anywhere; }
     .attendance-sub { margin: 0; color: #627084; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
     .attendance-time { margin: 10px 0 0; color: #526780; font-size: 13px; }
-    .attendance-qr { display: inline-flex; margin: 26px 0 16px; padding: 16px; border: 1px solid #dce4ee; border-radius: 12px; background: #fff; }
+    .attendance-qr { box-sizing:border-box; display: inline-flex; max-width:100%; margin: 26px 0 16px; padding: 16px; border: 1px solid #dce4ee; border-radius: 12px; background: #fff; }
+    .attendance-qr canvas,.attendance-qr img { max-width:100%; height:auto!important; object-fit:contain; }
     .attendance-help { margin: 0; color: #526780; font-size: 13px; line-height: 1.8; }
     .attendance-count { margin: 18px 0 0; padding: 12px; border-radius: 8px; background: #f3f6fa; font-size: 14px; }
     .attendance-count strong { color: #174bc1; font-size: 18px; }
@@ -25,4 +33,5 @@
     .attendance-url { margin: 14px 0 0; color: #8a96a8; font-size: 11px; word-break: break-all; }
     .attendance-page a:focus-visible, .attendance-page button:focus-visible { outline: 3px solid #174bc1; outline-offset: 4px; }
     @media (max-width: 480px) { .attendance-page { padding: 24px 14px 40px; } .attendance-card { padding: 26px 18px; } .attendance-button { width: 100%; } .attendance-actions form { width: 100%; } }
+    @media(max-width:600px) { body:has(.attendance-page) .header-container,body:has(.attendance-page) .footer-container { padding-left:16px; padding-right:16px; } }
 </style>

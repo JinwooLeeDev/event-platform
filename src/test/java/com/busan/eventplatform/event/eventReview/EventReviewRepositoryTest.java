@@ -3,54 +3,77 @@ package com.busan.eventplatform.event.eventReview;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Transactional
 class EventReviewRepositoryTest {
 
     @Autowired
     private EventReviewRepository eventReviewRepository;
 
-    private final Long NOT_EXIST_SESSION_ID = 999999L;
-    private final Long NOT_EXIST_USER_ID = 999999L;
-    private final Long NOT_EXIST_REVIEW_ID = 999999L;
-
+    // Repository 주입 확인
     @Test
-    void 특정_회차_후기목록_조회() {
-        var result = eventReviewRepository
-                .findAllByEventSessionId(NOT_EXIST_SESSION_ID);
+    void repository_load_success() {
+        assertNotNull(eventReviewRepository);
+    }
+
+    // 존재하지 않는 후기 조회
+    @Test
+    void findById_not_found() {
+        Optional<EventReview> result =
+                eventReviewRepository.findById(999999L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    // 특정 회차 후기 목록 조회
+    @Test
+    void findAllByEventSessionId_success() {
+        var result =
+                eventReviewRepository.findAllByEventSessionId(999999L);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
+    // 특정 회원의 후기 작성 여부 확인
     @Test
-    void 특정_회원_후기작성_여부_확인() {
-        boolean result = eventReviewRepository
-                .existsReview(NOT_EXIST_SESSION_ID, NOT_EXIST_USER_ID);
+    void existsReview_false_when_not_exists() {
+        boolean result =
+                eventReviewRepository.existsReview(999999L, 999999L);
 
         assertFalse(result);
     }
 
+    // 특정 회차 후기 좋아요순 조회
     @Test
-    void 존재하지_않는_후기_작성자와_함께_조회() {
+    void findAllByEventSessionIdOrderByLikeCount_success() {
+        var result =
+                eventReviewRepository
+                        .findAllByEventSessionIdOrderByLikeCount(999999L);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    // 특정 후기와 작성자 함께 조회
+    @Test
+    void findByIdWithUser_not_found() {
         Optional<EventReview> result =
-                eventReviewRepository.findByIdWithUser(NOT_EXIST_REVIEW_ID);
+                eventReviewRepository.findByIdWithUser(999999L);
 
         assertTrue(result.isEmpty());
     }
 
+    // 출석하지 않은 회원 확인
     @Test
-    void 특정_회차_좋아요순_후기목록_조회() {
-        var result = eventReviewRepository
-                .findAllByEventSessionIdOrderByLikeCount(NOT_EXIST_SESSION_ID);
+    void existsAttendance_false_when_not_attended() {
+        boolean result =
+                eventReviewRepository.existsAttendance(999999L, 999999L);
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertFalse(result);
     }
 }

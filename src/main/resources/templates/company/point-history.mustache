@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    {{> layout/head-meta}}
+    <title>포인트·보증금 내역 | Busan Play</title>
+</head>
+<body>
+{{> layout/header}}
+{{> layout/account-style}}
+{{> company/session-style}}
+
+<style>
+    .point-history-balance {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .point-history-balance h2 {
+        margin: 0 0 8px;
+        color: #627084;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .point-history-amount {
+        display: block;
+        color: #142d4e;
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .point-history-balance p {
+        margin: 8px 0 0;
+    }
+
+    .point-history-table {
+        min-width: 550px;
+    }
+
+    .point-history-table--wide {
+        min-width: 760px;
+    }
+
+    .point-history-table .point-history-money {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .point-history-table .point-history-date {
+        white-space: nowrap;
+    }
+
+    .point-history-event {
+        display: block;
+        color: #142d4e;
+        font-weight: 600;
+    }
+
+    .point-history-session {
+        display: block;
+        margin-top: 5px;
+        color: #627084;
+        font-size: 12px;
+    }
+
+    .point-history-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 1px solid #c6d6eb;
+        border-radius: 20px;
+        background: #f0f5fc;
+        color: #244b7e;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .point-history-empty {
+        margin: 0;
+        padding: 32px 16px;
+        border: 1px dashed #dce4ee;
+        border-radius: 10px;
+        color: #627084;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+        .point-history-amount {
+            font-size: 28px;
+        }
+
+        .point-history-balance .company-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<main class="company-workspace">
+    <div class="account-layout">
+        {{> layout/company-nav}}
+
+        <div class="account-content">
+            <header class="company-heading">
+                <div>
+                    <p class="company-location">기업페이지</p>
+                    <h1>포인트·보증금 내역</h1>
+                    <p class="company-description">
+                        기업 포인트 충전과 보증금 처리 내역을 확인하세요.
+                    </p>
+                </div>
+            </header>
+
+            {{#pointHistory}}
+            <!-- 현재 기업 포인트 -->
+            <section class="company-panel point-history-balance"
+                     aria-labelledby="point-balance-title">
+                <div>
+                    <h2 id="point-balance-title">보유 포인트</h2>
+                    <strong class="point-history-amount">
+                        {{pointText}} P
+                    </strong>
+                    <p class="session-muted">
+                        행사 보증금 결제에 사용할 수 있는 포인트입니다.
+                    </p>
+                </div>
+
+                <a class="company-button" href="/charge">
+                    포인트 충전
+                </a>
+            </section>
+
+            <!-- 충전 내역 -->
+            <section class="session-panel"
+                     aria-labelledby="point-charge-title">
+                <div class="company-panel-heading">
+                    <div>
+                        <h2 id="point-charge-title">충전 내역</h2>
+                        <p class="company-description">
+                            결제가 완료된 포인트 충전 내역입니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="session-table-wrap">
+                    <table class="session-table point-history-table">
+                        <thead>
+                        <tr>
+                            <th scope="col">충전 일시</th>
+                            <th scope="col"
+                                class="point-history-money">
+                                충전 금액 (P)
+                            </th>
+                            <th scope="col">상태</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#charges}}
+                        <tr>
+                            <td class="point-history-date">
+                                {{paidAtText}}
+                            </td>
+                            <td class="point-history-money">
+                                {{amountText}}
+                            </td>
+                            <td>
+                                        <span class="point-history-status">
+                                            {{statusName}}
+                                        </span>
+                            </td>
+                        </tr>
+                        {{/charges}}
+
+                        {{^charges}}
+                        <tr>
+                            <td colspan="3">
+                                <p class="point-history-empty">
+                                    포인트 충전 내역이 없습니다.
+                                </p>
+                            </td>
+                        </tr>
+                        {{/charges}}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 보증금 납부 및 정상 반환 내역 -->
+            <section class="session-panel"
+                     aria-labelledby="point-deposit-title">
+                <div class="company-panel-heading">
+                    <div>
+                        <h2 id="point-deposit-title">
+                            보증금 납부·반환 내역
+                        </h2>
+                        <p class="company-description">
+                            회차별 보증금 납부 상태와 정상 반환 금액을 확인하세요.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="session-table-wrap">
+                    <table class="session-table point-history-table
+                                      point-history-table--wide">
+                        <thead>
+                        <tr>
+                            <th scope="col">행사 / 회차</th>
+                            <th scope="col"
+                                class="point-history-money">
+                                보증금액 (P)
+                            </th>
+                            <th scope="col">상태</th>
+                            <th scope="col">납부 일시</th>
+                            <th scope="col"
+                                class="point-history-money">
+                                정상 반환 금액 (P)
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#deposits}}
+                        <tr>
+                            <td>
+                                        <span class="point-history-event">
+                                            {{eventTitle}}
+                                        </span>
+                                <span class="point-history-session">
+                                            {{sessionName}}
+                                        </span>
+                            </td>
+                            <td class="point-history-money">
+                                {{amountText}}
+                            </td>
+                            <td>
+                                        <span class="point-history-status">
+                                            {{statusName}}
+                                        </span>
+                            </td>
+                            <td class="point-history-date">
+                                {{paidAtText}}
+                            </td>
+                            <td class="point-history-money">
+                                {{returnedAmountText}}
+                            </td>
+                        </tr>
+                        {{/deposits}}
+
+                        {{^deposits}}
+                        <tr>
+                            <td colspan="5">
+                                <p class="point-history-empty">
+                                    보증금 납부·반환 내역이 없습니다.
+                                </p>
+                            </td>
+                        </tr>
+                        {{/deposits}}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 행사 취소에 따른 환불 내역 -->
+            <section class="session-panel"
+                     aria-labelledby="point-refund-title">
+                <div class="company-panel-heading">
+                    <div>
+                        <h2 id="point-refund-title">환불 내역</h2>
+                        <p class="company-description">
+                            행사 취소에 따른 환불 처리 상태와 실제 환불 금액입니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="session-table-wrap">
+                    <table class="session-table point-history-table
+                                      point-history-table--wide">
+                        <thead>
+                        <tr>
+                            <th scope="col">행사 / 회차</th>
+                            <th scope="col">요청 일시</th>
+                            <th scope="col">상태</th>
+                            <th scope="col"
+                                class="point-history-money">
+                                환불 금액 (P)
+                            </th>
+                            <th scope="col">사유</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#refunds}}
+                        <tr>
+                            <td>
+                                        <span class="point-history-event">
+                                            {{eventTitle}}
+                                        </span>
+                                <span class="point-history-session">
+                                            {{sessionName}}
+                                        </span>
+                            </td>
+                            <td class="point-history-date">
+                                {{requestedAtText}}
+                            </td>
+                            <td>
+                                        <span class="point-history-status">
+                                            {{statusName}}
+                                        </span>
+                            </td>
+                            <td class="point-history-money">
+                                {{amountText}}
+                            </td>
+                            <td>{{reason}}</td>
+                        </tr>
+                        {{/refunds}}
+
+                        {{^refunds}}
+                        <tr>
+                            <td colspan="5">
+                                <p class="point-history-empty">
+                                    환불 내역이 없습니다.
+                                </p>
+                            </td>
+                        </tr>
+                        {{/refunds}}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            {{/pointHistory}}
+
+            {{^pointHistory}}
+            <div class="company-empty">
+                <h2>포인트 내역을 확인할 수 없습니다.</h2>
+                <p>기업 정보 화면으로 돌아가 다시 확인해주세요.</p>
+                <a class="company-button company-button--secondary"
+                   href="/company/detail">
+                    기업 정보로 돌아가기
+                </a>
+            </div>
+            {{/pointHistory}}
+        </div>
+    </div>
+</main>
+
+{{> layout/footer}}
+</body>
+</html>
