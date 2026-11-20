@@ -31,4 +31,20 @@ public interface RefundRepository extends JpaRepository<Refund, Long> {
         select r from Refund r where r.deposit.id = :depositId and r.status = :status
 """)
     Optional<Refund> findByDepositId(@Param("depositId") Long depositId , @Param("status") RefundStatus status);
+
+    // 기업의 보증금 취소 환급 기록과 연결된 행사·회차 조회
+    @Query("""
+        select r
+        from Refund r
+        join fetch r.deposit d
+        join fetch d.eventSession s
+        join fetch s.event e
+        where r.company.id = :companyId
+          and d.company.id = :companyId
+          and e.company.id = :companyId
+        order by r.createdAt desc, r.id desc
+        """)
+    List<Refund> findHistoryByCompanyId(
+            @Param("companyId") Long companyId
+    );
 }
