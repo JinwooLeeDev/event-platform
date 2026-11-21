@@ -110,8 +110,6 @@ public class MyPageController {
         );
 
         model.addAttribute("pointHistory", purchaseService.pointHistory(sessionUser.getId()));
-        model.addAttribute("pointSize", purchaseService.pointHistory(sessionUser.getId()).size());
-
         return "user/mypoint";
     }
 
