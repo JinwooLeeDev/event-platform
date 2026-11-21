@@ -98,7 +98,7 @@
                         </a>
                     </section>
                     {{/paidReadyEvent}}
-                    <section class="company-operation" aria-label="회차 운영"><div><h3>회차 운영</h3><p>회차별 일정과 모집 현황, 참가자 목록을 확인하세요.</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">회차·참가자 관리</a><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?add=1">회차 추가</a></div></section>
+                    <section class="company-operation" aria-label="회차 운영"><div><h3>회차 운영</h3><p>회차별 일정과 모집 현황, 참가자 목록을 확인하세요.</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">회차·참가자 관리</a></div></section>
                     <div class="company-event-secondary"><details class="company-recruitment"><summary>회차별 모집 기간 확인</summary><dl>{{#sessionPeriods}}<div><dt>{{name}}</dt><dd>{{applyStartAt}} ~ {{applyEndAt}}</dd></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">등록된 회차가 없습니다.</p>{{/sessionPeriods}}</dl></details><details class="company-danger"><summary>회차 취소 신청</summary><p>취소할 회차를 선택해 사유를 제출해주세요. 운영자가 승인하면 해당 회차가 취소됩니다.</p><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?select=1">취소할 회차 선택</a></details></div>
                 </article>
             {{/eventList}}{{^eventList}}<div class="company-empty"><h2>첫 행사를 준비해보세요.</h2><p>행사를 등록하면 진행 상태와 회차를 이곳에서 관리할 수 있습니다.</p><a class="company-button company-button--secondary" href="/events/save">행사 주최 신청</a></div>{{/eventList}}{{/eventList}}

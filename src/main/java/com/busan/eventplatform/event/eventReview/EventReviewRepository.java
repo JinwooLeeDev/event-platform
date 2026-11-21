@@ -1,5 +1,7 @@
 package com.busan.eventplatform.event.eventReview;
 
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -54,6 +56,49 @@ public interface EventReviewRepository extends JpaRepository<EventReview, Long> 
     boolean existsAttendance(
             @Param("eventSessionId") Long eventSessionId,
             @Param("userId") Long userId
+    );
+
+    // 행사 전체 회차에서 좋아요가 가장 많은 리뷰 1개 조회
+    @Query("""
+        select er from EventReview er
+        join fetch er.user
+        join er.eventSession es
+        where es.event.id = :eventId
+        and es.status = :status
+        order by er.likeCount desc, er.createdAt desc
+        """)
+    List<EventReview> findBestReviewByEventId(
+            @Param("eventId") Long eventId,
+            @Param("status") EventSessionStatus status,
+            Pageable pageable
+    );
+
+    // 행사 전체 회차의 리뷰 목록 조회 (좋아요순)
+    @Query("""
+        select er from EventReview er
+        join fetch er.user
+        join er.eventSession es
+        where es.event.id = :eventId
+        and es.status = :status
+        order by er.likeCount desc, er.createdAt desc
+        """)
+    List<EventReview> findAllByEventId(
+            @Param("eventId") Long eventId,
+            @Param("status") EventSessionStatus status
+    );
+
+    // 특정 회차에서 좋아요가 가장 많은 리뷰 1개 조회
+    @Query("""
+        select er from EventReview er
+        join fetch er.user
+        where er.eventSession.id = :eventSessionId
+        and er.eventSession.status = :status
+        order by er.likeCount desc, er.createdAt desc
+        """)
+    List<EventReview> findBestReviewByEventSessionId(
+            @Param("eventSessionId") Long eventSessionId,
+            @Param("status") EventSessionStatus status,
+            Pageable pageable
     );
 
 }
