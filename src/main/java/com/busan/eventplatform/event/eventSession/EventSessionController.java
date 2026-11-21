@@ -1,5 +1,6 @@
 package com.busan.eventplatform.event.eventSession;
 
+import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import jakarta.servlet.http.HttpSession;
@@ -25,6 +26,9 @@ public class EventSessionController {
         saveDto.validate();
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
+        if (!eventSessionService.canAddSession(eventId, sessionCompanyDto.getId())) {
+            throw new Exception403("보완 요청된 행사만 회차를 추가할 수 있습니다.");
+        }
         eventSessionService.save(eventId, sessionCompanyDto.getId(), saveDto);
 
         return "redirect:/events";
@@ -45,8 +49,11 @@ public class EventSessionController {
     // 행사별 회차 목록 조회
     // GET - http://localhost:8080/events/sessions/list/{eventId}
     @GetMapping("/events/sessions/list/{eventId}")
-    public String list(@PathVariable Long eventId, Model model) {
+    public String list(@PathVariable Long eventId, Model model, HttpSession session) {
+        SessionCompanyDto companyDto = (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
         model.addAttribute("eventSession", eventSessionService.findByEventId(eventId));
+        model.addAttribute("eventId", eventId);
+        model.addAttribute("canAddSession", eventSessionService.canAddSession(eventId, companyDto.getId()));
 
         return "event_session/list";
     }

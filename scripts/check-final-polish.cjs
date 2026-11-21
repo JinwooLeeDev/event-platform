@@ -181,6 +181,8 @@ async function list(page) {
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), fixture + ' overflows at ' + width);
             assert.equal(await page.locator('.user-name .arrow-down').count(), 0);
             if (fixture === 'main' || fixture === 'list-all-1') {
+                assert.equal(await page.locator('.event-card__visual').count(), await page.locator('.event-card').count(), 'one image area per event');
+                assert.equal(await page.locator('.event-card img').count(), await page.locator('.event-card').count(), 'one representative image per event');
                 const image = page.locator('.event-card__image');
                 assert.equal(await image.getAttribute('src'), '/event-files/101');
                 await image.scrollIntoViewIfNeeded();

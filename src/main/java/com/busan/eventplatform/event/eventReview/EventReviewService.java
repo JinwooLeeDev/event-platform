@@ -4,12 +4,14 @@ import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.eventReview.eventReviewLike.EventReviewLike;
 import com.busan.eventplatform.event.eventReview.eventReviewLike.EventReviewLikeRepository;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,30 @@ public class EventReviewService {
                     return new EventReviewResponse.ListDto(review, isLiked);
                 })
                 .toList();
+    }
+
+    // 행사 전체 회차에서 좋아요가 가장 많은 리뷰 1개 조회
+    public EventReviewResponse.ListDto findBestReviewByEventId(
+            Long eventId,
+            Long userId
+    ) {
+        List<EventReview> reviewList =
+                eventReviewRepository.findBestReviewByEventId(
+                        eventId,
+                        EventSessionStatus.COMPLETED,
+                        PageRequest.of(0, 1)
+                );
+
+        if (reviewList.isEmpty()) {
+            return null;
+        }
+
+        EventReview review = reviewList.get(0);
+
+        boolean isLiked = userId != null
+                && eventReviewLikeRepository.existsLike(review.getId(), userId);
+
+        return new EventReviewResponse.ListDto(review, isLiked);
     }
 
     // 후기 작성
@@ -154,5 +180,52 @@ public class EventReviewService {
             eventReview.increaseLikeCount();
         }
         return eventReview.getEventSession().getId();
+    }
+
+    // 행사 전체 회차의 리뷰 목록 조회 (좋아요순)
+    public List<EventReviewResponse.ListDto> findAllByEventId(
+            Long eventId,
+            Long userId
+    ) {
+        List<EventReview> reviewList =
+                eventReviewRepository.findAllByEventId(
+                        eventId,
+                        EventSessionStatus.COMPLETED
+                );
+
+        return reviewList.stream()
+                .map(review -> {
+                    boolean isLiked = userId != null
+                            && eventReviewLikeRepository.existsLike(
+                            review.getId(), userId
+                    );
+
+                    return new EventReviewResponse.ListDto(review, isLiked);
+                })
+                .toList();
+    }
+
+    // 특정 회차에서 대표 리뷰 1개 조회
+    public EventReviewResponse.ListDto findBestReviewByEventSessionId(
+            Long eventSessionId,
+            Long userId
+    ) {
+        List<EventReview> reviewList =
+                eventReviewRepository.findBestReviewByEventSessionId(
+                        eventSessionId,
+                        EventSessionStatus.COMPLETED,
+                        PageRequest.of(0, 1)
+                );
+
+        if (reviewList.isEmpty()) {
+            return null;
+        }
+
+        EventReview review = reviewList.get(0);
+
+        boolean isLiked = userId != null
+                && eventReviewLikeRepository.existsLike(review.getId(), userId);
+
+        return new EventReviewResponse.ListDto(review, isLiked);
     }
 }
