@@ -94,7 +94,7 @@
         const url = new URL(form.action, location.href);
         url.search = new URLSearchParams(new FormData(form, event.submitter)).toString();
         url.searchParams.set('page', '1');
-        url.searchParams.set('size', content.querySelector('#list-pagination')?.dataset.size || '10');
+        url.searchParams.set('size', content.querySelector('#list-pagination')?.dataset.size || '9');
         navigate(url);
     }
     page.addEventListener('submit', submit);

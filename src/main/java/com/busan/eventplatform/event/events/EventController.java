@@ -47,7 +47,7 @@ public class EventController {
     @GetMapping("/events/list")
     public String list(
         @RequestParam(name = "page", defaultValue = "1") int page,
-        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "size", defaultValue = "9") int size,
         @RequestParam(name = "keyword", defaultValue = "") String keyword,
         @RequestParam(name = "categoryId", required = false) Long categoryId,
         Model model) {

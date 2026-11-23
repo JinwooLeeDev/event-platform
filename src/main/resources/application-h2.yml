@@ -18,5 +18,7 @@ spring:
     init:
       mode: always
       encoding: UTF-8
-      data-locations: classpath:db/demo-data.sql
+      data-locations:
+        - classpath:db/demo-data.sql
+        - classpath:db/showcase-data.sql
 
