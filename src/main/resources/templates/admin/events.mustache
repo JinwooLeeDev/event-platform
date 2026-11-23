@@ -1,70 +1,70 @@
 {{#reviewSuccess}}<p class="admin-company-warning" role="status">{{reviewSuccess}}</p>{{/reviewSuccess}}
 {{#eventListPage}}
 <section class="admin-panel">
-    <div class="admin-panel-heading"><h2>행사 목록 <span class="admin-badge">{{eventReviewCount}}건</span></h2></div>
-    <nav class="admin-status-links" aria-label="행사 상태별 조회">{{#statusOptions}}<a href="/admin/events?status={{value}}" {{#selected}}aria-current="page"{{/selected}}>{{label}}</a>{{/statusOptions}}</nav>
+    <div class="admin-panel-heading"><h2>{{i18n.admin.ui0075}} <span class="admin-badge">{{eventReviewCount}}{{i18n.admin.ui0014}}</span></h2></div>
+    <nav class="admin-status-links" aria-label="{{i18n.admin.ui0076}}">{{#statusOptions}}<a href="/admin/events?status={{value}}" {{#selected}}aria-current="page"{{/selected}}>{{label}}</a>{{/statusOptions}}</nav>
     <form action="/admin/events" method="get" class="admin-member-search">
-        <label for="event-status">행사 상태</label>
+        <label for="event-status">{{i18n.admin.ui0077}}</label>
         <select id="event-status" name="status">{{#statusOptions}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/statusOptions}}</select>
-        <button type="submit">조회</button>
+        <button type="submit">{{i18n.admin.ui0078}}</button>
     </form>
-    <div class="admin-list-tools"><label for="admin-event-find">현재 목록에서 찾기</label><input id="admin-event-find" type="search" placeholder="행사명·기업명 검색" data-admin-filter="#admin-event-rows" data-admin-count="#admin-event-visible"><span id="admin-event-visible" role="status">{{eventReviewCount}}건</span></div>
+    <div class="admin-list-tools"><label for="admin-event-find">{{i18n.admin.ui0016}}</label><input id="admin-event-find" type="search" placeholder="{{i18n.admin.ui0079}}" data-admin-filter="#admin-event-rows" data-admin-count="#admin-event-visible"><span id="admin-event-visible" role="status">{{eventReviewCount}}{{i18n.admin.ui0014}}</span></div>
     <div class="admin-table-wrap"><table class="admin-table">
-        <caption class="admin-sr-only">상태별 행사 목록</caption>
-        <thead><tr><th scope="col">번호</th><th scope="col">행사명</th><th scope="col">주최 기업</th><th scope="col">카테고리</th><th scope="col">신청일</th><th scope="col">심사</th></tr></thead>
+        <caption class="admin-sr-only">{{i18n.admin.ui0080}}</caption>
+        <thead><tr><th scope="col">{{i18n.admin.ui0007}}</th><th scope="col">{{i18n.admin.ui0081}}</th><th scope="col">{{i18n.admin.ui0082}}</th><th scope="col">{{i18n.admin.ui0083}}</th><th scope="col">{{i18n.admin.ui0084}}</th><th scope="col">{{i18n.admin.ui0023}}</th></tr></thead>
         <tbody id="admin-event-rows">
-        {{#reviewEvents}}<tr data-admin-row><td>{{id}}</td><td><a class="admin-record-title" href="/admin/events/{{id}}">{{title}}</a></td><td>{{company.name}}</td><td>{{category.name}}</td><td data-admin-date>{{createdAt}}</td><td><a class="admin-row-action" href="/admin/events/{{id}}">상세 검토</a></td></tr>{{/reviewEvents}}
-        {{^reviewEvents}}<tr><td colspan="6" class="admin-member-empty">선택한 상태의 행사가 없습니다.</td></tr>{{/reviewEvents}}
-        <tr data-admin-filter-empty hidden><td colspan="6" class="admin-member-empty">검색 조건에 맞는 행사가 없습니다.</td></tr>
+        {{#reviewEvents}}<tr data-admin-row><td>{{id}}</td><td><a class="admin-record-title" href="/admin/events/{{id}}">{{title}}</a></td><td>{{company.name}}</td><td>{{category.name}}</td><td data-admin-date>{{createdAt}}</td><td><a class="admin-row-action" href="/admin/events/{{id}}">{{i18n.admin.ui0024}}</a></td></tr>{{/reviewEvents}}
+        {{^reviewEvents}}<tr><td colspan="6" class="admin-member-empty">{{i18n.admin.ui0085}}</td></tr>{{/reviewEvents}}
+        <tr data-admin-filter-empty hidden><td colspan="6" class="admin-member-empty">{{i18n.admin.ui0086}}</td></tr>
         </tbody>
     </table></div>
 </section>
 {{/eventListPage}}
 {{#eventDetailPage}}
 {{#reviewEvent}}
-<nav class="admin-context-nav" aria-label="행사 검토 항목"><a href="#admin-event-information">행사 정보</a><a href="#admin-event-sessions">회차·모집 정보</a><a href="#admin-event-decision">심사 처리</a></nav>
+<nav class="admin-context-nav" aria-label="{{i18n.admin.ui0087}}"><a href="#admin-event-information">{{i18n.admin.ui0088}}</a><a href="#admin-event-sessions">{{i18n.admin.ui0089}}</a><a href="#admin-event-decision">{{i18n.admin.ui0030}}</a></nav>
 <div class="admin-review-layout"><div class="admin-review-content">
 <section class="admin-panel" id="admin-event-information">
-    <div class="admin-panel-heading"><h2>{{title}}</h2><a href="/admin/events">심사 목록 →</a></div>
+    <div class="admin-panel-heading"><h2>{{title}}</h2><a href="/admin/events">{{i18n.admin.ui0031}}</a></div>
     <dl class="admin-member-facts">
-        <div><dt>주최 기업</dt><dd>{{company.name}}</dd></div>
-        <div><dt>카테고리</dt><dd>{{category.name}}</dd></div>
-        <div><dt>행사 주소</dt><dd>{{address}}</dd></div>
-        <div><dt>신청일</dt><dd data-admin-date>{{createdAt}}</dd></div>
-        <div><dt>현재 상태</dt><dd><span class="admin-badge">{{statusLabel}}</span></dd></div>
-        {{#cancelledAt}}<div><dt>취소일</dt><dd>{{cancelledAt}}</dd></div>{{/cancelledAt}}
-        {{#cancellationReason}}<div><dt>취소 사유</dt><dd class="admin-company-feedback">{{cancellationReason}}</dd></div>{{/cancellationReason}}
-        <div><dt>한 줄 소개</dt><dd>{{summary}}</dd></div>
-        <div><dt>상세 설명</dt><dd class="admin-company-feedback">{{description}}</dd></div>
-        {{#feedbackMessage}}<div><dt>보완 요청 사유</dt><dd class="admin-company-feedback">{{feedbackMessage}}</dd></div>{{/feedbackMessage}}
+        <div><dt>{{i18n.admin.ui0082}}</dt><dd>{{company.name}}</dd></div>
+        <div><dt>{{i18n.admin.ui0083}}</dt><dd>{{category.name}}</dd></div>
+        <div><dt>{{i18n.admin.ui0090}}</dt><dd>{{address}}</dd></div>
+        <div><dt>{{i18n.admin.ui0084}}</dt><dd data-admin-date>{{createdAt}}</dd></div>
+        <div><dt>{{i18n.admin.ui0091}}</dt><dd><span class="admin-badge">{{statusLabel}}</span></dd></div>
+        {{#cancelledAt}}<div><dt>{{i18n.admin.ui0092}}</dt><dd>{{cancelledAt}}</dd></div>{{/cancelledAt}}
+        {{#cancellationReason}}<div><dt>{{i18n.admin.ui0093}}</dt><dd class="admin-company-feedback">{{cancellationReason}}</dd></div>{{/cancellationReason}}
+        <div><dt>{{i18n.admin.ui0094}}</dt><dd>{{summary}}</dd></div>
+        <div><dt>{{i18n.admin.ui0095}}</dt><dd class="admin-company-feedback">{{description}}</dd></div>
+        {{#feedbackMessage}}<div><dt>{{i18n.admin.ui0053}}</dt><dd class="admin-company-feedback">{{feedbackMessage}}</dd></div>{{/feedbackMessage}}
     </dl>
 </section>
 <section class="admin-panel admin-history" id="admin-event-sessions">
-    <div class="admin-panel-heading"><h2>회차 및 모집 정보</h2></div>
+    <div class="admin-panel-heading"><h2>{{i18n.admin.ui0096}}</h2></div>
     <div class="admin-table-wrap"><table class="admin-table">
-        <caption class="admin-sr-only">신청 행사 회차 정보</caption>
-        <thead><tr><th scope="col">회차</th><th scope="col">개최 일정</th><th scope="col">모집 기간</th><th scope="col">정원</th><th scope="col">참가비</th></tr></thead>
+        <caption class="admin-sr-only">{{i18n.admin.ui0097}}</caption>
+        <thead><tr><th scope="col">{{i18n.admin.ui0098}}</th><th scope="col">{{i18n.admin.ui0065}}</th><th scope="col">{{i18n.admin.ui0099}}</th><th scope="col">{{i18n.admin.ui0100}}</th><th scope="col">{{i18n.admin.ui0101}}</th></tr></thead>
         <tbody>{{#reviewSessions}}<tr><td>{{name}}</td><td><span data-admin-date>{{startsAt}}</span><br>~ <span data-admin-date>{{endsAt}}</span></td><td><span data-admin-date>{{applyStartAt}}</span><br>~ <span data-admin-date>{{applyEndAt}}</span></td><td>{{capacityLabel}}</td><td data-admin-point>{{fee}}</td></tr>{{/reviewSessions}}
-        {{^reviewSessions}}<tr><td colspan="5" class="admin-member-empty">등록된 회차가 없습니다.</td></tr>{{/reviewSessions}}</tbody>
+        {{^reviewSessions}}<tr><td colspan="5" class="admin-member-empty">{{i18n.admin.ui0102}}</td></tr>{{/reviewSessions}}</tbody>
     </table></div>
 </section>
-</div><aside class="admin-review-actions" aria-label="행사 심사 작업">
+</div><aside class="admin-review-actions" aria-label="{{i18n.admin.ui0103}}">
 <section class="admin-panel" id="admin-event-decision">
-    <div class="admin-panel-heading"><h2>행사 심사 처리</h2></div>
+    <div class="admin-panel-heading"><h2>{{i18n.admin.ui0104}}</h2></div>
     <div class="admin-company-review">
     {{#reviewable}}
-        <form action="/admin/events/{{id}}/approve" method="post" class="admin-company-approve" data-admin-confirm="행사 승인" data-admin-target="{{title}}">
-            <p>행사와 회차 정보를 확인했다면 승인해 주세요.<br>승인 후 기업 결제가 완료되면 행사가 공개됩니다.</p>
-            <button class="admin-status-button admin-status-button-activate" type="submit">행사 승인</button>
+        <form action="/admin/events/{{id}}/approve" method="post" class="admin-company-approve" data-admin-confirm="{{i18n.admin.ui0107}}" data-admin-target="{{title}}">
+            <p>{{i18n.admin.ui0105}}<br>{{i18n.admin.ui0106}}</p>
+            <button class="admin-status-button admin-status-button-activate" type="submit">{{i18n.admin.ui0107}}</button>
         </form>
-        <form action="/admin/events/{{id}}/feedback" method="post" class="admin-company-correction" data-admin-confirm="행사 보완 요청" data-admin-target="{{title}}">
-            <label for="event-feedback">보완 요청 사유</label>
-            <p id="event-feedback-help">기업이 수정할 내용을 최대 1,000자까지 입력해 주세요.</p>
+        <form action="/admin/events/{{id}}/feedback" method="post" class="admin-company-correction" data-admin-confirm="{{i18n.admin.ui0182}}" data-admin-target="{{title}}">
+            <label for="event-feedback">{{i18n.admin.ui0053}}</label>
+            <p id="event-feedback-help">{{i18n.admin.ui0108}}</p>
             <textarea id="event-feedback" name="feedbackMessage" rows="5" maxlength="1000" required aria-describedby="event-feedback-help"></textarea>
-            <button class="admin-status-button admin-status-button-danger" type="submit">보완 요청</button>
+            <button class="admin-status-button admin-status-button-danger" type="submit">{{i18n.admin.ui0056}}</button>
         </form>
     {{/reviewable}}
-    {{^reviewable}}<p class="admin-company-note">이미 심사가 처리되어 현재 승인 또는 보완 요청을 할 수 없습니다.</p>{{/reviewable}}
+    {{^reviewable}}<p class="admin-company-note">{{i18n.admin.ui0109}}</p>{{/reviewable}}
     </div>
 </section>
 

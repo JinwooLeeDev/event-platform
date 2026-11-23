@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const {BusanI18n} = require('./i18n-test-helpers.cjs');
 const source = fs.readFileSync('src/main/resources/static/js/admin-event-cancels.js', 'utf8');
 const tick = () => new Promise(setImmediate);
 
@@ -22,7 +23,7 @@ function setup() {
     const window = {location:{href:'http://localhost/admin/event-cancels'},
         history:{pushState(state,title,url){history.push(url); window.location.href=url;}},
         addEventListener(type,callback){handlers[type]=callback;}};
-    vm.runInNewContext(source, {URL, AbortController, window,
+    vm.runInNewContext(source, {BusanI18n, URL, AbortController, window,
         document:{querySelector:()=>browser},
         fetch:(url, options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve,reject})),
         DOMParser:class {parseFromString(html){return {querySelector:()=>html==='missing'?null:{childNodes:[html]}};}}

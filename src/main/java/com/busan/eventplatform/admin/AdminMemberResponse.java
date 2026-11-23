@@ -1,5 +1,6 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.user.User;
 import com.busan.eventplatform.user.UserStatus;
 import lombok.Getter;
@@ -37,11 +38,11 @@ public class AdminMemberResponse {
             id = user.getId();
             displayName = user.getDisplayName();
             email = user.getEmailNormalized();
-            roleName = user.getRole() == com.busan.eventplatform.user.Role.ADMIN ? "관리자" : "일반 회원";
+            roleName = user.getRole() == com.busan.eventplatform.user.Role.ADMIN ? LocaleMessages.display("관리자") : LocaleMessages.display("일반 회원");
             statusName = switch (user.getStatus()) {
-                case ACTIVE -> "활성";
-                case SUSPENDED -> "정지";
-                case WITHDRAWN -> "탈퇴";
+                case ACTIVE -> LocaleMessages.display("활성");
+                case SUSPENDED -> LocaleMessages.display("정지");
+                case WITHDRAWN -> LocaleMessages.display("탈퇴");
             };
             point = user.getPoint();
             createdAt = date(user.getCreatedAt());

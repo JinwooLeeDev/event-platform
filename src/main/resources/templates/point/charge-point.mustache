@@ -1,52 +1,52 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>포인트 충전 | Busan Play</title>
+    <title>{{i18n.payment.ui0001}}</title>
 </head>
 <body>
 {{> layout/header}}
 {{> point/charge-style}}
 <main class="charge-page">
     <div class="charge-wrap">
-        <nav class="charge-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span>{{#isPersonal}}<a href="/mypoint">포인트 관리</a>{{/isPersonal}}{{#isCorporate}}<a href="/company/detail">기업페이지</a>{{/isCorporate}}<span aria-hidden="true">/</span><span>포인트 충전</span></nav>
+        <nav class="charge-breadcrumb" aria-label="{{i18n.event.ui0002}}"><a href="/">{{i18n.event.ui0003}}</a><span aria-hidden="true">/</span>{{#isPersonal}}<a href="/mypoint">{{i18n.common.ui0019}}</a>{{/isPersonal}}{{#isCorporate}}<a href="/company/detail">{{i18n.common.companyPage}}</a>{{/isCorporate}}<span aria-hidden="true">/</span><span>{{i18n.company.ui0093}}</span></nav>
         <header class="charge-heading">
-            <div><h1>다음 경험을 위한 포인트 충전</h1><p>필요한 만큼 충전하고, 부산에서의 새로운 만남을 준비하세요.</p></div>
-            <div class="charge-balance"><span class="charge-point-icon" aria-hidden="true">P</span><div><span>현재 보유 포인트</span><strong id="myPoint">{{myPoint}}</strong></div></div>
+            <div><h1>{{i18n.payment.ui0002}}</h1><p>{{i18n.payment.ui0003}}</p></div>
+            <div class="charge-balance"><span class="charge-point-icon" aria-hidden="true">P</span><div><span>{{i18n.payment.ui0004}}</span><strong id="myPoint">{{myPoint}}</strong></div></div>
         </header>
         <div class="charge-layout">
             <div class="charge-content">
                 <section class="charge-panel" aria-labelledby="charge-amount-title">
-                    <div class="charge-section-heading"><h2 id="charge-amount-title">얼마를 충전할까요?</h2><p>금액을 직접 입력하거나 아래에서 선택하세요.</p></div>
-                    <label for="chargeAmount">충전 금액</label>
-                    <div class="charge-input-wrap"><input type="text" inputmode="numeric" id="chargeAmount" min="1" step="1" placeholder="금액 입력" aria-describedby="charge-amount-help"><span>원</span></div>
-                    <p class="charge-help" id="charge-amount-help">1원 이상 입력해주세요. 1원은 1포인트로 충전됩니다.</p>
-                    <div class="charge-amount-buttons" id="amount-btn-group" role="group" aria-label="충전 금액 빠른 선택">
-                        <button type="button" class="amount-btn" data-amount="10000" aria-pressed="false">10,000원</button>
-                        <button type="button" class="amount-btn" data-amount="30000" aria-pressed="false">30,000원</button>
-                        <button type="button" class="amount-btn" data-amount="50000" aria-pressed="false">50,000원</button>
-                        <button type="button" class="amount-btn" data-amount="100000" aria-pressed="false">100,000원</button>
+                    <div class="charge-section-heading"><h2 id="charge-amount-title">{{i18n.payment.ui0005}}</h2><p>{{i18n.payment.ui0006}}</p></div>
+                    <label for="chargeAmount">{{i18n.payment.ui0007}}</label>
+                    <div class="charge-input-wrap"><input type="text" inputmode="numeric" id="chargeAmount" min="1" step="1" placeholder="{{i18n.payment.ui0008}}" aria-describedby="charge-amount-help"><span>{{i18n.payment.ui0009}}</span></div>
+                    <p class="charge-help" id="charge-amount-help">{{i18n.payment.ui0010}}</p>
+                    <div class="charge-amount-buttons" id="amount-btn-group" role="group" aria-label="{{i18n.payment.ui0011}}">
+                        <button type="button" class="amount-btn" data-amount="10000" aria-pressed="false">{{i18n.payment.ui0012}}</button>
+                        <button type="button" class="amount-btn" data-amount="30000" aria-pressed="false">{{i18n.payment.ui0013}}</button>
+                        <button type="button" class="amount-btn" data-amount="50000" aria-pressed="false">{{i18n.payment.ui0014}}</button>
+                        <button type="button" class="amount-btn" data-amount="100000" aria-pressed="false">{{i18n.payment.ui0015}}</button>
                     </div>
                 </section>
                 <section class="charge-panel" aria-labelledby="charge-method-title">
-                    <div class="charge-section-heading"><h2 id="charge-method-title">결제 수단</h2><p>사용할 간편결제를 선택해주세요.</p></div>
+                    <div class="charge-section-heading"><h2 id="charge-method-title">{{i18n.payment.ui0016}}</h2><p>{{i18n.payment.ui0017}}</p></div>
                     <div role="group" aria-labelledby="charge-method-title">
-                        <button type="button" class="charge-method" data-payment-provider="naver" aria-pressed="true"><span class="charge-npay" aria-hidden="true"><b>N</b> pay</span><span class="charge-method-description"><strong>네이버페이</strong><span>연결된 네이버페이로 간편하게 결제</span></span><span class="charge-method-check" aria-hidden="true">✓</span></button>
-                        <button type="button" class="charge-method charge-method--kakao" data-payment-provider="kakao" aria-pressed="false"><span class="charge-kpay" aria-hidden="true">pay</span><span class="charge-method-description"><strong>카카오페이</strong><span>연결된 카카오페이로 간편하게 결제</span></span><span class="charge-method-check" aria-hidden="true">✓</span></button>
+                        <button type="button" class="charge-method" data-payment-provider="naver" aria-pressed="true"><span class="charge-npay" aria-hidden="true"><b>N</b> pay</span><span class="charge-method-description"><strong>{{i18n.payment.ui0018}}</strong><span>{{i18n.payment.ui0019}}</span></span><span class="charge-method-check" aria-hidden="true">✓</span></button>
+                        <button type="button" class="charge-method charge-method--kakao" data-payment-provider="kakao" aria-pressed="false"><span class="charge-kpay" aria-hidden="true">pay</span><span class="charge-method-description"><strong>{{i18n.payment.ui0020}}</strong><span>{{i18n.payment.ui0021}}</span></span><span class="charge-method-check" aria-hidden="true">✓</span></button>
                     </div>
                 </section>
-                <details class="charge-guide"><summary>충전 전에 확인해주세요</summary><ul><li>충전한 포인트는 행사 신청 및 서비스 이용에 사용할 수 있습니다.</li><li>간편결제가 완료되어야 포인트가 충전됩니다.</li><li>충전 및 환불에 관한 사항은 운영정책을 확인해주세요.</li></ul></details>
+                <details class="charge-guide"><summary>{{i18n.payment.ui0022}}</summary><ul><li>{{i18n.payment.ui0023}}</li><li>{{i18n.payment.ui0024}}</li><li>{{i18n.payment.ui0025}}</li></ul></details>
             </div>
             <aside class="charge-summary" aria-labelledby="charge-summary-title">
-                <h2 id="charge-summary-title">충전 내역 확인</h2>
-                <div class="charge-preview" role="status" aria-live="polite" aria-atomic="true"><span>충전 예정 포인트</span><strong id="expectedPoint">0P</strong><small>1원 = 1P</small></div>
-                <dl class="charge-summary-facts"><div><dt>결제 수단</dt><dd id="selectedPaymentMethod" aria-live="polite">네이버페이</dd></div><div class="charge-summary-total"><dt>결제 금액</dt><dd id="chargeTotal">0원</dd></div></dl>
+                <h2 id="charge-summary-title">{{i18n.payment.ui0026}}</h2>
+                <div class="charge-preview" role="status" aria-live="polite" aria-atomic="true"><span>{{i18n.payment.ui0027}}</span><strong id="expectedPoint">0P</strong><small>{{i18n.payment.ui0028}}</small></div>
+                <dl class="charge-summary-facts"><div><dt>{{i18n.payment.ui0016}}</dt><dd id="selectedPaymentMethod" aria-live="polite">{{i18n.payment.ui0018}}</dd></div><div class="charge-summary-total"><dt>{{i18n.payment.ui0029}}</dt><dd id="chargeTotal">{{i18n.payment.ui0030}}</dd></div></dl>
                 <div class="charge-payment-buttons">
-                    <button type="button" class="charge-pay-button" id="chargePayBtn">결제하기</button>
+                    <button type="button" class="charge-pay-button" id="chargePayBtn">{{i18n.payment.ui0031}}</button>
                 </div>
-                <p class="charge-payment-note">선택한 간편결제의 결제창으로 이동합니다.<br>결제를 완료한 뒤 충전 내역을 확인해주세요.</p>
-                {{#isPersonal}}<a class="charge-back" href="/mypoint">포인트 관리로 돌아가기</a>{{/isPersonal}}
-                {{#isCorporate}}<a class="charge-back" href="/company/detail">기업페이지로 돌아가기</a>{{/isCorporate}}
+                <p class="charge-payment-note">{{i18n.payment.ui0032}}<br>{{i18n.payment.ui0033}}</p>
+                {{#isPersonal}}<a class="charge-back" href="/mypoint">{{i18n.payment.ui0034}}</a>{{/isPersonal}}
+                {{#isCorporate}}<a class="charge-back" href="/company/detail">{{i18n.payment.ui0035}}</a>{{/isCorporate}}
             </aside>
         </div>
     </div>

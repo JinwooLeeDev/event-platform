@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>마이페이지 | Busan Play</title>
+    <title>{{i18n.auth.ui0076}}</title>
 </head>
 <body>
 {{> layout/header}}
@@ -13,67 +13,68 @@
         {{> layout/account-nav}}
         <div class="member-wrap account-content">
             <header class="member-heading">
-                <p class="member-location">마이페이지</p>
-                <h1>{{myPage.displayName}} 님의 부산 이야기</h1>
-                <p class="member-muted">신청한 행사부터 다음에 가보고 싶은 곳까지, 한곳에서 관리하세요.</p>
+                <p class="member-location">{{i18n.common.mypage}}</p>
+                <h1>{{myPage.displayName}} {{i18n.auth.ui0077}}</h1>
+                <p class="member-muted">{{i18n.auth.ui0078}}</p>
             </header>
             {{#purchaseSuccessMsg}}<p class="member-success" role="status">{{purchaseSuccessMsg}}</p>{{/purchaseSuccessMsg}}
             {{#successMessage}}<p class="member-success" role="status">{{successMessage}}</p>{{/successMessage}}
             <div class="member-overview">
                 <section class="member-wallet" aria-labelledby="point-title">
-                    <div class="member-wallet__top"><span class="member-wallet__icon" aria-hidden="true">P</span><a href="/mypoint">이용 내역</a></div>
-                    <h2 id="point-title">보유 포인트</h2>
+                    <div class="member-wallet__top"><span class="member-wallet__icon" aria-hidden="true">P</span><a href="/mypoint">{{i18n.auth.ui0079}}</a></div>
+                    <h2 id="point-title">{{i18n.admin.ui0165}}</h2>
                     <strong id="member-point">{{myPage.point}}</strong>
-                    <p>다음 경험을 위한 준비</p>
-                    <a class="member-button wallet-charge" href="/charge">포인트 충전하기 <span aria-hidden="true">+</span></a>
+                    <p>{{i18n.auth.ui0080}}</p>
+                    <a class="member-button wallet-charge" href="/charge">{{i18n.company.ui0008}} <span aria-hidden="true">+</span></a>
                 </section>
                 <section class="member-activity" aria-labelledby="activity-title">
-                    <div class="member-section-heading"><div><h2 id="activity-title">나의 행사 활동</h2><p class="member-muted">예정된 일정을 챙기고, 관심 있는 행사를 모아보세요.</p></div></div>
+                    <div class="member-section-heading"><div><h2 id="activity-title">{{i18n.auth.ui0081}}</h2><p class="member-muted">{{i18n.auth.ui0082}}</p></div></div>
                     <a class="member-activity-link" href="/myhistory">
                         <span class="member-activity-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v5a2 2 0 0 0 0 4v5H4v-5a2 2 0 0 0 0-4V5Z"/><path d="M15 5v3m0 3v2m0 3v3"/></svg></span>
-                        <span><strong>신청한 행사</strong><small>참가 상태·대기 순서·취소 확인</small></span><span class="member-link-arrow" aria-hidden="true">›</span>
+                        <span><strong>{{i18n.common.ui0017}}</strong><small>{{i18n.auth.ui0083}}</small></span><span class="member-link-arrow" aria-hidden="true">›</span>
                     </a>
                     <a class="member-activity-link" href="/myfavorites">
                         <span class="member-activity-icon member-activity-icon--heart" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
-                        <span><strong>좋아요한 행사</strong><small>나중에 가보고 싶은 행사 모아보기</small></span><span class="member-link-arrow" aria-hidden="true">›</span>
+                        <span><strong>{{i18n.common.ui0018}}</strong><small>{{i18n.auth.ui0084}}</small></span><span class="member-link-arrow" aria-hidden="true">›</span>
                     </a>
                 </section>
             </div>
             <section class="member-box member-profile" id="profile-settings" aria-labelledby="profile-title">
-                <div class="member-section-heading"><div><h2 id="profile-title">내 정보</h2><p class="member-muted">이름과 선호 언어를 관리하세요.</p></div><span class="member-section-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span></div>
+                <div class="member-section-heading"><div><h2 id="profile-title">{{i18n.common.ui0021}}</h2><p class="member-muted">{{i18n.auth.ui0085}}</p></div><span class="member-section-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span></div>
                 <div id="member-view">
                     <dl class="member-details">
-                        <div><dt>이름</dt><dd>{{myPage.displayName}}</dd></div>
-                        <div><dt>이메일</dt><dd>{{myPage.email}}</dd></div>
-                        <div><dt>선호 언어</dt><dd id="member-language">{{myPage.preferredLocale}}</dd></div>
-                        <div><dt>가입일</dt><dd>{{myPage.createdAt}}</dd></div>
+                        <div><dt>{{i18n.auth.ui0086}}</dt><dd>{{myPage.displayName}}</dd></div>
+                        <div><dt>{{i18n.admin.ui0033}}</dt><dd>{{myPage.email}}</dd></div>
+                        <div><dt>{{i18n.admin.ui0166}}</dt><dd id="member-language">{{myPage.preferredLocale}}</dd></div>
+                        <div><dt>{{i18n.auth.ui0087}}</dt><dd>{{myPage.createdAt}}</dd></div>
                     </dl>
-                    <button id="member-edit" class="member-button secondary" type="button" aria-controls="member-form" aria-expanded="false" hidden>내 정보 수정</button>
+                    <button id="member-edit" class="member-button secondary" type="button" aria-controls="member-form" aria-expanded="false" hidden>{{i18n.auth.ui0088}}</button>
                 </div>
                 <form id="member-form" class="member-form" action="/mypage" method="post" hidden>
-                    <div class="member-field member-field--wide"><label for="member-email">이메일</label><input id="member-email" type="email" value="{{myPage.email}}" readonly aria-describedby="member-email-help"><p id="member-email-help" class="member-muted">가입한 이메일은 변경할 수 없습니다.</p></div>
-                    <div class="member-field"><label for="member-name">이름</label><input id="member-name" name="displayName" value="{{myPage.displayName}}" autocomplete="name" maxlength="100" required></div>
-                    <div class="member-field"><label for="member-locale">선호 언어</label><select id="member-locale" name="preferredLocale" data-current="{{myPage.preferredLocale}}" required><option value="" disabled>언어 선택</option><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="zh-CN">简体中文</option></select></div>
+                    {{#localeCsrf}}<input type="hidden" name="_localeCsrf" value="{{localeCsrf}}">{{/localeCsrf}}
+                    <div class="member-field member-field--wide"><label for="member-email">{{i18n.admin.ui0033}}</label><input id="member-email" type="email" value="{{myPage.email}}" readonly aria-describedby="member-email-help"><p id="member-email-help" class="member-muted">{{i18n.company.ui0120}}</p></div>
+                    <div class="member-field"><label for="member-name">{{i18n.auth.ui0086}}</label><input id="member-name" name="displayName" value="{{myPage.displayName}}" autocomplete="name" maxlength="100" required></div>
+                    <div class="member-field"><label for="member-locale">{{i18n.admin.ui0166}}</label><select id="member-locale" name="preferredLocale" data-current="{{myPage.preferredLocale}}" required><option value="" disabled>{{i18n.auth.ui0089}}</option><option value="ko">{{i18n.auth.ui0090}}</option><option value="en">English</option><option value="ja">日本語</option><option value="zh-CN">简体中文</option></select></div>
                     <p id="member-message" class="member-error member-field--wide" role="status"></p>
-                    <div class="member-actions member-field--wide"><button id="member-save" class="member-button" type="submit">변경 사항 저장</button><button id="member-cancel" class="member-button secondary" type="button">취소</button></div>
+                    <div class="member-actions member-field--wide"><button id="member-save" class="member-button" type="submit">{{i18n.auth.ui0091}}</button><button id="member-cancel" class="member-button secondary" type="button">{{i18n.company.ui0043}}</button></div>
                 </form>
-                <noscript><p class="member-muted">정보 수정은 JavaScript를 활성화한 뒤 이용해주세요.</p></noscript>
+                <noscript>{{i18n.auth.ui0092}}</noscript>
             </section>
             <section id="password-settings" class="member-box member-security" aria-labelledby="security-title">
-                <div class="member-section-heading"><div><h2 id="security-title">보안 설정</h2><p class="member-muted">안전한 계정 이용을 위해 비밀번호를 관리하세요.</p></div><span class="member-section-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg></span></div>
+                <div class="member-section-heading"><div><h2 id="security-title">{{i18n.common.ui0022}}</h2><p class="member-muted">{{i18n.auth.ui0093}}</p></div><span class="member-section-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg></span></div>
                 <details class="member-password" id="password-panel" {{#passwordError}}open{{/passwordError}}>
-                    <summary><span><strong id="password-title">비밀번호 변경</strong><small>변경 후 새 비밀번호로 다시 로그인합니다.</small></span><span class="member-password__toggle" aria-hidden="true">⌄</span></summary>
+                    <summary><span><strong id="password-title">{{i18n.auth.ui0094}}</strong><small>{{i18n.auth.ui0095}}</small></span><span class="member-password__toggle" aria-hidden="true">⌄</span></summary>
                     {{#passwordError}}<p class="member-error" role="alert">{{passwordError}}</p>{{/passwordError}}
                     <form id="password-form" class="member-form" action="/mypage/password" method="post">
-                        <div class="member-field member-field--wide"><label for="current-password">현재 비밀번호</label><input id="current-password" name="currentPassword" type="password" autocomplete="current-password" required></div>
-                        <div class="member-field member-field--wide"><label for="new-password">새 비밀번호</label><input id="new-password" name="newPassword" type="password" autocomplete="new-password" minlength="8" aria-describedby="password-rule" required><p id="password-rule" class="member-muted">8자 이상, UTF-8 기준 72바이트 이하로 입력해주세요. 현재 비밀번호는 사용할 수 없습니다.</p></div>
-                        <div class="member-field member-field--wide"><label for="new-password-confirm">새 비밀번호 확인</label><input id="new-password-confirm" name="newPasswordConfirm" type="password" autocomplete="new-password" required></div>
+                        <div class="member-field member-field--wide"><label for="current-password">{{i18n.auth.ui0096}}</label><input id="current-password" name="currentPassword" type="password" autocomplete="current-password" required></div>
+                        <div class="member-field member-field--wide"><label for="new-password">{{i18n.company.ui0121}}</label><input id="new-password" name="newPassword" type="password" autocomplete="new-password" minlength="8" aria-describedby="password-rule" required><p id="password-rule" class="member-muted">{{i18n.auth.ui0097}}</p></div>
+                        <div class="member-field member-field--wide"><label for="new-password-confirm">{{i18n.company.ui0123}}</label><input id="new-password-confirm" name="newPasswordConfirm" type="password" autocomplete="new-password" required></div>
                         <p id="password-form-message" class="member-error member-field--wide" role="status"></p>
-                        <div class="member-field--wide"><button id="password-save" class="member-button" type="submit">비밀번호 변경</button></div>
+                        <div class="member-field--wide"><button id="password-save" class="member-button" type="submit">{{i18n.auth.ui0094}}</button></div>
                     </form>
                 </details>
             </section>
-            <div class="member-bottom"><a href="/events/list">새로운 행사 둘러보기 <span aria-hidden="true">↗</span></a><form action="/logout" method="post"><button type="submit">로그아웃</button></form></div>
+            <div class="member-bottom"><a href="/events/list">{{i18n.auth.ui0098}} <span aria-hidden="true">↗</span></a><form action="/logout" method="post"><button type="submit">{{i18n.common.logout}}</button></form></div>
         </div>
     </div>
 </main>
@@ -87,7 +88,7 @@
     const button = document.getElementById('password-save');
     let submitting = false;
     function validateConfirmation() {
-        confirmation.setCustomValidity(confirmation.value && confirmation.value !== password.value ? '새 비밀번호 확인이 일치하지 않습니다.' : '');
+        confirmation.setCustomValidity(confirmation.value && confirmation.value !== password.value ? BusanI18n.t("company.ui0144") : '');
     }
     password.addEventListener('input', validateConfirmation);
     confirmation.addEventListener('input', validateConfirmation);
@@ -96,17 +97,17 @@
         validateConfirmation();
         if (!form.reportValidity()) { event.preventDefault(); return; }
         if (new TextEncoder().encode(password.value).length > 72) {
-            event.preventDefault(); message.textContent = '새 비밀번호는 UTF-8 기준 72바이트 이하로 입력해주세요.'; password.focus(); return;
+            event.preventDefault(); message.textContent = BusanI18n.t("auth.ui0099"); password.focus(); return;
         }
-        message.textContent = ''; submitting = true; button.disabled = true; button.textContent = '변경 중…';
+        message.textContent = ''; submitting = true; button.disabled = true; button.textContent = BusanI18n.t("auth.ui0100");
     });
-    window.addEventListener('pageshow', () => { form.reset(); submitting = false; button.disabled = false; button.textContent = '비밀번호 변경'; message.textContent = ''; validateConfirmation(); });
+    window.addEventListener('pageshow', () => { form.reset(); submitting = false; button.disabled = false; button.textContent = BusanI18n.t("auth.ui0094"); message.textContent = ''; validateConfirmation(); });
 })();
 (() => {
     const get = id => document.getElementById(id);
     const form = get('member-form'), view = get('member-view'), edit = get('member-edit');
     const name = get('member-name'), locale = get('member-locale'), save = get('member-save'), cancel = get('member-cancel');
-    const languages = {ko:'한국어',en:'English',ja:'日本語','zh-CN':'简体中文'};
+    const languages = {ko:BusanI18n.t("auth.ui0090"),en:'English',ja:'日本語','zh-CN':'简体中文'};
     const originalName = name.value, originalLocale = locale.dataset.current;
     let submitting = false;
 
@@ -118,11 +119,11 @@
     cancel.addEventListener('click', () => { if(submitting) return; name.value = originalName; locale.value = Object.hasOwn(languages, originalLocale) ? originalLocale : ''; editing(false); edit.focus(); });
     form.addEventListener('submit', event => {
         if(submitting || form.hidden) { event.preventDefault(); return; }
-        if(!name.value.trim()) { event.preventDefault(); get('member-message').textContent = '이름을 입력해주세요.'; name.focus(); return; }
+        if(!name.value.trim()) { event.preventDefault(); get('member-message').textContent = BusanI18n.t("auth.ui0101"); name.focus(); return; }
         if(!form.reportValidity()) { event.preventDefault(); return; }
-        submitting = true; save.disabled = true; cancel.disabled = true; save.textContent = '저장 중…';
+        submitting = true; save.disabled = true; cancel.disabled = true; save.textContent = BusanI18n.t("company.ui0132");
     });
-    window.addEventListener('pageshow', () => { submitting = false; save.disabled = false; cancel.disabled = false; save.textContent = '변경 사항 저장'; });
+    window.addEventListener('pageshow', () => { submitting = false; save.disabled = false; cancel.disabled = false; save.textContent = BusanI18n.t("auth.ui0091"); });
     const point = get('member-point'), amount = Number(point.textContent.trim());
     if(Number.isFinite(amount)) point.textContent = amount.toLocaleString('ko-KR') + 'P';
 })();

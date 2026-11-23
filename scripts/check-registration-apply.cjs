@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const {BusanI18n} = require('./i18n-test-helpers.cjs');
 
 const template = fs.readFileSync('src/main/resources/templates/event/detail.mustache', 'utf8');
 assert.match(template, /<select[^>]*name="sessionId"/);
@@ -15,7 +16,7 @@ async function scenario({ picked = true, status = 200, check = {}, confirm = tru
     const modalOpens = [];
     const button = { dataset: {}, disabled: false };
     const location = { href: '' };
-    const context = {
+    const context = {BusanI18n,
         document: {
             addEventListener: (_, callback) => { handler = callback; },
             querySelector: selector => selector.includes('select[name="sessionId"]') && picked

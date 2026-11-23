@@ -9,5 +9,5 @@ public enum PaymentStatus {
 
     private PaymentStatus(String displayName) {this.displayName = displayName;}
 
-    public String getDisplayName() {return this.displayName;}
+    public String getDisplayName() {return com.busan.eventplatform.global.i18n.LocaleMessages.display(this.displayName);}
 }

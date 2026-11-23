@@ -38,10 +38,16 @@ class EventSaveApiControllerTest {
         eventService = mock(EventService.class);
         EventController legacy = new EventController(eventService,
                 mock(EventCategoryService.class), mock(EventSessionService.class),
-                mock(RegistrationService.class));
+                mock(RegistrationService.class), mock(com.busan.eventplatform.event.eventReview.EventReviewService.class));
         mvc = MockMvcBuilders.standaloneSetup(legacy, new EventSaveApiController(eventService))
+                .defaultRequest(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/")
+                        .locale(java.util.Locale.KOREAN))
                 .setControllerAdvice(new EventSaveApiExceptionHandler(),
-                        new GlobalExceptionHandler(new LoginViewAdvice()))
+                        new GlobalExceptionHandler(new LoginViewAdvice(),
+                                mock(com.busan.eventplatform.global.i18n.LocaleViewAdvice.class),
+                                new com.busan.eventplatform.global.error.exception.UiErrorMessages(
+                                        new com.busan.eventplatform.global.i18n.LocaleMessages(
+                                                new com.busan.eventplatform.global.i18n.I18nConfig().messageSource()))))
                 .build();
         companySession = new MockHttpSession();
         companySession.setAttribute(LoginSession.IDENTITY,

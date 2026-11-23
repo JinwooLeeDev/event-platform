@@ -1,6 +1,6 @@
 {{> login/modal-style}}
 <dialog class="login-modal" id="login-modal" aria-labelledby="login-modal-title" aria-describedby="login-modal-intro">
-    <button class="login-modal-close" type="button" aria-label="로그인 창 닫기" data-login-close>
+    <button class="login-modal-close" type="button" aria-label="{{i18n.auth.ui0067}}" data-login-close>
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
              aria-hidden="true">
             <path d="m6 6 12 12M18 6 6 18"/>
@@ -13,41 +13,40 @@
         </svg>
         Busan Play
     </div>
-    <h2 id="login-modal-title">반가워요, 다시 만났네요.</h2>
-    <p id="login-modal-intro">로그인하고 부산에서의 경험을 이어가세요.</p>
+    <h2 id="login-modal-title">{{i18n.auth.ui0068}}</h2>
+    <p id="login-modal-intro">{{i18n.auth.ui0069}}</p>
     {{#passwordChangedMessage}}
         <p class="login-modal-notice" role="status">{{passwordChangedMessage}}</p>
     {{/passwordChangedMessage}}
     {{#signupMessage}}
         <p class="login-modal-notice" role="status">{{signupMessage}}</p>
     {{/signupMessage}}
-    <div class="login-modal-tabs" role="tablist" aria-label="회원 유형">
+    <div class="login-modal-tabs" role="tablist" aria-label="{{i18n.auth.ui0070}}">
         <button id="login-modal-personal-tab" type="button" role="tab" aria-selected="true"
-                aria-controls="login-modal-panel" data-login-type="personal">개인회원
+                aria-controls="login-modal-panel" data-login-type="personal">{{i18n.auth.ui0003}}
         </button>
         <button id="login-modal-company-tab" type="button" role="tab" aria-selected="false"
-                aria-controls="login-modal-panel" data-login-type="company" tabindex="-1">기업회원
+                aria-controls="login-modal-panel" data-login-type="company" tabindex="-1">{{i18n.auth.ui0004}}
         </button>
     </div>
     <div id="login-modal-panel" role="tabpanel" aria-labelledby="login-modal-personal-tab">
-        <p class="login-modal-description" id="login-modal-description">개인회원으로 가입한 이메일을 입력해주세요.</p>
+        <p class="login-modal-description" id="login-modal-description">{{i18n.auth.ui0063}}</p>
         <form id="login-modal-form" action="/login" method="post">
-            <div class="login-modal-field"><label for="login-modal-email">이메일</label><input id="login-modal-email"
+            <div class="login-modal-field"><label for="login-modal-email">{{i18n.admin.ui0033}}</label><input id="login-modal-email"
                                                                                             name="email" type="email"
                                                                                             inputmode="email"
                                                                                             autocomplete="username"
                                                                                             maxlength="254"
                                                                                             placeholder="name@example.com"
                                                                                             required></div>
-            <div class="login-modal-field"><label for="login-modal-password">비밀번호</label><input
+            <div class="login-modal-field"><label for="login-modal-password">{{i18n.auth.ui0027}}</label><input
                     id="login-modal-password" name="password" type="password" autocomplete="current-password"
-                    placeholder="비밀번호를 입력해주세요" required></div>
+                    placeholder="{{i18n.auth.ui0071}}" required></div>
             <p class="login-modal-error" id="login-modal-error" role="alert" hidden></p>
-            <button class="login-modal-submit" type="submit" id="login-modal-submit">개인회원 로그인</button>
+            <button class="login-modal-submit" type="submit" id="login-modal-submit">{{i18n.auth.ui0061}}</button>
         </form>
-        <p class="login-modal-signup" id="login-modal-personal-signup">아직 회원이 아니신가요? <a href="/signup">개인회원 가입</a></p>
-        <p class="login-modal-signup" id="login-modal-company-signup" hidden>기업 계정이 필요하신가요? <a href="/signup/company">기업회원
-            가입</a></p>
+        <p class="login-modal-signup" id="login-modal-personal-signup">{{i18n.auth.ui0072}} <a href="/signup">{{i18n.auth.ui0073}}</a></p>
+        <p class="login-modal-signup" id="login-modal-company-signup" hidden>{{i18n.auth.ui0074}} <a href="/signup/company">{{i18n.auth.ui0075}}</a></p>
     </div>
 </dialog>
 {{> login/modal-script}}

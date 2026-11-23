@@ -1,9 +1,12 @@
 package com.busan.eventplatform.login.companylogin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginReqDto;
 import com.busan.eventplatform.login.LoginSession;
 import com.busan.eventplatform.login.LoginType;
+import com.busan.eventplatform.global.i18n.LocaleSelectionState;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -33,13 +36,14 @@ public class CompanyAuthController {
             companyAuthService.signup(request, session);
             session.removeAttribute(Define.EMAIL_VERIFICATION);
         }
-        redirectAttributes.addFlashAttribute("signupMessage", "기업 가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+        redirectAttributes.addFlashAttribute("signupMessage", LocaleMessages.display("기업 가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다."));
         return "redirect:/login?type=company";
     }
 
     @PostMapping({"/login/company", "/company/login"})
     public String login(@ModelAttribute LoginReqDto request, HttpServletRequest servletRequest, HttpSession session) {
         SessionCompanyDto sessionCompany = companyAuthService.login(request);
+        LocaleSelectionState.clear(session);
 
         // 인증 성공 후 세션 ID 교체
         servletRequest.changeSessionId();

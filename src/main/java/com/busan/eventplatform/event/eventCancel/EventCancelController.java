@@ -1,5 +1,7 @@
 package com.busan.eventplatform.event.eventCancel;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.global.util.Define;
 import com.busan.eventplatform.login.companylogin.SessionCompanyDto;
 import jakarta.servlet.http.HttpSession;
@@ -42,7 +44,7 @@ public class EventCancelController {
                 saveDto.getReason()
         );
 
-        redirect.addFlashAttribute("successMessage", "취소 신청이 접수되었습니다. 운영자 승인 후 회차가 취소됩니다.");
+        redirect.addFlashAttribute("successMessage", LocaleMessages.display("취소 신청이 접수되었습니다. 운영자 승인 후 회차가 취소됩니다."));
         return "redirect:/event-sessions/" + sessionId;
     }
 

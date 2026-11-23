@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>로그인 | Busan Play</title></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.auth.ui0056}}</title></head>
 <body>
 {{> layout/header}}
-<main class="login-gateway"><h1>부산의 경험을 이어가세요.</h1>
-    <p>개인회원 또는 기업회원으로 로그인해주세요.</p><a href="/login">로그인 창 열기</a>
-    <p><a href="/">메인으로 돌아가기</a></p>
+<main class="login-gateway"><h1>{{i18n.auth.ui0057}}</h1>
+    <p>{{i18n.auth.ui0058}}</p><a href="/login">{{i18n.auth.ui0059}}</a>
+    <p><a href="/">{{i18n.common.ui0031}}</a></p>
     <noscript>
-        <section><h2>개인회원 로그인</h2>
-            <form action="/login" method="post"><label>이메일 <input name="email" type="email" autocomplete="username"
-                                                                  required></label><label>비밀번호 <input name="password"
+        <section><h2>{{i18n.auth.ui0061}}</h2>
+            <form action="/login" method="post"><label>{{i18n.admin.ui0033}} <input name="email" type="email" autocomplete="username"
+                                                                  required></label><label>{{i18n.auth.ui0027}} <input name="password"
                                                                                                       type="password"
                                                                                                       autocomplete="current-password"
                                                                                                       required></label>
-                <button type="submit">개인회원 로그인</button>
+                <button type="submit">{{i18n.auth.ui0061}}</button>
             </form>
         </section>
-        <section><h2>기업회원 로그인</h2>
-            <form action="/login/company" method="post"><label>이메일 <input name="email" type="email"
+        <section><h2>{{i18n.company.ui0028}}</h2>
+            <form action="/login/company" method="post"><label>{{i18n.admin.ui0033}} <input name="email" type="email"
                                                                           autocomplete="username"
-                                                                          required></label><label>비밀번호 <input
+                                                                          required></label><label>{{i18n.auth.ui0027}} <input
                     name="password" type="password" autocomplete="current-password" required></label>
-                <button type="submit">기업회원 로그인</button>
+                <button type="submit">{{i18n.company.ui0028}}</button>
             </form>
         </section>
     </noscript>

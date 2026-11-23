@@ -12,11 +12,11 @@
     const confirmButton = dialog.querySelector('[data-reject-confirm]');
     const dialogError = dialog.querySelector('[data-reject-error]');
     const closeButton = dialog.querySelector('[data-reject-close]');
-    const labels = {CONFIRMED:'참가 확정', PENDING:'승인 대기', WAITING:'대기'};
+    const labels = {CONFIRMED:BusanI18n.t("community.ui0027"), PENDING:BusanI18n.t("company.ui0034"), WAITING:BusanI18n.t("event.ui0190")};
     let participants = [], loading = false, rejecting = false, selected = null;
     const formatDate = value => value ? String(value).replace('T', ' ').slice(0, 16).replaceAll('-', '.') : '—';
     // ★ [f/42] 출석 열 — 출석: "출석 11. 27 오후 1:42" / 참가 확정 미출석: "미출석" / 대기·승인 대기: "—"
-    const attendanceText = p => p.attended ? '출석 ' + (p.attendedAtText || '') : (p.status === 'CONFIRMED' ? '미출석' : '—');
+    const attendanceText = p => p.attended ? BusanI18n.t("common.extra023") + (p.attendedAtText || '') : (p.status === 'CONFIRMED' ? BusanI18n.t("common.ui0050") : '—');
 
     function render() {
         const keyword = search.value.trim().toLocaleLowerCase('ko-KR');
@@ -29,16 +29,16 @@
                 const td = document.createElement('td'); td.textContent = value == null ? '—' : String(value); tr.appendChild(td);
             });
             const action = document.createElement('td'), button = document.createElement('button');
-            button.type = 'button'; button.className = 'participant-reject-button'; button.textContent = '반려';
-            button.setAttribute('aria-label', `${p.displayName || '참가자'} · 신청 ${p.registrationId} 반려`);
+            button.type = 'button'; button.className = 'participant-reject-button'; button.textContent = BusanI18n.t("company.ui0019");
+            button.setAttribute('aria-label', BusanI18n.t("common.ui0051", [p.displayName || BusanI18n.t("community.ui0054"), p.registrationId]));
             // ★ [f/42] 회차가 시작된 신청은 반려 불가 (서버 rejectable — reject() 의 시작 시각 검사와 같은 기준)
             const rejectable = p.rejectable !== false;
-            if (!rejectable) button.title = '이미 시작된 회차의 신청은 반려할 수 없습니다.';
+            if (!rejectable) button.title = BusanI18n.t("common.ui0052");
             button.disabled = loading || rejecting || !rejectable;
             button.addEventListener('click', () => {
                 if (loading || rejecting || !rejectable) return;
                 selected = p;
-                target.textContent = `${p.displayName || '참가자'} · 신청 번호 ${p.registrationId}`;
+                target.textContent = BusanI18n.t("common.ui0053", [p.displayName || BusanI18n.t("community.ui0054"), p.registrationId]);
                 dialogError.hidden = true;
                 dialog.showModal();
             });
@@ -46,32 +46,32 @@
         });
         if (!rows.length) {
             const tr = document.createElement('tr'), td = document.createElement('td'); td.colSpan = 6;   // ★ [f/42] 열 5 → 6
-            td.textContent = participants.length ? '검색 조건에 맞는 참가자가 없습니다.' : '확정 또는 대기 중인 참가자가 없습니다.';
+            td.textContent = participants.length ? BusanI18n.t("common.ui0054") : BusanI18n.t("common.ui0055");
             tr.appendChild(td); body.appendChild(tr);
         }
         const count = status => participants.filter(p => p.status === status).length;
         const attended = participants.filter(p => p.attended).length;   // ★ [f/42] 출석 인원
-        summary.textContent = `전체 ${participants.length}명 · 확정 ${count('CONFIRMED')}명 · 승인 대기 ${count('PENDING')}명 · 대기 ${count('WAITING')}명 · 출석 ${attended}명 · 조회 결과 ${rows.length}명`;
+        summary.textContent = BusanI18n.t("common.ui0056", [participants.length, count('CONFIRMED'), count('PENDING'), count('WAITING'), attended, rows.length]);
     }
 
     async function load(afterReject = false) {
         if (loading) return;
         loading = true; refresh.disabled = true; search.disabled = true; filter.disabled = true;
         error.hidden = true; login.hidden = true; table.setAttribute('aria-busy', 'true');
-        render(); summary.textContent = '참가자 목록을 불러오는 중입니다.';
+        render(); summary.textContent = BusanI18n.t("event.ui0191");
         try {
             const response = await fetch('/api/registrations/participants/' + encodeURIComponent(panel.dataset.participants), {headers:{Accept:'application/json'}, credentials:'same-origin'});
-            if (response.status === 401 || response.redirected) { login.hidden = false; throw new Error('로그인이 필요합니다. 기업 계정으로 로그인해주세요.'); }
-            if (response.status === 403) throw new Error('이 회차를 주최한 기업만 참가자를 관리할 수 있습니다.');
-            if (!response.ok) throw new Error('참가자 목록을 불러오지 못했습니다. 새로고침으로 다시 시도해주세요.');
+            if (response.status === 401 || response.redirected) { login.hidden = false; throw new Error(BusanI18n.t("common.ui0057")); }
+            if (response.status === 403) throw new Error(BusanI18n.t("common.ui0058"));
+            if (!response.ok) throw new Error(BusanI18n.t("common.ui0059"));
             const data = await response.json();
-            if (!Array.isArray(data)) throw new Error('참가자 목록 응답을 확인할 수 없습니다.');
+            if (!Array.isArray(data)) throw new Error(BusanI18n.t("common.ui0060"));
             participants = data.filter(p => Object.hasOwn(labels, p.status));
             const occupied = document.querySelector('[data-session-occupied]');
-            if (occupied) occupied.textContent = participants.filter(p => p.status !== 'WAITING').length.toLocaleString('ko-KR') + '명';
+            if (occupied) occupied.textContent = participants.filter(p => p.status !== 'WAITING').length.toLocaleString('ko-KR') + BusanI18n.t("admin.ui0067");
         } catch (failure) {
-            error.textContent = afterReject ? '반려는 완료되었지만 최신 목록을 불러오지 못했습니다. 새로고침해주세요.'
-                : failure instanceof TypeError ? '네트워크 연결을 확인하고 다시 시도해주세요.' : failure.message;
+            error.textContent = afterReject ? BusanI18n.t("common.ui0061")
+                : failure instanceof TypeError ? BusanI18n.t("common.ui0062") : failure.message;
             error.hidden = false;
         } finally {
             loading = false; refresh.disabled = false; search.disabled = false; filter.disabled = false;
@@ -83,25 +83,25 @@
         if (!selected || rejecting || loading) return;
         const participant = selected;
         rejecting = true; confirmButton.disabled = true; closeButton.disabled = true; refresh.disabled = true;
-        confirmButton.textContent = '반려 처리 중…'; dialogError.hidden = true; notice.hidden = true;
+        confirmButton.textContent = BusanI18n.t("common.ui0063"); dialogError.hidden = true; notice.hidden = true;
         try {
             const response = await fetch('/api/registrations/reject/' + encodeURIComponent(participant.registrationId), {
                 method:'POST', headers:{Accept:'application/json'}, credentials:'same-origin'
             });
-            if (response.status === 401 || response.redirected) { login.hidden = false; throw new Error('기업 계정으로 다시 로그인해주세요.'); }
+            if (response.status === 401 || response.redirected) { login.hidden = false; throw new Error(BusanI18n.t("common.ui0064")); }
             const data = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(data.message || '반려하지 못했습니다. 현재 신청 상태와 권한을 확인해주세요.');
+            if (!response.ok) throw new Error(data.message || BusanI18n.t("common.ui0065"));
             participants = participants.filter(p => p.registrationId !== participant.registrationId);
             dialog.close(); selected = null;
-            notice.textContent = `${participant.displayName || '참가자'}의 신청을 반려했습니다.`; notice.hidden = false;
+            notice.textContent = BusanI18n.t("common.ui0066", [participant.displayName || BusanI18n.t("community.ui0054")]); notice.hidden = false;
             await load(true);
             refresh.focus();
         } catch (failure) {
-            dialogError.textContent = failure instanceof TypeError ? '통신 중 오류가 발생했습니다. 목록을 새로고침해 처리 여부를 확인해주세요.' : failure.message;
+            dialogError.textContent = failure instanceof TypeError ? BusanI18n.t("common.ui0067") : failure.message;
             dialogError.hidden = false;
         } finally {
             rejecting = false; confirmButton.disabled = false; closeButton.disabled = false; refresh.disabled = false;
-            confirmButton.textContent = '신청 반려'; render();
+            confirmButton.textContent = BusanI18n.t("company.ui0088"); render();
         }
     });
     closeButton.addEventListener('click', () => dialog.close());

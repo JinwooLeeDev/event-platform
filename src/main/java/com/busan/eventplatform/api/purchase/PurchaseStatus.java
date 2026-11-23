@@ -7,5 +7,5 @@ public enum PurchaseStatus {
     private final String displayName;
 
     private PurchaseStatus(String displayName) {this.displayName = displayName;}
-    public String getDisplayName() {return displayName;}
+    public String getDisplayName() {return com.busan.eventplatform.global.i18n.LocaleMessages.display(displayName);}
 }

@@ -14,7 +14,7 @@
     let opener = null;
 
     const showError = message => { error.textContent = message; error.hidden = !message; };
-    const buttonLabel = () => kind === 'company' ? '기업회원 로그인' : '개인회원 로그인';
+    const buttonLabel = () => kind === 'company' ? BusanI18n.t("company.ui0028") : BusanI18n.t("auth.ui0061");
     function selectType(type, focus = false) {
         if (busy) return;
         const next = type === 'company' ? 'company' : 'personal';
@@ -30,7 +30,7 @@
         });
         document.getElementById('login-modal-panel').setAttribute('aria-labelledby', 'login-modal-' + kind + '-tab');
         document.getElementById('login-modal-description').textContent = company
-            ? '기업회원으로 가입한 이메일을 입력해주세요.' : '개인회원으로 가입한 이메일을 입력해주세요.';
+            ? BusanI18n.t("auth.ui0062") : BusanI18n.t("auth.ui0063");
         document.getElementById('login-modal-personal-signup').hidden = company;
         document.getElementById('login-modal-company-signup').hidden = !company;
         submit.textContent = buttonLabel();
@@ -50,7 +50,7 @@
         busy = value;
         [...tabs, email, password, submit, close].forEach(control => { control.disabled = value; });
         form.setAttribute('aria-busy', String(value));
-        submit.textContent = value ? '로그인 중…' : buttonLabel();
+        submit.textContent = value ? BusanI18n.t("auth.ui0064") : buttonLabel();
     }
     window.BusanLogin = Object.freeze({open});
     close.addEventListener('click', () => { if (!busy) dialog.close(); });
@@ -105,7 +105,7 @@
                 else location.reload();
                 return;
             }
-            let message = '로그인하지 못했습니다. 이메일과 비밀번호를 확인해주세요.';
+            let message = BusanI18n.t("auth.ui0065");
             if ((response.headers.get('content-type') || '').includes('application/json')) {
                 const result = await response.json();
                 if (typeof result.message === 'string') message = result.message;
@@ -117,7 +117,7 @@
             showError(message);
             password.value = '';
         } catch (_) {
-            showError('연결을 확인한 뒤 다시 시도해주세요.');
+            showError(BusanI18n.t("auth.ui0066"));
         } finally {
             clearTimeout(timeout);
             setBusy(false);
@@ -125,7 +125,12 @@
         }
     });
     const autoOpen = () => {
-        if (location.pathname === '/login') open({type: new URLSearchParams(location.search).get('type')});
+        if (location.pathname !== '/login') return;
+        const showLogin = () => open({type: new URLSearchParams(location.search).get('type')});
+        const localeWidget = document.querySelector('.bp-locale');
+        if (localeWidget?.dataset.firstVisit === 'true') {
+            document.addEventListener('busan:locale-ready', showLogin, {once: true});
+        } else showLogin();
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', autoOpen, {once: true});
     else autoOpen();

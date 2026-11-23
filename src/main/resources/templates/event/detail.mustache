@@ -1,65 +1,65 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}행사 상세{{/event.title}} | Busan Play</title>
+    <title>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}{{i18n.event.ui0001}}{{/event.title}} | Busan Play</title>
 </head>
 <body>
 {{> layout/header}}
 {{> event/detail-style}}
 <main class="event-detail-page">
     <div class="event-detail-wrap">
-        <nav class="detail-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span><a href="/events/list">행사 둘러보기</a><span aria-hidden="true">/</span><span>행사 상세</span></nav>
+        <nav class="detail-breadcrumb" aria-label="{{i18n.event.ui0002}}"><a href="/">{{i18n.event.ui0003}}</a><span aria-hidden="true">/</span><a href="/events/list">{{i18n.event.ui0004}}</a><span aria-hidden="true">/</span><span>{{i18n.event.ui0001}}</span></nav>
         <header class="detail-heading">
             {{#event.categoryName}}<span class="detail-category">{{event.categoryName}}</span>{{/event.categoryName}}
-            <h1>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}행사 상세{{/event.title}}</h1>
+            <h1>{{#event.title}}{{event.title}}{{/event.title}}{{^event.title}}{{i18n.event.ui0001}}{{/event.title}}</h1>
             {{#event.summary}}<p class="detail-summary">{{event.summary}}</p>{{/event.summary}}
             {{#event.id}}
                 <div class="detail-main-image">
                     <img src="/event-files/{{event.id}}"
-                         alt="{{event.title}} 대표 이미지"
+                         alt="{{event.title}} {{i18n.event.ui0118}}"
                          onerror="this.parentElement.style.display='none'">
                 </div>
             {{/event.id}}
             <div class="detail-at-a-glance">
                 <div>
-                    <span>행사 장소</span>
+                    <span>{{i18n.event.ui0005}}</span>
                     <strong>
                         {{#event.placeName}}
                             {{event.placeName}}
                         {{/event.placeName}}
                         {{^event.placeName}}
                             {{#event.address}}{{event.address}}{{/event.address}}
-                            {{^event.address}}장소 안내 준비 중{{/event.address}}
+                            {{^event.address}}{{i18n.event.ui0006}}{{/event.address}}
                         {{/event.placeName}}
                     </strong>
                 </div>
-                <div><span>주최 기업</span><strong>{{#event.companyName}}{{event.companyName}}{{/event.companyName}}{{^event.companyName}}주최 정보 준비 중{{/event.companyName}}</strong></div>
-                <a href="#sessions">회차별 일정·참가비 확인 <span aria-hidden="true">↓</span></a>
+                <div><span>{{i18n.admin.ui0082}}</span><strong>{{#event.companyName}}{{event.companyName}}{{/event.companyName}}{{^event.companyName}}{{i18n.event.ui0007}}{{/event.companyName}}</strong></div>
+                <a href="#sessions">{{i18n.event.ui0008}} <span aria-hidden="true">↓</span></a>
             </div>
         </header>
-        <nav class="detail-section-nav" aria-label="행사 상세 메뉴"><a href="#sessions">회차·신청</a><a href="#description">행사 소개</a><a href="#location">장소 안내</a></nav>
+        <nav class="detail-section-nav" aria-label="{{i18n.event.ui0009}}"><a href="#sessions">{{i18n.event.ui0010}}</a><a href="#description">{{i18n.event.ui0011}}</a><a href="#location">{{i18n.event.ui0012}}</a></nav>
         <div class="detail-layout">
             <div class="detail-content">
                 <section class="detail-section detail-sessions" id="sessions" aria-labelledby="session-title">
-                    <div class="detail-section-heading"><div><h2 id="session-title">참가할 회차를 골라보세요</h2><p class="detail-muted">일정과 참가비를 비교하고 원하는 회차를 선택하세요.</p></div></div>
+                    <div class="detail-section-heading"><div><h2 id="session-title">{{i18n.event.ui0013}}</h2><p class="detail-muted">{{i18n.event.ui0014}}</p></div></div>
                     <div class="session-list">
                         {{#eventSessions}}
                         <article class="session-card" data-session-card="{{id}}" data-available="{{canApply}}">
-                            <div class="session-card__heading"><h3>{{name}}</h3><span class="session-status {{#canApply}}session-status--open{{/canApply}}">{{#canApply}}신청 가능{{/canApply}}{{^canApply}}신청 불가{{/canApply}}</span></div>
-                            <div class="session-schedule"><span class="session-schedule__icon" aria-hidden="true">▦</span><div><span class="session-label">개최 일정</span><div><time data-detail-date>{{#startsAt}}{{startsAt}}{{/startsAt}}{{^startsAt}}일정 미정{{/startsAt}}</time><span class="session-date-end"> ~ <time data-detail-date>{{#endsAt}}{{endsAt}}{{/endsAt}}{{^endsAt}}종료 일정 미정{{/endsAt}}</time></span></div></div></div>
-                            <dl class="session-metrics"><div><dt>참가비</dt><dd><strong data-detail-point>{{fee}}</strong><span> P</span></dd></div><div><dt>정원</dt><dd>{{capacityLabel}}</dd></div></dl>
-                            <details class="session-more"><summary>모집 기간 확인</summary><dl><div><dt>시작</dt><dd data-detail-date>{{#applyStartAt}}{{applyStartAt}}{{/applyStartAt}}{{^applyStartAt}}미정{{/applyStartAt}}</dd></div><div><dt>마감</dt><dd data-detail-date>{{#applyEndAt}}{{applyEndAt}}{{/applyEndAt}}{{^applyEndAt}}미정{{/applyEndAt}}</dd></div></dl></details>
-                            {{^canApply}}<p class="session-closed">{{#closedReason}}{{closedReason}}{{/closedReason}}{{^closedReason}}현재 신청할 수 없는 회차입니다.{{/closedReason}}</p>{{/canApply}}
-                            <button class="session-select" type="button" data-pick-session="{{id}}" aria-label="{{name}} 회차 선택" aria-controls="booking-selection" aria-pressed="false" {{^canApply}}disabled{{/canApply}}>{{#canApply}}이 회차 선택{{/canApply}}{{^canApply}}현재 신청 불가{{/canApply}}</button>
+                            <div class="session-card__heading"><h3>{{name}}</h3><span class="session-status {{#canApply}}session-status--open{{/canApply}}">{{#canApply}}{{i18n.event.ui0015}}{{/canApply}}{{^canApply}}{{i18n.event.ui0016}}{{/canApply}}</span></div>
+                            <div class="session-schedule"><span class="session-schedule__icon" aria-hidden="true">▦</span><div><span class="session-label">{{i18n.admin.ui0065}}</span><div><time data-detail-date>{{#startsAt}}{{startsAt}}{{/startsAt}}{{^startsAt}}{{i18n.event.ui0017}}{{/startsAt}}</time><span class="session-date-end"> ~ <time data-detail-date>{{#endsAt}}{{endsAt}}{{/endsAt}}{{^endsAt}}{{i18n.event.ui0018}}{{/endsAt}}</time></span></div></div></div>
+                            <dl class="session-metrics"><div><dt>{{i18n.admin.ui0101}}</dt><dd><strong data-detail-point>{{fee}}</strong><span> P</span></dd></div><div><dt>{{i18n.admin.ui0100}}</dt><dd>{{capacityLabel}}</dd></div></dl>
+                            <details class="session-more"><summary>{{i18n.event.ui0019}}</summary><dl><div><dt>{{i18n.event.ui0020}}</dt><dd data-detail-date>{{#applyStartAt}}{{applyStartAt}}{{/applyStartAt}}{{^applyStartAt}}{{i18n.event.ui0021}}{{/applyStartAt}}</dd></div><div><dt>{{i18n.event.ui0022}}</dt><dd data-detail-date>{{#applyEndAt}}{{applyEndAt}}{{/applyEndAt}}{{^applyEndAt}}{{i18n.event.ui0021}}{{/applyEndAt}}</dd></div></dl></details>
+                            {{^canApply}}<p class="session-closed">{{#closedReason}}{{closedReason}}{{/closedReason}}{{^closedReason}}{{i18n.event.ui0023}}{{/closedReason}}</p>{{/canApply}}
+                            <button class="session-select" type="button" data-pick-session="{{id}}" aria-label="{{name}} {{i18n.session.aria.select}}" aria-controls="booking-selection" aria-pressed="false" {{^canApply}}disabled{{/canApply}}>{{#canApply}}{{i18n.event.ui0024}}{{/canApply}}{{^canApply}}{{i18n.event.ui0025}}{{/canApply}}</button>
                         </article>
                         {{/eventSessions}}
                     </div>
-                    {{^hasEventSessions}}<div class="detail-empty"><h3>회차를 준비하고 있어요.</h3><p>일정이 등록되면 이곳에서 참가할 회차를 선택할 수 있습니다.</p></div>{{/hasEventSessions}}
+                    {{^hasEventSessions}}<div class="detail-empty"><h3>{{i18n.event.ui0026}}</h3><p>{{i18n.event.ui0027}}</p></div>{{/hasEventSessions}}
                 </section>
                 <section class="detail-section" id="description" aria-labelledby="description-title">
-                    <h2 id="description-title">어떤 행사인가요?</h2>
-                    <div class="detail-description">{{#event.description}}{{event.description}}{{/event.description}}{{^event.description}}자세한 행사 소개를 준비하고 있습니다.{{/event.description}}</div>
+                    <h2 id="description-title">{{i18n.event.ui0028}}</h2>
+                    <div class="detail-description">{{#event.description}}{{event.description}}{{/event.description}}{{^event.description}}{{i18n.event.ui0029}}{{/event.description}}</div>
                 </section>
 
 
@@ -70,8 +70,8 @@
 
                     <div class="detail-section-heading">
                         <div>
-                            <h2 id="review-title">참가자 리뷰</h2>
-                            <p class="detail-muted">행사에 참여한 사람들의 생생한 후기입니다.</p>
+                            <h2 id="review-title">{{i18n.event.ui0030}}</h2>
+                            <p class="detail-muted">{{i18n.event.ui0031}}</p>
                         </div>
                     </div>
 
@@ -105,7 +105,7 @@
 
                             {{^bestReview}}
                                 <div class="detail-empty">
-                                    <p>이 회차에는 아직 등록된 후기가 없습니다.</p>
+                                    <p>{{i18n.common.merge008}}</p>
                                 </div>
                             {{/bestReview}}
 
@@ -114,7 +114,7 @@
                         <!-- 선택한 회차의 후기 전체보기 -->
                         <div class="review-more">
                             <a href="/event-review/event/{{event.id}}?eventSessionId={{selectedEventSessionId}}">
-                            후기 전체보기 →
+                            {{i18n.common.merge009}}
                             </a>
                         </div>
 
@@ -122,7 +122,7 @@
 
                     {{^hasCompletedEventSessions}}
                         <div class="detail-empty">
-                            <p>아직 후기를 볼 수 있는 종료된 회차가 없습니다.</p>
+                            <p>{{i18n.common.merge010}}</p>
                         </div>
                     {{/hasCompletedEventSessions}}
 
@@ -131,7 +131,7 @@
 
 
                 <section class="detail-section" id="location" aria-labelledby="location-title">
-                    <h2 id="location-title">어디에서 만나나요?</h2>
+                    <h2 id="location-title">{{i18n.event.ui0044}}</h2>
                     <div class="detail-address">
                         <span aria-hidden="true">⌖</span>
                         <div>
@@ -143,40 +143,40 @@
                                     {{event.address}}
                                 {{/event.address}}
                                 {{^event.address}}
-                                    장소 안내를 준비하고 있습니다.
+                                    {{i18n.event.ui0045}}
                                 {{/event.address}}
                             </p>
                             {{#event.postalCode}}
-                                <p>우편번호: {{event.postalCode}}</p>
+                                <p>{{i18n.event.ui0046}} {{event.postalCode}}</p>
                             {{/event.postalCode}}
                         </div>
                     </div>
-                    <div id="event-map" class="detail-map" data-address="{{event.address}}" data-title="{{event.title}}" data-client-id="{{naverMapClientId}}" aria-label="행사 장소 지도" hidden></div>
-                    <p id="event-map-status" class="detail-map-placeholder" role="status">지도를 불러오는 중입니다.</p>
+                    <div id="event-map" class="detail-map" data-address="{{event.address}}" data-title="{{event.title}}" data-client-id="{{naverMapClientId}}" aria-label="{{i18n.event.ui0047}}" hidden></div>
+                    <p id="event-map-status" class="detail-map-placeholder" role="status">{{i18n.event.ui0048}}</p>
                 </section>
             </div>
             <aside class="detail-overview" aria-labelledby="booking-title">
-                <div class="booking-heading"><span class="booking-icon" aria-hidden="true">↗</span><div><h2 id="booking-title">참가 신청</h2><p>회차 선택 후 신청을 진행하세요.</p></div></div>
+                <div class="booking-heading"><span class="booking-icon" aria-hidden="true">↗</span><div><h2 id="booking-title">{{i18n.event.ui0049}}</h2><p>{{i18n.event.ui0050}}</p></div></div>
                 <div class="detail-session-picker">
-                    <label for="event-session">참가 회차</label>
+                    <label for="event-session">{{i18n.event.ui0051}}</label>
                     <select id="event-session" name="sessionId" aria-describedby="session-picker-help" {{^hasEventSessions}}disabled{{/hasEventSessions}}>
-                        <option value="" selected disabled>참가할 회차를 선택해주세요</option>
+                        <option value="" selected disabled>{{i18n.event.ui0052}}</option>
                         {{#eventSessions}}
                         <option value="{{id}}" data-session-option data-session-name="{{name}}" data-fee="{{fee}}" data-starts-at="{{startsAt}}" data-ends-at="{{endsAt}}" data-apply-start="{{applyStartAt}}" data-apply-end="{{applyEndAt}}" data-can-apply="{{canApply}}" data-closed-reason="{{#closedReason}}{{closedReason}}{{/closedReason}}">{{name}}{{#startsAt}} · {{startsAt}}{{/startsAt}}</option>
                         {{/eventSessions}}
                     </select>
-                    <p id="session-picker-help" class="detail-muted">{{#hasEventSessions}}회차 카드의 선택 버튼으로도 고를 수 있습니다.{{/hasEventSessions}}{{^hasEventSessions}}등록된 회차가 없습니다.{{/hasEventSessions}}</p>
+                    <p id="session-picker-help" class="detail-muted">{{#hasEventSessions}}{{i18n.event.ui0053}}{{/hasEventSessions}}{{^hasEventSessions}}{{i18n.admin.ui0102}}{{/hasEventSessions}}</p>
                 </div>
                 <div class="booking-selection" id="booking-selection" hidden>
-                    <p class="session-label">선택한 회차</p><h3 id="booking-session-name"></h3><p id="booking-session-date"></p>
-                    <div class="booking-price"><span>참가비</span><strong id="booking-session-fee"></strong></div>
+                    <p class="session-label">{{i18n.event.ui0054}}</p><h3 id="booking-session-name"></h3><p id="booking-session-date"></p>
+                    <div class="booking-price"><span>{{i18n.admin.ui0101}}</span><strong id="booking-session-fee"></strong></div>
                 </div>
-                <dl class="detail-facts"><div><dt>모집 시작</dt><dd id="session-apply-start">회차 선택 후 확인</dd></div><div><dt>모집 마감</dt><dd id="session-apply-end">회차 선택 후 확인</dd></div></dl>
+                <dl class="detail-facts"><div><dt>{{i18n.event.ui0055}}</dt><dd id="session-apply-start">{{i18n.event.ui0056}}</dd></div><div><dt>{{i18n.event.ui0057}}</dt><dd id="session-apply-end">{{i18n.event.ui0056}}</dd></div></dl>
                 <p id="session-apply-state" class="detail-state" role="status" hidden></p>
-                <button class="detail-button reg-apply-btn" type="button" disabled>참가 신청</button>
-                <p class="booking-note">신청 전 포인트와 신청 가능 여부를 확인합니다.<br>다음 결제 화면에서 최종 신청이 완료됩니다.</p>
-                <details class="booking-guide"><summary>대기 신청·결제 안내</summary><p>정원이 마감된 회차는 대기 신청으로 접수됩니다. 무료 회차도 결제 화면에서 최종 신청을 완료해야 합니다. 참가비와 환불 안내는 신청 확인 창에서 확인하세요.</p></details>
-                <a class="detail-back" href="/events/list">다른 행사 둘러보기 <span aria-hidden="true">→</span></a>
+                <button class="detail-button reg-apply-btn" type="button" disabled>{{i18n.event.ui0049}}</button>
+                <p class="booking-note">{{i18n.event.ui0058}}<br>{{i18n.event.ui0059}}</p>
+                <details class="booking-guide"><summary>{{i18n.event.ui0060}}</summary><p>{{i18n.event.ui0061}}</p></details>
+                <a class="detail-back" href="/events/list">{{i18n.event.ui0062}} <span aria-hidden="true">→</span></a>
             </aside>
         </div>
     </div>
@@ -188,14 +188,14 @@
 <script>
 (() => {
     const select = document.getElementById('event-session');
-    const formatDate = value => value ? value.slice(0, 16).replace('T', ' ').replaceAll('-', '.') : '일정 미정';
+    const formatDate = value => value ? value.slice(0, 16).replace('T', ' ').replaceAll('-', '.') : BusanI18n.t("event.ui0017");
     document.querySelectorAll('[data-detail-date]').forEach(element => {
         const value = element.textContent.trim();
         if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) element.textContent = formatDate(value);
     });
     document.querySelectorAll('[data-detail-point]').forEach(element => {
         const fee = Number(element.textContent);
-        element.textContent = fee === 0 ? '무료 · 0' : fee.toLocaleString('ko-KR');
+        element.textContent = fee === 0 ? BusanI18n.t("event.ui0063") : fee.toLocaleString('ko-KR');
     });
     document.querySelectorAll('[data-session-option]').forEach(option => {
         option.textContent = option.textContent.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?/, formatDate);
@@ -208,12 +208,12 @@
             document.getElementById('booking-session-name').textContent = option.dataset.sessionName;
             document.getElementById('booking-session-date').textContent = formatDate(option.dataset.startsAt) + ' ~ ' + formatDate(option.dataset.endsAt);
             const fee = Number(option.dataset.fee);
-            document.getElementById('booking-session-fee').textContent = fee === 0 ? '무료 · 0 P' : fee.toLocaleString('ko-KR') + ' P';
+            document.getElementById('booking-session-fee').textContent = fee === 0 ? BusanI18n.t("event.ui0064") : fee.toLocaleString('ko-KR') + ' P';
         }
         document.querySelectorAll('[data-pick-session]').forEach(button => {
             const active = button.dataset.pickSession === select.value;
             button.setAttribute('aria-pressed', String(active));
-            if (!button.disabled) button.textContent = active ? '선택한 회차 ✓' : '이 회차 선택';
+            if (!button.disabled) button.textContent = active ? BusanI18n.t("event.ui0065") : BusanI18n.t("event.ui0024");
         });
         document.querySelectorAll('[data-session-card]').forEach(card => {
             card.classList.toggle('is-selected', card.dataset.sessionCard === select.value);

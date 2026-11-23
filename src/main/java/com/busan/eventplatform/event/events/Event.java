@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "events")
+@EntityListeners(com.busan.eventplatform.event.translation.EventTranslationLifecycle.class)
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

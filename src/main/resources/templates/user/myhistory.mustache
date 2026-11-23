@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>신청한 행사 | Busan Play</title></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.application.ui0047}}</title></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
@@ -9,7 +9,7 @@
     <div class="account-layout">
         {{> layout/account-nav}}
         <div class="account-content">
-            <header class="account-heading"><div><p class="account-location">마이페이지 / 내 활동</p><h1>신청한 행사</h1><p class="account-description">참가 확정·대기 중·종료된 행사와 취소·환불 내역을 확인하세요.</p></div><a class="account-button account-button--secondary" href="/events/list">행사 둘러보기 <span aria-hidden="true">↗</span></a></header>
+            <header class="account-heading"><div><p class="account-location">{{i18n.community.ui0018}}</p><h1>{{i18n.common.ui0017}}</h1><p class="account-description">{{i18n.application.ui0048}}</p></div><a class="account-button account-button--secondary" href="/events/list">{{i18n.event.ui0004}} <span aria-hidden="true">↗</span></a></header>
             {{! ★ [f/41] 탭 전환·검색 시 이 영역만 비동기로 교체 }}
             <div id="history-area" aria-live="polite">{{> user/history-content}}</div>
         </div>

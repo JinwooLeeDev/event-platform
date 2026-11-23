@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>포인트·보증금 내역 | Busan Play</title>
+    <title>{{i18n.company.ui0089}}</title>
 </head>
 <body>
 {{> layout/header}}
@@ -120,10 +120,10 @@
         <div class="account-content">
             <header class="company-heading">
                 <div>
-                    <p class="company-location">기업페이지</p>
-                    <h1>포인트·보증금 내역</h1>
+                    <p class="company-location">{{i18n.common.companyPage}}</p>
+                    <h1>{{i18n.company.ui0090}}</h1>
                     <p class="company-description">
-                        기업 포인트 충전과 보증금 처리 내역을 확인하세요.
+                        {{i18n.company.ui0091}}
                     </p>
                 </div>
             </header>
@@ -133,17 +133,17 @@
             <section class="company-panel point-history-balance"
                      aria-labelledby="point-balance-title">
                 <div>
-                    <h2 id="point-balance-title">보유 포인트</h2>
+                    <h2 id="point-balance-title">{{i18n.admin.ui0165}}</h2>
                     <strong class="point-history-amount">
                         {{pointText}} P
                     </strong>
                     <p class="session-muted">
-                        행사 보증금 결제에 사용할 수 있는 포인트입니다.
+                        {{i18n.company.ui0092}}
                     </p>
                 </div>
 
                 <a class="company-button" href="/charge">
-                    포인트 충전
+                    {{i18n.company.ui0093}}
                 </a>
             </section>
 
@@ -151,9 +151,9 @@
                 <section class="session-panel" aria-labelledby="point-charge-title">
                     <div class="company-panel-heading">
                         <div>
-                            <h2 id="point-charge-title">충전 내역 ({{chargeCount}}건)</h2>
+                            <h2 id="point-charge-title">{{i18n.common.merge004}}{{chargeCount}}{{i18n.common.merge005}}</h2>
                             <p class="company-description">
-                                결제가 완료된 포인트 충전 내역입니다.
+                                {{i18n.company.ui0095}}
                             </p>
                         </div>
                     </div>
@@ -162,10 +162,10 @@
                         <table class="session-table point-history-table">
                             <thead>
                             <tr>
-                                <th scope="col">충전 일시</th>
-                                <th scope="col" class="point-history-money">충전 금액 (P)</th>
-                                <th scope="col">결제 수단</th>
-                                <th scope="col">상태</th>
+                                <th scope="col">{{i18n.company.ui0096}}</th>
+                                <th scope="col" class="point-history-money">{{i18n.company.ui0097}}</th>
+                                <th scope="col">{{i18n.payment.ui0016}}</th>
+                                <th scope="col">{{i18n.admin.ui0153}}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -184,7 +184,7 @@
                             {{^charges}}
                                 <tr>
                                     <td colspan="4">
-                                        <p class="point-history-empty">포인트 충전 내역이 없습니다.</p>
+                                        <p class="point-history-empty">{{i18n.company.ui0098}}</p>
                                     </td>
                                 </tr>
                             {{/charges}}
@@ -199,9 +199,9 @@
                      aria-labelledby="point-deposit-title">
                 <div class="company-panel-heading">
                     <div>
-                        <h2 id="point-deposit-title">보증금 납부·반환 내역 ({{depositCount}}건)</h2>
+                        <h2 id="point-deposit-title">{{i18n.common.merge006}}{{depositCount}}{{i18n.common.merge005}}</h2>
                         <p class="company-description">
-                            회차별 보증금 납부 상태와 정상 반환 금액을 확인하세요.
+                            {{i18n.company.ui0100}}
                         </p>
                     </div>
                 </div>
@@ -211,16 +211,16 @@
                                       point-history-table--wide">
                         <thead>
                         <tr>
-                            <th scope="col">행사 / 회차</th>
+                            <th scope="col">{{i18n.company.ui0101}}</th>
                             <th scope="col"
                                 class="point-history-money">
-                                보증금액 (P)
+                                {{i18n.company.ui0102}}
                             </th>
-                            <th scope="col">상태</th>
-                            <th scope="col">납부 일시</th>
+                            <th scope="col">{{i18n.admin.ui0153}}</th>
+                            <th scope="col">{{i18n.company.ui0103}}</th>
                             <th scope="col"
                                 class="point-history-money">
-                                정상 반환 금액 (P)
+                                {{i18n.company.ui0104}}
                             </th>
                         </tr>
                         </thead>
@@ -256,7 +256,7 @@
                         <tr>
                             <td colspan="5">
                                 <p class="point-history-empty">
-                                    보증금 납부·반환 내역이 없습니다.
+                                    {{i18n.company.ui0105}}
                                 </p>
                             </td>
                         </tr>
@@ -271,9 +271,9 @@
                      aria-labelledby="point-refund-title">
                 <div class="company-panel-heading">
                     <div>
-                        <h2 id="point-refund-title">환불 내역 ({{refundCount}}건)</h2>
+                        <h2 id="point-refund-title">{{i18n.common.merge007}}{{refundCount}}{{i18n.common.merge005}}</h2>
                         <p class="company-description">
-                            행사 취소에 따른 환불 처리 상태와 실제 환불 금액입니다.
+                            {{i18n.company.ui0107}}
                         </p>
                     </div>
                 </div>
@@ -283,14 +283,14 @@
                                       point-history-table--wide">
                         <thead>
                         <tr>
-                            <th scope="col">행사 / 회차</th>
-                            <th scope="col">요청 일시</th>
-                            <th scope="col">상태</th>
+                            <th scope="col">{{i18n.company.ui0101}}</th>
+                            <th scope="col">{{i18n.company.ui0108}}</th>
+                            <th scope="col">{{i18n.admin.ui0153}}</th>
                             <th scope="col"
                                 class="point-history-money">
-                                환불 금액 (P)
+                                {{i18n.company.ui0109}}
                             </th>
-                            <th scope="col">사유</th>
+                            <th scope="col">{{i18n.company.ui0110}}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -323,7 +323,7 @@
                         <tr>
                             <td colspan="5">
                                 <p class="point-history-empty">
-                                    환불 내역이 없습니다.
+                                    {{i18n.company.ui0111}}
                                 </p>
                             </td>
                         </tr>
@@ -336,11 +336,11 @@
 
             {{^pointHistory}}
             <div class="company-empty">
-                <h2>포인트 내역을 확인할 수 없습니다.</h2>
-                <p>기업 정보 화면으로 돌아가 다시 확인해주세요.</p>
+                <h2>{{i18n.company.ui0112}}</h2>
+                <p>{{i18n.company.ui0113}}</p>
                 <a class="company-button company-button--secondary"
                    href="/company/detail">
-                    기업 정보로 돌아가기
+                    {{i18n.company.ui0114}}
                 </a>
             </div>
             {{/pointHistory}}

@@ -14,11 +14,11 @@ spring:
   config:
     import: optional:file:.env[.properties]
   profiles:
-    default: h2
+    default: supabase
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         jdbc:
@@ -56,4 +56,22 @@ portone:
 naver-map:
   client-id: ${NAVER_MAP_CLIENT_ID:}
   client-secret: ${NAVER_MAP_CLIENT_SECRET:}
+
+# 2-A infrastructure only. Apply db/manual/event-translation.sql manually before enabling workers.
+# No model fallback or paid-tier switching. GEMINI_MODEL is deliberately explicit.
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:}
+    worker-enabled: ${GEMINI_TRANSLATION_WORKER_ENABLED:false}
+    timeout: ${GEMINI_TIMEOUT:30s}
+    lease: ${GEMINI_LEASE:2m}
+    poll-interval: ${GEMINI_POLL_INTERVAL:5000}
+    backoff: ${GEMINI_BACKOFF:30s}
+    max-retries: ${GEMINI_MAX_RETRIES:2}
+    max-concurrent: ${GEMINI_MAX_CONCURRENT:1}
+    requests-per-minute: ${GEMINI_REQUESTS_PER_MINUTE:5}
+    requests-per-day: ${GEMINI_REQUESTS_PER_DAY:100}
+    max-source-chars: ${GEMINI_MAX_SOURCE_CHARS:10000}
+    max-output-chars: ${GEMINI_MAX_OUTPUT_CHARS:40000}
 

@@ -1,5 +1,6 @@
 package com.busan.eventplatform.event.eventCancel;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.api.refund.RefundService;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
@@ -58,9 +59,9 @@ public class EventCancelService {
 
     public static String statusLabel(EventCancelStatus status) {
         return switch (status) {
-            case PENDING -> "승인 대기";
-            case APPROVED -> "취소 승인";
-            case REJECTED -> "취소 거절";
+            case PENDING -> LocaleMessages.display("승인 대기");
+            case APPROVED -> LocaleMessages.display("취소 승인");
+            case REJECTED -> LocaleMessages.display("취소 거절");
         };
     }
 

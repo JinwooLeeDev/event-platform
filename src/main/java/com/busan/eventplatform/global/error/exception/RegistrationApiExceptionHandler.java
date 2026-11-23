@@ -2,6 +2,7 @@ package com.busan.eventplatform.global.error.exception;
 
 import com.busan.eventplatform.user.registration.RegistrationApiController;
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,11 @@ import java.util.Map;
  * Fetch 로 호출하는 신청 API 는 항상 JSON {"message": ...} 를 받도록 보장한다.
  */
 @Slf4j
+@RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice(assignableTypes = RegistrationApiController.class)
 public class RegistrationApiExceptionHandler {
+    private final UiErrorMessages errorMessages;
 
     // 포인트 파트: 이미 결제한 행사
     @ExceptionHandler(AlreadyPurchaseException.class)
@@ -53,6 +56,6 @@ public class RegistrationApiExceptionHandler {
     }
 
     private ResponseEntity<Map<String, String>> body(HttpStatus status, String message) {
-        return ResponseEntity.status(status).body(Map.of("message", message));
+        return ResponseEntity.status(status).body(Map.of("message", errorMessages.display(message)));
     }
 }

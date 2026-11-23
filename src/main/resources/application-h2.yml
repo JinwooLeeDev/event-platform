@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:event_platform;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:./data/event_platform
     username: sa
     password: ""
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
   h2:
     console:
       enabled: true
@@ -16,7 +16,7 @@ spring:
 
   sql:
     init:
-      mode: always # never --> always로 변경
-      data-locations:
-        - classpath:db/local-mysql/data.sql # # data.sql 파일 읽기위한 설정.
+      mode: always
+      encoding: UTF-8
+      data-locations: classpath:db/demo-data.sql
 

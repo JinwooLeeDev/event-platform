@@ -1,28 +1,28 @@
 <!DOCTYPE html>
-<html lang="ko"><head>{{> layout/head-meta}}<title>커뮤니티 | Busan Play</title></head><body>
+<html lang="{{localeCode}}"><head>{{> layout/head-meta}}<title>{{i18n.community.ui0034}}</title></head><body>
 {{> layout/header}}
 {{> community/style}}
 <main class="community-page"><div class="community-room-wrap">
-    <a class="community-back" href="/community"><span aria-hidden="true">‹</span> 내 커뮤니티 목록</a>
+    <a class="community-back" href="/community"><span aria-hidden="true">‹</span> {{i18n.community.ui0035}}</a>
     {{#room}}
     <section class="community-card" aria-labelledby="community-title">
-        <header class="community-head"><div><span class="community-tag">회차 커뮤니티</span><h1 id="community-title" class="community-title">{{eventTitle}}</h1><div class="community-sub">{{sessionName}} · 주최 {{hostName}}</div><div class="community-close">{{closeText}}</div></div><div id="community-status" class="community-status" role="status">연결 중…</div></header>
+        <header class="community-head"><div><span class="community-tag">{{i18n.community.ui0036}}</span><h1 id="community-title" class="community-title">{{eventTitle}}</h1><div class="community-sub">{{sessionName}} {{i18n.community.ui0037}} {{hostName}}</div><div class="community-close">{{closeText}}</div></div><div id="community-status" class="community-status" role="status">{{i18n.community.ui0038}}</div></header>
         <p id="community-end-day-notice" class="community-notice" role="status" {{^endDayNotice}}hidden{{/endDayNotice}}>{{#endDayNotice}}{{.}}{{/endDayNotice}}</p>
-        <div id="community-pin" class="community-pin" {{^notice}}hidden{{/notice}}><div class="label">주최 측 공지</div><p id="community-pin-text" class="text">{{#notice}}{{.}}{{/notice}}</p><div id="community-pin-time" class="time">{{#noticeUpdatedAt}}{{.}} 등록{{/noticeUpdatedAt}}</div></div>
+        <div id="community-pin" class="community-pin" {{^notice}}hidden{{/notice}}><div class="label">{{i18n.community.ui0039}}</div><p id="community-pin-text" class="text">{{#notice}}{{.}}{{/notice}}</p><div id="community-pin-time" class="time">{{#noticeUpdatedAt}}{{.}} {{i18n.admin.ui0004}}{{/noticeUpdatedAt}}</div></div>
         <div class="community-tools">
-            <details class="community-people"><summary>참여자 <span id="community-people-count">{{participantCount}}</span>명</summary><ul id="community-people">{{#participants}}<li data-user-id="{{userId}}">{{nickname}}</li>{{/participants}}</ul></details>
+            <details class="community-people"><summary>{{i18n.community.ui0040}} <span id="community-people-count">{{participantCount}}</span>{{i18n.admin.ui0067}}</summary><ul id="community-people">{{#participants}}<li data-user-id="{{userId}}">{{nickname}}</li>{{/participants}}</ul></details>
             {{#host}}
-                <details class="community-notice-editor"><summary>주최 공지 관리</summary><form id="community-notice-form" class="community-notice-form" autocomplete="off"><label for="community-notice-input">참가자에게 안내할 내용</label><textarea id="community-notice-input" maxlength="500" rows="3" aria-describedby="community-notice-help" disabled>{{#notice}}{{.}}{{/notice}}</textarea><p id="community-notice-help">최대 500자. 내용을 비우고 등록하면 공지를 내립니다.</p><button id="community-notice-send" class="community-button" type="submit" disabled>공지 등록·수정</button></form></details>
+                <details class="community-notice-editor"><summary>{{i18n.community.ui0041}}</summary><form id="community-notice-form" class="community-notice-form" autocomplete="off"><label for="community-notice-input">{{i18n.community.ui0042}}</label><textarea id="community-notice-input" maxlength="500" rows="3" aria-describedby="community-notice-help" disabled>{{#notice}}{{.}}{{/notice}}</textarea><p id="community-notice-help">{{i18n.community.ui0043}}</p><button id="community-notice-send" class="community-button" type="submit" disabled>{{i18n.community.ui0044}}</button></form></details>
                 <!-- ★ [f/42] 주최 기업만: 현장 출석 QR 열기 (사이트가 QR 생성, 새 창) -->
-                <a class="community-button community-qr-button" href="/attendance/qr/{{sessionId}}" target="_blank" rel="noopener">출석 QR 열기</a>
+                <a class="community-button community-qr-button" href="/attendance/qr/{{sessionId}}" target="_blank" rel="noopener">{{i18n.community.ui0045}}</a>
             {{/host}}
         </div>
-        <ul id="community-messages" class="community-messages" role="log" aria-label="회차 대화 내역" aria-live="polite" aria-relevant="additions" data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
-            {{#empty}}<li class="community-system">아직 대화가 없어요. 함께할 참가자들에게 먼저 인사해보세요.</li>{{/empty}}
+        <ul id="community-messages" class="community-messages" role="log" aria-label="{{i18n.community.ui0046}}" aria-live="polite" aria-relevant="additions" data-session-id="{{sessionId}}" data-my-key="{{myKey}}">
+            {{#empty}}<li class="community-system">{{i18n.community.ui0047}}</li>{{/empty}}
             {{#messages}}{{#system}}<li class="community-system">{{content}} <span class="community-system-time">{{sentAt}}</span></li>{{/system}}{{^system}}<li class="community-msg{{#mine}} mine{{/mine}}{{#host}} host{{/host}}"><div class="meta"><strong>{{nickname}}</strong><span>{{sentAt}}</span></div><div class="bubble">{{content}}</div></li>{{/system}}{{/messages}}
         </ul>
-        <form id="community-form" class="community-form" autocomplete="off"><label for="community-input" class="community-sr-only">메시지</label><input id="community-input" type="text" maxlength="500" placeholder="메시지를 입력하세요" aria-describedby="community-input-help" disabled><button id="community-send" class="community-button" type="submit" disabled>보내기</button></form>
-        <p id="community-input-help" class="community-input-help">서로를 배려하는 대화를 나눠주세요. 메시지는 최대 500자까지 보낼 수 있습니다.</p>
+        <form id="community-form" class="community-form" autocomplete="off"><label for="community-input" class="community-sr-only">{{i18n.community.ui0048}}</label><input id="community-input" type="text" maxlength="500" placeholder="{{i18n.community.ui0049}}" aria-describedby="community-input-help" disabled><button id="community-send" class="community-button" type="submit" disabled>{{i18n.community.ui0050}}</button></form>
+        <p id="community-input-help" class="community-input-help">{{i18n.community.ui0051}}</p>
     </section>
     {{/room}}
 </div></main>
@@ -62,7 +62,7 @@
             const meta = document.createElement('div');
             meta.className = 'meta';
             const name = document.createElement('strong');
-            name.textContent = m.nickname;
+            name.textContent = m.host ? BusanI18n.translateSource(m.nickname) : m.nickname;
             const time = document.createElement('span');
             time.textContent = m.sentAt;
             meta.append(name, time);
@@ -78,7 +78,7 @@
             list.querySelector('.community-system.empty')?.remove();
             const li = document.createElement('li');
             li.className = 'community-system';
-            li.textContent = text;
+            li.textContent = BusanI18n.translateSource(text);
             if (sentAt) {                                  // 입장·퇴장 기록은 새로고침 후와 같게 시각 표시
                 const time = document.createElement('span');
                 time.className = 'community-system-time';
@@ -92,7 +92,7 @@
         // 종료일 당일 안내 → 상단 배너 (textContent 로 넣어 XSS 방지)
         function showEndDayNotice(text) {
             const banner = document.getElementById('community-end-day-notice');
-            banner.textContent = text;
+            banner.textContent = BusanI18n.translateSource(text);
             banner.hidden = false;
         }
 
@@ -100,10 +100,10 @@
         function showPin(m) {
             const pin = document.getElementById('community-pin');
             document.getElementById('community-pin-text').textContent = m.content;
-            document.getElementById('community-pin-time').textContent = m.content ? m.sentAt + ' 등록' : '';
+            document.getElementById('community-pin-time').textContent = m.content ? m.sentAt + BusanI18n.t("common.extra002") : '';
             pin.hidden = !m.content;
             if (noticeInput && document.activeElement !== noticeInput) noticeInput.value = m.content;
-            appendSystem(m.content ? '📌 주최 측 공지가 등록되었습니다.' : '주최 측 공지가 내려갔습니다.');
+            appendSystem(m.content ? BusanI18n.t("community.ui0052") : BusanI18n.t("community.ui0053"));
         }
 
         // [6단계] 참여자 목록 갱신 — 입장(JOIN)·퇴장(LEAVE)
@@ -112,7 +112,7 @@
             if (m.userId == null || people.querySelector('[data-user-id="' + m.userId + '"]')) return;
             const li = document.createElement('li');
             li.dataset.userId = m.userId;
-            li.textContent = m.nickname || '참가자';
+            li.textContent = m.nickname || BusanI18n.t("community.ui0054");
             people.appendChild(li);
             refreshPeopleCount();
         }
@@ -126,7 +126,7 @@
             if (ended) return;
             ended = true;
             setFormEnabled(false);
-            setStatus('연결 종료', 'is-off');
+            setStatus(BusanI18n.t("community.ui0055"), 'is-off');
             appendSystem(text);
             client.deactivate();
             if (goBack) setTimeout(() => { location.href = myKey.startsWith('company:') ? '/community' : '/myhistory'; }, 3000);
@@ -144,7 +144,7 @@
 
         client.onConnect = () => {
             failCount = 0;   // [7단계 B-15] 연결에 성공하면 실패 횟수 초기화
-            setStatus('실시간 연결됨', 'is-live');
+            setStatus(BusanI18n.t("community.ui0056"), 'is-live');
             setFormEnabled(true);
 
             client.subscribe('/topic/community/' + sessionId, frame => {
@@ -159,22 +159,22 @@
 
             client.subscribe('/user/queue/community', frame => {
                 const m = JSON.parse(frame.body);
-                if (m.type === 'KICKED' && String(m.sessionId) === sessionId) end(m.content + ' 잠시 후 내 행사로 이동합니다.', true);
+                if (m.type === 'KICKED' && String(m.sessionId) === sessionId) end(m.content + BusanI18n.t("common.extra003"), true);
                 else if (m.type === 'ERROR') appendSystem('⚠ ' + m.content);
             });
         };
 
-        client.onStompError = frame => end(frame.headers.message || '커뮤니티에 연결할 수 없습니다.', false);
+        client.onStompError = frame => end(frame.headers.message || BusanI18n.t("community.ui0057"), false);
         // [7단계 B-15] 끊길 때마다 횟수를 세고, MAX_RETRY 번 연속 실패하면 재연결 중단 (서버 재시작으로 로그인이 풀린 경우 등)
         client.onWebSocketClose = () => {
             if (ended) return;
             failCount++;
             setFormEnabled(false);
             if (failCount >= MAX_RETRY) {
-                end('연결할 수 없습니다. 새로고침하거나 다시 로그인해 주세요.', false);
+                end(BusanI18n.t("community.ui0058"), false);
                 return;
             }
-            setStatus('연결이 끊겼습니다. 다시 연결하는 중… (' + failCount + '/' + MAX_RETRY + ')', 'is-off');
+            setStatus(BusanI18n.t("common.extra004") + failCount + '/' + MAX_RETRY + ')', 'is-off');
         };
 
         form.addEventListener('submit', event => {

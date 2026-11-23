@@ -1,5 +1,7 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.global.i18n.I18nTestModels;
+
 import com.busan.eventplatform.event.eventFavorite.*;
 import com.busan.eventplatform.login.*;
 import com.busan.eventplatform.global.error.exception.*;
@@ -27,7 +29,7 @@ class MyFavoritePageTest {
         var compiler = com.samskivert.mustache.Mustache.compiler().withLoader(name -> new java.io.InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), java.nio.charset.StandardCharsets.UTF_8));
         try (var reader = new java.io.InputStreamReader(getClass().getResourceAsStream("/templates/user/myfavorites.mustache"), java.nio.charset.StandardCharsets.UTF_8)) {
-            var html = compiler.compile(reader).execute(model);
+            var html = compiler.compile(reader).execute(I18nTestModels.withLocale(model));
             assertTrue(html.contains("href=\"/event/7\""));
             assertTrue(html.contains("data-favorite-event=\"7\""));
             assertTrue(html.contains("&lt;script&gt;event&lt;/script&gt;"));

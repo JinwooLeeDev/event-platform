@@ -1,3 +1,4 @@
+{{> layout/i18n-assets}}
 <style>
     /* Header Layout & Background */
     .app-header {
@@ -230,21 +231,22 @@
         </div>
 
         <!-- 중앙: 공통 행사 검색 -->
-        <form class="header-search" action="/events/list" method="get" role="search" aria-label="행사 검색">
-            <input class="header-search__input" type="search" name="keyword" aria-label="검색할 행사명" placeholder="어떤 행사를 찾고 계신가요?">
-            <button class="header-search__button" type="submit" aria-label="행사 검색">
+        <form class="header-search" action="/events/list" method="get" role="search" aria-label="{{i18n.search}}">
+            <input class="header-search__input" type="search" name="keyword" aria-label="{{i18n.searchName}}" placeholder="{{i18n.searchPlaceholder}}">
+            <button class="header-search__button" type="submit" aria-label="{{i18n.search}}">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"></circle><path d="m16 16 5 5"></path></svg>
             </button>
         </form>
 
         <!-- 오른쪽: 사용자 정보 및 메뉴 -->
         <div class="header-right">
+            {{> layout/locale}}
             {{#loginUser}} <!-- 로그인 된 경우 -->
                 <div class="user-profile">
                     <div class="user-avatar">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </div>
-                    <span class="user-name">{{loginUser.displayName}} 님</span>
+                    <span class="user-name">{{loginUser.displayName}} {{i18n.common.ui0043}}</span>
                 </div>
 
 
@@ -252,21 +254,21 @@
 
                 <div class="action-buttons">
                     {{#isPersonal}}
-                        <a href="/mypage" class="btn-outline">마이페이지</a>
+                        <a href="/mypage" class="btn-outline">{{i18n.mypage}}</a>
                     {{/isPersonal}}
 
                     {{#isCorporate}}
-                        <a href="/company/detail" class="btn-outline">기업페이지</a>
+                        <a href="/company/detail" class="btn-outline">{{i18n.companyPage}}</a>
                     {{/isCorporate}}
 
                     {{#isAdmin}}
-                        <a href="/admin" class="btn-outline">관리자페이지</a>
+                        <a href="/admin" class="btn-outline">{{i18n.adminPage}}</a>
                     {{/isAdmin}}
 
                     <form action="/logout" method="post" style="margin: 0">
                     <button type="submit" class="btn-logout" style="border: 0; background: none; font: inherit; cursor: pointer">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                        로그아웃
+                        {{i18n.logout}}
                     </button>
                     </form>
                 </div>
@@ -274,8 +276,8 @@
 
             {{^loginUser}} <!-- 비로그인(게스트) 경우 -->
                 <div class="guest-buttons">
-                    <a href="/login" class="btn-text">로그인</a>
-                    <a href="/signup" class="btn-solid">회원가입</a>
+                    <a href="/login" class="btn-text">{{i18n.login}}</a>
+                    <a href="/signup" class="btn-solid">{{i18n.signup}}</a>
                 </div>
             {{/loginUser}}
         </div>

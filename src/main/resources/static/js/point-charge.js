@@ -5,7 +5,7 @@
     const methods = [...document.querySelectorAll('[data-payment-provider]')];
     const amounts = [...document.querySelectorAll('.amount-btn')];
     const balance = document.getElementById('myPoint');
-    const providerNames = {naver: '네이버페이', kakao: '카카오페이'};
+    const providerNames = {naver: BusanI18n.t("payment.ui0018"), kakao: BusanI18n.t("payment.ui0020")};
     let provider = 'naver';
     let paying = false;
     balance.textContent = Number(balance.textContent.trim()).toLocaleString('ko-KR') + 'P';
@@ -14,7 +14,7 @@
         const amount = Number(input.value);
         const formatted = (Number.isSafeInteger(amount) && amount > 0 ? amount : 0).toLocaleString('ko-KR');
         document.getElementById('expectedPoint').textContent = formatted + 'P';
-        document.getElementById('chargeTotal').textContent = formatted + '원';
+        document.getElementById('chargeTotal').textContent = formatted + BusanI18n.t("payment.ui0009");
         amounts.forEach(button => {
             const active = Number(button.dataset.amount) === amount;
             button.classList.toggle('active', active);
@@ -37,21 +37,21 @@
     function setBusy(value) {
         paying = value;
         [pay, input, ...methods, ...amounts].forEach(element => { element.disabled = value; });
-        pay.textContent = value ? '결제 처리 중…' : '결제하기';
+        pay.textContent = value ? BusanI18n.t("common.ui0101") : BusanI18n.t("payment.ui0031");
         pay.setAttribute('aria-busy', String(value));
     }
     async function post(url, body) {
         const response = await fetch(url, {
             method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
         });
-        if (!response.ok) throw new Error('결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        if (!response.ok) throw new Error(BusanI18n.t("common.ui0102"));
         return response.json();
     }
     pay.addEventListener('click', async () => {
         if (paying) return;
         const amount = Number(input.value);
         if (!Number.isSafeInteger(amount) || amount < 1 || !input.validity.valid) {
-            alert('충전할 금액을 1원 이상의 정수로 입력해주세요.');
+            alert(BusanI18n.t("common.ui0103"));
             input.focus();
             return;
         }
@@ -59,7 +59,7 @@
         const endpoint = '/api/' + provider + '/payment/';
         setBusy(true);
         try {
-            if (!window.PortOne) throw new Error('결제창을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.');
+            if (!window.PortOne) throw new Error(BusanI18n.t("common.ui0104"));
             const prepared = await post(endpoint + 'prepare', {amount});
             const payment = await window.PortOne.requestPayment({
                 storeId: prepared.storeId,
@@ -71,15 +71,15 @@
                 payMethod: 'EASY_PAY'
             });
             if (!payment || payment.code !== undefined) {
-                alert('결제가 취소되었거나 중단되었습니다.');
+                alert(BusanI18n.t("common.ui0105"));
                 return;
             }
             const completed = await post(endpoint + 'complete', {paymentId: payment.paymentId});
             balance.textContent = Number(completed.currentPoint).toLocaleString('ko-KR') + 'P';
-            alert('충전이 완료되었습니다.');
+            alert(BusanI18n.t("common.ui0106"));
             window.location.href = completed.redirectUrl;
         } catch (error) {
-            alert(error.message || '결제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            alert(error.message || BusanI18n.t("common.ui0107"));
         } finally {
             setBusy(false);
         }

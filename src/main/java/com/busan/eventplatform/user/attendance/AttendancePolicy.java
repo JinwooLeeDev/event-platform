@@ -42,7 +42,9 @@ public final class AttendancePolicy {
         if (startsAt == null) {
             return null;
         }
-        return "출석 가능 시간: " + opensAt(startsAt).format(TIME_TEXT) + " ~ " + closesAt(startsAt, endsAt).format(TIME_TEXT);
+        return com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.checkInTime",
+                opensAt(startsAt).format(TIME_TEXT.withLocale(org.springframework.context.i18n.LocaleContextHolder.getLocale())),
+                closesAt(startsAt, endsAt).format(TIME_TEXT.withLocale(org.springframework.context.i18n.LocaleContextHolder.getLocale())));
     }
 
     /**

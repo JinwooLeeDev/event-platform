@@ -46,28 +46,30 @@
                 url.searchParams.set('size', nav.dataset.size);
                 element.href = url.pathname + url.search;
                 if (selected) element.setAttribute('aria-current', 'page');
-                element.setAttribute('aria-label', label === '이전' || label === '다음' ? label + ' 페이지' : number + '페이지');
+                const originalLabel = BusanI18n.source(label);
+                element.setAttribute('aria-label', originalLabel === '이전' ? BusanI18n.t('common.pagination.previous')
+                    : originalLabel === '다음' ? BusanI18n.t('common.pagination.next') : BusanI18n.t('common.pagination.page', [number]));
             } else element.setAttribute('aria-disabled', 'true');
             nav.append(element);
         }
-        item('이전', current - 1);
+        item(BusanI18n.t("common.ui0095"), current - 1);
         const start = Math.max(1, Math.min(current - 2, total - 4));
         for (let number = start; number <= Math.min(total, start + 4); number++) item(String(number), number, number === current);
-        item('다음', current + 1);
+        item(BusanI18n.t("common.ui0096"), current + 1);
     }
     async function navigate(url, push = true) {
         controller?.abort();
         controller = new AbortController();
         const requestRevision = ++revision;
         content.setAttribute('aria-busy', 'true');
-        feedback.textContent = '행사를 불러오는 중입니다…';
+        feedback.textContent = BusanI18n.t("common.ui0097");
         feedback.hidden = false;
         try {
             const response = await fetch(url, {signal: controller.signal, headers: {Accept: 'text/html'}});
-            if (!response.ok) throw new Error('목록 요청 실패');
+            if (!response.ok) throw new Error(BusanI18n.t("common.ui0098"));
             const parsed = new DOMParser().parseFromString(await response.text(), 'text/html');
             const next = parsed.querySelector('.event-list-page .list-content');
-            if (!next) throw new Error('행사 목록을 확인할 수 없습니다.');
+            if (!next) throw new Error(BusanI18n.t("common.ui0099"));
             if (requestRevision !== revision) return;
             content.replaceChildren(...document.importNode(next, true).childNodes);
             currentURL = new URL(url);
@@ -79,7 +81,7 @@
         } catch (error) {
             if (requestRevision !== revision || error.name === 'AbortError') return;
             if (!push) { location.reload(); return; }
-            feedback.textContent = '행사를 불러오지 못했습니다. 연결 상태를 확인하고 다시 선택해주세요.';
+            feedback.textContent = BusanI18n.t("common.ui0100");
             feedback.hidden = false;
         } finally {
             if (requestRevision === revision) content.setAttribute('aria-busy', 'false');

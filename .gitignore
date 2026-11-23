@@ -325,3 +325,6 @@ $RECYCLE.BIN/
 /src/main/resources/application-h2.yml
 /src/main/resources/application-mysql.yml
 /src/main/resources/application-supabase.yml
+
+# Persistent local H2 database
+/data/

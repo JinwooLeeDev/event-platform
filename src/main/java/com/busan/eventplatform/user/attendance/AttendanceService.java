@@ -110,23 +110,23 @@ public class AttendanceService {
                 ? eventSessionRepository.findByIdForUpdate(sessionId)   // 저장 시 회차 락 → 중복 저장 방지
                 : eventSessionRepository.findById(sessionId);
         if (found.isEmpty()) {
-            return result(sessionId, null, null).message("존재하지 않는 회차의 출석 QR입니다.").messageClass("is-error").build();
+            return result(sessionId, null, null).message(com.busan.eventplatform.global.i18n.LocaleMessages.display("존재하지 않는 회차의 출석 QR입니다.")).messageClass("is-error").build();
         }
         EventSession session = found.get();
 
         // 1. QR 서명 — 회차 id 만 바꿔 만든 주소 차단
         if (!qrSigner.matches(sessionId, code)) {
-            return result(sessionId, session, null).message("유효하지 않은 출석 QR입니다. 현장에 안내된 QR을 다시 인식해 주세요.").messageClass("is-error").build();
+            return result(sessionId, session, null).message(com.busan.eventplatform.global.i18n.LocaleMessages.display("유효하지 않은 출석 QR입니다. 현장에 안내된 QR을 다시 인식해 주세요.")).messageClass("is-error").build();
         }
 
         // 2. 로그인 · 개인 회원
         if (identity == null || identity.getId() == null) {
             return result(sessionId, session, code).loginRequired(true)
-                    .message("로그인한 뒤 QR을 다시 인식해 주세요.").messageClass("is-info").build();
+                    .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("로그인한 뒤 QR을 다시 인식해 주세요.")).messageClass("is-info").build();
         }
         if (!identity.isUser()) {
             return result(sessionId, session, code)
-                    .message("개인 회원 계정으로 로그인해야 출석할 수 있습니다.").messageClass("is-error").build();
+                    .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("개인 회원 계정으로 로그인해야 출석할 수 있습니다.")).messageClass("is-error").build();
         }
 
         // 3. 본인의 참가 확정 신청
@@ -135,30 +135,30 @@ public class AttendanceService {
                 .orElse(null);
         if (registration == null) {
             return result(sessionId, session, code)
-                    .message("이 회차에 참가가 확정된 회원만 출석할 수 있습니다.").messageClass("is-error").build();
+                    .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("이 회차에 참가가 확정된 회원만 출석할 수 있습니다.")).messageClass("is-error").build();
         }
 
         // 4. 이미 출석 — 오류가 아니라 완료로 안내
         if (attendanceRepository.existsByRegistrationId(registration.getId())) {
             return result(sessionId, session, code).done(true)
-                    .message("이미 출석 체크되었습니다. 신청 내역에서 후기를 남길 수 있습니다.").messageClass("is-success").build();
+                    .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("이미 출석 체크되었습니다. 신청 내역에서 후기를 남길 수 있습니다.")).messageClass("is-success").build();
         }
 
         // 5. 출석 가능 시간 (시작 30분 전 ~ 종료)
         if (!AttendancePolicy.isCheckTime(session.getStartsAt(), session.getEndsAt(), LocalDateTime.now())) {
             return result(sessionId, session, code)
-                    .message("지금은 출석할 수 있는 시간이 아닙니다.").messageClass("is-error").build();
+                    .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("지금은 출석할 수 있는 시간이 아닙니다.")).messageClass("is-error").build();
         }
 
         if (!save) {
             return result(sessionId, session, code).canSubmit(true)
-                    .message("아래 버튼을 누르면 출석이 완료됩니다.").messageClass("is-info").build();
+                    .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("아래 버튼을 누르면 출석이 완료됩니다.")).messageClass("is-info").build();
         }
 
         // 6. 저장 — 확인자(checkedBy)는 QR 을 띄운 주최 기업 (시드 데이터와 같은 의미)
         attendanceRepository.save(Attendance.create(registration, session.getEvent().getCompany().getId()));
         return result(sessionId, session, code).done(true)
-                .message("출석 체크가 완료되었습니다. 신청 내역에서 후기를 남길 수 있습니다.").messageClass("is-success").build();
+                .message(com.busan.eventplatform.global.i18n.LocaleMessages.display("출석 체크가 완료되었습니다. 신청 내역에서 후기를 남길 수 있습니다.")).messageClass("is-success").build();
     }
 
     /** 회차 정보가 채워진 화면 DTO 빌더 (code 는 유효할 때만 다시 넘긴다) */

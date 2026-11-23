@@ -10,6 +10,6 @@ public enum RefundStatus {
     private RefundStatus(String displayname) {this.displayname = displayname;}
 
     public String getDisplayname() {
-        return displayname;
+        return com.busan.eventplatform.global.i18n.LocaleMessages.display(displayname);
     }
 }

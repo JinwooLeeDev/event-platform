@@ -1,5 +1,7 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.event.eventCategory.EventCategoryService;
 import com.busan.eventplatform.event.eventReview.EventReviewService;
 import com.busan.eventplatform.event.eventSession.EventSessionService;
@@ -239,7 +241,7 @@ public class EventController {
         updateDto.validate();
         SessionCompanyDto sessionCompanyDto = requireCompany(session);
         eventService.updateAndResubmit(id, sessionCompanyDto.getId(), updateDto, file);
-        redirect.addFlashAttribute("successMessage", "수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다.");
+        redirect.addFlashAttribute("successMessage", LocaleMessages.display("수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다."));
         return "redirect:/events";
     }
 

@@ -5,6 +5,7 @@ import com.busan.eventplatform.login.LoginSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -107,7 +108,7 @@ public class RegistrationApiController {
 
         registrationService.cancel(registrationId, loginIdentity);
         log.info("신청 취소 성공 - registrationId={}, userId={}", registrationId, loginIdentity.getId());
-        return ResponseEntity.ok(Map.of("message", "신청이 성공적으로 취소되었습니다."));
+        return ResponseEntity.ok(Map.of("message", LocaleMessages.display("신청이 성공적으로 취소되었습니다.")));
     }
 
     // 5. 회차별 참가자 목록 (주최 기업)
@@ -140,16 +141,16 @@ public class RegistrationApiController {
 
         registrationService.reject(registrationId, loginIdentity);
         log.info("신청 거절 성공 - registrationId={}, companyId={}", registrationId, loginIdentity.getId());
-        return ResponseEntity.ok(Map.of("message", "신청을 거절했습니다. 결제한 포인트는 신청자에게 전액 환불됩니다."));
+        return ResponseEntity.ok(Map.of("message", LocaleMessages.display("신청을 거절했습니다. 결제한 포인트는 신청자에게 전액 환불됩니다.")));
     }
 
     // ===== 공통 응답 =====
 
     private ResponseEntity<Map<String, String>> unauthorized() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", LocaleMessages.display("로그인이 필요합니다.")));
     }
 
     private ResponseEntity<Map<String, String>> forbidden(String message) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", message));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", LocaleMessages.display(message)));
     }
 }

@@ -1,10 +1,13 @@
 import com.samskivert.mustache.Mustache;
 import java.nio.file.*;
 import java.util.*;
+import com.busan.eventplatform.global.i18n.I18nConfig;
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 
 // Run: java -cp <jmustache.jar> scripts/FinalPolishRender.java
 // Fixtures exercise the real partials without touching a database or payment service.
 class FinalPolishRender {
+    static final LocaleMessages MESSAGES = new LocaleMessages(new I18nConfig().messageSource());
     static final Path ROOT = Path.of("src/main/resources/templates");
     static final Path OUT = Path.of("build/final-polish");
     static Map<String, Object> map(Object... pairs) {
@@ -14,7 +17,8 @@ class FinalPolishRender {
     }
     static Map<String, Object> base(boolean host) {
         return map("isPersonal", !host, "isCorporate", host, "isAdmin", false,
-                "loginUser", map("displayName", "부산테스터"));
+                "loginUser", map("displayName", "부산테스터"), "i18n", MESSAGES.view(Locale.KOREAN),
+                "i18nJson", MESSAGES.javascript(Locale.KOREAN), "localeCode", "ko", "localeFirstVisit", false);
     }
     static void render(String name, String template, Map<String, Object> model) throws Exception {
         var compiler = Mustache.compiler().defaultValue("")

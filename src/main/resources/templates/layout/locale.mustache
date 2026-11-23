@@ -1,0 +1,23 @@
+{{#localeCode}}
+<link rel="stylesheet" href="/css/locale.css">
+<div class="bp-locale" data-locale="{{localeCode}}" data-first-visit="{{localeFirstVisit}}">
+    <button type="button" class="bp-locale-trigger" data-locale-open aria-haspopup="dialog">{{i18n.language}} · {{localeCode}}</button>
+</div>
+<dialog id="locale-modal" class="bp-locale-dialog" aria-labelledby="locale-modal-title" aria-describedby="locale-modal-intro">
+    <button type="button" class="bp-locale-close" data-locale-close aria-label="{{i18n.close}}">×</button>
+    <p class="bp-locale-brand">Busan Play</p>
+    <h2 id="locale-modal-title">{{i18n.chooseLanguage}}</h2>
+    <p id="locale-modal-intro">{{i18n.languageIntro}}</p>
+    <form action="/locale" method="post" class="bp-locale-form">
+        <input type="hidden" name="_localeCsrf" value="{{localeCsrf}}">
+        <input type="hidden" name="returnTo" value="{{localeReturnTo}}">
+        <div class="bp-locale-options">
+            {{#localeOptions}}
+            <label><input type="radio" name="locale" value="{{code}}" {{#selected}}checked{{/selected}} required><span lang="{{code}}">{{label}}</span></label>
+            {{/localeOptions}}
+        </div>
+        <button type="submit" class="bp-locale-apply">{{i18n.apply}}</button>
+    </form>
+</dialog>
+<script src="/js/locale.js" defer></script>
+{{/localeCode}}

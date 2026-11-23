@@ -68,6 +68,6 @@ public class EventSaveApiExceptionHandler {
             String message
     ) {
         return ResponseEntity.status(status)
-                .body(Map.of("message", message));
+                .body(Map.of("message", com.busan.eventplatform.global.i18n.LocaleMessages.display(message)));
     }
 }

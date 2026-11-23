@@ -1,5 +1,7 @@
 package com.busan.eventplatform.event.eventReview;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
@@ -116,9 +118,9 @@ public class EventReviewController {
                     saveDto.getContent()
             );
 
-            redirectAttributes.addFlashAttribute("message", "후기가 등록되었습니다.");
+            redirectAttributes.addFlashAttribute("message", LocaleMessages.display("후기가 등록되었습니다."));
         } catch (Exception400 e) {
-            redirectAttributes.addFlashAttribute("message", e.getMessage());
+            redirectAttributes.addFlashAttribute("message", LocaleMessages.display(e.getMessage()));
         }
 
         return "redirect:/event-review/" + eventSessionId;

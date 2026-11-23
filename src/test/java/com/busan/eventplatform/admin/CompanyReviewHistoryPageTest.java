@@ -1,5 +1,7 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.I18nTestModels;
+
 import com.busan.eventplatform.company.*;
 import com.busan.eventplatform.company.companyAdminReview.*;
 import com.busan.eventplatform.global.file.FileStorage;
@@ -68,7 +70,7 @@ class CompanyReviewHistoryPageTest {
 
     private String render(ExtendedModelMap model) throws Exception {
         try (var reader = new InputStreamReader(getClass().getResourceAsStream("/templates/admin/companies.mustache"), StandardCharsets.UTF_8)) {
-            return Mustache.compiler().compile(reader).execute(model);
+            return Mustache.compiler().compile(reader).execute(I18nTestModels.withLocale(model));
         }
     }
 

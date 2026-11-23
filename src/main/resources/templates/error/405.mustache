@@ -13,7 +13,7 @@
         </div>
         <div class="error-divider"></div>
         <h1 class="error-title">
-            허용되지 않은 요청 방식입니다
+            {{i18n.error.ui0016}}
         </h1>
         <div class="error-description">
             {{#errorMessage}}
@@ -21,22 +21,22 @@
             {{/errorMessage}}
 
             {{^errorMessage}}
-                <p>현재 주소에서 지원하지 않는 요청 방식입니다.</p>
-                <p>이전 화면으로 돌아가 다시 이용해 주세요.</p>
+                <p>{{i18n.error.ui0017}}</p>
+                <p>{{i18n.error.ui0018}}</p>
             {{/errorMessage}}
         </div>
         <div class="error-actions">
             <a href="/" class="error-btn error-btn-primary">
-                메인으로 돌아가기 &rarr;
+                {{i18n.error.ui0004}}
             </a>
             <button type="button"
                     class="error-btn error-btn-secondary"
                     onclick="history.back()">
-                &larr; 이전 페이지
+                {{i18n.error.ui0005}}
             </button>
         </div>
         <div class="error-bottom">
-            부산의 모든 즐거움, <strong>Busan Play</strong>
+            {{i18n.error.ui0006}} <strong>Busan Play</strong>
         </div>
     </div>
 </main>

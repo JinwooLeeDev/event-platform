@@ -1,46 +1,46 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>참가 신청·포인트 결제 | Busan Play</title>
+    <title>{{i18n.payment.ui0036}}</title>
 </head>
 <body>
 {{> layout/header}}
 {{> point/purchase-style}}
 <main class="purchase-page">
     <div class="purchase-wrap">
-        <nav class="purchase-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span><a href="/events/list">행사 둘러보기</a><span aria-hidden="true">/</span><span>참가 신청·결제</span></nav>
-        <header class="purchase-heading"><h1>참가 신청을 마무리하세요</h1><p>참가할 일정과 사용할 포인트를 확인해주세요.</p></header>
-        <ol class="purchase-progress" aria-label="참가 신청 진행 단계"><li class="is-done"><span aria-hidden="true">✓</span>행사·회차 선택</li><li class="is-current" aria-current="step"><span aria-hidden="true">2</span>포인트 결제</li><li><span aria-hidden="true">3</span>신청 완료</li></ol>
+        <nav class="purchase-breadcrumb" aria-label="{{i18n.event.ui0002}}"><a href="/">{{i18n.event.ui0003}}</a><span aria-hidden="true">/</span><a href="/events/list">{{i18n.event.ui0004}}</a><span aria-hidden="true">/</span><span>{{i18n.payment.ui0037}}</span></nav>
+        <header class="purchase-heading"><h1>{{i18n.payment.ui0038}}</h1><p>{{i18n.payment.ui0039}}</p></header>
+        <ol class="purchase-progress" aria-label="{{i18n.payment.ui0040}}"><li class="is-done"><span aria-hidden="true">✓</span>{{i18n.payment.ui0041}}</li><li class="is-current" aria-current="step"><span aria-hidden="true">2</span>{{i18n.payment.ui0042}}</li><li><span aria-hidden="true">3</span>{{i18n.payment.ui0043}}</li></ol>
         {{#view}}
         <div class="purchase-layout">
             <div class="purchase-content">
                 <section class="purchase-panel purchase-event" aria-labelledby="purchase-event-title">
-                    <div class="purchase-panel-heading"><h2 id="purchase-event-title">참가할 행사</h2><span class="purchase-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18m-13 5h3m3 0h3"/></svg></span></div>
+                    <div class="purchase-panel-heading"><h2 id="purchase-event-title">{{i18n.payment.ui0044}}</h2><span class="purchase-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18m-13 5h3m3 0h3"/></svg></span></div>
                     {{#category}}<span class="purchase-category">{{category}}</span>{{/category}}
                     <h3>{{title}}</h3>
-                    <dl class="purchase-event-facts"><div><dt>참가 일정</dt><dd><time data-purchase-date>{{startsAt}}</time></dd></div><div><dt>장소</dt><dd>{{location}}</dd></div><div><dt>신청 내용</dt><dd>선택한 회차 참가 신청</dd></div></dl>
-                    <div class="purchase-event-fee"><span>회차 참가비</span><strong class="format-point" data-purchase-fee>{{eventPoint}}</strong></div>
+                    <dl class="purchase-event-facts"><div><dt>{{i18n.payment.ui0045}}</dt><dd><time data-purchase-date>{{startsAt}}</time></dd></div><div><dt>{{i18n.payment.ui0046}}</dt><dd>{{location}}</dd></div><div><dt>{{i18n.payment.ui0047}}</dt><dd>{{i18n.payment.ui0048}}</dd></div></dl>
+                    <div class="purchase-event-fee"><span>{{i18n.payment.ui0049}}</span><strong class="format-point" data-purchase-fee>{{eventPoint}}</strong></div>
                 </section>
-                <section class="purchase-panel purchase-guide" aria-labelledby="purchase-guide-title"><h2 id="purchase-guide-title">신청 전에 확인해주세요</h2><ul><li>결제를 완료해야 참가 신청이 접수됩니다.</li><li>정원이 마감된 회차는 대기 신청으로 접수될 수 있습니다. 최종 신청 가능 여부는 결제 시 다시 확인합니다.</li><li>신청 상태 확인과 참가 취소는 마이페이지의 ‘신청한 행사’에서 진행할 수 있습니다.</li></ul><details><summary>포인트 사용·취소 안내</summary><p>참가비는 보유 포인트에서 차감됩니다. 무료 회차도 아래 확인 및 결제 절차를 마쳐야 신청이 완료됩니다.</p><p>취소 시점과 신청 상태에 따라 환불 기준이 달라질 수 있습니다. 취소 전 신청 내역에 표시되는 안내를 확인해주세요.</p></details></section>
+                <section class="purchase-panel purchase-guide" aria-labelledby="purchase-guide-title"><h2 id="purchase-guide-title">{{i18n.payment.ui0050}}</h2><ul><li>{{i18n.payment.ui0051}}</li><li>{{i18n.payment.ui0052}}</li><li>{{i18n.payment.ui0053}}</li></ul><details><summary>{{i18n.payment.ui0054}}</summary><p>{{i18n.payment.ui0055}}</p><p>{{i18n.payment.ui0056}}</p></details></section>
             </div>
             <aside class="purchase-summary" aria-labelledby="purchase-summary-title">
-                <h2 id="purchase-summary-title">포인트 결제 정보</h2>
-                <div class="purchase-balance"><span class="purchase-point-icon" aria-hidden="true">P</span><div><span>현재 보유 포인트</span><strong class="format-point" id="currentPoint">{{currentPoint}}</strong></div></div>
-                <dl class="purchase-point-facts"><div><dt>참가비</dt><dd class="format-point">{{eventPoint}}</dd></div><div class="purchase-payment-total"><dt>사용할 포인트</dt><dd class="format-point">{{eventPoint}}</dd></div></dl>
-                <div class="purchase-remaining"><span>결제 후 예상 잔액</span><strong class="format-point" id="predict">{{predictedPoint}}</strong></div>
-                <p id="purchase-balance-warning" class="purchase-warning" role="status" hidden>포인트가 부족합니다. 포인트를 충전한 뒤 참가 신청을 진행해주세요.</p>
-                <form id="purchase-form" action="/event/purchase/{{id}}" method="post" onsubmit="return confirm('결제를 진행하시겠습니까?')">
-                    <div class="purchase-agreement"><input type="checkbox" id="agreeCheck" required><label for="agreeCheck">행사 정보, 사용할 포인트와 참가 취소 안내를 확인했습니다. <span>(필수)</span></label></div>
-                    <button type="submit" id="paymentBtn" class="purchase-pay-button" disabled><span class="format-point">{{eventPoint}}</span> 결제하고 신청하기</button>
+                <h2 id="purchase-summary-title">{{i18n.payment.ui0057}}</h2>
+                <div class="purchase-balance"><span class="purchase-point-icon" aria-hidden="true">P</span><div><span>{{i18n.payment.ui0004}}</span><strong class="format-point" id="currentPoint">{{currentPoint}}</strong></div></div>
+                <dl class="purchase-point-facts"><div><dt>{{i18n.admin.ui0101}}</dt><dd class="format-point">{{eventPoint}}</dd></div><div class="purchase-payment-total"><dt>{{i18n.payment.ui0058}}</dt><dd class="format-point">{{eventPoint}}</dd></div></dl>
+                <div class="purchase-remaining"><span>{{i18n.payment.ui0059}}</span><strong class="format-point" id="predict">{{predictedPoint}}</strong></div>
+                <p id="purchase-balance-warning" class="purchase-warning" role="status" hidden>{{i18n.payment.ui0060}}</p>
+                <form id="purchase-form" action="/event/purchase/{{id}}" method="post" onsubmit="return confirm(BusanI18n.t('common.extra007'))">
+                    <div class="purchase-agreement"><input type="checkbox" id="agreeCheck" required><label for="agreeCheck">{{i18n.payment.ui0061}} <span>{{i18n.payment.ui0062}}</span></label></div>
+                    <button type="submit" id="paymentBtn" class="purchase-pay-button" disabled><span class="format-point">{{eventPoint}}</span> {{i18n.payment.ui0063}}</button>
                 </form>
-                <p class="purchase-payment-note">보유 포인트에서 차감됩니다.<br>결제 후 마이페이지에서 신청 결과를 확인해주세요.</p>
-                <a class="purchase-charge-link" href="/charge">포인트 충전하기 <span aria-hidden="true">+</span></a>
+                <p class="purchase-payment-note">{{i18n.payment.ui0064}}<br>{{i18n.payment.ui0065}}</p>
+                <a class="purchase-charge-link" href="/charge">{{i18n.company.ui0008}} <span aria-hidden="true">+</span></a>
             </aside>
         </div>
         {{/view}}
-        {{^view}}<section class="purchase-panel purchase-empty"><h2>참가 정보를 확인할 수 없습니다.</h2><p>행사 상세에서 참가할 회차를 다시 선택해주세요.</p><a href="/events/list">행사 둘러보기</a></section>{{/view}}
-        <a class="purchase-back" href="/events/list"><span aria-hidden="true">←</span> 행사 목록으로 돌아가기</a>
+        {{^view}}<section class="purchase-panel purchase-empty"><h2>{{i18n.payment.ui0066}}</h2><p>{{i18n.payment.ui0067}}</p><a href="/events/list">{{i18n.event.ui0004}}</a></section>{{/view}}
+        <a class="purchase-back" href="/events/list"><span aria-hidden="true">←</span> {{i18n.payment.ui0068}}</a>
     </div>
 </main>
 {{> layout/footer}}
@@ -62,7 +62,7 @@
     });
     if (!canPay) {
         document.getElementById('purchase-balance-warning').hidden = false;
-        paymentBtn.textContent = '포인트가 부족합니다';
+        paymentBtn.textContent = BusanI18n.t("payment.ui0069");
     }
     const updatePaymentButton = () => { paymentBtn.disabled = !canPay || !agreeCheck.checked; };
     agreeCheck.addEventListener('change', updatePaymentButton);

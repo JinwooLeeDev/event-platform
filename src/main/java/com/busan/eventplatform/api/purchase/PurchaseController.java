@@ -1,5 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginSession;
@@ -46,7 +48,7 @@ public class PurchaseController {
         RegistrationRes.ApplyDto result = registrationPurchaseService.applyWithPayment(eventSessionId, loginIdentity);
 
         // 확정 / 대기 N번 등 신청 결과를 상황별 문구로 안내
-        redirect.addFlashAttribute("purchaseSuccessMsg", result.getMessage());
+        redirect.addFlashAttribute("purchaseSuccessMsg", LocaleMessages.display(result.getMessage()));
 
         return "redirect:/mypage"; // TODO 결제처리 완료후 어떤 페이지로 이동시킬지 추후 결정. 일단 myPage로.
     }

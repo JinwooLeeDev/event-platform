@@ -1,5 +1,6 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
 import com.busan.eventplatform.company.companyAdminReview.AdminReviewResponse;
@@ -14,7 +15,7 @@ public final class AdminCompanyView {
     private AdminCompanyView() {}
 
     public static String list(Model model, List<AdminReviewResponse.ListDTO> companies) {
-        String view = AdminPageView.prepare(model, "기업 관리", "승인 대기 중인 기업의 사업자 정보와 증빙을 검토하세요.", "companies");
+        String view = AdminPageView.prepare(model, LocaleMessages.display("기업 관리"), LocaleMessages.display("승인 대기 중인 기업의 사업자 정보와 증빙을 검토하세요."), "companies");
         model.addAttribute("companyListPage", true);
         model.addAttribute("companyDetailPage", false);
         model.addAttribute("companyCount", companies.size());
@@ -30,7 +31,7 @@ public final class AdminCompanyView {
     }
 
     public static String detail(Model model, AdminReviewResponse.DetailDTO company) {
-        String view = AdminPageView.prepare(model, "기업 심사 상세", "제출된 기업 정보와 증빙을 확인한 뒤 심사해주세요.", "companies");
+        String view = AdminPageView.prepare(model, LocaleMessages.display("기업 심사 상세"), LocaleMessages.display("제출된 기업 정보와 증빙을 확인한 뒤 심사해주세요."), "companies");
         model.addAttribute("companyListPage", false);
         model.addAttribute("companyDetailPage", true);
         model.addAttribute("company", company);
@@ -41,27 +42,27 @@ public final class AdminCompanyView {
                 "reviewerName", history.getReviewerName(),
                 "feedback", history.getFeedback() == null ? "" : history.getFeedback(),
                 "hasFeedback", history.getFeedback() != null && !history.getFeedback().isBlank(),
-                "createdAtText", history.getCreatedAt() == null ? "기록 시각 없음" : MyDateUtil.timestampFormat(history.getCreatedAt())
+                "createdAtText", history.getCreatedAt() == null ? LocaleMessages.display("기록 시각 없음") : MyDateUtil.timestampFormat(history.getCreatedAt())
         )).toList());
         return view;
     }
 
     private static String statusLabel(CompanyStatus status) {
         return switch (status) {
-            case PENDING -> "승인 대기";
-            case APPROVED -> "승인 완료";
-            case REJECTED -> "반려";
-            case FEEDBACK_NEEDED -> "보완 요청";
-            case SUSPENDED -> "정지";
+            case PENDING -> LocaleMessages.display("승인 대기");
+            case APPROVED -> LocaleMessages.display("승인 완료");
+            case REJECTED -> LocaleMessages.display("반려");
+            case FEEDBACK_NEEDED -> LocaleMessages.display("보완 요청");
+            case SUSPENDED -> LocaleMessages.display("정지");
         };
     }
 
     private static String verificationLabel(BusinessVerificationStatus status) {
         return switch (status) {
-            case NOT_CHECKED -> "확인 전";
-            case MATCHED -> "정보 일치";
-            case MISMATCHED -> "정보 불일치";
-            case ERROR -> "검증 오류";
+            case NOT_CHECKED -> LocaleMessages.display("확인 전");
+            case MATCHED -> LocaleMessages.display("정보 일치");
+            case MISMATCHED -> LocaleMessages.display("정보 불일치");
+            case ERROR -> LocaleMessages.display("검증 오류");
         };
     }
 }

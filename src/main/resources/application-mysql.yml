@@ -8,9 +8,9 @@ spring:
       connection-init-sql: SET time_zone = '+00:00'
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   sql:
     init:
-      mode:
-      data-locations:
-        - classpath:db/local-mysql/data.sql  # data.sql 파일 읽기위한 설정.
+      mode: always
+      encoding: UTF-8
+      data-locations: classpath:db/demo-data.sql

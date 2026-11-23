@@ -1,5 +1,7 @@
 package com.busan.eventplatform.event.eventCategory;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,7 +29,7 @@ public class EventCategoryController {
     public String findAllList(Model model) {
         EventCategoryResponse.ListDto resDto = eventCategoryService.findAllList();
         model.addAttribute("categoryList", resDto.getCategoryList());
-        return com.busan.eventplatform.admin.AdminPageView.prepare(model, "카테고리 관리", "행사 분류에 사용할 카테고리를 등록·수정·삭제하세요.", "categories");
+        return com.busan.eventplatform.admin.AdminPageView.prepare(model, LocaleMessages.display("카테고리 관리"), LocaleMessages.display("행사 분류에 사용할 카테고리를 등록·수정·삭제하세요."), "categories");
     }
 
     // POST - http://localhost:8080/categories/update/1
@@ -48,8 +50,8 @@ public class EventCategoryController {
     @org.springframework.web.bind.annotation.ExceptionHandler({com.busan.eventplatform.global.error.exception.Exception400.class,
             org.springframework.dao.DataIntegrityViolationException.class})
     public String categoryError(RuntimeException error, org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
-        redirect.addFlashAttribute("categoryError", error instanceof org.springframework.dao.DataIntegrityViolationException
-                ? "행사에 사용 중인 카테고리는 삭제할 수 없습니다." : error.getMessage());
+        redirect.addFlashAttribute("categoryError", LocaleMessages.display(error instanceof org.springframework.dao.DataIntegrityViolationException
+                ? "행사에 사용 중인 카테고리는 삭제할 수 없습니다." : error.getMessage()));
         return "redirect:/admin/categories";
     }
 }
