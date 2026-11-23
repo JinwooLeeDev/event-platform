@@ -58,7 +58,7 @@ public class Refund {
     }
 
     // 기업전용 생성자.
-    // TODO 기업이 취소 요청시 이 생성자 사용!
+    // 취소 승인 시 기업 환불 내역이 없으면 이 생성자로 생성한다.
     @Builder(builderMethodName = "companyBuilder" , builderClassName = "companyBuilder")
     public Refund(Company company , Deposit deposit , String reason) {
         this.company = company;
