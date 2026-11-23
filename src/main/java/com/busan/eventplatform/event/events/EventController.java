@@ -162,6 +162,8 @@ public class EventController {
             throw new Exception403("기업 회원만 행사 등록이 가능합니다.");
         }
 
+        eventService.validateRegistrationPermission(identity.getId());
+
         model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
         return "event/save-form";
     }
