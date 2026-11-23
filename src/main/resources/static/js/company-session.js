@@ -17,8 +17,7 @@
         const eventId = form.dataset.eventId || location.pathname.match(/^\/events\/sessions\/(?:list|status)\/(\d+)$/)?.[1];
         if (!eventId) return;
         form.action = '/events/sessions/save/' + encodeURIComponent(eventId);
-        const details = form.closest('[data-session-create]'); details.hidden = false;
-        if (new URLSearchParams(location.search).has('add')) details.open = true;
+        const details = form.closest('[data-session-create]');
         const field = name => form.elements.namedItem(name);
         const updateFee = () => { const fee = field('fee'); fee.readOnly = field('pricingType').value === 'FREE'; fee.min = fee.readOnly ? '0' : '1'; if (fee.readOnly) fee.value = '0'; };
         field('pricingType').addEventListener('change', updateFee);
@@ -37,9 +36,4 @@
     document.querySelectorAll('[data-session-capacity]').forEach(el => { const n = Number(el.textContent.trim()); el.textContent = n === 2147483647 ? BusanI18n.t("event.ui0155") : n.toLocaleString('ko-KR') + BusanI18n.t("admin.ui0067"); });
     const states = {SCHEDULED:BusanI18n.t("common.ui0069"),IN_PROGRESS:BusanI18n.t("common.ui0070"),COMPLETED:BusanI18n.t("company.ui0042"),CANCELLED:BusanI18n.t("company.ui0043")};
     document.querySelectorAll('[data-session-status]').forEach(el => { el.textContent = states[el.textContent.trim()] || el.textContent; });
-    const picker = document.querySelector('[data-session-picker]');
-    if (picker) {
-        const links = picker.querySelectorAll('[data-session-link]');
-        if (links.length === 1 && !new URLSearchParams(location.search).has('select') && !new URLSearchParams(location.search).has('add')) location.replace(links[0].getAttribute('href'));
-    }
 })();

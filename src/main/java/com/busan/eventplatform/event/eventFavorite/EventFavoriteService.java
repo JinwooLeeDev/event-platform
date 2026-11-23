@@ -49,7 +49,7 @@ public class EventFavoriteService {
         eventFavoriteRepository.delete(eventFavorite);
     }
 
-    // 좋아요 상태 및 개수 조회
+    // 좋아요 상태 조회
     public EventFavoriteResponse.DetailDto findDetail(Long userId, Long eventId) {
         boolean isFavorite = false; // 누르지 않은 상태로 시작 -- 로그인하지 않은 방문자는 좋아요 여부 확인할 수 X
         if (userId != null) {
@@ -57,9 +57,8 @@ public class EventFavoriteService {
         }
         eventRepository.findById(eventId)
                 .orElseThrow(() -> new Exception404("행사를 찾을 수 없습니다."));
-        Long favoriteCount = eventFavoriteRepository.countByEventId(eventId);
 
-        return new EventFavoriteResponse.DetailDto(isFavorite, favoriteCount);
+        return new EventFavoriteResponse.DetailDto(isFavorite);
     }
 
 

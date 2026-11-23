@@ -14,9 +14,8 @@
         <a class="session-panel session-choice-link" href="/event-sessions/{{id}}" data-session-link><div class="company-panel-heading"><h2>{{name}}</h2><span class="company-state" data-session-status>{{status}}</span></div><dl class="session-facts"><div><dt>{{i18n.admin.ui0065}}</dt><dd><span data-session-date>{{startsAt}}</span><br>~ <span data-session-date>{{endsAt}}</span></dd></div><div><dt>{{i18n.admin.ui0099}}</dt><dd><span data-session-date>{{applyStartAt}}</span><br>~ <span data-session-date>{{applyEndAt}}</span></dd></div></dl><div class="session-choice-metrics"><div><span>{{i18n.admin.ui0100}}</span><strong>{{capacityLabel}}</strong></div><div><span>{{i18n.event.ui0156}}</span><strong>{{occupiedCount}}{{i18n.admin.ui0067}}</strong></div><div><span>{{i18n.admin.ui0101}}</span><strong data-session-point>{{fee}}</strong></div></div><span class="session-choice-action">{{i18n.company.ui0065}} <span aria-hidden="true">↗</span></span></a>
         {{/eventSession}}
         </div>
-        {{^eventSession}}<div class="company-empty"><h2>{{i18n.admin.ui0102}}</h2><p>{{i18n.event.ui0206}}</p></div>{{/eventSession}}
-        {{> event_session/create-form}}
-        <noscript>{{i18n.event.ui0207}}</noscript>
+        {{^eventSession}}<div class="company-empty"><h2>{{i18n.admin.ui0102}}</h2><p><a href="/events">{{i18n.event.ui0183}}</a></p></div>{{/eventSession}}
+        <noscript><p class="company-description">{{i18n.common.merge031}}</p></noscript>
     </section>
 </div></main>
 {{> layout/footer}}

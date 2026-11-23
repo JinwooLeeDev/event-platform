@@ -37,8 +37,6 @@ public class EventReviewController {
             HttpSession session,
             Model model
     ) {
-
-        // 로그인 회원 ID 확인
         Long userId = null;
 
         Object value = session.getAttribute(Define.SESSION_USER);
@@ -47,7 +45,6 @@ public class EventReviewController {
             userId = sessionUserDto.getId();
         }
 
-        // 후기 목록 조회 및 좋아요 여부 확인
         List<EventReviewResponse.ListDto> reviewList =
                 eventReviewService.findAllByEventSessionId(
                         eventSessionId, sort, userId
@@ -58,6 +55,37 @@ public class EventReviewController {
         model.addAttribute("eventSessionId", eventSessionId);
         model.addAttribute("isLatest", !"like".equals(sort));
         model.addAttribute("isLike", "like".equals(sort));
+
+        // 특정 회차 후기 페이지임을 명시
+        model.addAttribute("isEventReview", false);
+
+        return "event/review-list";
+    }
+
+    @GetMapping("/event-review/event/{eventId}")
+    public String eventReviewList(
+            @PathVariable Long eventId,
+            @RequestParam Long eventSessionId,
+            HttpSession session,
+            Model model
+    ) {
+        Long userId = null;
+
+        Object value = session.getAttribute(Define.SESSION_USER);
+
+        if (value instanceof SessionUserDto sessionUserDto) {
+            userId = sessionUserDto.getId();
+        }
+
+        List<EventReviewResponse.ListDto> reviewList =
+                eventReviewService.findAllByEventSessionId(
+                        eventSessionId, "latest", userId
+                );
+
+        model.addAttribute("reviewList", reviewList);
+        model.addAttribute("eventId", eventId);
+        model.addAttribute("eventSessionId", eventSessionId);
+        model.addAttribute("isEventReview", true);
 
         return "event/review-list";
     }
@@ -150,8 +178,12 @@ public class EventReviewController {
 
     // 좋아요 등록 및 취소
     @PostMapping("/event-review/like/{id}")
-    public String toggleLike(@PathVariable Long id, HttpSession session) {
-
+    public String toggleLike(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long eventId,
+            @RequestParam(required = false) Long requestedEventSessionId,
+            HttpSession session
+    ) {
         LoginIdentity identity = LoginSession.requireIdentity(session);
 
         if (identity.isCompany()) {
@@ -160,12 +192,21 @@ public class EventReviewController {
 
         Object value = session.getAttribute(Define.SESSION_USER);
 
-        if (!(value instanceof SessionUserDto sessionUserDto) || !Objects.equals(identity.getId(), sessionUserDto.getId())) {
+        if (!(value instanceof SessionUserDto sessionUserDto)
+                || !Objects.equals(identity.getId(), sessionUserDto.getId())) {
             throw new Exception401("회원 계정으로 다시 로그인해주세요.");
         }
 
-        Long eventSessionId = eventReviewService.toggleLike(id, sessionUserDto.getId());
+        Long eventSessionId =
+                eventReviewService.toggleLike(id, sessionUserDto.getId());
 
+        // 행사 전체 후기에서 좋아요를 누른 경우
+        if (eventId != null) {
+            return "redirect:/event-review/event/" + eventId
+                    + "?eventSessionId=" + requestedEventSessionId;
+        }
+
+        // 특정 회차 후기에서 좋아요를 누른 경우
         return "redirect:/event-review/" + eventSessionId;
     }
 }

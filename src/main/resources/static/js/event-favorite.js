@@ -10,15 +10,22 @@
     const busy = (group, value) => { group.busy = value; group.buttons.forEach(button => { button.disabled = value; }); };
     function apply(group, data) {
         const favorite = data.favorite ?? data.isFavorite;
-        const count = Number(data.favoriteCount);
-        if (typeof favorite !== 'boolean' || !Number.isFinite(count) || count < 0) throw new Error(BusanI18n.t("common.ui0085"));
-        group.state = {favorite, count};
+
+        if (typeof favorite !== 'boolean') {
+            throw new Error(BusanI18n.t("common.ui0085"));
+        }
+
+        group.state = { favorite };
+
         group.buttons.forEach(button => {
             button.setAttribute('aria-pressed', String(favorite));
-            button.setAttribute('aria-label', favorite ? BusanI18n.t("common.ui0086") : BusanI18n.t("common.ui0036"));
-            button.querySelector('[data-favorite-count]').textContent = count.toLocaleString('ko-KR');
-            if (page && !favorite) button.closest('[data-favorite-item]')?.remove();
+            button.setAttribute('aria-label', favorite ? BusanI18n.t("common.merge040") : BusanI18n.t("common.merge041"));
+
+            if (page && !favorite) {
+                button.closest('[data-favorite-item]')?.remove();
+            }
         });
+
         if (page) {
             const total = page.querySelectorAll('[data-favorite-item]').length;
             page.querySelector('[data-favorite-total]').textContent = total.toLocaleString('ko-KR');

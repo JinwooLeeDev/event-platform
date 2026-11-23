@@ -116,7 +116,6 @@ public class MyPageController {
         );
 
         model.addAttribute("pointHistory", purchaseService.pointHistory(sessionUser.getId()));
-
         return "user/mypoint";
     }
 

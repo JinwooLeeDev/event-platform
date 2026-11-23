@@ -37,10 +37,10 @@
                             <div>
                                 <h3>{{i18n.company.ui0053}}</h3>
                                 <p>
-                                    {{i18n.admin.ui0144}} {{sessionCount}}{{i18n.company.ui0054}} {{paidSessionCount}}{{i18n.company.ui0055}} {{unpaidSessionCount}}{{i18n.admin.ui0098}}
+                                    {{i18n.admin.ui0144}} {{sessionCount}}{{i18n.common.merge001}} {{paidSessionCount}}{{i18n.common.merge002}} {{unpaidSessionCount}}{{i18n.admin.ui0098}}
                                 </p>
                                 <p>
-                                    {{i18n.company.ui0056}}
+                                    {{i18n.common.merge003}}
                                 </p>
                             </div>
                             <span>{{i18n.company.ui0057}} <strong>150,000 P</strong></span>
@@ -71,7 +71,7 @@
                                 <form
                                         action="/event/deposit/{{sessionId}}"
                                         method="post"
-                                        onsubmit="return confirm(BusanI18n.t('common.extra005'))"
+                                        onsubmit="return confirm('선택한 회차의 보증금을 결제하시겠습니까? 모든 회차 납부 후 행사가 공개됩니다.')"
                                 >
                                     <button type="submit" class="company-button">
                                         {{i18n.company.ui0060}}
@@ -95,7 +95,7 @@
                         </a>
                     </section>
                     {{/paidReadyEvent}}
-                    <section class="company-operation" aria-label="{{i18n.company.ui0063}}"><div><h3>{{i18n.company.ui0063}}</h3><p>{{i18n.company.ui0064}}</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">{{i18n.company.ui0065}}</a><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?add=1">{{i18n.company.ui0066}}</a></div></section>
+                    <section class="company-operation" aria-label="{{i18n.company.ui0063}}"><div><h3>{{i18n.company.ui0063}}</h3><p>{{i18n.company.ui0064}}</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">{{i18n.company.ui0065}}</a></div></section>
                     <div class="company-event-secondary"><details class="company-recruitment"><summary>{{i18n.company.ui0067}}</summary><dl>{{#sessionPeriods}}<div><dt>{{name}}</dt><dd>{{applyStartAt}} ~ {{applyEndAt}}</dd></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">{{i18n.admin.ui0102}}</p>{{/sessionPeriods}}</dl></details><details class="company-danger"><summary>{{i18n.company.ui0068}}</summary><p>{{i18n.company.ui0069}}</p><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?select=1">{{i18n.company.ui0070}}</a></details></div>
                 </article>
             {{/eventList}}{{^eventList}}<div class="company-empty"><h2>{{i18n.company.ui0071}}</h2><p>{{i18n.company.ui0072}}</p><a class="company-button company-button--secondary" href="/events/save">{{i18n.company.ui0073}}</a></div>{{/eventList}}{{/eventList}}

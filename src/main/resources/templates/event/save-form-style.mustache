@@ -423,4 +423,58 @@
             width: 100%;
         }
     }
+
+    /* 입력 오류: aria-invalid가 설정된 필드만 강조 */
+    .event-save-page .form-group input[aria-invalid="true"],
+    .event-save-page .form-group select[aria-invalid="true"],
+    .event-save-page .form-group textarea[aria-invalid="true"] {
+        border-color: #c44141;
+        background-color: #fff8f8;
+    }
+
+    .event-save-page .form-group input[aria-invalid="true"]:focus,
+    .event-save-page .form-group select[aria-invalid="true"]:focus,
+    .event-save-page .form-group textarea[aria-invalid="true"]:focus {
+        border-color: #c44141;
+        box-shadow: 0 0 0 3px rgba(196, 65, 65, 0.12);
+    }
+
+    /* 각 입력란 아래 오류 설명 */
+    .event-save-page .event-save-field-error {
+        margin: 0;
+        color: #b53333;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    /* 로그인·권한·저장 실패 등 공통 오류 */
+    .event-save-page .event-save-form-error {
+        margin: 0;
+        padding: 16px 18px;
+        border: 1px solid #ebc2c2;
+        border-radius: 10px;
+        background: #fff5f5;
+        color: #a72e2e;
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .event-save-page .event-save-form-error:focus {
+        outline: 2px solid #c44141;
+        outline-offset: 3px;
+    }
+
+    .event-save-page .event-save-field-error[hidden],
+    .event-save-page .event-save-form-error[hidden] {
+        display: none;
+    }
+
+    /* 서버 전송 중 중복 제출 방지 표시 */
+    .event-save-page .submit-button:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
 </style>

@@ -32,6 +32,12 @@
                   class="event-save-form"
                   id="event-save-form">
 
+                <p id="event-save-form-error"
+                   class="event-save-form-error"
+                   role="alert"
+                   tabindex="-1"
+                   hidden></p>
+
             <!-- 행사 기본 정보 -->
             <section class="event-save-section">
                 <h2><span class="event-section-number">01 </span>{{i18n.event.ui0090}}</h2>
@@ -120,17 +126,35 @@
                     <div id="no-session-area" hidden>
                         <h3>{{i18n.event.ui0104}}</h3>
 
-                        <div class="form-group">
-                            <label>{{i18n.event.ui0105}} <span>*</span></label>
-                            <input type="date" name="startDate"
-                                   id="startDate" disabled required>
+                        <div class="date-time-group">
+                            <div class="form-group">
+                                <label for="startDate">{{i18n.event.ui0105}} <span>*</span></label>
+                                <input type="date" name="startDate" id="startDate" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="startTime">{{i18n.event.ui0126}} <span>*</span></label>
+                                <input type="time" id="startTime" disabled required>
+                            </div>
+                        </div>
+
+                        <div class="date-time-group">
+                            <div class="form-group">
+                                <label for="endDate">{{i18n.event.ui0106}} <span>*</span></label>
+                                <input type="date" name="endDate" id="endDate" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endTime">{{i18n.event.ui0128}} <span>*</span></label>
+                                <input type="time" id="endTime" disabled required>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label>{{i18n.event.ui0106}} <span>*</span></label>
-                            <input type="date" name="endDate"
-                                   id="endDate" disabled required>
+                            <label for="capacity">{{i18n.common.merge028}} <span>*</span></label>
+                            <input type="number" name="sessions[0].capacity" id="capacity"
+                                   min="1" max="2147483647" step="1" placeholder="{{i18n.common.merge029}}" disabled required>
                         </div>
+                        <input type="hidden" name="sessions[0].startsAt" id="noSessionStartsAt" disabled>
+                        <input type="hidden" name="sessions[0].endsAt" id="noSessionEndsAt" disabled>
 
                         <div class="date-time-group">
                             <div class="form-group">
@@ -375,6 +399,189 @@
 
     const form = document.getElementById("event-save-form");
 
+    let fieldErrorSequence = 0;
+
+    // 특정 입력란에 오류 표시
+    function showFieldError(input, message) {
+        if (!input) return;
+
+        let errorId = input.dataset.fieldErrorId;
+
+        if (!errorId) {
+            errorId = `event-save-field-error-${++fieldErrorSequence}`;
+            input.dataset.fieldErrorId = errorId;
+        }
+
+        let errorElement = document.getElementById(errorId);
+
+        if (!errorElement) {
+            errorElement = document.createElement("p");
+            errorElement.id = errorId;
+            errorElement.className = "event-save-field-error";
+
+            // 주소 검색 버튼이나 날짜 입력 레이아웃을 유지
+            const group = input.closest(".form-group");
+
+            if (group) {
+                group.appendChild(errorElement);
+            } else {
+                input.insertAdjacentElement("afterend", errorElement);
+            }
+        }
+
+        errorElement.textContent = message;
+        errorElement.hidden = false;
+        input.setAttribute("aria-invalid", "true");
+
+        // 기존 도움말 연결은 유지하면서 오류 설명 추가
+        const describedBy = new Set(
+            (input.getAttribute("aria-describedby") || "")
+                .split(/\s+/)
+                .filter(Boolean)
+        );
+
+        describedBy.add(errorId);
+        input.setAttribute("aria-describedby", [...describedBy].join(" "));
+    }
+
+    // 특정 입력란의 오류 해제
+    function clearFieldError(input) {
+        if (!input) return;
+
+        input.removeAttribute("aria-invalid");
+
+        const errorId = input.dataset.fieldErrorId;
+        if (!errorId) return;
+
+        const errorElement = document.getElementById(errorId);
+
+        if (errorElement) {
+            errorElement.textContent = "";
+            errorElement.hidden = true;
+        }
+
+        const describedBy = (input.getAttribute("aria-describedby") || "")
+            .split(/\s+/)
+            .filter(id => id && id !== errorId);
+
+        if (describedBy.length > 0) {
+            input.setAttribute("aria-describedby", describedBy.join(" "));
+        } else {
+            input.removeAttribute("aria-describedby");
+        }
+    }
+
+    // 폼 상단 공통 오류
+    function showFormError(message) {
+        const errorElement =
+            document.getElementById("event-save-form-error");
+
+        errorElement.textContent = message;
+        errorElement.hidden = false;
+
+        // 서버 오류는 특정 입력란에 속하지 않으므로 상단 안내로 이동한다.
+        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        errorElement.focus({ preventScroll: true });
+    }
+
+    // 제출 재시도 전 모든 오류 초기화
+    function clearErrors() {
+        form.querySelectorAll('[aria-invalid="true"]')
+            .forEach(clearFieldError);
+
+        const errorElement =
+            document.getElementById("event-save-form-error");
+
+        errorElement.textContent = "";
+        errorElement.hidden = true;
+    }
+
+    // 첫 번째 오류 입력란으로 이동
+    function focusFirstError() {
+        const input = form.querySelector(
+            '[aria-invalid="true"]:not([type="hidden"]):not(:disabled)'
+        );
+
+        if (input) {
+            input.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+            input.focus({ preventScroll: true });
+        }
+    }
+
+    // 날짜·시간처럼 연관된 입력란 여러 개에 같은 오류 표시
+    function showInputErrors(message, ...inputs) {
+        inputs.forEach(input => showFieldError(input, message));
+        focusFirstError();
+    }
+
+    // required, min, max 등 브라우저 기본 검증 오류도 같은 디자인으로 표시
+    form.addEventListener("invalid", function (event) {
+        let input = event.target;
+
+        if (!input.matches("input, select, textarea")) return;
+
+        event.preventDefault();
+
+        // 라디오 그룹은 첫 번째 입력란에 오류를 모아 표시
+        if (input.type === "radio") {
+            const name = input.name;
+
+            input = [...form.querySelectorAll('input[type="radio"]')]
+                .find(radio => radio.name === name && !radio.disabled) || input;
+        }
+
+        const label = input.closest(".form-group")
+            ?.querySelector("label")
+            ?.textContent.replace(/\*/g, "").trim() || BusanI18n.t("common.merge011");
+
+        let message = input.validationMessage || BusanI18n.t("common.merge012");
+
+        if (input.validity.valueMissing) {
+            message = BusanI18n.t("common.merge013", [label]);
+        } else if (input.validity.rangeUnderflow) {
+            message = BusanI18n.t("common.merge014", [input.min]);
+        } else if (input.validity.rangeOverflow) {
+            message = BusanI18n.t("common.merge015", [input.max]);
+        } else if (input.validity.badInput) {
+            message = BusanI18n.t("common.merge016");
+        } else if (input.validity.stepMismatch) {
+            message = BusanI18n.t("common.merge017");
+        }
+
+        showFieldError(input, message);
+
+        // 여러 필수 항목에 오류가 발생해도 첫 항목만 포커스
+        const firstInvalid = form.querySelector('[aria-invalid="true"]');
+
+        if (firstInvalid === input) {
+            input.focus();
+        }
+    }, true);
+
+    // 수정 중에는 해당 필드의 기존 오류 표시 해제
+    // 이벤트 위임이므로 나중에 추가한 회차 입력란에도 적용됨
+    function clearEditedFieldError(event) {
+        const input = event.target;
+
+        if (!input.matches("input, select, textarea")) return;
+
+        if (input.type === "radio") {
+            form.querySelectorAll('input[type="radio"]').forEach(radio => {
+                if (radio.name === input.name) {
+                    clearFieldError(radio);
+                }
+            });
+        } else {
+            clearFieldError(input);
+        }
+    }
+
+    form.addEventListener("input", clearEditedFieldError);
+    form.addEventListener("change", clearEditedFieldError);
+
     const sessionArea = document.getElementById("session-area");
     const noSessionArea = document.getElementById("no-session-area");
 
@@ -385,6 +592,11 @@
 
     const startDate = document.getElementById("startDate");
     const endDate = document.getElementById("endDate");
+    const startTime = document.getElementById("startTime");
+    const endTime = document.getElementById("endTime");
+    const capacity = document.getElementById("capacity");
+    const noSessionStartsAt = document.getElementById("noSessionStartsAt");
+    const noSessionEndsAt = document.getElementById("noSessionEndsAt");
 
     const applyStartDate = document.getElementById("applyStartDate");
     const applyStartTime = document.getElementById("applyStartTime");
@@ -438,6 +650,9 @@
         const inputs = [
             startDate,
             endDate,
+            startTime,
+            endTime,
+            capacity,
             applyStartDate,
             applyStartTime,
             applyEndDate,
@@ -452,6 +667,8 @@
 
         applyStartAt.disabled = !enabled;
         applyEndAt.disabled = !enabled;
+        noSessionStartsAt.disabled = !enabled;
+        noSessionEndsAt.disabled = !enabled;
 
         updateNoSessionFee();
     }
@@ -589,49 +806,93 @@
         });
     }
 
-    // 날짜 검증 공통 함수
-    function validatePastDate(date, label) {
+    // 과거 날짜를 검사하고, 문제가 있는 실제 날짜 입력란에 오류를 표시한다.
+    // 서버 전달용 hidden 입력란이 아니라 화면에 보이는 input을 전달해야 한다.
+    function validatePastDate(date, label, input) {
         if (isPastDate(date)) {
-            alert(BusanI18n.t("event.ui0135", [label]));
+            showInputErrors(
+                BusanI18n.t("event.ui0135", [label]),
+                input
+            );
             return false;
         }
 
         return true;
     }
 
-    // 폼 제출
-    form.addEventListener("submit", function (event) {
+    // 전송 중 더블클릭과 성공 직후 화면 이동 전 재제출을 막는다.
+    let eventSaveSubmitting = false;
+    let eventSaveCompleted = false;
+    const eventSaveSubmitButton = form.querySelector('button[type="submit"]');
+    const eventSaveSubmitLabel = eventSaveSubmitButton.textContent;
+
+    // 뒤로 가기로 이 화면이 복원됐을 때도 제출 버튼을 다시 사용할 수 있게 한다.
+    window.addEventListener("pageshow", function () {
+        eventSaveSubmitting = false;
+        eventSaveCompleted = false;
+        eventSaveSubmitButton.disabled = false;
+        eventSaveSubmitButton.textContent = eventSaveSubmitLabel;
+    });
+
+    // 폼 제출 전 검증: 실패하면 전송을 막고 현재 입력값과 파일 선택을 유지한다.
+    // required/min 등의 기본 검증은 위 invalid 이벤트가, 날짜 관계는 여기서 처리한다.
+    form.addEventListener("submit", async function (event) {
+        // 앞의 주소 전용 검사에서 alert를 띄워 전송을 막았다면 여기서는 중단한다.
+        if (event.defaultPrevented) return;
+
+        // 기본 페이지 이동을 항상 막고, 검증에 성공한 경우에만 Fetch로 전송한다.
+        event.preventDefault();
+        if (eventSaveSubmitting || eventSaveCompleted) return;
+
+        // 재시도할 때 이전 날짜 오류와 공통 오류를 지우고 새로 검사한다.
+        clearErrors();
+
         const selectedType =
                 document.querySelector('input[name="hasSessions"]:checked');
 
         if (!selectedType) {
             event.preventDefault();
-            alert(BusanI18n.t("event.ui0136"));
+            showInputErrors(
+                BusanI18n.t("common.merge018"),
+                form.querySelector('input[name="hasSessions"]')
+            );
             return;
         }
 
         // 회차가 없는 행사
         if (selectedType.value === "false") {
 
-            // 과거 날짜 검사
+            // 값뿐 아니라 입력 요소도 보관해야 오류를 해당 입력란에 연결할 수 있다.
             const dateFields = [
-                { value: startDate.value, label: BusanI18n.t("event.ui0105") },
-                { value: endDate.value, label: BusanI18n.t("event.ui0106") },
-                { value: applyStartDate.value, label: BusanI18n.t("event.ui0107") },
-                { value: applyEndDate.value, label: BusanI18n.t("event.ui0109") }
+                { input: startDate, label: BusanI18n.t("event.ui0105") },
+                { input: endDate, label: BusanI18n.t("event.ui0106") },
+                { input: applyStartDate, label: BusanI18n.t("event.ui0107") },
+                { input: applyEndDate, label: BusanI18n.t("event.ui0109") }
             ];
 
             for (const field of dateFields) {
-                if (!validatePastDate(field.value, field.label)) {
+                if (!validatePastDate(
+                        field.input.value,
+                        field.label,
+                        field.input
+                )) {
                     event.preventDefault();
                     return;
                 }
             }
 
-            // 행사 시작일과 종료일 비교
-            if (startDate.value > endDate.value) {
+            // 분리된 날짜·시간을 서버가 받는 LocalDateTime 형식으로 합친다.
+            noSessionStartsAt.value = combineDateTime(startDate.value, startTime.value);
+            noSessionEndsAt.value = combineDateTime(endDate.value, endTime.value);
+
+            // 같은 날짜에도 종료 시간이 시작 시간보다 빠를 수 없음
+            if (noSessionStartsAt.value > noSessionEndsAt.value) {
                 event.preventDefault();
-                alert(BusanI18n.t("event.ui0137"));
+                showInputErrors(
+                    BusanI18n.t("common.merge019"),
+                    endDate,
+                    endTime
+                );
                 return;
             }
 
@@ -645,7 +906,11 @@
             // 모집 시작일시와 마감일시 비교
             if (applyStartAt.value > applyEndAt.value) {
                 event.preventDefault();
-                alert(BusanI18n.t("event.ui0138"));
+                showInputErrors(
+                    BusanI18n.t("event.ui0138"),
+                    applyEndDate,
+                    applyEndTime
+                );
                 return;
             }
 
@@ -653,7 +918,10 @@
             // 같은 날짜 허용 x
             if (applyEndDate.value >= startDate.value) {
                 event.preventDefault();
-                alert(BusanI18n.t("event.ui0139"));
+                showInputErrors(
+                    BusanI18n.t("event.ui0139"),
+                    applyEndDate
+                );
                 return;
             }
         }
@@ -663,9 +931,12 @@
             const sessionItems =
                     sessionList.querySelectorAll(".session-item");
 
-            if (sessionItems.length === 0) {
+            // 서버 EventRequest.SaveDto와 동일하게 다회차는 최소 2개를 요구한다.
+            // 필드 하나의 문제가 아니므로 폼 상단에 안내하고 추가 버튼으로 이동한다.
+            if (sessionItems.length < 2) {
                 event.preventDefault();
-                alert(BusanI18n.t("event.ui0140"));
+                showFormError(BusanI18n.t("common.merge020"));
+                addSessionButton.focus();
                 return;
             }
 
@@ -683,9 +954,11 @@
 
                 // 날짜와 시간 합치기
                 for (const field of fields) {
-                    const date = item.querySelector(
+                    // 오류는 화면의 날짜 input에 표시하고, 합친 값은 hidden에 저장한다.
+                    const dateInput = item.querySelector(
                             `[data-date-field="${field}"]`
-                    ).value;
+                    );
+                    const date = dateInput.value;
 
                     const time = item.querySelector(
                             `[data-time-field="${field}"]`
@@ -699,7 +972,7 @@
                         applyEndAt: BusanI18n.t("event.ui0109")
                     };
 
-                    if (!validatePastDate(date, BusanI18n.t("event.ui0141", [index + 1, labels[field]]))) {
+                    if (!validatePastDate(date, BusanI18n.t("event.ui0141", [index + 1, labels[field]]), dateInput)) {
                         event.preventDefault();
                         return;
                     }
@@ -721,14 +994,23 @@
                 // 행사 종료일시는 시작일시보다 빠를 수 없음
                 if (values.startsAt > values.endsAt) {
                     event.preventDefault();
-                    alert(BusanI18n.t("event.ui0142", [index + 1]));
+                    // 현재 회차의 종료 날짜·시간만 강조한다. 다른 회차는 건드리지 않는다.
+                    showInputErrors(
+                        BusanI18n.t("event.ui0142", [index + 1]),
+                        item.querySelector('[data-date-field="endsAt"]'),
+                        item.querySelector('[data-time-field="endsAt"]')
+                    );
                     return;
                 }
 
                 // 모집 마감일시는 모집 시작일시보다 빠를 수 없음
                 if (values.applyStartAt > values.applyEndAt) {
                     event.preventDefault();
-                    alert(BusanI18n.t("event.ui0143", [index + 1]));
+                    showInputErrors(
+                        BusanI18n.t("event.ui0143", [index + 1]),
+                        item.querySelector('[data-date-field="applyEndAt"]'),
+                        item.querySelector('[data-time-field="applyEndAt"]')
+                    );
                     return;
                 }
 
@@ -738,9 +1020,71 @@
 
                 if (applyEndDateValue >= eventStartDateValue) {
                     event.preventDefault();
-                    alert(BusanI18n.t("event.ui0144", [index + 1]));
+                    showInputErrors(
+                        BusanI18n.t("event.ui0144", [index + 1]),
+                        item.querySelector('[data-date-field="applyEndAt"]')
+                    );
                     return;
                 }
+            }
+        }
+
+        // 입력란을 비활성화하면 FormData에서 빠지므로 제출 버튼만 잠근다.
+        eventSaveSubmitting = true;
+        eventSaveSubmitButton.disabled = true;
+        eventSaveSubmitButton.textContent = BusanI18n.t("common.merge021");
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                credentials: "same-origin",
+                // 이 헤더가 EventSaveApiController를 선택한다.
+                headers: {
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                // multipart 경계값은 브라우저가 설정하므로 Content-Type은 지정하지 않는다.
+                body: new FormData(form),
+                redirect: "error"
+            });
+
+            const contentType = response.headers.get("Content-Type") || "";
+            const result = contentType.includes("application/json")
+                ? await response.json()
+                : null;
+
+            if (!response.ok) {
+                // JSON이 아닌 오류 응답(업로드 제한 등)도 현재 화면에서 안내한다.
+                let message = BusanI18n.t("common.merge022");
+                if (response.status === 401) {
+                    message = BusanI18n.t("common.merge023");
+                } else if (response.status === 403) {
+                    message = BusanI18n.t("common.merge024");
+                } else if (response.status === 413) {
+                    message = BusanI18n.t("common.merge025");
+                }
+
+                showFormError(typeof result?.message === "string" ? result.message : message);
+                return;
+            }
+
+            // HTML 응답 등을 등록 성공으로 오인하지 않고 서버의 성공 계약을 확인한다.
+            if (result?.redirectUrl !== "/events") {
+                showFormError(BusanI18n.t("common.merge026"));
+                return;
+            }
+
+            eventSaveCompleted = true;
+            window.location.assign(result.redirectUrl);
+        } catch (error) {
+            // 통신 실패는 서버 저장 여부를 확정할 수 없으므로 자동 재시도하지 않는다.
+            showFormError(BusanI18n.t("common.merge027"));
+        } finally {
+            // 실패해도 reset()이나 화면 재생성을 하지 않아 입력값·선택 파일을 유지한다.
+            if (!eventSaveCompleted) {
+                eventSaveSubmitting = false;
+                eventSaveSubmitButton.disabled = false;
+                eventSaveSubmitButton.textContent = eventSaveSubmitLabel;
             }
         }
     });

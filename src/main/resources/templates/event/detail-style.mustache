@@ -1,240 +1,1006 @@
+
 <style>
-body:has(.event-detail-page) { margin: 0; }
-.event-detail-page { --detail-blue: #174bc1; --detail-ink: #142d4e; --detail-muted: #627084; background: #f6f8fb; color: var(--detail-ink); padding: 28px 32px 64px; font: 14px/1.75 Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif; }
-.event-detail-page *, .event-detail-page *::before, .event-detail-page *::after { box-sizing: border-box; }
-.event-detail-page [hidden] { display: none !important; }
-.event-detail-wrap { max-width: 1240px; margin: auto; }
-.event-detail-page a:focus-visible, .event-detail-page button:focus-visible, .event-detail-page select:focus-visible, .event-detail-page summary:focus-visible { outline: 3px solid #174bc1; outline-offset: 4px; }
-.detail-breadcrumb { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; color: #627084; font-size: 12px; }
-.detail-breadcrumb a { color: inherit; text-decoration: none; }
-.detail-heading { padding: 30px 36px; border: 1px solid #dce4ee; border-radius: 18px; background: #fff; }
-.detail-category { display: inline-block; border-radius: 6px; background: #edf3ff; padding: 4px 10px; color: #174bc1; font-size: 12px; font-weight: 700; }
-.detail-heading h1 { max-width: 920px; margin: 12px 0; font-size: clamp(27px, 3vw, 38px); line-height: 1.4; letter-spacing: -1.2px; overflow-wrap: anywhere; }
-.detail-summary { margin: 0; max-width: 850px; color: #627084; font-size: 16px; overflow-wrap: anywhere; }
-.detail-at-a-glance { display: flex; flex-wrap: wrap; gap: 22px 40px; align-items: center; border-top: 1px solid #e9edf3; margin-top: 24px; padding-top: 20px; }
-.detail-at-a-glance > div { display: flex; flex-direction: column; flex: 1 1 200px; gap: 4px; min-width: 0; }
-.detail-at-a-glance > div > span, .session-label { color: #627084; font-size: 12px; }
-.detail-at-a-glance strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
-.detail-at-a-glance a { display: inline-flex; align-items: center; gap: 20px; color: #174bc1; font-weight: 700; text-decoration: none; }
-.detail-section-nav { display: flex; gap: 28px; padding: 18px 4px; margin: 8px 0; }
-.detail-section-nav a { display: block; padding: 4px 0; color: #4e5d74; font-weight: 700; text-decoration: none; }
-.detail-section-nav a:hover { color: #174bc1; text-decoration: underline; text-underline-offset: 7px; }
-.detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 28px; align-items: start; }
-.detail-content { min-width: 0; display: grid; gap: 24px; }
-.detail-section { padding: 28px; border: 1px solid #dce4ee; border-radius: 16px; background: #fff; scroll-margin-top: 20px; min-width: 0; }
-.detail-section h2 { margin: 0 0 12px; font-size: 23px; line-height: 1.45; letter-spacing: -.6px; }
-.detail-section-heading { margin-bottom: 22px; }
-.detail-section-heading h2 { margin-bottom: 6px; }
-.detail-muted { color: #627084; font-size: 13px; margin: 6px 0 0; }
-.session-list { display: grid; gap: 16px; }
-.session-card { padding: 22px; border: 1px solid #cfd9e5; border-radius: 12px; background: #fff; }
-.session-card.is-selected { border: 2px solid #174bc1; padding: 21px; background: #f6f9ff; box-shadow: 0 0 0 3px #174bc10a; }
-.session-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
-.session-card h3 { margin: 0; font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }
-.session-status { flex-shrink: 0; padding: 3px 9px; border-radius: 5px; color: #5b6677; background: #edf0f4; font-size: 12px; font-weight: 700; }
-.session-status--open { background: #e7f3ee; color: #236548; }
-.session-schedule { display: flex; gap: 12px; align-items: flex-start; margin-top: 18px; }
-.session-schedule__icon { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 42px; flex-shrink: 0; border-radius: 8px; background: #edf3fb; color: #315d9a; font-size: 25px; }
-.session-schedule > div { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
-.session-schedule .session-label { display: block; font-weight: 400; }
-.session-date-end { display: inline-block; }
-.session-metrics { display: grid; grid-template-columns: 1fr 1fr; margin: 18px 0 12px; padding: 14px 0; border-top: 1px solid #e5ebf2; border-bottom: 1px solid #e5ebf2; }
-.session-metrics > div + div { border-left: 1px solid #e5ebf2; padding-left: 22px; }
-.session-metrics dt { color: #627084; font-size: 12px; }
-.session-metrics dd { margin: 3px 0 0; font-size: 16px; font-weight: 600; }
-.session-metrics strong { font-size: 20px; }
-.session-metrics dd > span { font-size: 13px; }
-.session-more { margin-bottom: 16px; color: #56667d; font-size: 12px; }
-.session-more summary, .booking-guide summary { cursor: pointer; padding: 5px 0; min-height: 32px; }
-.session-more dl { margin: 6px 0; padding: 12px; background: #f1f5fa; border-radius: 6px; }
-.session-more dl > div { display: flex; gap: 12px; }
-.session-more dd { margin: 0; overflow-wrap: anywhere; }
-.session-closed { color: #765025; background: #faf4e9; padding: 10px 12px; border-radius: 6px; font-size: 12px; overflow-wrap: anywhere; }
-.session-select { width: 100%; padding: 11px 16px; min-height: 44px; border: 1px solid #bdcce3; border-radius: 8px; background: #fff; color: #174bc1; font: inherit; font-weight: 700; cursor: pointer; }
-.session-select:hover:not(:disabled) { background: #edf3ff; border-color: #174bc1; }
-.session-select[aria-pressed="true"] { color: #fff; background: #174bc1; border-color: #174bc1; }
-.session-select:disabled { border-color: #e0e5ec; background: #f2f4f7; color: #737e8d; cursor: not-allowed; }
-.detail-overview { position: sticky; top: 20px; max-height: calc(100dvh - 40px); overflow-y: auto; padding: 24px; border: 1px solid #cbd8eb; border-radius: 16px; background: #fff; box-shadow: 0 6px 24px #142d4e08; scroll-margin-top: 20px; }
-.booking-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-.booking-icon { display: flex; width: 42px; height: 42px; justify-content: center; align-items: center; background: #edf3ff; color: #174bc1; border-radius: 10px; font-size: 26px; }
-.booking-heading h2 { margin: 0; font-size: 21px; }
-.booking-heading p { margin: 0; font-size: 12px; color: #627084; }
-.detail-session-picker label { display: block; margin-bottom: 8px; font-weight: 700; }
-.detail-session-picker select { width: 100%; min-height: 48px; padding: 10px; border: 1px solid #b7c8e0; border-radius: 8px; background: #fff; color: #142d4e; font: inherit; text-overflow: ellipsis; }
-.detail-session-picker .detail-muted { font-size: 12px; }
-.booking-selection { margin-top: 20px; padding: 16px; border-radius: 10px; background: #f1f6fd; }
-.booking-selection p { margin: 0; }
-.booking-selection h3 { margin: 4px 0; font-size: 16px; overflow-wrap: anywhere; }
-#booking-session-date { font-size: 12px; color: #526780; overflow-wrap: anywhere; }
-.booking-price { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid #dae4f1; padding-top: 12px; margin-top: 12px; }
-.booking-price > span { font-size: 12px; }
-.booking-price strong { font-size: 22px; }
-.detail-facts { margin: 20px 0; }
-.detail-facts > div { display: grid; grid-template-columns: 66px minmax(0,1fr); gap: 10px; padding: 7px 0; font-size: 12px; }
-.detail-facts dt { color: #627084; }
-.detail-facts dd { margin: 0; overflow-wrap: anywhere; }
-.detail-state { padding: 10px 12px; border-radius: 8px; background: #edf3ff; color: #345e94; font-size: 12px; }
-.detail-button { width: 100%; min-height: 50px; padding: 12px; border: 0; border-radius: 9px; background: #174bc1; color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
-.detail-button:hover:not(:disabled) { background: #123b99; }
-.detail-button:disabled { background: #e8edf4; color: #67768b; cursor: not-allowed; }
-.booking-note { margin: 12px 0 18px; color: #627084; font-size: 12px; line-height: 1.8; text-align: center; }
-.booking-guide { border-top: 1px solid #e5ebf2; padding-top: 12px; color: #53647c; font-size: 12px; }
-.booking-guide p { margin: 8px 0; line-height: 1.9; }
-.detail-back { display: flex; justify-content: space-between; gap: 12px; padding-top: 18px; margin-top: 12px; border-top: 1px solid #e5ebf2; color: #174bc1; text-decoration: none; font-weight: 600; font-size: 13px; }
-.detail-description { white-space: pre-wrap; overflow-wrap: anywhere; color: #42536a; font-size: 15px; line-height: 2; }
-.detail-address { display: flex; gap: 12px; align-items: center; margin: 14px 0 18px; }
-.detail-address > span { color: #174bc1; font-size: 30px; }
-.detail-address p { margin: 0; overflow-wrap: anywhere; }
-.detail-map { width: 100%; height: 300px; border-radius: 10px; overflow: hidden; }
-.detail-map-placeholder { padding: 30px 20px; border: 1px solid #e0e7ef; border-radius: 10px; background: #f3f6fa; color: #627084; text-align: center; }
-.detail-empty { border: 1px dashed #cbd8eb; background: #f5f8fd; padding: 30px 20px; border-radius: 10px; text-align: center; }
-.detail-empty h3 { margin: 0; font-size: 18px; }
-.detail-empty p { margin: 8px 0 0; color: #627084; }
-body:has(.event-detail-page) .header-container, body:has(.event-detail-page) .footer-container { box-sizing: border-box; max-width: 1304px; padding-left: 32px; padding-right: 32px; }
-body:has(.event-detail-page) .footer-container { flex-wrap: wrap; }
-body:has(.event-detail-page) .footer-divider { display: none; }
-body:has(.event-detail-page) .footer-info-section { flex: 2 1 260px; }
-body:has(.event-detail-page) .footer-contact-section { flex: 1 1 160px; }
-body:has(.event-detail-page) .footer-policy-section { flex: 1 1 100%; align-items: flex-start; }
-body:has(.event-detail-page) .copyright-warning { text-align: left; }
-@media (max-width: 950px) {
- .detail-layout { grid-template-columns: 1fr; }
- .detail-content { display: contents; }
- .detail-sessions { order: 0; }
- .detail-overview { order: 1; position: static; max-height: none; overflow: visible; }
- #description { order: 2; }
- #location { order: 3; }
- .session-list { grid-template-columns: repeat(2,minmax(0,1fr)); }
-}
-@media (max-width: 600px) {
- .event-detail-page { padding: 20px 16px 40px; }
- .detail-heading { padding: 24px 20px; }
- .detail-heading h1 { font-size: 27px; }
- .detail-summary { font-size: 14px; }
- .detail-at-a-glance { gap: 16px; }
- .detail-at-a-glance > div { flex-basis: 100%; }
- .detail-section-nav { gap: 24px; font-size: 13px; }
- .detail-section, .detail-overview { padding: 22px 18px; }
- .detail-section h2 { font-size: 21px; }
- .session-list { grid-template-columns: 1fr; }
- .session-card { padding: 18px; }
- .session-card.is-selected { padding: 17px; }
- .detail-layout { gap: 20px; }
- body:has(.event-detail-page) .header-container, body:has(.event-detail-page) .footer-container { padding-left: 16px; padding-right: 16px; }
- body:has(.event-detail-page) .header-left > .vertical-divider { display: none; }
- body:has(.event-detail-page) .header-right { margin-left: auto; max-width: 100%; }
- body:has(.event-detail-page) .company-details { flex-wrap: wrap; }
-}
-
-/* 리뷰 영역 */
-.review-section {
-    margin-top: 32px;
-}
-
-.review-write {
-    padding: 24px;
-    margin: 20px 0;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-}
-
-.review-write h3 {
-    margin-bottom: 16px;
-}
-
-.review-write form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.review-write select,
-.review-write textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font: inherit;
-}
-
-.review-write textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.review-write button,
-.review-item button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.review-write button {
-    background: #2563eb;
-    color: white;
-}
-
-.review-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.review-item {
-    padding: 20px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-}
-
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.review-header span {
-    color: #e99b22;
-    font-weight: 700;
-}
-
-.review-item p {
-    line-height: 1.7;
-    white-space: pre-wrap;
-}
-
-.review-item small {
-    display: block;
-    margin-top: 12px;
-    color: #888;
-}
-
-.review-item button {
-    margin-top: 10px;
-    background: #fee2e2;
-    color: #b91c1c;
-}
-.detail-main-image {
-    width: 100%;
-    height: 380px;
-    margin: 24px 0;
-    overflow: hidden;
-    border-radius: 18px;
-    background: #f1f3f5;
-}
-
-.detail-main-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-@media (max-width: 600px) {
-    .detail-main-image {
-        height: 230px;
+    body:has(.event-detail-page) {
+        margin: 0;
     }
-}
 
+    .event-detail-page {
+        --detail-blue: #174bc1;
+        --detail-ink: #142d4e;
+        --detail-muted: #627084;
+        background: #f6f8fb;
+        color: var(--detail-ink);
+        padding: 28px 32px 64px;
+        font: 14px/1.75 Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+
+    .event-detail-page *,
+    .event-detail-page *::before,
+    .event-detail-page *::after {
+        box-sizing: border-box;
+    }
+
+    .event-detail-page [hidden] {
+        display: none !important;
+    }
+
+    .event-detail-wrap {
+        max-width: 1240px;
+        margin: auto;
+    }
+
+    .event-detail-page a:focus-visible,
+    .event-detail-page button:focus-visible,
+    .event-detail-page select:focus-visible,
+    .event-detail-page summary:focus-visible {
+        outline: 3px solid #174bc1;
+        outline-offset: 4px;
+    }
+
+    /* 상단 기본 정보 */
+    .detail-breadcrumb {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 24px;
+        color: #627084;
+        font-size: 12px;
+    }
+
+    .detail-breadcrumb a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .detail-heading {
+        padding: 30px 36px;
+        border: 1px solid #dce4ee;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .detail-category {
+        display: inline-block;
+        border-radius: 6px;
+        background: #edf3ff;
+        padding: 4px 10px;
+        color: #174bc1;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .detail-heading h1 {
+        max-width: 920px;
+        margin: 12px 0;
+        font-size: clamp(27px, 3vw, 38px);
+        line-height: 1.4;
+        letter-spacing: -1.2px;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-summary {
+        margin: 0;
+        max-width: 850px;
+        color: #627084;
+        font-size: 16px;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-at-a-glance {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px 40px;
+        align-items: center;
+        border-top: 1px solid #e9edf3;
+        margin-top: 24px;
+        padding-top: 20px;
+    }
+
+    .detail-at-a-glance > div {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 200px;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .detail-at-a-glance > div > span,
+    .session-label {
+        color: #627084;
+        font-size: 12px;
+    }
+
+    .detail-at-a-glance strong {
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-at-a-glance a {
+        display: inline-flex;
+        align-items: center;
+        gap: 20px;
+        color: #174bc1;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    /* 상세 페이지 메뉴 */
+    .detail-section-nav {
+        display: flex;
+        gap: 28px;
+        padding: 18px 4px;
+        margin: 8px 0;
+    }
+
+    .detail-section-nav a {
+        display: block;
+        padding: 4px 0;
+        color: #4e5d74;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .detail-section-nav a:hover {
+        color: #174bc1;
+        text-decoration: underline;
+        text-underline-offset: 7px;
+    }
+
+    /* 상세 페이지 레이아웃 */
+    .detail-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 350px;
+        gap: 28px;
+        align-items: start;
+    }
+
+    .detail-content {
+        min-width: 0;
+        display: grid;
+        gap: 24px;
+    }
+
+    .detail-section {
+        padding: 28px;
+        border: 1px solid #dce4ee;
+        border-radius: 16px;
+        background: #fff;
+        scroll-margin-top: 20px;
+        min-width: 0;
+    }
+
+    .detail-section h2 {
+        margin: 0 0 12px;
+        font-size: 23px;
+        line-height: 1.45;
+        letter-spacing: -.6px;
+    }
+
+    .detail-section-heading {
+        margin-bottom: 22px;
+    }
+
+    .detail-section-heading h2 {
+        margin-bottom: 6px;
+    }
+
+    .detail-muted {
+        color: #627084;
+        font-size: 13px;
+        margin: 6px 0 0;
+    }
+
+    /* 행사 회차 */
+    .session-list {
+        display: grid;
+        gap: 16px;
+    }
+
+    .session-card {
+        padding: 22px;
+        border: 1px solid #cfd9e5;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .session-card.is-selected {
+        border: 2px solid #174bc1;
+        padding: 21px;
+        background: #f6f9ff;
+        box-shadow: 0 0 0 3px #174bc10a;
+    }
+
+    .session-card__heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .session-card h3 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .session-status {
+        flex-shrink: 0;
+        padding: 3px 9px;
+        border-radius: 5px;
+        color: #5b6677;
+        background: #edf0f4;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .session-status--open {
+        background: #e7f3ee;
+        color: #236548;
+    }
+
+    .session-schedule {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-top: 18px;
+    }
+
+    .session-schedule__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        background: #edf3fb;
+        color: #315d9a;
+        font-size: 25px;
+    }
+
+    .session-schedule > div {
+        min-width: 0;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .session-schedule .session-label {
+        display: block;
+        font-weight: 400;
+    }
+
+    .session-date-end {
+        display: inline-block;
+    }
+
+    .session-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 18px 0 12px;
+        padding: 14px 0;
+        border-top: 1px solid #e5ebf2;
+        border-bottom: 1px solid #e5ebf2;
+    }
+
+    .session-metrics > div + div {
+        border-left: 1px solid #e5ebf2;
+        padding-left: 22px;
+    }
+
+    .session-metrics dt {
+        color: #627084;
+        font-size: 12px;
+    }
+
+    .session-metrics dd {
+        margin: 3px 0 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .session-metrics strong {
+        font-size: 20px;
+    }
+
+    .session-metrics dd > span {
+        font-size: 13px;
+    }
+
+    .session-more {
+        margin-bottom: 16px;
+        color: #56667d;
+        font-size: 12px;
+    }
+
+    .session-more summary,
+    .booking-guide summary {
+        cursor: pointer;
+        padding: 5px 0;
+        min-height: 32px;
+    }
+
+    .session-more dl {
+        margin: 6px 0;
+        padding: 12px;
+        background: #f1f5fa;
+        border-radius: 6px;
+    }
+
+    .session-more dl > div {
+        display: flex;
+        gap: 12px;
+    }
+
+    .session-more dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .session-closed {
+        color: #765025;
+        background: #faf4e9;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .session-select {
+        width: 100%;
+        padding: 11px 16px;
+        min-height: 44px;
+        border: 1px solid #bdcce3;
+        border-radius: 8px;
+        background: #fff;
+        color: #174bc1;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .session-select:hover:not(:disabled) {
+        background: #edf3ff;
+        border-color: #174bc1;
+    }
+
+    .session-select[aria-pressed="true"] {
+        color: #fff;
+        background: #174bc1;
+        border-color: #174bc1;
+    }
+
+    .session-select:disabled {
+        border-color: #e0e5ec;
+        background: #f2f4f7;
+        color: #737e8d;
+        cursor: not-allowed;
+    }
+
+    /* 신청 영역 */
+    .detail-overview {
+        position: sticky;
+        top: 20px;
+        max-height: calc(100dvh - 40px);
+        overflow-y: auto;
+        padding: 24px;
+        border: 1px solid #cbd8eb;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 6px 24px #142d4e08;
+        scroll-margin-top: 20px;
+    }
+
+    .booking-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .booking-icon {
+        display: flex;
+        width: 42px;
+        height: 42px;
+        justify-content: center;
+        align-items: center;
+        background: #edf3ff;
+        color: #174bc1;
+        border-radius: 10px;
+        font-size: 26px;
+    }
+
+    .booking-heading h2 {
+        margin: 0;
+        font-size: 21px;
+    }
+
+    .booking-heading p {
+        margin: 0;
+        font-size: 12px;
+        color: #627084;
+    }
+
+    .detail-session-picker label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .detail-session-picker select {
+        width: 100%;
+        min-height: 48px;
+        padding: 10px;
+        border: 1px solid #b7c8e0;
+        border-radius: 8px;
+        background: #fff;
+        color: #142d4e;
+        font: inherit;
+        text-overflow: ellipsis;
+    }
+
+    .detail-session-picker .detail-muted {
+        font-size: 12px;
+    }
+
+    .booking-selection {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: 10px;
+        background: #f1f6fd;
+    }
+
+    .booking-selection p {
+        margin: 0;
+    }
+
+    .booking-selection h3 {
+        margin: 4px 0;
+        font-size: 16px;
+        overflow-wrap: anywhere;
+    }
+
+    #booking-session-date {
+        font-size: 12px;
+        color: #526780;
+        overflow-wrap: anywhere;
+    }
+
+    .booking-price {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        border-top: 1px solid #dae4f1;
+        padding-top: 12px;
+        margin-top: 12px;
+    }
+
+    .booking-price > span {
+        font-size: 12px;
+    }
+
+    .booking-price strong {
+        font-size: 22px;
+    }
+
+    .detail-facts {
+        margin: 20px 0;
+    }
+
+    .detail-facts > div {
+        display: grid;
+        grid-template-columns: 66px minmax(0, 1fr);
+        gap: 10px;
+        padding: 7px 0;
+        font-size: 12px;
+    }
+
+    .detail-facts dt {
+        color: #627084;
+    }
+
+    .detail-facts dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-state {
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #edf3ff;
+        color: #345e94;
+        font-size: 12px;
+    }
+
+    .detail-button {
+        width: 100%;
+        min-height: 50px;
+        padding: 12px;
+        border: 0;
+        border-radius: 9px;
+        background: #174bc1;
+        color: #fff;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .detail-button:hover:not(:disabled) {
+        background: #123b99;
+    }
+
+    .detail-button:disabled {
+        background: #e8edf4;
+        color: #67768b;
+        cursor: not-allowed;
+    }
+
+    .booking-note {
+        margin: 12px 0 18px;
+        color: #627084;
+        font-size: 12px;
+        line-height: 1.8;
+        text-align: center;
+    }
+
+    .booking-guide {
+        border-top: 1px solid #e5ebf2;
+        padding-top: 12px;
+        color: #53647c;
+        font-size: 12px;
+    }
+
+    .booking-guide p {
+        margin: 8px 0;
+        line-height: 1.9;
+    }
+
+    .detail-back {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 18px;
+        margin-top: 12px;
+        border-top: 1px solid #e5ebf2;
+        color: #174bc1;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    /* 행사 상세 설명 */
+    .detail-description {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #42536a;
+        font-size: 15px;
+        line-height: 2;
+    }
+
+    /* 행사 장소 및 지도 */
+    .detail-address {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin: 14px 0 18px;
+    }
+
+    .detail-address > span {
+        color: #174bc1;
+        font-size: 30px;
+    }
+
+    .detail-address p {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-map {
+        width: 100%;
+        height: 300px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .detail-map-placeholder {
+        padding: 30px 20px;
+        border: 1px solid #e0e7ef;
+        border-radius: 10px;
+        background: #f3f6fa;
+        color: #627084;
+        text-align: center;
+    }
+
+    /* 빈 화면 */
+    .detail-empty {
+        border: 1px dashed #cbd8eb;
+        background: #f5f8fd;
+        padding: 30px 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .detail-empty h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .detail-empty p {
+        margin: 8px 0 0;
+        color: #627084;
+    }
+
+    /* 헤더 및 푸터 */
+    body:has(.event-detail-page) .header-container,
+    body:has(.event-detail-page) .footer-container {
+        box-sizing: border-box;
+        max-width: 1304px;
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+
+    body:has(.event-detail-page) .footer-container {
+        flex-wrap: wrap;
+    }
+
+    body:has(.event-detail-page) .footer-divider {
+        display: none;
+    }
+
+    body:has(.event-detail-page) .footer-info-section {
+        flex: 2 1 260px;
+    }
+
+    body:has(.event-detail-page) .footer-contact-section {
+        flex: 1 1 160px;
+    }
+
+    body:has(.event-detail-page) .footer-policy-section {
+        flex: 1 1 100%;
+        align-items: flex-start;
+    }
+
+    body:has(.event-detail-page) .copyright-warning {
+        text-align: left;
+    }
+
+    /* 리뷰 영역 */
+    .review-section {
+        margin-top: 32px;
+    }
+
+    .review-write {
+        padding: 24px;
+        margin: 20px 0;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+    }
+
+    .review-write h3 {
+        margin-bottom: 16px;
+    }
+
+    .review-write form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .review-write select,
+    .review-write textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font: inherit;
+    }
+
+    .review-write textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .review-write button,
+    .review-item button {
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .review-write button {
+        background: #2563eb;
+        color: white;
+    }
+
+    .review-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .review-item {
+        padding: 22px 24px;
+        border: 1px solid #dce2eb;
+        border-radius: 14px;
+        background: #fff;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .review-header span {
+        color: #e99b22;
+        font-weight: 700;
+    }
+
+    .review-like {
+        color: #f08a00;
+    }
+
+    .review-item p {
+        line-height: 1.7;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .review-item small {
+        display: block;
+        margin-top: 12px;
+        color: #888;
+    }
+
+    .review-item button {
+        margin-top: 10px;
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    /* 후기 전체보기 카드 */
+    .review-summary {
+        display: block;
+        padding: 20px;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .review-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .review-preview {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+        margin: 0 0 16px;
+        line-height: 1.6;
+    }
+
+    .review-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #8993a3;
+        font-size: 12px;
+    }
+
+    .review-toggle-text {
+        color: #3569b8;
+    }
+
+    .review-full-content {
+        padding: 16px 20px 20px;
+        border-top: 1px solid #edf0f5;
+    }
+
+    .review-full-content p {
+        line-height: 1.8;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin-top: 16px;
+    }
+
+    .review-item[open] .review-toggle-text {
+        font-size: 0;
+    }
+
+    .review-item[open] .review-toggle-text::after {
+        content: "클릭해서 접기";
+        font-size: 12px;
+    }
+
+    /* 대표 이미지 */
+    .detail-main-image {
+        width: 100%;
+        height: 380px;
+        margin: 24px 0;
+        overflow: hidden;
+        border-radius: 18px;
+        background: #f1f3f5;
+    }
+
+    .detail-main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* 회차별 후기 탭 */
+    .review-session-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 20px 0;
+    }
+
+    .review-session-tab {
+        display: inline-block;
+        padding: 10px 18px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .review-session-tab:hover {
+        background: #f3f6ff;
+    }
+
+    .review-session-tab.active {
+        background: #174bc1;
+        border-color: #174bc1;
+        color: white;
+        font-weight: 600;
+    }
+
+    /* 후기 전체보기 */
+    .review-more {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .review-more a {
+        display: inline-block;
+        padding: 10px 18px;
+        border: 1px solid #174bc1;
+        border-radius: 8px;
+        color: #174bc1;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .review-more a:hover {
+        background: #edf3ff;
+    }
+
+    /* 태블릿 */
+    @media (max-width: 950px) {
+        .detail-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .detail-content {
+            display: contents;
+        }
+
+        .detail-sessions {
+            order: 0;
+        }
+
+        .detail-overview {
+            order: 1;
+            position: static;
+            max-height: none;
+            overflow: visible;
+        }
+
+        #description {
+            order: 2;
+        }
+
+        #location {
+            order: 3;
+        }
+
+        .session-list {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    /* 모바일 */
+    @media (max-width: 600px) {
+        .event-detail-page {
+            padding: 20px 16px 40px;
+        }
+
+        .detail-heading {
+            padding: 24px 20px;
+        }
+
+        .detail-heading h1 {
+            font-size: 27px;
+        }
+
+        .detail-summary {
+            font-size: 14px;
+        }
+
+        .detail-at-a-glance {
+            gap: 16px;
+        }
+
+        .detail-at-a-glance > div {
+            flex-basis: 100%;
+        }
+
+        .detail-section-nav {
+            gap: 24px;
+            font-size: 13px;
+        }
+
+        .detail-section,
+        .detail-overview {
+            padding: 22px 18px;
+        }
+
+        .detail-section h2 {
+            font-size: 21px;
+        }
+
+        .session-list {
+            grid-template-columns: 1fr;
+        }
+
+        .session-card {
+            padding: 18px;
+        }
+
+        .session-card.is-selected {
+            padding: 17px;
+        }
+
+        .detail-layout {
+            gap: 20px;
+        }
+
+        body:has(.event-detail-page) .header-container,
+        body:has(.event-detail-page) .footer-container {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        body:has(.event-detail-page) .header-left > .vertical-divider {
+            display: none;
+        }
+
+        body:has(.event-detail-page) .header-right {
+            margin-left: auto;
+            max-width: 100%;
+        }
+
+        body:has(.event-detail-page) .company-details {
+            flex-wrap: wrap;
+        }
+
+        .detail-main-image {
+            height: 230px;
+        }
+    }
 </style>

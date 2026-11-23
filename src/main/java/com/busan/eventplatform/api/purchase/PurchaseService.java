@@ -119,8 +119,8 @@ public class PurchaseService {
 
 
         paymentService.paymentList(userId).forEach(payment -> history.add(PurchaseRes.PointHistoryDto.builder()
-                .occurredAt(payment.getPaidAt()).typeLabel(LocaleMessages.display("충전")).title(LocaleMessages.display("포인트 충전"))
-                .statusLabel("충전 완료").amount(payment.getAmount()).build()));
+                .occurredAt(payment.getPaidAt()).typeLabel(LocaleMessages.display("충전")).title(LocaleMessages.display("포인트 충전")).typeStatus(payment.getTypeStatus())
+                .statusLabel(LocaleMessages.display("충전 완료")).amount(payment.getAmount()).build()));
 
         purchaseList(userId).forEach(purchase -> history.add(PurchaseRes.PointHistoryDto.builder()
                 .occurredAt(purchase.getPurchaseDate()).typeLabel(LocaleMessages.display("행사 구매")).title(purchase.getTitle())

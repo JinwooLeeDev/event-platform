@@ -90,6 +90,18 @@
         font-size: 13px;
     }
 
+    .point-history-payment-type {
+        font-weight: 600;
+    }
+
+    .point-history-payment-type[data-payment-type="KAKAO"] {
+        color: #9a6700;
+    }
+
+    .point-history-payment-type[data-payment-type="NAVER"] {
+        color: #007e3a;
+    }
+
     @media (max-width: 600px) {
         .point-history-amount {
             font-size: 28px;
@@ -136,68 +148,58 @@
             </section>
 
             <!-- 충전 내역 -->
-            <section class="session-panel"
-                     aria-labelledby="point-charge-title">
-                <div class="company-panel-heading">
-                    <div>
-                        <h2 id="point-charge-title">{{i18n.company.ui0094}}</h2>
-                        <p class="company-description">
-                            {{i18n.company.ui0095}}
-                        </p>
+                <section class="session-panel" aria-labelledby="point-charge-title">
+                    <div class="company-panel-heading">
+                        <div>
+                            <h2 id="point-charge-title">{{i18n.common.merge004}}{{chargeCount}}{{i18n.common.merge005}}</h2>
+                            <p class="company-description">
+                                {{i18n.company.ui0095}}
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="session-table-wrap">
-                    <table class="session-table point-history-table">
-                        <thead>
-                        <tr>
-                            <th scope="col">{{i18n.company.ui0096}}</th>
-                            <th scope="col"
-                                class="point-history-money">
-                                {{i18n.company.ui0097}}
-                            </th>
-                            <th scope="col">{{i18n.admin.ui0153}}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#charges}}
-                        <tr>
-                            <td class="point-history-date">
-                                {{paidAtText}}
-                            </td>
-                            <td class="point-history-money">
-                                {{amountText}}
-                            </td>
-                            <td>
-                                        <span class="point-history-status">
-                                            {{statusName}}
-                                        </span>
-                            </td>
-                        </tr>
-                        {{/charges}}
+                    <div class="session-table-wrap">
+                        <table class="session-table point-history-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">{{i18n.company.ui0096}}</th>
+                                <th scope="col" class="point-history-money">{{i18n.company.ui0097}}</th>
+                                <th scope="col">{{i18n.payment.ui0016}}</th>
+                                <th scope="col">{{i18n.admin.ui0153}}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#charges}}
+                                <tr>
+                                    <td class="point-history-date">{{paidAtText}}</td>
+                                    <td class="point-history-money">{{amountText}}</td>
+                                    <td>
+                            <span class="point-history-payment-type"
+                                  data-payment-type="{{paymentType}}">{{paymentType}}</span>
+                                    </td>
+                                    <td><span class="point-history-status">{{statusName}}</span></td>
+                                </tr>
+                            {{/charges}}
 
-                        {{^charges}}
-                        <tr>
-                            <td colspan="3">
-                                <p class="point-history-empty">
-                                    {{i18n.company.ui0098}}
-                                </p>
-                            </td>
-                        </tr>
-                        {{/charges}}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                            {{^charges}}
+                                <tr>
+                                    <td colspan="4">
+                                        <p class="point-history-empty">{{i18n.company.ui0098}}</p>
+                                    </td>
+                                </tr>
+                            {{/charges}}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
 
             <!-- 보증금 납부 및 정상 반환 내역 -->
             <section class="session-panel"
                      aria-labelledby="point-deposit-title">
                 <div class="company-panel-heading">
                     <div>
-                        <h2 id="point-deposit-title">
-                            {{i18n.company.ui0099}}
-                        </h2>
+                        <h2 id="point-deposit-title">{{i18n.common.merge006}}{{depositCount}}{{i18n.common.merge005}}</h2>
                         <p class="company-description">
                             {{i18n.company.ui0100}}
                         </p>
@@ -269,7 +271,7 @@
                      aria-labelledby="point-refund-title">
                 <div class="company-panel-heading">
                     <div>
-                        <h2 id="point-refund-title">{{i18n.company.ui0106}}</h2>
+                        <h2 id="point-refund-title">{{i18n.common.merge007}}{{refundCount}}{{i18n.common.merge005}}</h2>
                         <p class="company-description">
                             {{i18n.company.ui0107}}
                         </p>

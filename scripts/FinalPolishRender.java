@@ -32,6 +32,10 @@ class FinalPolishRender {
             var model = base(host);
             model.put("myPoint", 28500);
             render(host ? "charge-company" : "charge-personal", "point/charge-point", model);
+            if (host) {
+                model.put("categoryList", List.of(map("id", 1, "name", "체험")));
+                render("event-save", "event/save-form", model);
+            }
             model.put("room", map("sessionId", 12, "eventTitle", "부산 문화 체험 행사", "sessionName", "오전 회차",
                     "hostName", "부산문화", "myKey", host ? "company:5" : "user:3", "host", host,
                     "participantCount", 2, "participants", List.of(map("userId", 3, "nickname", "참가자")),

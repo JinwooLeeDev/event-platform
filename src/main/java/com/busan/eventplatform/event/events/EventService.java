@@ -81,12 +81,8 @@ public class EventService {
             }
         } else {
             // 회차가 없는 행사: 기본 회차 자동 생성
-            EventSessionRequest.SaveDto sessionDto = new EventSessionRequest.SaveDto();
+            EventSessionRequest.SaveDto sessionDto = saveDto.getSessions().getFirst();
             sessionDto.setName("기본 회차");
-            sessionDto.setStartsAt(saveDto.getStartDate().atStartOfDay());
-            sessionDto.setEndsAt(saveDto.getEndDate().atTime(23, 59, 59));
-            sessionDto.setCapacity(Integer.MAX_VALUE);
-            // 신청 인원 제한 -- 무제한
             sessionDto.setHoldDurationSeconds(0);
             // 좌석 임시 점유 시간 0초 설정
             sessionDto.setPricingType(saveDto.getPricingType());

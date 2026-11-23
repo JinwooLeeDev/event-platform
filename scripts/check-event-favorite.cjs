@@ -36,10 +36,10 @@ const click = button => button.click({preventDefault(){},stopPropagation(){}});
     assert.equal(toggle.calls.length,1, 'duplicate event cards share one state request');
     await click(toggle.buttons[0]);
     assert.equal(toggle.calls[1].method,'POST');
-    assert.ok(toggle.buttons.every(button=>button.attributes['aria-pressed']==='true' && button.count.textContent==='4'));
+    assert.ok(toggle.buttons.every(button=>button.attributes['aria-pressed']==='true'));
     await click(toggle.buttons[1]);
     assert.equal(toggle.calls[2].method,'DELETE');
-    assert.ok(toggle.buttons.every(button=>button.attributes['aria-pressed']==='false' && button.count.textContent==='3'));
+    assert.ok(toggle.buttons.every(button=>button.attributes['aria-pressed']==='false'));
 
     const anonymous = await scenario([response(false,3), response(false,3,401)],{confirm:true});
     await click(anonymous.buttons[0]); assert.deepEqual(anonymous.redirects,['/login']);
@@ -50,7 +50,7 @@ const click = button => button.click({preventDefault(){},stopPropagation(){}});
     await click(corporate.buttons[0]); assert.equal(corporate.calls.length,1); assert.equal(corporate.messages[0].hidden,false);
 
     const failure = await scenario([response(false,3), response(false,3,500)]);
-    await click(failure.buttons[0]); assert.equal(failure.buttons[0].count.textContent,'3');
+    await click(failure.buttons[0]); assert.equal(failure.buttons[0].attributes['aria-pressed'],'false');
     assert.equal(failure.buttons[0].disabled,false); assert.equal(failure.messages[0].hidden,false);
 
     let release;
@@ -68,5 +68,5 @@ const click = button => button.click({preventDefault(){},stopPropagation(){}});
     await click(stale.buttons[0]); assert.equal(stale.buttons[0].attributes['aria-pressed'],'true');
     const retry = await scenario([new Error('offline'),response(false,3),response(true,4)]);
     await click(retry.buttons[0]); assert.equal(retry.buttons[0].attributes['aria-pressed'],'true');
-    console.log('PASS: favorite toggle/counts, duplicate cards, login/company handling, failure recovery, rapid clicks, last favorite removal, stale state reconciliation');
+    console.log('PASS: favorite toggle, duplicate cards, login/company handling, failure recovery, rapid clicks, last favorite removal, stale state reconciliation');
 })().catch(error => {console.error(error);process.exitCode=1;});

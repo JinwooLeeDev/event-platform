@@ -1,3 +1,4 @@
+
 {{> layout/head-meta}}
 {{> layout/header}}
 {{> event/review-style}}
@@ -6,27 +7,34 @@
     <section class="review-section">
         <h2>{{i18n.event.ui0079}}</h2>
 
-        <div class="review-sort">
-            <a href="/event-review/{{eventSessionId}}?sort=latest"
-               class="{{#isLatest}}active{{/isLatest}}">
-                {{i18n.event.ui0080}}
-            </a>
-            <a href="/event-review/{{eventSessionId}}?sort=like"
-               class="{{#isLike}}active{{/isLike}}">
-                {{i18n.event.ui0081}}
-            </a>
-        </div>
+        <!-- 특정 회차 리뷰일 때만 정렬 버튼 표시 -->
+        {{^isEventReview}}
+            <div class="review-sort">
+                <a href="/event-review/{{eventSessionId}}?sort=latest"
+                   class="{{#isLatest}}active{{/isLatest}}">
+                    {{i18n.event.ui0080}}
+                </a>
+                <a href="/event-review/{{eventSessionId}}?sort=like"
+                   class="{{#isLike}}active{{/isLike}}">
+                    {{i18n.event.ui0081}}
+                </a>
+            </div>
+        {{/isEventReview}}
 
-        <div class="review-write">
-            <h3>{{i18n.event.ui0082}}</h3>
-            <form action="/event-review/save/{{eventSessionId}}" method="post">
+        <!-- 특정 회차 리뷰일 때만 후기 작성 표시 -->
+        {{^isEventReview}}
+            <div class="review-write">
+                <h3>{{i18n.event.ui0082}}</h3>
+                <form action="/event-review/save/{{eventSessionId}}" method="post">
                 <textarea name="content"
                           placeholder="{{i18n.event.ui0040}}"
                           required></textarea>
-                <button type="submit">{{i18n.event.ui0083}}</button>
-            </form>
-        </div>
+                    <button type="submit">{{i18n.event.ui0083}}</button>
+                </form>
+            </div>
+        {{/isEventReview}}
 
+        <!-- 리뷰 목록: 회차별 / 행사 전체 공통 -->
         <div class="review-list">
             {{#reviewList}}
                 <article class="review-item">
@@ -39,10 +47,10 @@
 
                     <div class="review-actions">
                         <form action="/event-review/like/{{id}}" method="post">
-                            <button type="submit"
-                                    class="review-like-btn {{#isLiked}}liked{{/isLiked}}">
-                                {{i18n.event.ui0084}} {{likeCount}}
-                            </button>
+                        <button type="submit"
+                                class="review-like-btn {{#isLiked}}liked{{/isLiked}}">
+                            {{i18n.event.ui0084}} {{likeCount}}
+                        </button>
                         </form>
                     </div>
                 </article>
@@ -56,6 +64,7 @@
         </div>
     </section>
 </main>
+
 {{#message}}
     <script>
         alert('{{message}}');

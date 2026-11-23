@@ -17,7 +17,7 @@
             {{#event.id}}
                 <div class="detail-main-image">
                     <img src="/event-files/{{event.id}}"
-                         alt="{{i18n.event.ui0118}}: {{event.title}}"
+                         alt="{{event.title}} {{i18n.event.ui0118}}"
                          onerror="this.parentElement.style.display='none'">
                 </div>
             {{/event.id}}
@@ -51,7 +51,7 @@
                             <dl class="session-metrics"><div><dt>{{i18n.admin.ui0101}}</dt><dd><strong data-detail-point>{{fee}}</strong><span> P</span></dd></div><div><dt>{{i18n.admin.ui0100}}</dt><dd>{{capacityLabel}}</dd></div></dl>
                             <details class="session-more"><summary>{{i18n.event.ui0019}}</summary><dl><div><dt>{{i18n.event.ui0020}}</dt><dd data-detail-date>{{#applyStartAt}}{{applyStartAt}}{{/applyStartAt}}{{^applyStartAt}}{{i18n.event.ui0021}}{{/applyStartAt}}</dd></div><div><dt>{{i18n.event.ui0022}}</dt><dd data-detail-date>{{#applyEndAt}}{{applyEndAt}}{{/applyEndAt}}{{^applyEndAt}}{{i18n.event.ui0021}}{{/applyEndAt}}</dd></div></dl></details>
                             {{^canApply}}<p class="session-closed">{{#closedReason}}{{closedReason}}{{/closedReason}}{{^closedReason}}{{i18n.event.ui0023}}{{/closedReason}}</p>{{/canApply}}
-                            <button class="session-select" type="button" data-pick-session="{{id}}" aria-label="{{i18n.session.aria.select}}: {{name}}" aria-controls="booking-selection" aria-pressed="false" {{^canApply}}disabled{{/canApply}}>{{#canApply}}{{i18n.event.ui0024}}{{/canApply}}{{^canApply}}{{i18n.event.ui0025}}{{/canApply}}</button>
+                            <button class="session-select" type="button" data-pick-session="{{id}}" aria-label="{{name}} {{i18n.session.aria.select}}" aria-controls="booking-selection" aria-pressed="false" {{^canApply}}disabled{{/canApply}}>{{#canApply}}{{i18n.event.ui0024}}{{/canApply}}{{^canApply}}{{i18n.event.ui0025}}{{/canApply}}</button>
                         </article>
                         {{/eventSessions}}
                     </div>
@@ -61,6 +61,8 @@
                     <h2 id="description-title">{{i18n.event.ui0028}}</h2>
                     <div class="detail-description">{{#event.description}}{{event.description}}{{/event.description}}{{^event.description}}{{i18n.event.ui0029}}{{/event.description}}</div>
                 </section>
+
+
 
                 <!-- 행사 리뷰 -->
                 <section class="detail-section review-section" id="reviews"
@@ -73,60 +75,60 @@
                         </div>
                     </div>
 
-                    <!-- 리뷰 작성 -->
-                    {{#canWriteReview}}
-                        <div class="review-write">
-                            <h3>{{i18n.event.ui0032}}</h3>
+                    <!-- 완료된 회차가 있을 때만 후기 탭 표시 -->
+                    {{#hasCompletedEventSessions}}
 
-                            <form action="/event-reviews/save" method="post">
-                                <input type="hidden" name="eventId" value="{{event.id}}">
-
-                                <label for="review-rating">{{i18n.event.ui0033}}</label>
-                                <select id="review-rating" name="rating" required>
-                                    <option value="5">{{i18n.event.ui0034}}</option>
-                                    <option value="4">{{i18n.event.ui0035}}</option>
-                                    <option value="3">{{i18n.event.ui0036}}</option>
-                                    <option value="2">{{i18n.event.ui0037}}</option>
-                                    <option value="1">{{i18n.event.ui0038}}</option>
-                                </select>
-
-                                <label for="review-content">{{i18n.event.ui0039}}</label>
-                                <textarea id="review-content" name="content"
-                                          placeholder="{{i18n.event.ui0040}}"
-                                          required></textarea>
-
-                                <button type="submit">{{i18n.event.ui0041}}</button>
-                            </form>
+                        <div class="review-session-tabs">
+                            {{#reviewSessionTabs}}
+                                <a href="/event/{{event.id}}?eventSessionId={{id}}#reviews"
+                                class="review-session-tab {{#selected}}active{{/selected}}"
+                                data-review-session="{{id}}">
+                                {{name}}
+                                </a>
+                            {{/reviewSessionTabs}}
                         </div>
-                    {{/canWriteReview}}
 
-                    <!-- 리뷰 목록 -->
-                    <div class="review-list">
-                        {{#reviewList}}
-                            <article class="review-item">
-                                <div class="review-header">
-                                    <strong>{{username}}</strong>
-                                    <span>★ {{rating}}{{i18n.event.ui0042}}</span>
+                        <!-- 선택한 회차의 대표 후기 -->
+                        <div class="review-list">
+
+                            {{#bestReview}}
+                                <article class="review-item">
+                                    <div class="review-header">
+                                        <strong>{{displayName}}</strong>
+                                        <span>♥ {{likeCount}}</span>
+                                    </div>
+
+                                    <p>{{content}}</p>
+                                    <small>{{createdAt}}</small>
+                                </article>
+                            {{/bestReview}}
+
+                            {{^bestReview}}
+                                <div class="detail-empty">
+                                    <p>{{i18n.common.merge008}}</p>
                                 </div>
+                            {{/bestReview}}
 
-                                <p>{{content}}</p>
-                                <small>{{createdAt}}</small>
+                        </div>
 
-                                {{#isOwner}}
-                                    <form action="/event-reviews/delete/{{id}}" method="post">
-                                        <button type="submit">{{i18n.admin.ui0009}}</button>
-                                    </form>
-                                {{/isOwner}}
-                            </article>
-                        {{/reviewList}}
+                        <!-- 선택한 회차의 후기 전체보기 -->
+                        <div class="review-more">
+                            <a href="/event-review/event/{{event.id}}?eventSessionId={{selectedEventSessionId}}">
+                            {{i18n.common.merge009}}
+                            </a>
+                        </div>
 
-                        {{^reviewList}}
-                            <div class="detail-empty">
-                                <p>{{i18n.event.ui0043}}</p>
-                            </div>
-                        {{/reviewList}}
-                    </div>
+                    {{/hasCompletedEventSessions}}
+
+                    {{^hasCompletedEventSessions}}
+                        <div class="detail-empty">
+                            <p>{{i18n.common.merge010}}</p>
+                        </div>
+                    {{/hasCompletedEventSessions}}
+
                 </section>
+
+
 
                 <section class="detail-section" id="location" aria-labelledby="location-title">
                     <h2 id="location-title">{{i18n.event.ui0044}}</h2>

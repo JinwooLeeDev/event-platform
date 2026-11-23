@@ -5,35 +5,138 @@
 {{> layout/header}}
 {{> layout/account-style}}
 {{> layout/personal-account-style}}
+<style>
+    .point-history .history-tabs button {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .point-history [hidden] {
+        display: none !important;
+    }
+</style>
+
 <main class="personal-account-page point-page">
     <div class="account-layout">
         {{> layout/account-nav}}
         <div class="account-content">
             <header class="account-heading"><div><p class="account-location">{{i18n.community.ui0018}}</p><h1>{{i18n.common.ui0019}}</h1><p class="account-description">{{i18n.application.ui0050}}</p></div></header>
             <section class="account-panel account-point-balance" aria-labelledby="balance-title"><div class="account-point-balance-main"><span class="account-point-symbol" aria-hidden="true">P</span><div><h2 id="balance-title">{{i18n.admin.ui0165}}</h2>{{#myPage}}<strong class="point-number">{{point}}</strong>{{/myPage}}{{^myPage}}<strong>{{i18n.application.ui0051}}</strong><p class="account-description">{{i18n.application.ui0052}}</p>{{/myPage}}</div></div><a class="account-button account-button--secondary" href="/charge">{{i18n.company.ui0008}} <span aria-hidden="true">+</span></a></section>
+
+
             <section class="account-panel account-ledger point-history" aria-labelledby="point-history-title">
-                <div class="account-panel-heading"><h2 id="point-history-title">{{i18n.application.ui0053}}</h2><span class="account-ledger-label">{{i18n.application.ui0054}}</span></div>
+                <div class="account-panel-heading">
+                    <h2 id="point-history-title">
+                        {{i18n.common.merge035}} <span id="point-history-count" aria-live="polite"></span>
+                    </h2>
+                    <span class="account-ledger-label">{{i18n.application.ui0054}}</span>
+                </div>
+
                 <p class="account-description">{{i18n.application.ui0055}}</p>
+
+                <div class="history-tabs" role="group" aria-label="{{i18n.common.merge038}}">
+                    <button type="button" class="nav-link active" data-history-filter="all" aria-pressed="true">
+                        {{i18n.application.ui0053}}
+                    </button>
+
+                    <button type="button" class="nav-link" data-history-filter="charge" aria-pressed="false">
+                        {{i18n.common.merge036}}
+                    </button>
+
+                    <button type="button" class="nav-link" data-history-filter="event" aria-pressed="false">
+                        {{i18n.common.merge037}}
+                    </button>
+                </div>
+
                 {{#pointHistory}}
-                <article class="account-point-row">
-                    <div>
-                        <div class="point-history-labels"><span class="account-ledger-label">{{typeLabel}}</span><span class="status-badge">{{statusLabel}}</span></div>
-                        <strong>{{title}}</strong>
-                        {{#sessionName}}<small>{{sessionName}}</small>{{/sessionName}}
-                        <small>{{#occurredAt}}<time data-account-date>{{occurredAt}}</time>{{/occurredAt}}{{^occurredAt}}{{i18n.application.ui0056}}{{/occurredAt}}</small>
-                        {{#detailUrl}}<a class="account-text-link point-history-link" href="{{detailUrl}}">{{i18n.application.ui0057}}</a>{{/detailUrl}}
-                    </div>
-                    <span class="account-point-amount {{#debit}}account-point-amount--used{{/debit}}">{{#debit}}−{{/debit}}{{^debit}}+{{/debit}}<span class="point-number">{{amount}}</span></span>
-                </article>
+                    <article class="account-point-row" data-history-type="{{typeLabel}}">
+                        <div>
+                            <div class="point-history-labels">
+                                <span class="account-ledger-label">{{typeLabel}}</span>
+                                <span class="status-badge">{{statusLabel}}</span>
+                            </div>
+
+                            <strong>{{title}}{{#typeStatus}} - <span class="pay">{{typeStatus}}</span>{{/typeStatus}}</strong>
+
+                            {{#sessionName}}<small>{{sessionName}}</small>{{/sessionName}}
+
+                            <small>
+                                {{#occurredAt}}<time data-account-date>{{occurredAt}}</time>{{/occurredAt}}
+                                {{^occurredAt}}{{i18n.application.ui0056}}{{/occurredAt}}
+                            </small>
+
+                            {{#detailUrl}}
+                                <a class="account-text-link point-history-link" href="{{detailUrl}}">{{i18n.application.ui0057}}</a>
+                            {{/detailUrl}}
+                        </div>
+
+                        <span class="account-point-amount {{#debit}}account-point-amount--used{{/debit}}">{{#debit}}−{{/debit}}{{^debit}}+{{/debit}}<span class="point-number">{{amount}}</span></span>
+                    </article>
                 {{/pointHistory}}
-                {{^pointHistory}}<div class="account-ledger-empty"><p>{{i18n.application.ui0058}}</p><span>{{i18n.application.ui0059}}</span><a class="account-text-link" href="/charge">{{i18n.company.ui0008}}</a></div>{{/pointHistory}}
+
+                <div class="account-ledger-empty" id="point-history-empty" hidden>
+                    <p></p>
+                    <a class="account-button account-button--secondary" href="/charge">{{i18n.company.ui0008}}</a>
+                </div>
             </section>
+
             <details class="account-guide"><summary>{{i18n.application.ui0060}}</summary><ul><li>{{i18n.payment.ui0023}}</li><li>{{i18n.application.ui0061}} <a href="/myhistory">{{i18n.common.ui0017}}</a>{{i18n.application.ui0062}}</li><li>{{i18n.application.ui0063}}</li><li>{{i18n.application.ui0064}}</li></ul></details>
         </div>
     </div>
 </main>
 {{> layout/footer}}
 <script>
+    const historySection = document.querySelector(".point-history");
+    const filterButtons = historySection.querySelectorAll("[data-history-filter]");
+    const historyRows = historySection.querySelectorAll("[data-history-type]");
+    const historyCount = historySection.querySelector("#point-history-count");
+    const emptyState = historySection.querySelector("#point-history-empty");
+    const emptyMessage = emptyState.querySelector("p");
+    const chargeLink = emptyState.querySelector("a");
+
+    const eventTypes = new Set([BusanI18n.t("payment.ui0106"), BusanI18n.t("payment.ui0107"), BusanI18n.t("payment.ui0108")]);
+
+    const emptyMessages = {
+        all: BusanI18n.t("application.ui0058"),
+        charge: BusanI18n.t("common.merge032"),
+        event: BusanI18n.t("common.merge033")
+    };
+
+    function showPointHistory(selectedButton) {
+        const filter = selectedButton.dataset.historyFilter;
+        let visibleCount = 0;
+
+        historyRows.forEach(row => {
+            const type = row.dataset.historyType;
+            const visible = filter === "all"
+                    || (filter === "charge" && type === BusanI18n.t("payment.ui0105"))
+                    || (filter === "event" && eventTypes.has(type));
+
+            row.hidden = !visible;
+            if (visible) visibleCount++;
+        });
+
+        filterButtons.forEach(button => {
+            const active = button === selectedButton;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
+
+        historyCount.textContent = BusanI18n.t("common.merge034", [visibleCount]);
+        emptyMessage.textContent = emptyMessages[filter];
+        chargeLink.hidden = filter === "event";
+        emptyState.hidden = visibleCount > 0;
+    }
+
+    filterButtons.forEach(button => {
+        button.addEventListener("click", () => showPointHistory(button));
+    });
+
+    showPointHistory(filterButtons[0]);
+
+
+
 document.querySelectorAll('.point-number').forEach(element => {
     const amount = Number(element.textContent.trim());
     if (Number.isFinite(amount)) element.textContent = amount.toLocaleString('ko-KR') + 'P';
@@ -42,6 +145,13 @@ document.querySelectorAll('[data-account-date]').forEach(element => {
     const value = element.textContent.trim();
     if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(value)) element.textContent = value.slice(0,16).replace('T',' ').replaceAll('-','.');
 });
+
+document.querySelectorAll(".pay").forEach( e => {
+    const pay = e.textContent.trim()
+    if(pay === "KAKAO") e.style.color = "#fdd300"
+    else if(pay === "NAVER") e.style.color = "green"
+})
+
 </script>
 </body>
 </html>

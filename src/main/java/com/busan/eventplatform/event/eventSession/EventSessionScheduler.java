@@ -17,7 +17,6 @@ public class EventSessionScheduler {
     private final EventSessionService eventSessionService;
     private final TaskScheduler taskScheduler;
 
-
     /**
      *  4시간마다 종료된 행사가 있는지 조회. --> 정상종료된 기업에게 보증금을 돌려주는 refundEventCompleted에서 DepositStatus를 Refund로 변경하므로
      *  이전부터 정상종료된 행사를 전부 조회하는게 아닌 최근 정상종료된 행사만 조회.
