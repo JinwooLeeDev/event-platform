@@ -24,9 +24,41 @@
                         <div id="code-field" class="auth-field signup-verification" hidden><label for="code">{{i18n.auth.ui0023}}</label><div class="auth-row"><input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="{{i18n.auth.ui0024}}" aria-describedby="code-message"><button id="confirm-code" class="auth-button secondary" type="button">{{i18n.auth.ui0025}}</button></div><p id="code-message" class="auth-message" role="status" aria-live="polite"></p></div>
                     </section>
                     <section class="signup-panel" aria-labelledby="signup-profile-title"><div class="signup-section-heading"><h3 id="signup-profile-title">{{i18n.auth.ui0116}}</h3><p>{{i18n.auth.ui0117}}</p></div>
-                        <div class="auth-field"><label for="display-name">{{i18n.admin.ui0151}}</label><input id="display-name" name="displayName" type="text" autocomplete="name" maxlength="50" placeholder="{{i18n.auth.ui0118}}" aria-describedby="display-name-hint" required><p id="display-name-hint" class="auth-hint">{{i18n.auth.ui0119}}</p></div>
-                        <div class="signup-field-grid"><div class="auth-field"><label for="password">{{i18n.auth.ui0027}}</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="{{i18n.auth.ui0120}}" aria-describedby="password-hint" required></div><div class="auth-field"><label for="password-confirm">{{i18n.auth.ui0029}}</label><input id="password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="{{i18n.auth.ui0030}}" required></div></div>
-                        <p id="password-hint" class="auth-hint">{{i18n.auth.ui0121}}</p>
+                        <div class="signup-field-grid">
+                            <div class="auth-field">
+                                <label for="password">{{i18n.auth.ui0027}}</label>
+                                <input id="password"
+                                       name="password"
+                                       type="password"
+                                       autocomplete="new-password"
+                                       minlength="8"
+                                       maxlength="16"
+                                       placeholder="{{i18n.auth.ui0028}}"
+                                       aria-describedby="password-hint"
+                                       required>
+                            </div>
+
+                            <div class="auth-field">
+                                <label for="password-confirm">{{i18n.auth.ui0029}}</label>
+                                <input id="password-confirm"
+                                       name="passwordConfirm"
+                                       type="password"
+                                       autocomplete="new-password"
+                                       maxlength="16"
+                                       placeholder="{{i18n.auth.ui0030}}"
+                                       aria-describedby="password-match-message"
+                                       required>
+
+                                <p id="password-match-message"
+                                   class="auth-message"
+                                   role="status"
+                                   aria-live="polite"></p>
+                            </div>
+                        </div>
+
+                        <p id="password-hint" class="auth-hint">
+                            {{i18n.auth.ui0031}}
+                        </p>
                     </section>
                     <div class="signup-submit-area"><p id="form-message" class="auth-message" role="status" aria-live="polite"></p><button id="submit-button" class="auth-button auth-submit" type="submit">{{i18n.auth.ui0122}}</button><p class="signup-submit-help">{{i18n.auth.ui0123}}</p></div>
                 </form>
@@ -37,115 +69,294 @@
 </main>
 {{> layout/footer}}
 <script>
-(() => {
-    const element = id => document.getElementById(id);
-    const email = element('email');
-    const code = element('code');
-    const send = element('send-code');
-    const confirm = element('confirm-code');
-    let verifiedEmail = null;
-    let busy = false;
-    let submitting = false;
-    let resendAt = 0;
+    (() => {
+        const element = id => document.getElementById(id);
 
-    function message(id, text, success = false) {
-        element(id).textContent = text;
-        element(id).dataset.state = success ? 'success' : 'error';
-    }
-    function update() {
-        const seconds = Math.max(0, Math.ceil((resendAt - Date.now()) / 1000));
-        send.disabled = busy || submitting || seconds > 0;
-        send.textContent = busy ? BusanI18n.t("community.ui0006") : seconds > 0 ? BusanI18n.t("auth.ui0126", [seconds]) : BusanI18n.t("auth.ui0021");
-        confirm.disabled = busy || submitting || verifiedEmail !== null;
-        element('submit-button').disabled = busy || submitting;
-    }
-    async function post(url, body) {
-        const response = await fetch(url, {
-            method: 'POST', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!(response.headers.get('content-type') || '').includes('application/json')) {
-            throw new Error(BusanI18n.t("company.ui0137"));
+        const form = element("signup-form");
+        const email = element("email");
+        const code = element("code");
+        const send = element("send-code");
+        const confirm = element("confirm-code");
+        const submit = element("submit-button");
+        const displayName = element("display-name");
+        const password = element("password");
+        const passwordConfirm = element("password-confirm");
+
+        // 기업 가입과 동일한 비밀번호 기준
+        const passwordPattern =
+            /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@!%*#?&])[A-Za-z\d$@!%*#?&]{8,16}$/;
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // 서버 인증 결과와 요청 진행 상태
+        let verifiedEmail = null;
+        let busy = false;
+        let submitting = false;
+        let resendAt = 0;
+
+        function message(id, text, success = false) {
+            const target = element(id);
+            target.textContent = text;
+            target.dataset.state = text
+                ? (success ? "success" : "error")
+                : "";
         }
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message || BusanI18n.t("company.ui0138"));
-        return result;
-    }
-    email.addEventListener('input', () => {
-        verifiedEmail = null;
-        element('code-field').hidden = true;
-        code.value = '';
-        message('email-message', '');
-        message('code-message', '');
-        update();
-    });
-    send.addEventListener('click', async () => {
-        if (busy || submitting) return;
-        if (email.value.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-            message('email-message', BusanI18n.t("auth.ui0127"));
-            email.focus();
-            return;
+
+        // 확인값 입력 후에는 비밀번호 쪽을 수정해도 즉시 다시 비교
+        function checkPasswordMatch() {
+            const target = element("password-match-message");
+            const hasConfirmation = passwordConfirm.value !== "";
+            const mismatch =
+                hasConfirmation
+                && password.value !== passwordConfirm.value;
+
+            passwordConfirm.setCustomValidity(
+                mismatch ? BusanI18n.t("auth.ui0054") : ""
+            );
+
+            // 배경 박스 스타일을 제거하고 글자 색만 변경
+            target.removeAttribute("data-state");
+
+            target.textContent = !hasConfirmation
+                ? ""
+                : mismatch
+                    ? BusanI18n.t("auth.ui0054")
+                    : BusanI18n.t("company.ui0145");
+
+            target.style.color = mismatch ? "#b42318" : "#087443";
+
+            // 비밀번호 형식 검사 유지
+            password.setCustomValidity(
+                password.value && !passwordPattern.test(password.value)
+                    ? BusanI18n.t("auth.ui0053")
+                    : ""
+            );
         }
-        busy = true;
-        email.readOnly = true;
-        update();
-        try {
-            const result = await post('/api/v1/email-verifications', { email: email.value });
+
+        // 이메일 인증·필수값·비밀번호 기준을 모두 충족해야 가입 가능
+        function isSignupReady() {
+            const requiredInputs = Array.from(
+                form.querySelectorAll("input[required]")
+            );
+
+            const requiredComplete = requiredInputs.every(input =>
+                input.value.trim() !== "" && input.validity.valid
+            );
+
+            return requiredComplete
+                && emailPattern.test(email.value)
+                && verifiedEmail === email.value
+                && displayName.value.trim() !== ""
+                && passwordPattern.test(password.value)
+                && password.value === passwordConfirm.value;
+        }
+
+        function update() {
+            const seconds = Math.max(
+                0,
+                Math.ceil((resendAt - Date.now()) / 1000)
+            );
+
+            send.disabled = busy || submitting || seconds > 0;
+            send.textContent = busy
+                ? BusanI18n.t("community.ui0006")
+                : seconds > 0
+                    ? BusanI18n.t("auth.ui0126", [seconds])
+                    : BusanI18n.t("auth.ui0021");
+
+            confirm.disabled =
+                busy
+                || submitting
+                || element("code-field").hidden
+                || verifiedEmail !== null;
+
+            submit.disabled =
+                busy || submitting || !isSignupReady();
+        }
+
+        async function post(url, body) {
+            const response = await fetch(url, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!(response.headers.get("content-type") || "")
+                    .includes("application/json")) {
+                throw new Error(BusanI18n.t("company.ui0137"));
+            }
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || BusanI18n.t("company.ui0138")
+                );
+            }
+
+            return result;
+        }
+
+        // 이메일이 바뀌면 이전 인증 결과를 사용하지 않는다.
+        email.addEventListener("input", () => {
             verifiedEmail = null;
-            resendAt = Date.now() + 60000;
-            code.value = '';
-            element('code-field').hidden = false;
-            message('email-message', result.message, true);
-            message('code-message', '');
-            code.focus();
-        } catch (error) {
-            message('email-message', error.message || BusanI18n.t("auth.ui0128"));
-        } finally {
-            busy = false;
-            email.readOnly = verifiedEmail !== null;
+            element("code-field").hidden = true;
+            code.value = "";
+            message("email-message", "");
+            message("code-message", "");
+            update();
+        });
+
+        // 인증번호 발송
+        send.addEventListener("click", async () => {
+            if (busy || submitting || Date.now() < resendAt) {
+                return;
+            }
+
+            if (email.value.length > 254
+                    || !emailPattern.test(email.value)) {
+                message("email-message", BusanI18n.t("auth.ui0127"));
+                email.focus();
+                return;
+            }
+
+            const target = email.value;
+
+            busy = true;
+            email.readOnly = true;
+            update();
+
+            try {
+                const result = await post(
+                    "/api/v1/email-verifications",
+                    { email: target }
+                );
+
+                if (email.value !== target) {
+                    return;
+                }
+
+                verifiedEmail = null;
+                resendAt = Date.now() + 60000;
+                code.value = "";
+                element("code-field").hidden = false;
+
+                message("email-message", result.message, true);
+                message("code-message", "");
+                code.focus();
+            } catch (error) {
+                message(
+                    "email-message",
+                    error.message || BusanI18n.t("auth.ui0128")
+                );
+            } finally {
+                busy = false;
+                email.readOnly = verifiedEmail !== null;
+                update();
+            }
+        });
+
+        // 인증번호 확인
+        confirm.addEventListener("click", async () => {
+            if (busy || submitting || verifiedEmail !== null) {
+                return;
+            }
+
+            if (!/^[0-9]{6}$/.test(code.value)) {
+                message("code-message", BusanI18n.t("auth.ui0129"));
+                return;
+            }
+
+            const target = email.value;
+
+            busy = true;
+            email.readOnly = true;
+            update();
+
+            try {
+                const result = await post(
+                    "/api/v1/email-verifications/confirm",
+                    {
+                        email: target,
+                        code: code.value
+                    }
+                );
+
+                if (email.value !== target) {
+                    return;
+                }
+
+                if (result.verified !== true) {
+                    throw new Error(BusanI18n.t("auth.ui0130"));
+                }
+
+                verifiedEmail = target;
+                message("code-message", result.message, true);
+            } catch (error) {
+                message(
+                    "code-message",
+                    error.message || BusanI18n.t("auth.ui0128")
+                );
+            } finally {
+                busy = false;
+                email.readOnly = verifiedEmail !== null;
+                update();
+            }
+        });
+
+        // 입력·자동완성 변경에 맞춰 실시간 검사 및 버튼 갱신
+        function refreshForm() {
+            checkPasswordMatch();
             update();
         }
-    });
-    confirm.addEventListener('click', async () => {
-        if (busy || submitting) return;
-        if (!/^[0-9]{6}$/.test(code.value)) {
-            message('code-message', BusanI18n.t("auth.ui0129"));
-            return;
-        }
-        busy = true;
-        email.readOnly = true;
-        update();
-        try {
-            const result = await post('/api/v1/email-verifications/confirm', { email: email.value, code: code.value });
-            if (result.verified !== true) throw new Error(BusanI18n.t("auth.ui0130"));
-            verifiedEmail = email.value;
-            message('code-message', result.message, true);
-        } catch (error) {
-            message('code-message', error.message || BusanI18n.t("auth.ui0128"));
-        } finally {
-            busy = false;
-            email.readOnly = verifiedEmail !== null;
+
+        form.addEventListener("input", refreshForm);
+        form.addEventListener("change", refreshForm);
+
+        // 버튼 상태와 별개로 최종 제출에서도 재검사
+        form.addEventListener("submit", event => {
+            checkPasswordMatch();
+            message("form-message", "");
+
+            if (busy || submitting) {
+                event.preventDefault();
+                return;
+            }
+
+            if (!form.reportValidity()) {
+                event.preventDefault();
+                return;
+            }
+
+            if (verifiedEmail !== email.value) {
+                event.preventDefault();
+                message("form-message", BusanI18n.t("auth.ui0131"));
+                return;
+            }
+
+            if (!isSignupReady()) {
+                event.preventDefault();
+                update();
+                return;
+            }
+
+            submitting = true;
             update();
-        }
-    });
-    element('signup-form').addEventListener('submit', event => {
-        let error = '';
-        if (busy || verifiedEmail !== email.value) error = BusanI18n.t("auth.ui0131");
-        else if (new TextEncoder().encode(element('password').value).length > 72) error = BusanI18n.t("auth.ui0132");
-        else if (element('password').value !== element('password-confirm').value) error = BusanI18n.t("auth.ui0054");
-        if (error || submitting) {
-            event.preventDefault();
-            if (error) message('form-message', error);
-            return;
-        }
-        submitting = true;
-        update();
-    });
-    window.addEventListener('pageshow', () => { submitting = false; update(); });
-    setInterval(update, 1000);
-    update();
-})();
+        });
+
+        window.addEventListener("pageshow", () => {
+            submitting = false;
+            refreshForm();
+        });
+
+        // 재발송 대기시간 및 인증 유효 상태에 따른 버튼 갱신
+        setInterval(refreshForm, 1000);
+        refreshForm();
+    })();
 </script>
 </body>
 </html>
