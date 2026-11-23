@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const {BusanI18n} = require('./i18n-test-helpers.cjs');
 const source = fs.readFileSync('src/main/resources/static/js/event-favorite.js', 'utf8');
 const tick = () => new Promise(setImmediate);
 const response = (favorite, count, status = 200) => ({status, ok:status === 200, json:async()=>({favorite, favoriteCount:count})});
@@ -20,7 +21,7 @@ async function scenario(replies, {company = false, favoritePage = false, duplica
     });
     const page = {querySelectorAll:()=>items.filter(item=>!item.removed),
         querySelector:selector=>selector==='[data-favorite-total]'?total:empty};
-    vm.runInNewContext(source, {
+    vm.runInNewContext(source, {BusanI18n,
         document:{querySelector:()=>favoritePage?page:null,querySelectorAll:selector=>selector==='[data-favorite-event]'?buttons:[]},
         window:{addEventListener(){},BusanLogin:loginModal?{open:()=>modalOpens.push(true)}:undefined}, location:{assign:url=>redirects.push(url)}, confirm:()=>confirm,
         fetch:async(url,options)=>{calls.push({url,method:options.method});const reply=replies.shift();if(reply instanceof Error)throw reply;return await reply;}

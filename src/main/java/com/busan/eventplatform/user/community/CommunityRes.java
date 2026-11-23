@@ -53,6 +53,26 @@ public class CommunityRes {
         private boolean host;     // ★ [6단계] 주최 기업 메시지면 색 구분
         private boolean system;   // ★ [6단계] 입장·퇴장 기록이면 가운데 회색 한 줄
 
+        public String getContent() {
+            if (!system || content == null) return content;
+            if (content.endsWith("님이 입장했습니다.")) {
+                return com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.communityJoined",
+                        content.substring(0, content.length() - "님이 입장했습니다.".length()));
+            }
+            if (content.endsWith("님이 퇴장했습니다.")) {
+                return com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.communityLeft",
+                        content.substring(0, content.length() - "님이 퇴장했습니다.".length()));
+            }
+            return com.busan.eventplatform.global.i18n.LocaleMessages.display(content);
+        }
+
+        public String getNickname() {
+            return host && nickname != null && nickname.endsWith(" (주최)")
+                    ? nickname.substring(0, nickname.length() - " (주최)".length())
+                        + com.busan.eventplatform.global.i18n.LocaleMessages.display(" (주최)")
+                    : nickname;
+        }
+
         public boolean getMine() {
             return mine;
         }

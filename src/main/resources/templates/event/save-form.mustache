@@ -1,9 +1,9 @@
 
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>행사 주최 신청 | Busan Play</title>
+    <title>{{i18n.event.ui0086}}</title>
 </head>
 <body>
 {{> layout/header}}
@@ -17,13 +17,13 @@
         <div class="event-save-container account-content">
 
             <div class="event-save-navigation">
-                <a href="/events">← 내 행사 목록으로</a>
+                <a href="/events">{{i18n.event.ui0087}}</a>
             </div>
 
         <section class="event-save-header">
             <span class="event-save-label">BUSAN PLAY · PARTNERS</span>
-            <h1>행사 주최 신청</h1>
-            <p>부산에서 함께할 새로운 경험을 소개해 주세요.<br>행사 정보와 일정을 작성하면 관리자 심사를 위해 접수됩니다.</p>
+            <h1>{{i18n.company.ui0073}}</h1>
+            <p>{{i18n.event.ui0088}}<br>{{i18n.event.ui0089}}</p>
         </section>
 
             <form action="/events/save"
@@ -34,15 +34,15 @@
 
             <!-- 행사 기본 정보 -->
             <section class="event-save-section">
-                <h2><span class="event-section-number">01 </span>행사 기본 정보</h2>
+                <h2><span class="event-section-number">01 </span>{{i18n.event.ui0090}}</h2>
                 <p class="section-description">
-                    행사에 대한 기본 정보를 입력해 주세요.
+                    {{i18n.event.ui0091}}
                 </p>
 
                     <div class="form-group">
-                        <label>행사 카테고리 <span>*</span></label>
+                        <label>{{i18n.event.ui0070}} <span>*</span></label>
                         <select name="categoryId" required>
-                            <option value="">카테고리를 선택해 주세요.</option>
+                            <option value="">{{i18n.event.ui0092}}</option>
                             {{#categoryList}}
                                 <option value="{{id}}">{{name}}</option>
                             {{/categoryList}}
@@ -50,25 +50,25 @@
                     </div>
 
                     <div class="form-group">
-                        <label>행사 제목 <span>*</span></label>
+                        <label>{{i18n.event.ui0093}} <span>*</span></label>
                         <input type="text" name="title"
-                               placeholder="행사의 이름을 입력해 주세요" required>
+                               placeholder="{{i18n.event.ui0094}}" required>
                     </div>
 
                     <div class="form-group">
-                        <label>한 줄 요약 <span>*</span></label>
+                        <label>{{i18n.event.ui0095}} <span>*</span></label>
                         <input type="text" name="summary"
-                               placeholder="어떤 경험을 할 수 있는 행사인가요?" required>
+                               placeholder="{{i18n.event.ui0096}}" required>
                     </div>
 
                 <div class="form-group">
-                    <label>행사 주소 <span>*</span></label>
+                    <label>{{i18n.admin.ui0090}} <span>*</span></label>
 
                     <div style="display: flex; gap: 10px;">
                         <input type="text"
                                id="address"
                                name="address"
-                               placeholder="주소 검색 버튼을 눌러 주세요."
+                               placeholder="{{i18n.event.ui0097}}"
                                readonly
                                required
                                style="flex: 1;">
@@ -76,7 +76,7 @@
                         <button type="button"
                                 id="address-search-button"
                                 class="submit-button">
-                            주소 검색
+                            {{i18n.event.ui0098}}
                         </button>
                     </div>
 
@@ -85,7 +85,7 @@
                 </div>
 
                     <div class="form-group">
-                        <label>상세 설명 <span>*</span></label>
+                        <label>{{i18n.admin.ui0095}} <span>*</span></label>
                         <textarea name="description" rows="8" required></textarea>
                     </div>
                 </section>
@@ -93,54 +93,54 @@
 
             <!-- 행사 일정 -->
             <section class="event-save-section">
-                <h2><span class="event-section-number">02 </span>행사 일정</h2>
+                <h2><span class="event-section-number">02 </span>{{i18n.event.ui0099}}</h2>
                 <p class="section-description">
-                    회차별로 운영하는 행사인지 선택해 주세요.
+                    {{i18n.event.ui0100}}
                 </p>
 
                     <div class="form-group">
-                        <label>회차가 있나요? <span>*</span></label>
+                        <label>{{i18n.event.ui0101}} <span>*</span></label>
 
                         <div class="session-choice">
                             <label>
                                 <input type="radio" name="hasSessions"
                                        value="true" required>
-                                회차가 있어요
+                                {{i18n.event.ui0102}}
                             </label>
 
                             <label>
                                 <input type="radio" name="hasSessions"
                                        value="false" required>
-                                회차가 없어요
+                                {{i18n.event.ui0103}}
                             </label>
                         </div>
                     </div>
 
                     <!-- 회차가 없는 행사 -->
                     <div id="no-session-area" hidden>
-                        <h3>행사 전체 일정</h3>
+                        <h3>{{i18n.event.ui0104}}</h3>
 
                         <div class="form-group">
-                            <label>행사 시작일 <span>*</span></label>
+                            <label>{{i18n.event.ui0105}} <span>*</span></label>
                             <input type="date" name="startDate"
                                    id="startDate" disabled required>
                         </div>
 
                         <div class="form-group">
-                            <label>행사 종료일 <span>*</span></label>
+                            <label>{{i18n.event.ui0106}} <span>*</span></label>
                             <input type="date" name="endDate"
                                    id="endDate" disabled required>
                         </div>
 
                         <div class="date-time-group">
                             <div class="form-group">
-                                <label>모집 시작일 <span>*</span></label>
+                                <label>{{i18n.event.ui0107}} <span>*</span></label>
                                 <input type="date" id="applyStartDate"
                                        disabled required>
                             </div>
 
                             <div class="form-group">
-                                <label>모집 시작 시간 <span>*</span></label>
+                                <label>{{i18n.event.ui0108}} <span>*</span></label>
                                 <input type="time" id="applyStartTime"
                                        disabled required>
                             </div>
@@ -148,13 +148,13 @@
 
                         <div class="date-time-group">
                             <div class="form-group">
-                                <label>모집 마감일 <span>*</span></label>
+                                <label>{{i18n.event.ui0109}} <span>*</span></label>
                                 <input type="date" id="applyEndDate"
                                        disabled required>
                             </div>
 
                             <div class="form-group">
-                                <label>모집 마감 시간 <span>*</span></label>
+                                <label>{{i18n.event.ui0110}} <span>*</span></label>
                                 <input type="time" id="applyEndTime"
                                        disabled required>
                             </div>
@@ -168,18 +168,18 @@
 
                         <!-- 참가비 -->
                         <div class="form-group">
-                            <label>참가비 유형 <span>*</span></label>
+                            <label>{{i18n.event.ui0111}} <span>*</span></label>
                             <select name="pricingType" id="pricingType"
                                     disabled required>
-                                <option value="">참가비 유형을 선택해 주세요.</option>
-                                <option value="FREE">무료</option>
-                                <option value="PAID">유료</option>
+                                <option value="">{{i18n.event.ui0112}}</option>
+                                <option value="FREE">{{i18n.event.ui0113}}</option>
+                                <option value="PAID">{{i18n.event.ui0114}}</option>
                             </select>
                         </div>
 
                         <div class="form-group fee-area"
                              id="fee-area" hidden>
-                            <label>참가비 <span>*</span></label>
+                            <label>{{i18n.admin.ui0101}} <span>*</span></label>
                             <input type="number" name="fee" id="fee"
                                    min="1" disabled>
                         </div>
@@ -187,15 +187,15 @@
 
                     <!-- 회차가 있는 행사 -->
                     <div id="session-area" hidden>
-                        <h3>회차별 일정</h3>
+                        <h3>{{i18n.event.ui0115}}</h3>
                         <p class="section-description">
-                            회차별 행사 일정과 모집 기간을 입력해 주세요.
+                            {{i18n.event.ui0116}}
                         </p>
 
                         <div id="session-list"></div>
 
                         <button type="button" id="add-session-button">
-                            + 회차 추가
+                            {{i18n.event.ui0117}}
                         </button>
                     </div>
                 </section>
@@ -203,29 +203,29 @@
 
             <!-- 대표 이미지 -->
             <section class="event-save-section">
-                <h2><span class="event-section-number">03 </span>대표 이미지</h2>
+                <h2><span class="event-section-number">03 </span>{{i18n.event.ui0118}}</h2>
                 <p class="section-description">
-                    행사를 대표하는 포스터 이미지를 등록해 주세요.
+                    {{i18n.event.ui0119}}
                 </p>
 
                     <div class="form-group">
-                        <label>대표 이미지 <span>*</span></label>
+                        <label>{{i18n.event.ui0118}} <span>*</span></label>
                         <div class="file-upload-box">
                             <input type="file" name="file"
                                    accept=".jpg,.jpeg,.png" required>
-                            <p>JPG, JPEG, PNG 파일을 등록해 주세요.</p>
+                            <p>{{i18n.event.ui0120}}</p>
                         </div>
                     </div>
                 </section>
 
                 <p class="event-save-notice">
-                    신청한 행사의 심사 상태는 기업 관리의 ‘주최 행사’에서 확인할 수 있습니다.
+                    {{i18n.event.ui0121}}
                 </p>
 
                 <div class="event-save-actions">
-                    <a href="/events" class="cancel-button">취소</a>
+                    <a href="/events" class="cancel-button">{{i18n.company.ui0043}}</a>
                     <button type="submit" class="submit-button">
-                        주최 신청하기
+                        {{i18n.event.ui0122}}
                     </button>
                 </div>
             </form>
@@ -241,24 +241,24 @@
 
         <div class="session-item-header">
             <h3 class="session-title"></h3>
-            <button type="button" class="remove-session-button">삭제</button>
+            <button type="button" class="remove-session-button">{{i18n.admin.ui0009}}</button>
         </div>
 
         <div class="form-group">
-            <label>회차명 <span>*</span></label>
+            <label>{{i18n.event.ui0123}} <span>*</span></label>
             <input type="text" data-field="name"
-                   placeholder="예: 1회차" required>
+                   placeholder="{{i18n.event.ui0124}}" required>
         </div>
 
 
         <!-- 행사 시작 -->
         <div class="date-time-group">
             <div class="form-group">
-                <label>행사 시작 날짜 <span>*</span></label>
+                <label>{{i18n.event.ui0125}} <span>*</span></label>
                 <input type="date" data-date-field="startsAt" required>
             </div>
             <div class="form-group">
-                <label>행사 시작 시간 <span>*</span></label>
+                <label>{{i18n.event.ui0126}} <span>*</span></label>
                 <input type="time" data-time-field="startsAt" required>
             </div>
         </div>
@@ -266,11 +266,11 @@
         <!-- 행사 종료 -->
         <div class="date-time-group">
             <div class="form-group">
-                <label>행사 종료 날짜 <span>*</span></label>
+                <label>{{i18n.event.ui0127}} <span>*</span></label>
                 <input type="date" data-date-field="endsAt" required>
             </div>
             <div class="form-group">
-                <label>행사 종료 시간 <span>*</span></label>
+                <label>{{i18n.event.ui0128}} <span>*</span></label>
                 <input type="time" data-time-field="endsAt" required>
             </div>
         </div>
@@ -278,11 +278,11 @@
         <!-- 모집 시작 -->
         <div class="date-time-group">
             <div class="form-group">
-                <label>모집 시작 날짜 <span>*</span></label>
+                <label>{{i18n.event.ui0129}} <span>*</span></label>
                 <input type="date" data-date-field="applyStartAt" required>
             </div>
             <div class="form-group">
-                <label>모집 시작 시간 <span>*</span></label>
+                <label>{{i18n.event.ui0108}} <span>*</span></label>
                 <input type="time" data-time-field="applyStartAt" required>
             </div>
         </div>
@@ -290,11 +290,11 @@
         <!-- 모집 마감 -->
         <div class="date-time-group">
             <div class="form-group">
-                <label>모집 마감 날짜 <span>*</span></label>
+                <label>{{i18n.event.ui0130}} <span>*</span></label>
                 <input type="date" data-date-field="applyEndAt" required>
             </div>
             <div class="form-group">
-                <label>모집 마감 시간 <span>*</span></label>
+                <label>{{i18n.event.ui0110}} <span>*</span></label>
                 <input type="time" data-time-field="applyEndAt" required>
             </div>
         </div>
@@ -308,22 +308,22 @@
         <input type="hidden" data-field="minimumCheckAt">
 
         <div class="form-group">
-            <label>정원 <span>*</span></label>
+            <label>{{i18n.admin.ui0100}} <span>*</span></label>
             <input type="number" data-field="capacity" min="1" required>
         </div>
 
         <!-- 참가비 -->
         <div class="form-group">
-            <label>참가비 유형 <span>*</span></label>
+            <label>{{i18n.event.ui0111}} <span>*</span></label>
             <select data-field="pricingType" required>
-                <option value="">참가비 유형을 선택해 주세요.</option>
-                <option value="FREE">무료</option>
-                <option value="PAID">유료</option>
+                <option value="">{{i18n.event.ui0112}}</option>
+                <option value="FREE">{{i18n.event.ui0113}}</option>
+                <option value="PAID">{{i18n.event.ui0114}}</option>
             </select>
         </div>
 
         <div class="form-group session-fee-area fee-area" hidden>
-            <label>참가비 <span>*</span></label>
+            <label>{{i18n.admin.ui0101}} <span>*</span></label>
             <input type="number" data-field="fee" min="1" disabled>
         </div>
     </div>
@@ -344,7 +344,7 @@
                         const address = data.roadAddress || data.jibunAddress;
 
                         if (!address) {
-                            alert("주소를 확인할 수 없습니다.");
+                            alert(BusanI18n.t("event.ui0131"));
                             return;
                         }
 
@@ -369,7 +369,7 @@
 
                 if (!addressSelected) {
                     event.preventDefault();
-                    alert("주소 검색을 통해 행사 장소를 선택해 주세요.");
+                    alert(BusanI18n.t("event.ui0132"));
                 }
             }, true);
 
@@ -559,7 +559,7 @@
         sessionItem.querySelector(".remove-session-button")
                 .addEventListener("click", function () {
                     if (sessionList.children.length <= 1) {
-                        alert("최소 한 개의 회차는 필요합니다.");
+                        alert(BusanI18n.t("event.ui0133"));
                         return;
                     }
 
@@ -580,7 +580,7 @@
 
         sessionItems.forEach((item, index) => {
             item.querySelector(".session-title").textContent =
-                    `${index + 1}회차`;
+                    BusanI18n.t("event.ui0134", [index + 1]);
 
             item.querySelectorAll("[data-field]").forEach(input => {
                 const fieldName = input.dataset.field;
@@ -592,7 +592,7 @@
     // 날짜 검증 공통 함수
     function validatePastDate(date, label) {
         if (isPastDate(date)) {
-            alert(`${label}은(는) 오늘 이전 날짜로 설정할 수 없습니다.`);
+            alert(BusanI18n.t("event.ui0135", [label]));
             return false;
         }
 
@@ -606,7 +606,7 @@
 
         if (!selectedType) {
             event.preventDefault();
-            alert("회차 운영 여부를 선택해 주세요.");
+            alert(BusanI18n.t("event.ui0136"));
             return;
         }
 
@@ -615,10 +615,10 @@
 
             // 과거 날짜 검사
             const dateFields = [
-                { value: startDate.value, label: "행사 시작일" },
-                { value: endDate.value, label: "행사 종료일" },
-                { value: applyStartDate.value, label: "모집 시작일" },
-                { value: applyEndDate.value, label: "모집 마감일" }
+                { value: startDate.value, label: BusanI18n.t("event.ui0105") },
+                { value: endDate.value, label: BusanI18n.t("event.ui0106") },
+                { value: applyStartDate.value, label: BusanI18n.t("event.ui0107") },
+                { value: applyEndDate.value, label: BusanI18n.t("event.ui0109") }
             ];
 
             for (const field of dateFields) {
@@ -631,7 +631,7 @@
             // 행사 시작일과 종료일 비교
             if (startDate.value > endDate.value) {
                 event.preventDefault();
-                alert("행사 종료일은 시작일보다 빠를 수 없습니다.");
+                alert(BusanI18n.t("event.ui0137"));
                 return;
             }
 
@@ -645,7 +645,7 @@
             // 모집 시작일시와 마감일시 비교
             if (applyStartAt.value > applyEndAt.value) {
                 event.preventDefault();
-                alert("모집 마감일시는 모집 시작일시보다 빠를 수 없습니다.");
+                alert(BusanI18n.t("event.ui0138"));
                 return;
             }
 
@@ -653,7 +653,7 @@
             // 같은 날짜 허용 x
             if (applyEndDate.value >= startDate.value) {
                 event.preventDefault();
-                alert("모집 마감일은 행사 시작일보다 빨라야 합니다.");
+                alert(BusanI18n.t("event.ui0139"));
                 return;
             }
         }
@@ -665,7 +665,7 @@
 
             if (sessionItems.length === 0) {
                 event.preventDefault();
-                alert("최소 한 개의 회차를 추가해 주세요.");
+                alert(BusanI18n.t("event.ui0140"));
                 return;
             }
 
@@ -693,13 +693,13 @@
 
                     // 과거 날짜 검사
                     const labels = {
-                        startsAt: "행사 시작일",
-                        endsAt: "행사 종료일",
-                        applyStartAt: "모집 시작일",
-                        applyEndAt: "모집 마감일"
+                        startsAt: BusanI18n.t("event.ui0105"),
+                        endsAt: BusanI18n.t("event.ui0106"),
+                        applyStartAt: BusanI18n.t("event.ui0107"),
+                        applyEndAt: BusanI18n.t("event.ui0109")
                     };
 
-                    if (!validatePastDate(date, `${index + 1}회차 ${labels[field]}`)) {
+                    if (!validatePastDate(date, BusanI18n.t("event.ui0141", [index + 1, labels[field]]))) {
                         event.preventDefault();
                         return;
                     }
@@ -721,14 +721,14 @@
                 // 행사 종료일시는 시작일시보다 빠를 수 없음
                 if (values.startsAt > values.endsAt) {
                     event.preventDefault();
-                    alert(`${index + 1}회차 행사 종료 일시는 시작 일시보다 빠를 수 없습니다.`);
+                    alert(BusanI18n.t("event.ui0142", [index + 1]));
                     return;
                 }
 
                 // 모집 마감일시는 모집 시작일시보다 빠를 수 없음
                 if (values.applyStartAt > values.applyEndAt) {
                     event.preventDefault();
-                    alert(`${index + 1}회차 모집 마감 일시는 모집 시작일시보다 빠를 수 없습니다.`);
+                    alert(BusanI18n.t("event.ui0143", [index + 1]));
                     return;
                 }
 
@@ -738,7 +738,7 @@
 
                 if (applyEndDateValue >= eventStartDateValue) {
                     event.preventDefault();
-                    alert(`${index + 1}회차 모집 마감일은 행사 시작일보다 빨라야 합니다.`);
+                    alert(BusanI18n.t("event.ui0144", [index + 1]));
                     return;
                 }
             }

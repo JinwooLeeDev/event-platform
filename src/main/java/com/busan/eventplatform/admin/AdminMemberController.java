@@ -1,5 +1,6 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.user.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,7 +25,7 @@ public class AdminMemberController {
     public String members(@RequestParam(defaultValue = "") String keyword,
                           @RequestParam(required = false) UserStatus status,
                           @RequestParam(defaultValue = "1") int page, Model model) {
-        AdminController.page(model, "회원 관리", "회원 정보를 검색하고 계정 상태를 확인하세요.", "members");
+        AdminController.page(model, LocaleMessages.display("회원 관리"), LocaleMessages.display("회원 정보를 검색하고 계정 상태를 확인하세요."), "members");
         model.addAttribute("memberListPage", true);
         model.addAttribute("memberDetailPage", false);
         model.addAttribute("memberPage", memberService.findMembers(keyword, status, page));
@@ -33,7 +34,7 @@ public class AdminMemberController {
 
     @GetMapping("/admin/members/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        AdminController.page(model, "회원 상세", "회원의 기본 정보와 계정 상태를 확인하세요.", "members");
+        AdminController.page(model, LocaleMessages.display("회원 상세"), LocaleMessages.display("회원의 기본 정보와 계정 상태를 확인하세요."), "members");
         model.addAttribute("memberListPage", false);
         model.addAttribute("memberDetailPage", true);
         model.addAttribute("member", memberService.findMember(id));

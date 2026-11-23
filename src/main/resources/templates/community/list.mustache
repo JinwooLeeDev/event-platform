@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="ko"><head>{{> layout/head-meta}}<title>내 커뮤니티 | Busan Play</title></head><body>
+<html lang="{{localeCode}}"><head>{{> layout/head-meta}}<title>{{i18n.community.ui0016}}</title></head><body>
 {{> layout/header}}
 {{> layout/account-style}}
 {{> community/style}}
 <main class="community-page"><div class="account-layout">
     {{#host}}{{> layout/company-nav}}{{/host}}{{^host}}{{> layout/account-nav}}{{/host}}
     <div class="account-content">
-        <header class="community-heading"><p class="community-location">{{#host}}기업페이지 / 행사 운영{{/host}}{{^host}}마이페이지 / 내 활동{{/host}}</p><h1>내 커뮤니티</h1><p>{{#host}}회차별 참가자와 소통하고 행사 소식을 안내하세요.{{/host}}{{^host}}함께할 사람들과 인사를 나누고 행사 소식을 확인하세요.{{/host}}</p></header>
-        <div class="community-guide"><span aria-hidden="true">ⓘ</span><div><strong>{{#host}}주최한 행사의 회차별 대화 공간{{/host}}{{^host}}참가가 확정되면 자동으로 참여해요{{/host}}</strong><p>커뮤니티는 회차 종료일 24시에 닫힙니다. 입장할 수 있는 회차만 아래에 표시됩니다.</p></div></div>
-        <section class="community-rooms" aria-label="입장 가능한 커뮤니티">
-            {{#communities}}<article class="community-room-link"><div class="community-room-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H9l-5 4V4Z"/><path d="M8 8h8m-8 4h5"/></svg></div><div class="community-room-info"><span class="community-tag">{{#host}}주최 커뮤니티{{/host}}{{^host}}참가 확정{{/host}}</span><h2><a href="{{url}}">{{eventTitle}}</a></h2><p class="community-session">{{sessionName}}</p><p class="community-close">{{closeText}}</p></div><a class="community-button" href="{{url}}">대화방 입장 <span aria-hidden="true">›</span></a></article>{{/communities}}
-            {{#empty}}<div class="community-empty"><span aria-hidden="true">☏</span><h2>아직 입장할 커뮤니티가 없어요</h2><p>{{#host}}주최한 행사의 운영 중인 회차가 이곳에 표시됩니다.{{/host}}{{^host}}행사 참가가 확정되면 해당 회차의 커뮤니티가 이곳에 표시됩니다.{{/host}}</p>{{#host}}<a class="community-button community-button--secondary" href="/events">주최 행사 확인</a>{{/host}}{{^host}}<a class="community-button community-button--secondary" href="/myhistory">신청한 행사 확인</a>{{/host}}</div>{{/empty}}
+        <header class="community-heading"><p class="community-location">{{#host}}{{i18n.community.ui0017}}{{/host}}{{^host}}{{i18n.community.ui0018}}{{/host}}</p><h1>{{i18n.community.ui0019}}</h1><p>{{#host}}{{i18n.community.ui0020}}{{/host}}{{^host}}{{i18n.community.ui0021}}{{/host}}</p></header>
+        <div class="community-guide"><span aria-hidden="true">ⓘ</span><div><strong>{{#host}}{{i18n.community.ui0022}}{{/host}}{{^host}}{{i18n.community.ui0023}}{{/host}}</strong><p>{{i18n.community.ui0024}}</p></div></div>
+        <section class="community-rooms" aria-label="{{i18n.community.ui0025}}">
+            {{#communities}}<article class="community-room-link"><div class="community-room-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H9l-5 4V4Z"/><path d="M8 8h8m-8 4h5"/></svg></div><div class="community-room-info"><span class="community-tag">{{#host}}{{i18n.community.ui0026}}{{/host}}{{^host}}{{i18n.community.ui0027}}{{/host}}</span><h2><a href="{{url}}">{{eventTitle}}</a></h2><p class="community-session">{{sessionName}}</p><p class="community-close">{{closeText}}</p></div><a class="community-button" href="{{url}}">{{i18n.community.ui0028}} <span aria-hidden="true">›</span></a></article>{{/communities}}
+            {{#empty}}<div class="community-empty"><span aria-hidden="true">☏</span><h2>{{i18n.community.ui0029}}</h2><p>{{#host}}{{i18n.community.ui0030}}{{/host}}{{^host}}{{i18n.community.ui0031}}{{/host}}</p>{{#host}}<a class="community-button community-button--secondary" href="/events">{{i18n.community.ui0032}}</a>{{/host}}{{^host}}<a class="community-button community-button--secondary" href="/myhistory">{{i18n.community.ui0033}}</a>{{/host}}</div>{{/empty}}
         </section>
     </div>
 </div></main>

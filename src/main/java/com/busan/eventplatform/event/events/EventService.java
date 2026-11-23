@@ -17,12 +17,14 @@ import com.busan.eventplatform.global.error.exception.Exception403;
 import com.busan.eventplatform.global.error.exception.Exception404;
 import com.busan.eventplatform.user.registration.RegistrationRepository;
 import com.busan.eventplatform.user.registration.RegistrationStatus;
+import com.busan.eventplatform.event.translation.EventTranslationPresentation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +47,13 @@ public class EventService {
     private final EventSessionRepository eventSessionRepository; /// 행사 결제할때 필요한 행사 회차수 조회를 위해 추가.
     private final com.busan.eventplatform.event.eventFile.EventFileService eventFileService;
     private final DepositRepository depositRepository;
+    private EventTranslationPresentation translationPresentation;
+
+    // Keep existing constructors used by domain tests/tools; Spring supplies the optional presentation layer.
+    @Autowired
+    public void configureTranslationPresentation(EventTranslationPresentation presentation) {
+        this.translationPresentation = presentation;
+    }
 
     // 행사 등록 기능
     @Transactional
@@ -119,6 +128,7 @@ public class EventService {
 
         var response = new EventResponse.PageDto(eventPage);
         populateSessionPeriods(response.getEventList());
+        if (translationPresentation != null) translationPresentation.list(eventPage.getContent(), response.getEventList());
         return response;
     }
 
@@ -141,7 +151,9 @@ public class EventService {
         if (userId != null) {
             chatAvailable = registrationRepository.countConfirmedByEventIdAndUserId(id, userId, RegistrationStatus.CONFIRMED) > 0;
         }
-        return new EventResponse.DetailDto(event, owner, confirmedCount, waitingCount, chatAvailable);
+        var response = new EventResponse.DetailDto(event, owner, confirmedCount, waitingCount, chatAvailable);
+        if (translationPresentation != null) translationPresentation.detail(event, response);
+        return response;
     }
 
     // 행사 수정 화면 데이터 조회

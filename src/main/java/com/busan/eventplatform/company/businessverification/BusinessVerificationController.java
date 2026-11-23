@@ -1,5 +1,7 @@
 package com.busan.eventplatform.company.businessverification;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+import com.busan.eventplatform.global.error.exception.UiErrorMessages;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class BusinessVerificationController {
 
     private final BusinessVerificationSessionService businessVerificationSessionService;
+    private final UiErrorMessages errorMessages;
 
 //    사업자검증 버튼 요청
     @PostMapping
@@ -20,10 +23,11 @@ public class BusinessVerificationController {
             HttpSession session
     ) {
         synchronized (session) {
-            return businessVerificationSessionService.check(
+            var result = businessVerificationSessionService.check(
                     check,
                     session
             );
+            return new BusinessVerificationResponse.Check(result.getStatus(), LocaleMessages.display(result.getMessage()));
         }
     }
 
@@ -33,7 +37,7 @@ public class BusinessVerificationController {
         return ResponseEntity.badRequest().body(
                 new BusinessVerificationResponse.Check(
                         BusinessVerificationStatus.NOT_CHECKED,
-                        exception.getMessage()
+                        errorMessages.display(exception.getMessage())
                 )
         );
     }

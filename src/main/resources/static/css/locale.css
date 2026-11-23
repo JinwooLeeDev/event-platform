@@ -11,3 +11,7 @@
 .bp-locale-options input { accent-color: #0044cc; }
 .bp-locale-apply { width: 100%; padding: 12px; border: 0; border-radius: 10px; background: #0044cc; color: white; font: inherit; cursor: pointer; }
 .bp-locale-dialog :focus-visible, .bp-locale-trigger:focus-visible { outline: 3px solid #9cbfff; outline-offset: 3px; }
+/* CJK translations have different natural break points; retain the existing layout and typography. */
+html:lang(ja) .charge-heading > div:first-child, html:lang(zh-CN) .charge-heading > div:first-child { max-width:100%; }
+html:lang(ja) .charge-heading h1, html:lang(ja) .charge-heading p,
+html:lang(zh-CN) .charge-heading h1, html:lang(zh-CN) .charge-heading p { word-break:normal; overflow-wrap:anywhere; }

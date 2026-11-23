@@ -1,5 +1,6 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,7 @@ public class AdminController {
         model.addAttribute("eventPaymentCount", eventRepository.countByStatus(com.busan.eventplatform.event.events.EventStatus.PAID_READY));
         model.addAttribute("eventFeedbackCount", eventRepository.countByStatus(com.busan.eventplatform.event.events.EventStatus.FEEDBACK_REQUIRED));
         model.addAttribute("companyReviewItems", AdminCompanyView.rows(companies.stream().limit(5).toList()));
-        return page(model, "운영 대시보드", "플랫폼 운영 현황과 처리할 업무를 확인하세요.", "dashboard");
+        return page(model, LocaleMessages.display("운영 대시보드"), LocaleMessages.display("플랫폼 운영 현황과 처리할 업무를 확인하세요."), "dashboard");
     }
 
     static String page(Model model, String title, String description, String section) {

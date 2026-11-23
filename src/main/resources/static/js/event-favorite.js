@@ -1,7 +1,7 @@
 (() => {
     const groups = new Map();
     const page = document.querySelector('[data-favorites-page]');
-    const labels = {PUBLISHED:'공개 중',PENDING_REVIEW:'심사 대기',FEEDBACK_REQUIRED:'보완 요청',PAID_READY:'공개 전',COMPLETED:'종료',CANCELLED:'취소'};
+    const labels = {PUBLISHED:BusanI18n.t("company.ui0033"),PENDING_REVIEW:BusanI18n.t("common.ui0083"),FEEDBACK_REQUIRED:BusanI18n.t("admin.ui0056"),PAID_READY:BusanI18n.t("common.ui0084"),COMPLETED:BusanI18n.t("company.ui0042"),CANCELLED:BusanI18n.t("company.ui0043")};
     document.querySelectorAll('[data-favorite-event-status]').forEach(el => { el.textContent = labels[el.textContent.trim()] || el.textContent; });
     const message = (group, text = '') => group.buttons.forEach(button => {
         const element = button.closest('[data-favorite-control]').querySelector('[data-favorite-message]');
@@ -11,11 +11,11 @@
     function apply(group, data) {
         const favorite = data.favorite ?? data.isFavorite;
         const count = Number(data.favoriteCount);
-        if (typeof favorite !== 'boolean' || !Number.isFinite(count) || count < 0) throw new Error('좋아요 상태를 확인하지 못했습니다. 다시 눌러 주세요.');
+        if (typeof favorite !== 'boolean' || !Number.isFinite(count) || count < 0) throw new Error(BusanI18n.t("common.ui0085"));
         group.state = {favorite, count};
         group.buttons.forEach(button => {
             button.setAttribute('aria-pressed', String(favorite));
-            button.setAttribute('aria-label', favorite ? '좋아요 취소' : '좋아요');
+            button.setAttribute('aria-label', favorite ? BusanI18n.t("common.ui0086") : BusanI18n.t("common.ui0036"));
             button.querySelector('[data-favorite-count]').textContent = count.toLocaleString('ko-KR');
             if (page && !favorite) button.closest('[data-favorite-item]')?.remove();
         });
@@ -29,17 +29,17 @@
         const response = await fetch('/events/favorite/' + encodeURIComponent(id), {method, headers:{Accept:'application/json'}});
         const data = await response.json().catch(() => null);
         if (!response.ok) {
-            const error = new Error('좋아요를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+            const error = new Error(BusanI18n.t("common.ui0087"));
             error.status = response.status; throw error;
         }
-        if (!data) throw new Error('좋아요 상태를 확인하지 못했습니다. 다시 눌러 주세요.');
+        if (!data) throw new Error(BusanI18n.t("common.ui0085"));
         return data;
     }
     async function load(group) {
         if (group.busy) return;
         busy(group, true); message(group);
         try { apply(group, await request(group.id)); }
-        catch (_) { message(group, '좋아요를 불러오지 못했습니다. 하트를 눌러 다시 시도해 주세요.'); }
+        catch (_) { message(group, BusanI18n.t("common.ui0088")); }
         finally { busy(group, false); }
     }
     const initialized = new WeakSet();
@@ -59,20 +59,20 @@
             button.addEventListener('click', async event => {
                 event.preventDefault(); event.stopPropagation();
                 if (group.busy) return;
-                if (button.dataset.favoriteCompany === 'true') { message(group, '개인 회원만 좋아요를 등록할 수 있습니다.'); return; }
+                if (button.dataset.favoriteCompany === 'true') { message(group, BusanI18n.t("common.ui0089")); return; }
                 busy(group, true); message(group);
                 try {
                     if (!group.state) apply(group, await request(id));
                     apply(group, await request(id, group.state.favorite ? 'DELETE' : 'POST'));
                 } catch (error) {
                     if (error.status === 401) {
-                        message(group, '좋아요를 변경하려면 개인 계정으로 로그인해 주세요.');
+                        message(group, BusanI18n.t("common.ui0090"));
                         if (window.BusanLogin) window.BusanLogin.open();
-                        else if (confirm('로그인이 필요합니다. 로그인 화면으로 이동할까요?')) location.assign('/login');
+                        else if (confirm(BusanI18n.t("common.ui0091"))) location.assign('/login');
                     } else if (error.status === 400 || error.status === 404) {
-                        try { apply(group, await request(id)); message(group, '변경된 좋아요 상태를 반영했습니다. 다시 확인해 주세요.'); }
-                        catch (_) { message(group, '좋아요를 처리하지 못했습니다. 다시 시도해 주세요.'); }
-                    } else { message(group, '좋아요를 처리하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.'); }
+                        try { apply(group, await request(id)); message(group, BusanI18n.t("common.ui0092")); }
+                        catch (_) { message(group, BusanI18n.t("common.ui0093")); }
+                    } else { message(group, BusanI18n.t("common.ui0094")); }
                 } finally { busy(group, false); }
             });
         });

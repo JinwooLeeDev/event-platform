@@ -1,5 +1,7 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.api.payment.PaymentService;
 import com.busan.eventplatform.api.purchase.PurchaseRes;
 import com.busan.eventplatform.api.purchase.PurchaseService;
@@ -89,11 +91,11 @@ public class MyPageController {
         model.addAttribute("resultCount", history.getItems().size());
         String search = "&keyword=" + URLEncoder.encode(history.getKeyword(), StandardCharsets.UTF_8);
         model.addAttribute("historyTabs", List.of(
-                Map.of("url", "/myhistory?tab=confirmed" + search, "label", "참가 확정", "count", history.getConfirmedCount(), "active", currentTab.equals("confirmed")),
-                Map.of("url", "/myhistory?tab=waiting" + search, "label", "대기 중", "count", history.getWaitingCount(), "active", currentTab.equals("waiting")),
-                Map.of("url", "/myhistory?tab=past" + search, "label", "종료된 행사", "count", history.getPastCount(), "active", currentTab.equals("past")),
+                Map.of("url", "/myhistory?tab=confirmed" + search, "label", LocaleMessages.display("참가 확정"), "count", history.getConfirmedCount(), "active", currentTab.equals("confirmed")),
+                Map.of("url", "/myhistory?tab=waiting" + search, "label", LocaleMessages.display("대기 중"), "count", history.getWaitingCount(), "active", currentTab.equals("waiting")),
+                Map.of("url", "/myhistory?tab=past" + search, "label", LocaleMessages.display("종료된 행사"), "count", history.getPastCount(), "active", currentTab.equals("past")),
                 // ★ [f/41] 취소·거절·행사 취소 내역 (환불 확인용, 담당자 요청)
-                Map.of("url", "/myhistory?tab=cancelled" + search, "label", "취소·환불", "count", history.getCancelledCount(), "active", currentTab.equals("cancelled"))));
+                Map.of("url", "/myhistory?tab=cancelled" + search, "label", LocaleMessages.display("취소·환불"), "count", history.getCancelledCount(), "active", currentTab.equals("cancelled"))));
     }
 
     @GetMapping("/mypoint")
@@ -147,7 +149,7 @@ public class MyPageController {
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
-                "회원 정보가 수정되었습니다."
+                LocaleMessages.display("회원 정보가 수정되었습니다.", com.busan.eventplatform.global.i18n.SupportedLocale.locale(updatedUser.getPreferredLocale()))
         );
         return "redirect:/mypage";
     }
@@ -165,13 +167,13 @@ public class MyPageController {
         try {
             myPageService.updatePassword(sessionUser.getId(), request);
         } catch (Exception400 exception) {
-            redirectAttributes.addFlashAttribute("passwordError", exception.getMessage());
+            redirectAttributes.addFlashAttribute("passwordError", LocaleMessages.display(exception.getMessage()));
             return "redirect:/mypage#password-settings";
         }
 
         session.invalidate();
         redirectAttributes.addFlashAttribute("passwordChangedMessage",
-                "비밀번호가 변경되었습니다. 새 비밀번호로 다시 로그인해주세요.");
+                LocaleMessages.display("비밀번호가 변경되었습니다. 새 비밀번호로 다시 로그인해주세요."));
         return "redirect:/login";
     }
 }

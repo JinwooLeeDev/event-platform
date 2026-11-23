@@ -1,5 +1,7 @@
 package com.busan.eventplatform.user.registration;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.event.eventCancel.EventCancelRepository;   // ★ [f/41] 회차 취소 검토 중 확인
 import com.busan.eventplatform.event.eventCancel.EventCancelStatus;
 
@@ -669,8 +671,8 @@ public class RegistrationService {
         Long purchaseId = purchaseIdOf(r);
         Integer refunded = purchaseId == null ? null : refundAmounts.get(purchaseId);
         if (refunded == null) return null;
-        String prefix = refundReason == null ? "" : refundReason + "로 ";
-        return prefix + "환불 완료 " + point(refunded);
+        return refundReason == null ? LocaleMessages.format("server.history.refunded", point(refunded))
+                : LocaleMessages.format("server.history.refundedReason", LocaleMessages.display(refundReason), point(refunded));
     }
 
     private Integer waitingNumberOf(Registration registration) {
@@ -738,15 +740,15 @@ public class RegistrationService {
             tab = "waiting";
             label = "대기열 등록";
             cssClass = "status-waiting";
-            message = "대기 " + waitingNumber + "번입니다. 앞선 신청이 취소되면 자동으로 참가 확정됩니다."
-                    + (paid > 0 ? " 대기 중에 취소하면 " + point(paid) + "가 전액 환불됩니다." : "");
+            message = LocaleMessages.format("server.history.waiting", waitingNumber)
+                    + (paid > 0 ? LocaleMessages.format("server.history.waitingRefund", point(paid)) : "");
         } else {
             tab = "confirmed";
             label = "참가 확정";
             cssClass = "status-confirmed";
             message = !now.isBefore(session.getStartsAt())
                     ? "현재 진행 중인 회차입니다."
-                    : "참가가 확정되었습니다. " + refundGuide(paid, expectedRefund);
+                    : LocaleMessages.format("server.history.confirmedGuide", refundGuide(paid, expectedRefund));
         }
 
         // 3. 취소 버튼 확인 창 문구 — 환불 예정 금액을 미리 보여줌
@@ -754,7 +756,7 @@ public class RegistrationService {
         if (!cancelable) cancelConfirm = "";
         else if (paid == 0) cancelConfirm = "참가 신청을 취소하시겠습니까?";
         else if (expectedRefund > 0)
-            cancelConfirm = "참가 신청을 취소하시겠습니까?\n결제한 " + point(paid) + " 중 " + point(expectedRefund) + "가 환불됩니다.";
+            cancelConfirm = LocaleMessages.format("server.history.cancelRefund", point(paid), point(expectedRefund));
         else cancelConfirm = "참가 신청을 취소하시겠습니까?\n회차 1일 전부터는 환불되지 않습니다. (환불 0P)";
 
         return RegistrationRes.MyHistoryItemDto.builder()
@@ -766,9 +768,9 @@ public class RegistrationService {
                 .place(event.getAddress())
                 .scheduleText(RegistrationRes.formatSchedule(session.getStartsAt(), session.getEndsAt()))
                 .tab(tab)
-                .statusLabel(label)
+                .statusLabel(LocaleMessages.display(label))
                 .statusClass(cssClass)
-                .statusMessage(message)
+                .statusMessage(LocaleMessages.display(message))
                 .waiting(waitingNumber != null)
                 .waitingRank(waitingNumber == null ? 0 : waitingNumber)
                 .paidPointText(point(paid))
@@ -777,8 +779,8 @@ public class RegistrationService {
                 .expectedRefundText(blankToNull(cancelable ? point(expectedRefund) : "")) // ★ 취소 불가 건은 '취소 시 예상 환불' 숨김
                 .refundText(refundTextOf(r, refundAmounts, refundReason)) // ★ 실제 환불 기록이 있으면 "환불 완료 7,000P" (기업 거절은 사유 표시), 없으면 null
                 .cancelable(cancelable)
-                .cancelConfirmText(cancelConfirm)
-                .refundPolicyText(cancelable && paid > 0 ? RefundPolicy.REGISTRATION_TEXT : "") // 무료·취소 불가면 정책 버튼 숨김
+                .cancelConfirmText(LocaleMessages.display(cancelConfirm))
+                .refundPolicyText(cancelable && paid > 0 ? LocaleMessages.format("server.history.refundPolicy") : "") // 무료·취소 불가면 정책 버튼 숨김
                 .cancelUrl(cancelable ? "/registrations/cancel/" + r.getId() : "")
                 .detailUrl("/event/" + event.getId()) // 행사 상세 주소 (행사 파트 확정: /event/{id})
                 // ★ [f/40] 참가 확정 + 커뮤니티 운영 중(회차 종료일 24시 전)일 때만 입장 주소, 아니면 null → 버튼 숨김
@@ -789,7 +791,8 @@ public class RegistrationService {
                 .closed("cancelled".equals(tab))   // ★ [f/41] 취소·환불 카드 → '취소 불가' 버튼 숨김
                 .attended(attendedTime != null)                                                  // ★ [f/42]
                 .attendanceText(attendedTime == null ? null
-                        : "출석 체크 완료 · " + attendedTime.format(RegistrationRes.ATTENDED_AT_FORMAT))
+                        : LocaleMessages.format("server.history.attended", attendedTime.format(RegistrationRes.ATTENDED_AT_FORMAT
+                                .withLocale(org.springframework.context.i18n.LocaleContextHolder.getLocale()))))
                 .reviewUrl(attendedTime == null ? null : AttendancePolicy.reviewUrl(session.getId()))
 
                 .build();
@@ -797,10 +800,10 @@ public class RegistrationService {
 
     // [나의 신청 내역] 확정 건의 "지금 취소하면" 환불 안내 문구
     private String refundGuide(int paid, int expectedRefund) {
-        if (paid == 0) return "무료 회차라 취소해도 환불할 금액이 없습니다.";
-        if (expectedRefund == paid) return "지금 취소하면 결제한 " + point(paid) + "가 전액 환불됩니다.";
-        if (expectedRefund > 0) return "지금 취소하면 " + point(paid) + " 중 " + point(expectedRefund) + "만 환불됩니다.";
-        return "회차 1일 전부터는 취소해도 환불되지 않습니다.";
+        if (paid == 0) return LocaleMessages.display("무료 회차라 취소해도 환불할 금액이 없습니다.");
+        if (expectedRefund == paid) return LocaleMessages.format("server.history.fullRefundGuide", point(paid));
+        if (expectedRefund > 0) return LocaleMessages.format("server.history.partialRefundGuide", point(paid), point(expectedRefund));
+        return LocaleMessages.display("회차 1일 전부터는 취소해도 환불되지 않습니다.");
     }
 
     // [나의 신청 내역] 탭별 개수

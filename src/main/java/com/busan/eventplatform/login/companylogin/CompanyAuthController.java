@@ -1,5 +1,7 @@
 package com.busan.eventplatform.login.companylogin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.login.LoginIdentity;
 import com.busan.eventplatform.login.LoginReqDto;
 import com.busan.eventplatform.login.LoginSession;
@@ -34,7 +36,7 @@ public class CompanyAuthController {
             companyAuthService.signup(request, session);
             session.removeAttribute(Define.EMAIL_VERIFICATION);
         }
-        redirectAttributes.addFlashAttribute("signupMessage", "기업 가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+        redirectAttributes.addFlashAttribute("signupMessage", LocaleMessages.display("기업 가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다."));
         return "redirect:/login?type=company";
     }
 

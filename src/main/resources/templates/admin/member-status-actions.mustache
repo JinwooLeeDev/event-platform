@@ -1,13 +1,13 @@
 {{#canSuspend}}
-<form class="admin-status-form" action="/admin/members/{{id}}/status" method="post" data-admin-confirm="회원 정지" data-admin-target="{{displayName}}" data-admin-danger="true">
+<form class="admin-status-form" action="/admin/members/{{id}}/status" method="post" data-admin-confirm="{{i18n.admin.ui0137}}" data-admin-target="{{displayName}}" data-admin-danger="true">
     <input type="hidden" name="status" value="SUSPENDED">
-    <button class="admin-status-button admin-status-button-danger" type="submit" aria-label="{{displayName}} 회원 정지">회원 정지</button>
+    <button class="admin-status-button admin-status-button-danger" type="submit" aria-label="{{i18n.admin.ui0137}}: {{displayName}}">{{i18n.admin.ui0137}}</button>
 </form>
 {{/canSuspend}}
 {{#canActivate}}
-<form class="admin-status-form" action="/admin/members/{{id}}/status" method="post" data-admin-confirm="정지 해제" data-admin-target="{{displayName}}">
+<form class="admin-status-form" action="/admin/members/{{id}}/status" method="post" data-admin-confirm="{{i18n.admin.ui0138}}" data-admin-target="{{displayName}}">
     <input type="hidden" name="status" value="ACTIVE">
-    <button class="admin-status-button admin-status-button-activate" type="submit" aria-label="{{displayName}} 정지 해제">정지 해제</button>
+    <button class="admin-status-button admin-status-button-activate" type="submit" aria-label="{{i18n.admin.ui0138}}: {{displayName}}">{{i18n.admin.ui0138}}</button>
 </form>
 {{/canActivate}}
-{{^canSuspend}}{{^canActivate}}<span class="admin-status-locked">상태 변경 불가</span>{{/canActivate}}{{/canSuspend}}
+{{^canSuspend}}{{^canActivate}}<span class="admin-status-locked">{{i18n.admin.ui0139}}</span>{{/canActivate}}{{/canSuspend}}

@@ -1,5 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.api.payment.PaymentService;
@@ -117,11 +119,11 @@ public class PurchaseService {
 
 
         paymentService.paymentList(userId).forEach(payment -> history.add(PurchaseRes.PointHistoryDto.builder()
-                .occurredAt(payment.getPaidAt()).typeLabel("충전").title("포인트 충전")
+                .occurredAt(payment.getPaidAt()).typeLabel(LocaleMessages.display("충전")).title(LocaleMessages.display("포인트 충전"))
                 .statusLabel("충전 완료").amount(payment.getAmount()).build()));
 
         purchaseList(userId).forEach(purchase -> history.add(PurchaseRes.PointHistoryDto.builder()
-                .occurredAt(purchase.getPurchaseDate()).typeLabel("행사 구매").title(purchase.getTitle())
+                .occurredAt(purchase.getPurchaseDate()).typeLabel(LocaleMessages.display("행사 구매")).title(purchase.getTitle())
                 .sessionName(purchase.getSessionName()).detailUrl(purchase.getDetailUrl())
                 .statusLabel(refundLabel(refundedAmounts.get(purchase.getPurchaseId()), purchase.getPrice()))
                 .amount(purchase.getPrice()).debit(true).build()));
@@ -136,7 +138,7 @@ public class PurchaseService {
                     && session.getEvent().getStatus() != EventStatus.CANCELLED;
 
             history.add(PurchaseRes.PointHistoryDto.builder()
-                    .occurredAt(refund.getCreatedAt()).typeLabel(rejectedByCompany ? "기업 거절" : "환불")   // ★ 변경
+                    .occurredAt(refund.getCreatedAt()).typeLabel(LocaleMessages.display(rejectedByCompany ? "기업 거절" : "환불"))   // ★ 변경
                     .title(session.getEvent().getTitle())
                     .sessionName(session.getName()).detailUrl("/event/" + session.getEvent().getId())
                     .statusLabel(refundLabel(refund.getAmount(), purchase.getPrice()))
@@ -149,8 +151,8 @@ public class PurchaseService {
     }
 
     private String refundLabel(Integer amount, int purchasePrice) {
-        if (amount == null) return "구매 완료";
-        if (amount == 0) return "환불액 0P";
-        return amount >= purchasePrice ? "전액 환불" : "부분 환불";
+        if (amount == null) return LocaleMessages.display("구매 완료");
+        if (amount == 0) return LocaleMessages.display("환불액 0P");
+        return LocaleMessages.display(amount >= purchasePrice ? "전액 환불" : "부분 환불");
     }
 }

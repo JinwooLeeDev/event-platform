@@ -1,9 +1,9 @@
 <dialog id="admin-confirm-dialog" class="admin-confirm-dialog" aria-labelledby="admin-confirm-title" aria-describedby="admin-confirm-description">
-    <div class="admin-confirm-heading"><h2 id="admin-confirm-title">처리 내용을 확인해주세요</h2><button type="button" data-admin-confirm-close aria-label="확인 창 닫기">×</button></div>
-    <p id="admin-confirm-description">대상과 적용할 작업을 확인한 후 진행해주세요.</p>
-    <dl><div><dt>대상</dt><dd id="admin-confirm-target"></dd></div><div><dt>작업</dt><dd id="admin-confirm-action"></dd></div></dl>
-    <div id="admin-confirm-reason-wrap" hidden><strong>전달할 사유</strong><p id="admin-confirm-reason"></p></div>
-    <div class="admin-confirm-actions"><button class="admin-status-button" type="button" data-admin-confirm-close>돌아가서 검토</button><button id="admin-confirm-submit" class="admin-status-button admin-primary-button" type="button">확인 후 처리</button></div>
+    <div class="admin-confirm-heading"><h2 id="admin-confirm-title">{{i18n.admin.ui0110}}</h2><button type="button" data-admin-confirm-close aria-label="{{i18n.admin.ui0111}}">×</button></div>
+    <p id="admin-confirm-description">{{i18n.admin.ui0112}}</p>
+    <dl><div><dt>{{i18n.admin.ui0113}}</dt><dd id="admin-confirm-target"></dd></div><div><dt>{{i18n.admin.ui0114}}</dt><dd id="admin-confirm-action"></dd></div></dl>
+    <div id="admin-confirm-reason-wrap" hidden><strong>{{i18n.admin.ui0115}}</strong><p id="admin-confirm-reason"></p></div>
+    <div class="admin-confirm-actions"><button class="admin-status-button" type="button" data-admin-confirm-close>{{i18n.admin.ui0116}}</button><button id="admin-confirm-submit" class="admin-status-button admin-primary-button" type="button">{{i18n.admin.ui0117}}</button></div>
 </dialog>
 <script>
 (() => {
@@ -16,7 +16,7 @@
         if (Number.isFinite(amount)) element.textContent = amount.toLocaleString('ko-KR') + ' P';
     });
     document.querySelectorAll('.admin-badge').forEach(element => {
-        const text = element.textContent.trim();
+        const text = BusanI18n.source(element.textContent.trim());
         element.dataset.tone = /오류|정지|반려|거절|취소/.test(text) ? 'danger'
             : /보완|대기|검토/.test(text) ? 'warning' : /승인|활성|일치|확정|공개/.test(text) ? 'success' : 'neutral';
     });
@@ -35,12 +35,12 @@
                 row.hidden = !visible; if (visible) matches++;
             });
             if (empty) empty.hidden = !rows.length || matches > 0;
-            if (count) count.textContent = `현재 목록 ${rows.length}건 중 ${matches}건 표시`;
+            if (count) count.textContent = BusanI18n.t("admin.ui0118", [rows.length, matches]);
         });
     });
     document.querySelectorAll('textarea[maxlength]').forEach(textarea => {
         const count = document.createElement('span'); count.className = 'admin-character-count';
-        const update = () => { count.textContent = `${textarea.value.length.toLocaleString('ko-KR')} / ${Number(textarea.maxLength).toLocaleString('ko-KR')}자`; };
+        const update = () => { count.textContent = BusanI18n.t("admin.ui0119", [textarea.value.length.toLocaleString('ko-KR'), Number(textarea.maxLength).toLocaleString('ko-KR')]); };
         textarea.insertAdjacentElement('afterend', count); textarea.addEventListener('input', update); update();
     });
     const dialog = document.getElementById('admin-confirm-dialog');
@@ -59,12 +59,12 @@
         event.preventDefault();
         if (!form.reportValidity()) return;
         pending = {form, submitter:event.submitter};
-        document.getElementById('admin-confirm-target').textContent = form.dataset.adminTarget || '선택한 항목';
+        document.getElementById('admin-confirm-target').textContent = form.dataset.adminTarget || BusanI18n.t("admin.ui0120");
         document.getElementById('admin-confirm-action').textContent = form.dataset.adminConfirm;
         const reason = form.querySelector('textarea')?.value.trim() || '';
         document.getElementById('admin-confirm-reason-wrap').hidden = !reason;
         document.getElementById('admin-confirm-reason').textContent = reason;
-        apply.textContent = form.dataset.adminConfirm + ' 처리';
+        apply.textContent = form.dataset.adminConfirm + BusanI18n.t("common.extra001");
         apply.dataset.danger = String(form.dataset.adminDanger === 'true');
         dialog.showModal();
     });

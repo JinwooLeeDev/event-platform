@@ -1,5 +1,6 @@
 package com.busan.eventplatform.company.companyAdminReview;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
@@ -93,7 +94,7 @@ public class AdminReviewResponse {
             this.fromStatus = history.getFromStatus();
             this.toStatus = history.getToStatus();
             this.reviewerName = history.getReviewer() == null || history.getReviewer().getDisplayName() == null
-                    ? "관리자 정보 없음" : history.getReviewer().getDisplayName();
+                    ? LocaleMessages.display("관리자 정보 없음") : history.getReviewer().getDisplayName();
             this.feedback = history.getFeedback();
             this.createdAt = history.getCreatedAt();
         }

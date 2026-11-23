@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>회차 선택·운영 | Busan Play</title></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.event.ui0202}}</title></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
@@ -8,15 +8,15 @@
 <main class="company-workspace session-page"><div class="account-layout">
     {{> layout/company-nav}}
     <section class="account-content" data-session-picker>
-        <header class="company-heading"><div><p class="company-location">기업페이지 / 주최 행사</p><h1>회차 선택·운영</h1><p class="company-description">일정과 모집 현황을 비교하고 관리할 회차를 선택하세요.</p></div><a class="company-button company-button--secondary" href="/events">주최 행사 목록</a></header>
+        <header class="company-heading"><div><p class="company-location">{{i18n.event.ui0203}}</p><h1>{{i18n.event.ui0204}}</h1><p class="company-description">{{i18n.event.ui0205}}</p></div><a class="company-button company-button--secondary" href="/events">{{i18n.event.ui0183}}</a></header>
         <div class="session-choice-grid">
         {{#eventSession}}
-        <a class="session-panel session-choice-link" href="/event-sessions/{{id}}" data-session-link><div class="company-panel-heading"><h2>{{name}}</h2><span class="company-state" data-session-status>{{status}}</span></div><dl class="session-facts"><div><dt>개최 일정</dt><dd><span data-session-date>{{startsAt}}</span><br>~ <span data-session-date>{{endsAt}}</span></dd></div><div><dt>모집 기간</dt><dd><span data-session-date>{{applyStartAt}}</span><br>~ <span data-session-date>{{applyEndAt}}</span></dd></div></dl><div class="session-choice-metrics"><div><span>정원</span><strong>{{capacityLabel}}</strong></div><div><span>현재 점유</span><strong>{{occupiedCount}}명</strong></div><div><span>참가비</span><strong data-session-point>{{fee}}</strong></div></div><span class="session-choice-action">회차·참가자 관리 <span aria-hidden="true">↗</span></span></a>
+        <a class="session-panel session-choice-link" href="/event-sessions/{{id}}" data-session-link><div class="company-panel-heading"><h2>{{name}}</h2><span class="company-state" data-session-status>{{status}}</span></div><dl class="session-facts"><div><dt>{{i18n.admin.ui0065}}</dt><dd><span data-session-date>{{startsAt}}</span><br>~ <span data-session-date>{{endsAt}}</span></dd></div><div><dt>{{i18n.admin.ui0099}}</dt><dd><span data-session-date>{{applyStartAt}}</span><br>~ <span data-session-date>{{applyEndAt}}</span></dd></div></dl><div class="session-choice-metrics"><div><span>{{i18n.admin.ui0100}}</span><strong>{{capacityLabel}}</strong></div><div><span>{{i18n.event.ui0156}}</span><strong>{{occupiedCount}}{{i18n.admin.ui0067}}</strong></div><div><span>{{i18n.admin.ui0101}}</span><strong data-session-point>{{fee}}</strong></div></div><span class="session-choice-action">{{i18n.company.ui0065}} <span aria-hidden="true">↗</span></span></a>
         {{/eventSession}}
         </div>
-        {{^eventSession}}<div class="company-empty"><h2>등록된 회차가 없습니다.</h2><p>아래 ‘회차 추가’에서 모집 일정과 참가비를 입력해주세요.</p></div>{{/eventSession}}
+        {{^eventSession}}<div class="company-empty"><h2>{{i18n.admin.ui0102}}</h2><p>{{i18n.event.ui0206}}</p></div>{{/eventSession}}
         {{> event_session/create-form}}
-        <noscript><p class="company-description">회차 이름을 선택하면 관리 화면으로 이동합니다.</p></noscript>
+        <noscript>{{i18n.event.ui0207}}</noscript>
     </section>
 </div></main>
 {{> layout/footer}}

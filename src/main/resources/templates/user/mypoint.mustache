@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>포인트 관리 | Busan Play</title></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.application.ui0049}}</title></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
@@ -9,26 +9,26 @@
     <div class="account-layout">
         {{> layout/account-nav}}
         <div class="account-content">
-            <header class="account-heading"><div><p class="account-location">마이페이지 / 내 활동</p><h1>포인트 관리</h1><p class="account-description">보유 포인트와 충전·구매·환불 내역을 확인하세요.</p></div></header>
-            <section class="account-panel account-point-balance" aria-labelledby="balance-title"><div class="account-point-balance-main"><span class="account-point-symbol" aria-hidden="true">P</span><div><h2 id="balance-title">보유 포인트</h2>{{#myPage}}<strong class="point-number">{{point}}</strong>{{/myPage}}{{^myPage}}<strong>잔액 확인 필요</strong><p class="account-description">마이페이지 또는 충전 화면에서 잔액을 확인해주세요.</p>{{/myPage}}</div></div><a class="account-button account-button--secondary" href="/charge">포인트 충전하기 <span aria-hidden="true">+</span></a></section>
+            <header class="account-heading"><div><p class="account-location">{{i18n.community.ui0018}}</p><h1>{{i18n.common.ui0019}}</h1><p class="account-description">{{i18n.application.ui0050}}</p></div></header>
+            <section class="account-panel account-point-balance" aria-labelledby="balance-title"><div class="account-point-balance-main"><span class="account-point-symbol" aria-hidden="true">P</span><div><h2 id="balance-title">{{i18n.admin.ui0165}}</h2>{{#myPage}}<strong class="point-number">{{point}}</strong>{{/myPage}}{{^myPage}}<strong>{{i18n.application.ui0051}}</strong><p class="account-description">{{i18n.application.ui0052}}</p>{{/myPage}}</div></div><a class="account-button account-button--secondary" href="/charge">{{i18n.company.ui0008}} <span aria-hidden="true">+</span></a></section>
             <section class="account-panel account-ledger point-history" aria-labelledby="point-history-title">
-                <div class="account-panel-heading"><h2 id="point-history-title">전체 거래 내역</h2><span class="account-ledger-label">최신 거래순</span></div>
-                <p class="account-description">충전과 환불은 더하고, 행사 구매는 차감한 내역입니다.</p>
+                <div class="account-panel-heading"><h2 id="point-history-title">{{i18n.application.ui0053}}</h2><span class="account-ledger-label">{{i18n.application.ui0054}}</span></div>
+                <p class="account-description">{{i18n.application.ui0055}}</p>
                 {{#pointHistory}}
                 <article class="account-point-row">
                     <div>
                         <div class="point-history-labels"><span class="account-ledger-label">{{typeLabel}}</span><span class="status-badge">{{statusLabel}}</span></div>
                         <strong>{{title}}</strong>
                         {{#sessionName}}<small>{{sessionName}}</small>{{/sessionName}}
-                        <small>{{#occurredAt}}<time data-account-date>{{occurredAt}}</time>{{/occurredAt}}{{^occurredAt}}거래일 확인 중{{/occurredAt}}</small>
-                        {{#detailUrl}}<a class="account-text-link point-history-link" href="{{detailUrl}}">관련 행사 보기</a>{{/detailUrl}}
+                        <small>{{#occurredAt}}<time data-account-date>{{occurredAt}}</time>{{/occurredAt}}{{^occurredAt}}{{i18n.application.ui0056}}{{/occurredAt}}</small>
+                        {{#detailUrl}}<a class="account-text-link point-history-link" href="{{detailUrl}}">{{i18n.application.ui0057}}</a>{{/detailUrl}}
                     </div>
                     <span class="account-point-amount {{#debit}}account-point-amount--used{{/debit}}">{{#debit}}−{{/debit}}{{^debit}}+{{/debit}}<span class="point-number">{{amount}}</span></span>
                 </article>
                 {{/pointHistory}}
-                {{^pointHistory}}<div class="account-ledger-empty"><p>아직 포인트 거래 내역이 없어요.</p><span>포인트를 충전하거나 행사에 신청하면 이곳에서 확인할 수 있습니다.</span><a class="account-text-link" href="/charge">포인트 충전하기</a></div>{{/pointHistory}}
+                {{^pointHistory}}<div class="account-ledger-empty"><p>{{i18n.application.ui0058}}</p><span>{{i18n.application.ui0059}}</span><a class="account-text-link" href="/charge">{{i18n.company.ui0008}}</a></div>{{/pointHistory}}
             </section>
-            <details class="account-guide"><summary>포인트 이용 안내</summary><ul><li>충전한 포인트는 행사 신청 및 서비스 이용에 사용할 수 있습니다.</li><li>신청 상태와 참가 취소는 <a href="/myhistory">신청한 행사</a>에서 확인해주세요.</li><li>구매 내역에는 처음 결제한 포인트가 표시되며, 돌려받은 포인트는 별도의 환불 내역으로 표시됩니다.</li><li>부분·전액 환불은 구매 당시 결제액과 실제 환불액을 기준으로 구분합니다. 환불액이 0P인 경우에는 포인트가 반환되지 않습니다.</li></ul></details>
+            <details class="account-guide"><summary>{{i18n.application.ui0060}}</summary><ul><li>{{i18n.payment.ui0023}}</li><li>{{i18n.application.ui0061}} <a href="/myhistory">{{i18n.common.ui0017}}</a>{{i18n.application.ui0062}}</li><li>{{i18n.application.ui0063}}</li><li>{{i18n.application.ui0064}}</li></ul></details>
         </div>
     </div>
 </main>

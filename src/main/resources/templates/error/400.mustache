@@ -13,7 +13,7 @@
         </div>
         <div class="error-divider"></div>
         <h1 class="error-title">
-            올바르지 않은 요청입니다
+            {{i18n.error.ui0001}}
         </h1>
         <div class="error-description">
             {{#errorMessage}}
@@ -21,22 +21,22 @@
             {{/errorMessage}}
 
             {{^errorMessage}}
-                <p>요청 형식이나 입력 내용이 올바르지 않습니다.</p>
-                <p>내용을 확인한 후 다시 시도해 주세요.</p>
+                <p>{{i18n.error.ui0002}}</p>
+                <p>{{i18n.error.ui0003}}</p>
             {{/errorMessage}}
         </div>
         <div class="error-actions">
             <a href="/" class="error-btn error-btn-primary">
-                메인으로 돌아가기 &rarr;
+                {{i18n.error.ui0004}}
             </a>
             <button type="button"
                     class="error-btn error-btn-secondary"
                     onclick="history.back()">
-                &larr; 이전 페이지
+                {{i18n.error.ui0005}}
             </button>
         </div>
         <div class="error-bottom">
-            부산의 모든 즐거움, <strong>Busan Play</strong>
+            {{i18n.error.ui0006}} <strong>Busan Play</strong>
         </div>
     </div>
 </main>

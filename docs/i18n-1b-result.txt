@@ -1,0 +1,224 @@
+Busan Play 1-B 정적 UI 다국어 적용 결과
+
+작업 범위
+- feat/다국어지원 브랜치에서 기존 1-A 구조를 확장했다. 브랜치 변경, 커밋, Push는 하지 않았다.
+- 기존 1-A 테스트 38개로 MessageSource, 지원 Locale, 언어 쿠키, 최초 선택 모달,
+  헤더 선택, 회원가입 저장, 로그인 동기화, 로그아웃 후 유지, CSRF와 복귀 URL을 확인했다.
+- 기존 Mustache 80개와 정적 JS 10개를 조사했다. 문구가 있는 기존 66개 파일
+  (Mustache 58개, JS 8개)을 번역하고, 공통 전달용 Mustache/JS를 각각 1개 추가했다.
+- 4개 언어 파일은 각각 1,524개 키를 갖는다. 기존 20개에서 1,504개 추가했다.
+
+구현 구조
+- LocaleMessages/LocaleViewAdvice가 기존 MessageSource를 사용해 중첩 i18n 모델을 제공한다.
+  Controller마다 번역 데이터를 반복해서 넣지 않는다. 기존 1-A 별칭도 유지했다.
+- layout/i18n-assets.mustache가 같은 MessageSource의 메시지를 안전한 JSON으로 전달한다.
+  i18n.js의 BusanI18n.t가 JS 알림, 확인창, 동적 문구에 사용된다. 별도 JSON 번역 저장소는 없다.
+  따옴표, 개행, HTML script 종료 구문과 특수문자는 JSON 직렬화/escape로 처리한다.
+- 공통 예외 처리와 UiErrorMessages가 사용자 오류를 번역한다. 상태 코드, 예외 타입,
+  응답 필드와 비즈니스 판단은 유지했다. 숫자/필드명 포함 문장은 매개변수 키로 처리했다.
+- Enum 저장값은 유지하고 표시 getter/DTO의 정적 라벨만 번역했다. 신청 내역, 환불 안내,
+  포인트 상태, 인증 메일도 같은 리소스를 사용한다.
+- 공유 커뮤니티 시스템 문구는 수신자의 언어로 표시한다. 사용자 채팅/공지 원문,
+  행사 제목/설명/장소명, 이름, 카테고리 DB 값과 자유 형식 사유는 그대로 유지한다.
+- 날짜는 안전한 표시 위치에만 Locale을 적용했다. 저장 날짜, 타임존, 기간 계산,
+  금액 계산, 결제 통화 KRW와 외부 API 계약은 변경하지 않았다.
+
+검증
+- 다국어 관련 JUnit 61개 통과: 기존 기반/언어 흐름, HTML·JSON 오류,
+  리소스/인수/JSON 안전성, 네 언어의 인증 메일(실제 전송 없이 mock) 포함.
+- 키 누락/중복/빈 값/플레이스홀더/템플릿 참조/JS 문법 검사 실패 0건.
+  Mustache 참조 1,232개, JS 참조 251개, JS 구문 36개 검사.
+- 정적 UI에 남은 한국어 누락 0건. 남은 한국어 221건은 주석 214건,
+  내부 판별/선택자 4건, 정규식 3건이다. 이름 뒤 호칭 common.ui0043의 영어/중국어
+  빈 문자열은 의도한 표현이며 검사에서 명시적으로 허용한다.
+- Node 기능 검증: 즐겨찾기, 참가 신청, 관리자 취소 비동기 이동,
+  기업 참가자 관리, 메시지 포맷, 결제 수단 선택/실패/중복 방지,
+  비동기 검색/분류/페이지 이동/응답 순서, 이미지와 28개 반응형 배치 통과.
+- 실제 브라우저 검사 및 전체 JUnit 비교 결과는 아래 최종 집계를 참조한다.
+- 빌드와 테스트는 분리된 출력 폴더와 메모리 H2에서 수행했다. 사용자 DB와
+  기존 개발 서버는 건드리지 않았다. 실제 결제, SMTP, 사업자 인증 호출은 실행하지 않았다.
+
+제한 및 수동 확인
+- 전체 기존 테스트는 모두 통과하지 않는다. 작업 전 HEAD와 같은 환경에서 비교해
+  신규 실패 여부를 구분했다. 기존 실패를 해결하려고 업무 로직을 바꾸지는 않았다.
+- 390px 오류 페이지 footer 가로 넘침은 한국어에서도 재현되는 기존 문제이며,
+  네 언어에서 별도로 기록했다. 디자인 변경 범위에 포함하지 않았다.
+- 영어/일본어/중국어의 결제·환불·승인 취소 용어와 기업 관련 표현은
+  실제 운영 담당자의 최종 문구 검토를 권장한다.
+- 외부 결제사의 실제 승인/환불, 실제 이메일 수신과 외부 인증 서비스의 원문은
+  실환경 검증 대상이다. 해당 서비스의 오류 원문을 임의로 번역하지 않는다.
+
+다음 단계 준비만 정리 (구현하지 않음)
+- Event 원본은 title, summary, description을 보유한다. address/placeName은
+  고유 지명 취급 정책을 먼저 결정해야 한다. cancellationReason/feedbackMessage 등은
+  공개 범위와 개인정보 정책에 따라 별도로 선정한다.
+- 향후 번역 저장은 eventId + locale + 원문 hash/revision의 유일성, 번역 상태,
+  생성/수정 시간과 실패 정보를 고려한다. 이번 작업에서 테이블은 만들지 않았다.
+- EventService.save, update, updateAndResubmit의 저장 완료 후 원문 변경을 감지하고,
+  findById/findAllPage에서 번역 조회와 원문 fallback을 고려할 수 있다.
+- 호출은 저장 트랜잭션 완료 후 비동기 작업이 적합하다. 요청마다 API를 부르면
+  비용/지연/중복 호출 위험이 있으므로 캐시, 중복 방지, 재시도, 제한량을 설계해야 한다.
+- 수정 중 오래된 번역 덮어쓰기, HTML/플레이스홀더 손상, 개인정보 전송,
+  API 키 관리, 장애 시 원문 표시, 팀원 작업 충돌을 검토해야 한다.
+- Gemini API 코드, 동적 콘텐츠 번역 서비스, DB 스키마는 추가하지 않았다. 1-B에서 종료한다.
+
+파일별 변경 목록과 최종 실행 집계
+
+Final JUnit: 375 tests / 39 existing failures.
+Baseline HEAD: 352 tests / 41 failures.
+Introduced failures: 0
+Build: bootJar SUCCESS. Targeted i18n: 61/61 PASS.
+Browser: 108 pages / 0 issues / 0 JavaScript errors.
+Existing failing test classes:
+com.busan.eventplatform.company.CompanyServiceTest
+com.busan.eventplatform.company.admin.CompanyReviewServiceTest
+com.busan.eventplatform.event.EventSavePeriodTest
+com.busan.eventplatform.event.eventCancel.EventCancelServiceTest
+com.busan.eventplatform.event.events.EventControllerTest
+com.busan.eventplatform.event.events.EventServiceTest
+com.busan.eventplatform.login.companylogin.CompanySignupMigrationTest
+com.busan.eventplatform.login.mypage.MyHistoryPageTest
+com.busan.eventplatform.point.DepositTest
+com.busan.eventplatform.point.PaymentTest
+com.busan.eventplatform.point.RefundServiceTest
+com.busan.eventplatform.seed.AllTablesSeedTest
+
+Modified/added files:
+scripts/FinalPolishRender.java
+scripts/check-admin-event-cancels.cjs
+scripts/check-company-participants.cjs
+scripts/check-event-favorite.cjs
+scripts/check-registration-apply.cjs
+src/main/java/com/busan/eventplatform/admin/AdminCompanyView.java
+src/main/java/com/busan/eventplatform/admin/AdminController.java
+src/main/java/com/busan/eventplatform/admin/AdminEventCancelController.java
+src/main/java/com/busan/eventplatform/admin/AdminEventController.java
+src/main/java/com/busan/eventplatform/admin/AdminMemberController.java
+src/main/java/com/busan/eventplatform/admin/AdminMemberResponse.java
+src/main/java/com/busan/eventplatform/admin/AdminSessionController.java
+src/main/java/com/busan/eventplatform/api/payment/PaymentStatus.java
+src/main/java/com/busan/eventplatform/api/purchase/DepositController.java
+src/main/java/com/busan/eventplatform/api/purchase/DepositStatus.java
+src/main/java/com/busan/eventplatform/api/purchase/PurchaseController.java
+src/main/java/com/busan/eventplatform/api/purchase/PurchaseRes.java
+src/main/java/com/busan/eventplatform/api/purchase/PurchaseService.java
+src/main/java/com/busan/eventplatform/api/purchase/PurchaseStatus.java
+src/main/java/com/busan/eventplatform/api/refund/RefundStatus.java
+src/main/java/com/busan/eventplatform/company/businessverification/BusinessVerificationController.java
+src/main/java/com/busan/eventplatform/company/companyAdminReview/AdminReviewResponse.java
+src/main/java/com/busan/eventplatform/event/eventCancel/EventCancelController.java
+src/main/java/com/busan/eventplatform/event/eventCancel/EventCancelService.java
+src/main/java/com/busan/eventplatform/event/eventCategory/EventCategoryController.java
+src/main/java/com/busan/eventplatform/event/eventReview/EventReviewController.java
+src/main/java/com/busan/eventplatform/event/eventSession/EventSessionResponse.java
+src/main/java/com/busan/eventplatform/event/events/EventController.java
+src/main/java/com/busan/eventplatform/global/error/exception/GlobalExceptionHandler.java
+src/main/java/com/busan/eventplatform/global/error/exception/RegistrationApiExceptionHandler.java
+src/main/java/com/busan/eventplatform/global/i18n/LocaleMessages.java
+src/main/java/com/busan/eventplatform/global/i18n/LocaleViewAdvice.java
+src/main/java/com/busan/eventplatform/login/companylogin/CompanyAuthController.java
+src/main/java/com/busan/eventplatform/login/emailverification/EmailVerificationController.java
+src/main/java/com/busan/eventplatform/login/emailverification/SmtpEmailSender.java
+src/main/java/com/busan/eventplatform/login/mypage/MyPageController.java
+src/main/java/com/busan/eventplatform/user/attendance/AttendancePolicy.java
+src/main/java/com/busan/eventplatform/user/attendance/AttendanceService.java
+src/main/java/com/busan/eventplatform/user/community/CommunityRes.java
+src/main/java/com/busan/eventplatform/user/community/CommunityService.java
+src/main/java/com/busan/eventplatform/user/registration/RegistrationApiController.java
+src/main/java/com/busan/eventplatform/user/registration/RegistrationRes.java
+src/main/java/com/busan/eventplatform/user/registration/RegistrationService.java
+src/main/java/com/busan/eventplatform/user/registration/RegistrationStatus.java
+src/main/resources/messages.properties
+src/main/resources/messages_en.properties
+src/main/resources/messages_ja.properties
+src/main/resources/messages_zh_CN.properties
+src/main/resources/static/css/locale.css
+src/main/resources/static/js/admin-event-cancels.js
+src/main/resources/static/js/company-participants.js
+src/main/resources/static/js/company-session.js
+src/main/resources/static/js/event-detail-map.js
+src/main/resources/static/js/event-detail-session.js
+src/main/resources/static/js/event-favorite.js
+src/main/resources/static/js/event-list.js
+src/main/resources/static/js/point-charge.js
+src/main/resources/templates/admin/categories.mustache
+src/main/resources/templates/admin/companies.mustache
+src/main/resources/templates/admin/event-cancels.mustache
+src/main/resources/templates/admin/events.mustache
+src/main/resources/templates/admin/interaction.mustache
+src/main/resources/templates/admin/layout/header.mustache
+src/main/resources/templates/admin/layout/sidebar.mustache
+src/main/resources/templates/admin/member-status-actions.mustache
+src/main/resources/templates/admin/members.mustache
+src/main/resources/templates/admin/page.mustache
+src/main/resources/templates/admin/sessions.mustache
+src/main/resources/templates/attendance/check.mustache
+src/main/resources/templates/attendance/qr.mustache
+src/main/resources/templates/community/list.mustache
+src/main/resources/templates/community/room.mustache
+src/main/resources/templates/company/detail.mustache
+src/main/resources/templates/company/event-list.mustache
+src/main/resources/templates/company/participant-reject-dialog.mustache
+src/main/resources/templates/company/point-history.mustache
+src/main/resources/templates/company/update.mustache
+src/main/resources/templates/error/400.mustache
+src/main/resources/templates/error/401.mustache
+src/main/resources/templates/error/403.mustache
+src/main/resources/templates/error/404.mustache
+src/main/resources/templates/error/405.mustache
+src/main/resources/templates/error/4xx.mustache
+src/main/resources/templates/error/500.mustache
+src/main/resources/templates/error/5xx.mustache
+src/main/resources/templates/event/detail.mustache
+src/main/resources/templates/event/list.mustache
+src/main/resources/templates/event/review-list.mustache
+src/main/resources/templates/event/save-form.mustache
+src/main/resources/templates/event/update-form.mustache
+src/main/resources/templates/event_cancel/save-form.mustache
+src/main/resources/templates/event_session/create-form.mustache
+src/main/resources/templates/event_session/detail.mustache
+src/main/resources/templates/event_session/list.mustache
+src/main/resources/templates/layout/account-nav.mustache
+src/main/resources/templates/layout/company-nav.mustache
+src/main/resources/templates/layout/event-card.mustache
+src/main/resources/templates/layout/favorite-button.mustache
+src/main/resources/templates/layout/footer.mustache
+src/main/resources/templates/layout/header.mustache
+src/main/resources/templates/login/companysignup.mustache
+src/main/resources/templates/login/login.mustache
+src/main/resources/templates/login/modal-script.mustache
+src/main/resources/templates/login/modal.mustache
+src/main/resources/templates/login/mypage.mustache
+src/main/resources/templates/login/signup.mustache
+src/main/resources/templates/main.mustache
+src/main/resources/templates/point/charge-point.mustache
+src/main/resources/templates/point/purchase.mustache
+src/main/resources/templates/registration/apply-button-script.mustache
+src/main/resources/templates/registration/cancel-confirm-dialog.mustache
+src/main/resources/templates/user/history-content.mustache
+src/main/resources/templates/user/myfavorites.mustache
+src/main/resources/templates/user/myhistory.mustache
+src/main/resources/templates/user/mypoint.mustache
+src/test/java/com/busan/eventplatform/admin/AdminDashboardTest.java
+src/test/java/com/busan/eventplatform/admin/AdminOperationsScreenTest.java
+src/test/java/com/busan/eventplatform/admin/AdminPageTest.java
+src/test/java/com/busan/eventplatform/admin/CompanyReviewHistoryPageTest.java
+src/test/java/com/busan/eventplatform/company/CompanyDetailRenderTest.java
+src/test/java/com/busan/eventplatform/event/EventRecruitmentRenderingTest.java
+src/test/java/com/busan/eventplatform/event/events/MyFavoritePageTest.java
+src/test/java/com/busan/eventplatform/global/i18n/LocaleFlowTest.java
+src/test/java/com/busan/eventplatform/login/mypage/MyHistoryPageTest.java
+src/test/java/com/busan/eventplatform/login/mypage/MyPointPageTest.java
+docs/i18n-1b-analysis.txt
+docs/i18n-1b-result.txt
+scripts/check-i18n-browser.cjs
+scripts/check-i18n-runtime.cjs
+scripts/check-i18n.cjs
+scripts/i18n-test-helpers.cjs
+src/main/java/com/busan/eventplatform/global/error/exception/UiErrorMessages.java
+src/main/resources/static/js/i18n.js
+src/main/resources/templates/layout/i18n-assets.mustache
+src/test/java/com/busan/eventplatform/global/i18n/I18nTestModels.java
+src/test/java/com/busan/eventplatform/global/i18n/ServerUiMessagesTest.java
+src/test/java/com/busan/eventplatform/global/i18n/StaticUiTranslationTest.java
+src/test/java/com/busan/eventplatform/global/i18n/VerificationMailLocaleTest.java

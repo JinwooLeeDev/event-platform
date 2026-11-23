@@ -2,6 +2,7 @@ package com.busan.eventplatform.login.emailverification;
 
 import com.busan.eventplatform.global.error.exception.Exception500;
 import com.busan.eventplatform.global.util.Define;
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,18 +27,8 @@ public class SmtpEmailSender implements EmailSender {
 
         message.setFrom(from);
         message.setTo(email);
-        message.setSubject("[Busan Play] 회원가입 이메일 인증번호");
-        message.setText("""
-                안녕하세요. Busan Play입니다.
-
-                이메일 인증번호: %s
-
-                %d분 안에 인증번호를 입력해주세요.
-                본인이 요청하지 않았다면 이 메일을 무시해주세요.
-                """.formatted(
-                code,
-                Define.EMAIL_CODE_EXPIRE_MINUTES
-        ));
+        message.setSubject(LocaleMessages.display("[Busan Play] 회원가입 이메일 인증번호"));
+        message.setText(LocaleMessages.format("auth.email.verificationBody", code, Define.EMAIL_CODE_EXPIRE_MINUTES));
 
         try {
             javaMailSender.send(message);

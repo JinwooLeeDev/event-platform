@@ -139,7 +139,8 @@ class LocaleFlowTest {
         assertThat(((SessionUserDto)session.getAttribute(LoginSession.USER)).getPreferredLocale()).isEqualTo("zh-CN");
         mvc.perform(post("/mypage").session(session).param("_localeCsrf", token(session))
                         .param("displayName", user.getDisplayName()).param("preferredLocale", "en"))
-                .andExpect(redirectedUrl("/mypage")).andExpect(cookie().value(COOKIE, "en"));
+                .andExpect(redirectedUrl("/mypage")).andExpect(cookie().value(COOKIE, "en"))
+                .andExpect(flash().attribute("successMessage", "Your member details have been updated."));
     }
 
     @Test void profileLanguageChangeAlsoRequiresCsrfToken() throws Exception {
@@ -232,6 +233,36 @@ class LocaleFlowTest {
                         .requestAttr("jakarta.servlet.error.status_code", 404).accept("text/html"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString("id=\"locale-modal\""))));
+    }
+
+    @ParameterizedTest @ValueSource(strings = {"ko", "en", "ja", "zh-CN"})
+    void failedLoginRendersLocalizedErrorWithoutChangingAuthentication(String code) throws Exception {
+        String expected = switch (code) {
+            case "en" -> "Incorrect email or password.";
+            case "ja" -> "メールアドレスまたはパスワードが正しくありません。";
+            case "zh-CN" -> "邮箱或密码不正确。";
+            default -> "이메일 또는 비밀번호가 올바르지 않습니다.";
+        };
+        MockHttpSession session = new MockHttpSession();
+        mvc.perform(post("/login").session(session).cookie(new Cookie(COOKIE, code))
+                        .param("email", UUID.randomUUID() + "@example.test").param("password", "wrongpass"))
+                .andExpect(status().isUnauthorized()).andExpect(model().attribute("errorMessage", expected));
+        assertThat(session.getAttribute(LoginSession.IDENTITY)).isNull();
+    }
+
+    @ParameterizedTest @ValueSource(strings = {"ko", "en", "ja", "zh-CN"})
+    void emailVerificationJsonErrorUsesCookieLocale(String code) throws Exception {
+        String expected = switch (code) {
+            case "en" -> "Request a verification code first.";
+            case "ja" -> "先に認証コードをリクエストしてください。";
+            case "zh-CN" -> "请先获取验证码。";
+            default -> "인증번호를 먼저 요청해주세요.";
+        };
+        mvc.perform(post("/api/v1/email-verifications/confirm").cookie(new Cookie(COOKIE, code))
+                        .contentType("application/json").accept("application/json")
+                        .content("{\"email\":\"test@example.test\",\"code\":\"123456\"}"))
+                .andExpect(status().isBadRequest()).andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.message").value(expected)).andExpect(jsonPath("$.verified").value(false));
     }
 
     private String token(MockHttpSession session) { return (String)session.getAttribute("BUSAN_PLAY_LOCALE_CSRF"); }

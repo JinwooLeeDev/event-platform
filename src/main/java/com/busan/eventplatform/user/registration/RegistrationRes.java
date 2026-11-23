@@ -28,9 +28,9 @@ public class RegistrationRes {
         public static ApplyDto of(Registration registration, Integer waitingNumber) {
             RegistrationStatus status = registration.getStatus();
             String message = switch (status) {
-                case CONFIRMED -> "참가 신청이 확정되었습니다";
-                case PENDING -> "참가 신청이 접수되었습니다. 주최자 승인을 기다려 주세요";
-                case WAITING -> "정원이 마감되어 대기열 " + waitingNumber + "번으로 등록되었습니다";
+                case CONFIRMED -> com.busan.eventplatform.global.i18n.LocaleMessages.display("참가 신청이 확정되었습니다");
+                case PENDING -> com.busan.eventplatform.global.i18n.LocaleMessages.display("참가 신청이 접수되었습니다. 주최자 승인을 기다려 주세요");
+                case WAITING -> com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.waitlistRegistered", waitingNumber);
                 default -> "";
             };
             return ApplyDto.builder()
@@ -148,11 +148,13 @@ public class RegistrationRes {
             boolean rejectedByCompany = history.getChangedStatus() == RegistrationStatus.REJECTED
                     && history.getReason() != null
                     && history.getReason().startsWith("주최자");
-            this.statusLabel = rejectedByCompany ? "기업 거절" : history.getChangedStatus().getDescription();
+            this.statusLabel = rejectedByCompany ? com.busan.eventplatform.global.i18n.LocaleMessages.display("기업 거절") : history.getChangedStatus().getDescription();
             // 개인 화면에는 처리자 엔티티나 사유에 기록된 내부 기업 ID를 노출하지 않는다.
-            this.reason = history.getReason() == null ? null
+            String safeReason = history.getReason() == null ? null
                     : history.getReason().replaceAll("\\s*\\(companyId=\\d+\\)", "");
-            this.occurredAtText = history.getCreatedAt() == null ? "기록 시각 없음"
+            this.reason = safeReason != null && java.util.Set.of("참가 신청", "본인 취소", "대기열 승격", "행사 취소").contains(safeReason)
+                    ? com.busan.eventplatform.global.i18n.LocaleMessages.display(safeReason) : safeReason;
+            this.occurredAtText = history.getCreatedAt() == null ? com.busan.eventplatform.global.i18n.LocaleMessages.display("기록 시각 없음")
                     : CHANGE_TIME.format(history.getCreatedAt());
         }
     }
@@ -192,7 +194,7 @@ public class RegistrationRes {
                             && LocalDateTime.now().isBefore(registration.getEventSession().getStartsAt()))
                     .createdAt(registration.getCreatedAt())
                     .attended(attendedAt != null)
-                    .attendedAtText(attendedAt == null ? "" : attendedAt.format(ATTENDED_AT_FORMAT))
+                    .attendedAtText(attendedAt == null ? "" : attendedAt.format(ATTENDED_AT_FORMAT.withLocale(org.springframework.context.i18n.LocaleContextHolder.getLocale())))
                     .build();
         }
     }
@@ -220,7 +222,7 @@ public class RegistrationRes {
                     .canApply(blockedReason == null)
                     .enoughPoint(currentPoint >= fee)
                     .waitlist(remainingSeats <= 0)
-                    .message(blockedReason == null ? "" : blockedReason)
+                    .message(blockedReason == null ? "" : com.busan.eventplatform.global.i18n.LocaleMessages.display(blockedReason))
                     .build();
         }
     }
@@ -246,7 +248,7 @@ public class RegistrationRes {
         if (startsAt == null) {
             return "";
         }
-        return startsAt.format(SCHEDULE_FORMAT);
+        return startsAt.format(SCHEDULE_FORMAT.withLocale(org.springframework.context.i18n.LocaleContextHolder.getLocale()));
     }
 
 }

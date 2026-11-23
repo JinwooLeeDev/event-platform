@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const {BusanI18n} = require('./i18n-test-helpers.cjs');
 const tick = () => new Promise(setImmediate);
 const source = fs.readFileSync('src/main/resources/static/js/company-participants.js', 'utf8');
 class Element {
@@ -23,13 +24,13 @@ function setup() {
     const dialog=new Element(), occupied=new Element(), requests=[];
     const panel={dataset:{participants:'10'},querySelector:s=>elements[s]};
     dialog.querySelector=s=>elements[s];
-    vm.runInNewContext(source,{
+    vm.runInNewContext(source,{BusanI18n,
         document:{querySelector:s=>s==='[data-participants]'?panel:s==='[data-session-occupied]'?occupied:dialog,createElement:()=>new Element()},
         fetch:(url,options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve,reject}))
     });
     const respond=async(index,data,status=200)=>{requests[index].resolve({ok:status===200,status,json:async()=>data});await tick();};
     const rows=()=>elements['[data-participant-rows]'].children;
-    const button=()=>rows()[0].children[4].children[0];
+    const button=()=>rows()[0].children[5].children[0];
     return {elements,dialog,occupied,requests,respond,rows,button};
 }
 const person=(id,status,name='Member')=>({registrationId:id,status,displayName:name,createdAt:'2026-11-18T10:00:00'});
@@ -42,7 +43,7 @@ const person=(id,status,name='Member')=>({registrationId:id,status,displayName:n
         s.elements['[data-participant-filter]'].value='WAITING'; s.elements['[data-participant-filter]'].fire('change');
         assert.equal(s.rows().length,1);assert.equal(s.rows()[0].children[0].textContent,'2');
         s.elements['[data-participant-search]'].value='absent';s.elements['[data-participant-search]'].fire('input');
-        assert.equal(s.rows()[0].children[0].colSpan,5);
+        assert.equal(s.rows()[0].children[0].colSpan,6);
     }
     {
         const s=setup();await s.respond(0,[person(1,'CONFIRMED'),person(2,'WAITING')]);
@@ -80,7 +81,7 @@ const person=(id,status,name='Member')=>({registrationId:id,status,displayName:n
         await s.respond(2,{},500);await submit;
         assert.equal(s.elements['[data-participant-error]'].hidden,false);
         assert.equal(s.elements['[data-participant-notice]'].hidden,false);
-        assert.equal(s.rows()[0].children[0].colSpan,5);
+        assert.equal(s.rows()[0].children[0].colSpan,6);
     }
     console.log('Company participants: 5 scenarios passed (active-only list, filters, reject/reload, duplicates, errors).');
 })().catch(error=>{console.error(error);process.exitCode=1;});
