@@ -75,7 +75,7 @@ public class RefundService {
     /**
      * 아래 조건을 이미 검사하고 들어오는건지 확인 필요!!!
      * 이 행사가 "진행 후" 또는 "진행중"인 행사는 아닌지? --> 관리자측에서 검사??(보류)
-     * 외부에서 필요한 값 : eventSession이 "행사취소" 상태 + 기업이 환불요청시 환불내역 새로 추가해줘야함.
+     * 외부에서 필요한 값 : eventSession이 "행사취소" 상태. 환불 내역은 승인 시 없으면 생성한다.
      */
     @Transactional
     /// Company의 환불 + User 전액 환불(User의 등록상태가 REJECTED 전? 후? --> 언제 환불해줄까?).
@@ -93,7 +93,11 @@ public class RefundService {
         if(deposit.getStatus() != DepositStatus.PAID) throw new Exception400("이 행사는 환불을 진행할 수 없습니다");
 
         Refund refund = refundRepository.findByDepositId(deposit.getId() , RefundStatus.PENDING)
-                .orElseThrow(() -> new Exception404("해당 행사는 기업이 자체취소했거나 결제한 내역이 없습니다"));
+                .orElseGet(() -> refundRepository.save(Refund.companyBuilder()
+                        .company(company)
+                        .deposit(deposit)
+                        .reason(reason)
+                        .build()));
 
         // 3. 환불 정책에 맞게 환불요금 계산.
         int amount = RefundPolicy.forCompanyCancel(Deposit.SESSION_DEPOSIT , cancelReqTime , LocalDate.from(eventSession.getStartsAt()));
