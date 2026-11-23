@@ -24,6 +24,16 @@
                         <div id="code-field" class="auth-field signup-verification" hidden><label for="code">{{i18n.auth.ui0023}}</label><div class="auth-row"><input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="{{i18n.auth.ui0024}}" aria-describedby="code-message"><button id="confirm-code" class="auth-button secondary" type="button">{{i18n.auth.ui0025}}</button></div><p id="code-message" class="auth-message" role="status" aria-live="polite"></p></div>
                     </section>
                     <section class="signup-panel" aria-labelledby="signup-profile-title"><div class="signup-section-heading"><h3 id="signup-profile-title">{{i18n.auth.ui0116}}</h3><p>{{i18n.auth.ui0117}}</p></div>
+                        <div class="auth-field">
+                            <label for="display-name">닉네임</label>
+                            <input id="display-name"
+                                   name="displayName"
+                                   type="text"
+                                   maxlength="50"
+                                   autocomplete="nickname"
+                                   placeholder="닉네임을 입력해주세요"
+                                   required>
+                        </div>
                         <div class="signup-field-grid">
                             <div class="auth-field">
                                 <label for="password">{{i18n.auth.ui0027}}</label>
