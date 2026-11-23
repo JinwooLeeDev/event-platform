@@ -1,6 +1,8 @@
 package com.busan.eventplatform.company;
 
 import com.busan.eventplatform.api.payment.Payment;
+import com.busan.eventplatform.api.payment.PaymentStatus;
+import com.busan.eventplatform.api.payment.PaymentTypeStatus;
 import com.busan.eventplatform.api.purchase.Deposit;
 import com.busan.eventplatform.api.purchase.DepositStatus;
 import com.busan.eventplatform.api.refund.Refund;
@@ -22,6 +24,10 @@ public class CompanyPointResponse {
         private List<Charge> charges;
         private List<DepositHistory> deposits;
         private List<RefundHistory> refunds;
+
+        public int getChargeCount(){return charges.size();}
+        public int getDepositCount(){return deposits.size();}
+        public int getRefundCount(){return refunds.size();}
     }
 
     @Getter
@@ -30,12 +36,14 @@ public class CompanyPointResponse {
         private String statusName;
         private String paymentType;
         private String paidAtText;
+        private PaymentTypeStatus typeStatus;
 
         public Charge(Payment payment) {
             this.amountText = formatAmount(payment.getAmount());
             this.statusName = payment.getStatus().getDisplayName();
             this.paymentType = payment.getTypeStatus().name();
             this.paidAtText = formatDate(payment.getPaidAt());
+            this.typeStatus = payment.getTypeStatus();
         }
 
     }

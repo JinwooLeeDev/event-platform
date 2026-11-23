@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>행사 찾기 | Busan Play</title>
+    <title>{{i18n.event.ui0066}}</title>
 </head>
 <body>
 {{> layout/header}}
@@ -47,17 +47,17 @@
 </style>
 <main class="main-page event-list-page">
     <section class="main-events" aria-labelledby="list-title">
-        <nav class="list-breadcrumb" aria-label="현재 위치"><a href="/">홈</a> / 행사 찾기</nav>
+        <nav class="list-breadcrumb" aria-label="{{i18n.event.ui0002}}"><a href="/">{{i18n.event.ui0003}}</a> {{i18n.event.ui0067}}</nav>
         <p class="main-events__eyebrow">DISCOVER BUSAN</p>
-        <h1 id="list-title">부산의 새로운 즐거움을 찾아보세요.</h1>
-        <p class="list-description">전시부터 공연, 축제까지. 지금 공개된 행사를 만나보세요.</p>
+        <h1 id="list-title">{{i18n.event.ui0068}}</h1>
+        <p class="list-description">{{i18n.event.ui0069}}</p>
 
         <div class="list-layout">
             <aside class="list-sidebar" aria-labelledby="category-title">
                 <p class="main-events__eyebrow">EXPLORE</p>
-                <h2 id="category-title">카테고리</h2>
-                <nav aria-label="행사 카테고리">
-                    <form action="/events/list" method="get"><input type="hidden" name="keyword" value="{{keyword}}"><button class="list-category {{#allCategories}}is-selected{{/allCategories}}" value="" type="submit" {{#allCategories}}aria-current="true"{{/allCategories}}>전체 행사</button></form>
+                <h2 id="category-title">{{i18n.admin.ui0083}}</h2>
+                <nav aria-label="{{i18n.event.ui0070}}">
+                    <form action="/events/list" method="get"><input type="hidden" name="keyword" value="{{keyword}}"><button class="list-category {{#allCategories}}is-selected{{/allCategories}}" value="" type="submit" {{#allCategories}}aria-current="true"{{/allCategories}}>{{i18n.event.ui0071}}</button></form>
                     {{#categories}}
                     <form action="/events/list" method="get"><input type="hidden" name="keyword" value="{{keyword}}"><button class="list-category {{#selected}}is-selected{{/selected}}" name="categoryId" value="{{id}}" type="submit" {{#selected}}aria-current="true"{{/selected}}>{{name}}</button></form>
                     {{/categories}}
@@ -65,18 +65,18 @@
             </aside>
             <p id="list-feedback" class="list-feedback" role="status" aria-live="polite" hidden></p>
             <div class="list-content" aria-busy="false">
-        <p class="list-result" role="status">{{#isSearch}}‘<strong>{{keyword}}</strong>’ 검색 결과 · {{/isSearch}}전체 <strong>{{eventPage.totalElements}}</strong>개</p>
+        <p class="list-result" role="status">{{#isSearch}}‘<strong>{{keyword}}</strong>{{i18n.event.ui0072}} {{/isSearch}}{{i18n.admin.ui0144}} <strong>{{eventPage.totalElements}}</strong>{{i18n.company.ui0046}}</p>
         <div class="event-grid">
             {{#eventPage.eventList}}{{> layout/event-card}}{{/eventPage.eventList}}
         </div>
         {{^eventPage.eventList}}
         <div class="main-events__empty">
-            {{#isSearch}}<h2>검색 결과가 없습니다.</h2><p>다른 검색어를 입력하거나 전체 행사를 확인해주세요.</p>{{/isSearch}}
-            {{^isSearch}}<h2>표시할 행사가 없습니다.</h2><p>공개된 행사가 없거나 요청한 페이지에 내역이 없습니다.</p>{{/isSearch}}
-            <a class="list-button" href="/events/list">전체 행사 보기</a>
+            {{#isSearch}}<h2>{{i18n.event.ui0073}}</h2><p>{{i18n.event.ui0074}}</p>{{/isSearch}}
+            {{^isSearch}}<h2>{{i18n.event.ui0075}}</h2><p>{{i18n.event.ui0076}}</p>{{/isSearch}}
+            <a class="list-button" href="/events/list">{{i18n.event.ui0077}}</a>
         </div>
         {{/eventPage.eventList}}
-        <nav id="list-pagination" class="list-pagination" aria-label="행사 목록 페이지"
+        <nav id="list-pagination" class="list-pagination" aria-label="{{i18n.event.ui0078}}"
              data-current="{{eventPage.currentPage}}" data-total="{{eventPage.totalPages}}" data-size="{{eventPage.size}}" data-keyword="{{keyword}}" data-category="{{categoryId}}" hidden></nav>
         <noscript>
     

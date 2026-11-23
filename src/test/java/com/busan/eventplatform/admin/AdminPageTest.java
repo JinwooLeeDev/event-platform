@@ -1,5 +1,7 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.I18nTestModels;
+
 import com.samskivert.mustache.Mustache;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
@@ -50,7 +52,7 @@ class AdminPageTest {
             var compiler = Mustache.compiler().withLoader(name -> new InputStreamReader(
                     getClass().getResourceAsStream("/templates/" + name + ".mustache"), StandardCharsets.UTF_8));
             try (var reader = new InputStreamReader(getClass().getResourceAsStream("/templates/admin/page.mustache"), StandardCharsets.UTF_8)) {
-                String html = compiler.compile(reader).execute(model);
+                String html = compiler.compile(reader).execute(I18nTestModels.withLocale(model));
                 assertTrue(html.contains("href=\"/admin/members\" aria-current=\"page\""));
                 assertTrue(html.contains("&lt;script&gt;member&lt;/script&gt;"));
                 assertFalse(html.contains("관리 기능을 준비하고 있습니다"));
@@ -84,7 +86,7 @@ class AdminPageTest {
                     getClass().getResourceAsStream("/templates/" + name + ".mustache"), StandardCharsets.UTF_8));
             String html;
             try (var reader = new InputStreamReader(getClass().getResourceAsStream("/templates/" + view + ".mustache"), StandardCharsets.UTF_8)) {
-                html = compiler.compile(reader).execute(model);
+                html = compiler.compile(reader).execute(I18nTestModels.withLocale(model));
             }
             assertTrue(html.contains("href=\"/admin/" + section + "\" aria-current=\"page\""));
             assertTrue(html.contains("action=\"/logout\" method=\"post\""));

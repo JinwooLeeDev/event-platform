@@ -23,7 +23,8 @@ public class EventSessionResponse {
     @Data
     public static class EventSessionDto {
         public String getCapacityLabel() {
-            return capacity == Integer.MAX_VALUE ? "제한 없음" : capacity + "명";
+            return capacity == Integer.MAX_VALUE ? com.busan.eventplatform.global.i18n.LocaleMessages.display("제한 없음")
+                    : com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.capacityPeople", Integer.toString(capacity));
         }
         private Long id;
         private String name;
@@ -38,6 +39,10 @@ public class EventSessionResponse {
         private LocalDateTime applyEndAt;
         private boolean canApply = true;
         private String closedReason = "";
+
+        public String getClosedReason() {
+            return com.busan.eventplatform.global.i18n.LocaleMessages.display(closedReason);
+        }
 
         public void applyRegistrationState(String closedReason) {
             this.closedReason = (closedReason == null) ? "" : closedReason;

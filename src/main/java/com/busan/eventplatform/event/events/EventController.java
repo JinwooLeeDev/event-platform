@@ -1,7 +1,11 @@
 package com.busan.eventplatform.event.events;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 import com.busan.eventplatform.event.eventCategory.EventCategoryService;
+import com.busan.eventplatform.event.eventReview.EventReviewService;
 import com.busan.eventplatform.event.eventSession.EventSessionService;
+import com.busan.eventplatform.event.eventSession.EventSessionStatus;
 import com.busan.eventplatform.global.error.exception.Exception400;
 import com.busan.eventplatform.global.error.exception.Exception401;
 import com.busan.eventplatform.global.error.exception.Exception403;
@@ -33,6 +37,7 @@ public class EventController {
     private final EventCategoryService eventCategoryService;
     private final EventSessionService eventSessionService;
     private final RegistrationService registrationService;
+    private final EventReviewService eventReviewService;
 
     @Value("${naver-map.client-id:}")
     private String naverMapClientId;
@@ -63,7 +68,12 @@ public class EventController {
     // 행사 상세 조회
     // GET - http://localhost:8080/event/1
     @GetMapping("/event/{id}")
-    public String detail(@PathVariable Long id, Model model, HttpSession session) {
+    public String detail(
+            @PathVariable Long id,
+            @RequestParam(value = "eventSessionId", required = false) Long eventSessionId,
+            Model model,
+            HttpSession session
+    ) {
 
         SessionCompanyDto sessionCompanyDto =
                 (SessionCompanyDto) session.getAttribute(Define.SESSION_COMPANY);
@@ -76,16 +86,68 @@ public class EventController {
         EventResponse.DetailDto detailDto =
                 eventService.findById(id, companyId, userId);
         model.addAttribute("event", detailDto);
+
+        // 행사 전체 회차 조회
         var eventSessions = eventSessionService.findByEventId(id);
 
+        // 기존 신청 가능 여부 처리
+        Map<Long, String> closedReasons =
+                registrationService.getClosedReasonsByEventId(id);
 
-        // detail() — eventSessions 조회 바로 다음
-        Map<Long, String> closedReasons = registrationService.getClosedReasonsByEventId(id);
-        eventSessions.forEach(s -> s.applyRegistrationState(closedReasons.getOrDefault(s.getId(), "")));
+        eventSessions.forEach(s ->
+                s.applyRegistrationState(closedReasons.getOrDefault(s.getId(), ""))
+        );
 
         model.addAttribute("eventSessions", eventSessions);
         model.addAttribute("hasEventSessions", !eventSessions.isEmpty());
         model.addAttribute("naverMapClientId", naverMapClientId);
+
+        // 후기 탭에는 종료된 회차만 사용
+        var completedEventSessions = eventSessions.stream()
+                .filter(s -> s.getStatus() == EventSessionStatus.COMPLETED)
+                .toList();
+
+        model.addAttribute("completedEventSessions", completedEventSessions);
+        model.addAttribute("hasCompletedEventSessions", !completedEventSessions.isEmpty());
+
+        // 선택한 회차가 완료된 회차 목록에 있는지 확인
+        Long selectedEventSessionId = null;
+
+        if (eventSessionId != null &&
+                completedEventSessions.stream()
+                        .anyMatch(s -> Objects.equals(s.getId(), eventSessionId))) {
+
+            selectedEventSessionId = eventSessionId;
+
+        } else if (!completedEventSessions.isEmpty()) {
+
+            // 선택한 회차가 없거나 잘못된 경우 첫 번째 완료 회차 선택
+            selectedEventSessionId = completedEventSessions.get(0).getId();
+        }
+
+        model.addAttribute("selectedEventSessionId", selectedEventSessionId);
+        Long finalSelectedEventSessionId = selectedEventSessionId;
+
+        model.addAttribute("reviewSessionTabs",
+                completedEventSessions.stream()
+                        .map(s -> Map.of(
+                                "id", s.getId(),
+                                "name", s.getName(),
+                                "eventId", id,
+                                "selected", Objects.equals(
+                                        s.getId(), finalSelectedEventSessionId
+                                )
+                        ))
+                        .toList());
+        // 선택한 회차의 대표 후기 조회
+        var bestReview = selectedEventSessionId == null
+                ? null
+                : eventReviewService.findBestReviewByEventSessionId(
+                selectedEventSessionId,
+                userId
+        );
+
+        model.addAttribute("bestReview", bestReview);
 
         return "event/detail";
     }
@@ -99,8 +161,6 @@ public class EventController {
         if (!identity.isCompany()) {
             throw new Exception403("기업 회원만 행사 등록이 가능합니다.");
         }
-
-        eventService.validateRegistrationPermission(identity.getId());
 
         model.addAttribute("categoryList", eventCategoryService.findAllList().getCategoryList());
         return "event/save-form";
@@ -181,7 +241,7 @@ public class EventController {
         updateDto.validate();
         SessionCompanyDto sessionCompanyDto = requireCompany(session);
         eventService.updateAndResubmit(id, sessionCompanyDto.getId(), updateDto, file);
-        redirect.addFlashAttribute("successMessage", "수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다.");
+        redirect.addFlashAttribute("successMessage", LocaleMessages.display("수정 내용을 저장하고 재심사를 요청했습니다. 관리자 승인 대기 상태입니다."));
         return "redirect:/events";
     }
 

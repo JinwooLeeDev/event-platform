@@ -1,36 +1,36 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>개인 회원가입 | Busan Play</title></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.auth.ui0102}}</title></head>
 <body>
 {{> layout/header}}
 {{> login/signup-style}}
 <main class="signup-page">
     <div class="signup-wrap">
-        <nav class="signup-breadcrumb" aria-label="현재 위치"><a href="/">홈</a><span aria-hidden="true">/</span><span>회원가입</span></nav>
-        <nav class="signup-types" aria-label="가입할 회원 유형"><a href="/signup" aria-current="page">개인회원</a><a href="/signup/company">기업회원</a></nav>
+        <nav class="signup-breadcrumb" aria-label="{{i18n.event.ui0002}}"><a href="/">{{i18n.event.ui0003}}</a><span aria-hidden="true">/</span><span>{{i18n.common.signup}}</span></nav>
+        <nav class="signup-types" aria-label="{{i18n.auth.ui0002}}"><a href="/signup" aria-current="page">{{i18n.auth.ui0003}}</a><a href="/signup/company">{{i18n.auth.ui0004}}</a></nav>
         <div class="signup-layout">
             <aside class="signup-intro" aria-labelledby="signup-title">
                 <span class="signup-intro-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span>
-                <h1 id="signup-title">부산에서의 하루,<br> 나답게 시작하세요.</h1>
-                <p>가보고 싶은 행사를 모으고,<br> 새로운 경험에 함께해보세요.</p>
-                <div class="signup-intro-guide"><h2>가입 후 이렇게 즐겨보세요</h2><ul><li>관심 있는 행사에 좋아요 남기기</li><li>원하는 회차에 참가 신청하기</li><li>마이페이지에서 내 일정 관리하기</li></ul></div>
-                <p class="signup-intro-login">이미 계정이 있으신가요?<br> <a href="/login">개인회원 로그인 <span aria-hidden="true">↗</span></a></p>
+                <h1 id="signup-title">{{i18n.auth.ui0103}}<br> {{i18n.auth.ui0104}}</h1>
+                <p>{{i18n.auth.ui0105}}<br> {{i18n.auth.ui0106}}</p>
+                <div class="signup-intro-guide"><h2>{{i18n.auth.ui0107}}</h2><ul><li>{{i18n.auth.ui0108}}</li><li>{{i18n.auth.ui0109}}</li><li>{{i18n.auth.ui0110}}</li></ul></div>
+                <p class="signup-intro-login">{{i18n.auth.ui0111}}<br> <a href="/login">{{i18n.auth.ui0061}} <span aria-hidden="true">↗</span></a></p>
             </aside>
             <div class="signup-content">
-                <header class="signup-heading"><h2>개인 회원가입</h2><p>이메일을 인증하고 회원 정보를 입력해주세요.</p><span>모든 항목은 필수입니다.</span></header>
+                <header class="signup-heading"><h2>{{i18n.auth.ui0112}}</h2><p>{{i18n.auth.ui0113}}</p><span>{{i18n.auth.ui0019}}</span></header>
                 <form id="signup-form" action="/signup" method="post">
-                    <section class="signup-panel" aria-labelledby="signup-email-title"><div class="signup-section-heading"><h3 id="signup-email-title">이메일 인증</h3><p>로그인에 사용할 이메일을 인증해주세요.</p></div>
-                        <div class="auth-field"><label for="email">이메일</label><div class="auth-row"><input id="email" name="email" type="text" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com" aria-describedby="email-message" required><button id="send-code" class="auth-button secondary" type="button">인증번호 발송</button></div><p id="email-message" class="auth-message" role="status" aria-live="polite"></p></div>
-                        <div id="code-field" class="auth-field signup-verification" hidden><label for="code">인증번호</label><div class="auth-row"><input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="숫자 6자리" aria-describedby="code-message"><button id="confirm-code" class="auth-button secondary" type="button">인증 확인</button></div><p id="code-message" class="auth-message" role="status" aria-live="polite"></p></div>
+                    <section class="signup-panel" aria-labelledby="signup-email-title"><div class="signup-section-heading"><h3 id="signup-email-title">{{i18n.auth.ui0114}}</h3><p>{{i18n.auth.ui0115}}</p></div>
+                        <div class="auth-field"><label for="email">{{i18n.admin.ui0033}}</label><div class="auth-row"><input id="email" name="email" type="text" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com" aria-describedby="email-message" required><button id="send-code" class="auth-button secondary" type="button">{{i18n.auth.ui0021}}</button></div><p id="email-message" class="auth-message" role="status" aria-live="polite"></p></div>
+                        <div id="code-field" class="auth-field signup-verification" hidden><label for="code">{{i18n.auth.ui0023}}</label><div class="auth-row"><input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="{{i18n.auth.ui0024}}" aria-describedby="code-message"><button id="confirm-code" class="auth-button secondary" type="button">{{i18n.auth.ui0025}}</button></div><p id="code-message" class="auth-message" role="status" aria-live="polite"></p></div>
                     </section>
-                    <section class="signup-panel" aria-labelledby="signup-profile-title"><div class="signup-section-heading"><h3 id="signup-profile-title">회원 정보</h3><p>부산에서 사용할 이름과 비밀번호를 설정하세요.</p></div>
-                        <div class="auth-field"><label for="display-name">닉네임</label><input id="display-name" name="displayName" type="text" autocomplete="name" maxlength="50" placeholder="닉네임을 입력해주세요" aria-describedby="display-name-hint" required><p id="display-name-hint" class="auth-hint">플랫폼에서 사용할 이름입니다.</p></div>
-                        <div class="signup-field-grid"><div class="auth-field"><label for="password">비밀번호</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="8자 이상" aria-describedby="password-hint" required></div><div class="auth-field"><label for="password-confirm">비밀번호 확인</label><input id="password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="다시 입력해주세요" required></div></div>
-                        <p id="password-hint" class="auth-hint">8자 이상, UTF-8 기준 72바이트 이하로 입력해주세요. 한글 등은 글자당 여러 바이트를 사용합니다.</p>
+                    <section class="signup-panel" aria-labelledby="signup-profile-title"><div class="signup-section-heading"><h3 id="signup-profile-title">{{i18n.auth.ui0116}}</h3><p>{{i18n.auth.ui0117}}</p></div>
+                        <div class="auth-field"><label for="display-name">{{i18n.admin.ui0151}}</label><input id="display-name" name="displayName" type="text" autocomplete="name" maxlength="50" placeholder="{{i18n.auth.ui0118}}" aria-describedby="display-name-hint" required><p id="display-name-hint" class="auth-hint">{{i18n.auth.ui0119}}</p></div>
+                        <div class="signup-field-grid"><div class="auth-field"><label for="password">{{i18n.auth.ui0027}}</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="{{i18n.auth.ui0120}}" aria-describedby="password-hint" required></div><div class="auth-field"><label for="password-confirm">{{i18n.auth.ui0029}}</label><input id="password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="{{i18n.auth.ui0030}}" required></div></div>
+                        <p id="password-hint" class="auth-hint">{{i18n.auth.ui0121}}</p>
                     </section>
-                    <div class="signup-submit-area"><p id="form-message" class="auth-message" role="status" aria-live="polite"></p><button id="submit-button" class="auth-button auth-submit" type="submit">개인회원 가입하기</button><p class="signup-submit-help">이메일 인증을 완료한 후 가입할 수 있습니다.</p></div>
+                    <div class="signup-submit-area"><p id="form-message" class="auth-message" role="status" aria-live="polite"></p><button id="submit-button" class="auth-button auth-submit" type="submit">{{i18n.auth.ui0122}}</button><p class="signup-submit-help">{{i18n.auth.ui0123}}</p></div>
                 </form>
-                <p class="signup-bottom">행사를 운영하는 기업이신가요? <a href="/signup/company">기업회원으로 가입하기</a></p>
+                <p class="signup-bottom">{{i18n.auth.ui0124}} <a href="/signup/company">{{i18n.auth.ui0125}}</a></p>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@
     function update() {
         const seconds = Math.max(0, Math.ceil((resendAt - Date.now()) / 1000));
         send.disabled = busy || submitting || seconds > 0;
-        send.textContent = busy ? '처리 중…' : seconds > 0 ? `${seconds}초 후 재발송` : '인증번호 발송';
+        send.textContent = busy ? BusanI18n.t("community.ui0006") : seconds > 0 ? BusanI18n.t("auth.ui0126", [seconds]) : BusanI18n.t("auth.ui0021");
         confirm.disabled = busy || submitting || verifiedEmail !== null;
         element('submit-button').disabled = busy || submitting;
     }
@@ -66,10 +66,10 @@
             body: JSON.stringify(body)
         });
         if (!(response.headers.get('content-type') || '').includes('application/json')) {
-            throw new Error('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+            throw new Error(BusanI18n.t("company.ui0137"));
         }
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || '요청에 실패했습니다.');
+        if (!response.ok) throw new Error(result.message || BusanI18n.t("company.ui0138"));
         return result;
     }
     email.addEventListener('input', () => {
@@ -83,7 +83,7 @@
     send.addEventListener('click', async () => {
         if (busy || submitting) return;
         if (email.value.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-            message('email-message', '공백 없이 올바른 이메일 주소를 입력해주세요.');
+            message('email-message', BusanI18n.t("auth.ui0127"));
             email.focus();
             return;
         }
@@ -100,7 +100,7 @@
             message('code-message', '');
             code.focus();
         } catch (error) {
-            message('email-message', error.message || '서버와 연결하지 못했습니다.');
+            message('email-message', error.message || BusanI18n.t("auth.ui0128"));
         } finally {
             busy = false;
             email.readOnly = verifiedEmail !== null;
@@ -110,7 +110,7 @@
     confirm.addEventListener('click', async () => {
         if (busy || submitting) return;
         if (!/^[0-9]{6}$/.test(code.value)) {
-            message('code-message', '인증번호는 숫자 6자리로 입력해주세요.');
+            message('code-message', BusanI18n.t("auth.ui0129"));
             return;
         }
         busy = true;
@@ -118,11 +118,11 @@
         update();
         try {
             const result = await post('/api/v1/email-verifications/confirm', { email: email.value, code: code.value });
-            if (result.verified !== true) throw new Error('인증 결과를 확인하지 못했습니다.');
+            if (result.verified !== true) throw new Error(BusanI18n.t("auth.ui0130"));
             verifiedEmail = email.value;
             message('code-message', result.message, true);
         } catch (error) {
-            message('code-message', error.message || '서버와 연결하지 못했습니다.');
+            message('code-message', error.message || BusanI18n.t("auth.ui0128"));
         } finally {
             busy = false;
             email.readOnly = verifiedEmail !== null;
@@ -131,9 +131,9 @@
     });
     element('signup-form').addEventListener('submit', event => {
         let error = '';
-        if (busy || verifiedEmail !== email.value) error = '이메일 인증을 먼저 완료해주세요.';
-        else if (new TextEncoder().encode(element('password').value).length > 72) error = '비밀번호가 너무 깁니다. 더 짧게 입력해주세요.';
-        else if (element('password').value !== element('password-confirm').value) error = '비밀번호 확인이 일치하지 않습니다.';
+        if (busy || verifiedEmail !== email.value) error = BusanI18n.t("auth.ui0131");
+        else if (new TextEncoder().encode(element('password').value).length > 72) error = BusanI18n.t("auth.ui0132");
+        else if (element('password').value !== element('password-confirm').value) error = BusanI18n.t("auth.ui0054");
         if (error || submitting) {
             event.preventDefault();
             if (error) message('form-message', error);

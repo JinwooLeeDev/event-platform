@@ -1,5 +1,7 @@
 package com.busan.eventplatform.login.mypage;
 
+import com.busan.eventplatform.global.i18n.I18nTestModels;
+
 import com.busan.eventplatform.api.payment.PaymentService;
 import com.busan.eventplatform.api.purchase.PurchaseService;
 import com.busan.eventplatform.login.LoginIdentity;
@@ -127,7 +129,7 @@ class MyHistoryPageTest {
         var compiler = Mustache.compiler().withLoader(name -> new InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), StandardCharsets.UTF_8));
         try (var reader = new InputStreamReader(getClass().getResourceAsStream("/templates/user/myhistory.mustache"), StandardCharsets.UTF_8)) {
-            return compiler.compile(reader).execute(model);
+            return compiler.compile(reader).execute(I18nTestModels.withLocale(model));
         } catch (java.io.IOException exception) {
             throw new java.io.UncheckedIOException(exception);
         }

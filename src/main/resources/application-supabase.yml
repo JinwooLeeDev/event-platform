@@ -16,4 +16,4 @@ spring:
     init:
       mode: always
       encoding: UTF-8
-      data-locations: classpath:db/supabase/test-accounts.sql
+      data-locations: classpath:db/demo-data.sql

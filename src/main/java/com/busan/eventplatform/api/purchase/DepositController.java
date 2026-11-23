@@ -1,5 +1,7 @@
 package com.busan.eventplatform.api.purchase;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
+
 
 import com.busan.eventplatform.event.eventSession.EventSessionScheduler;
 import com.busan.eventplatform.global.error.exception.Exception403;
@@ -27,7 +29,7 @@ public class DepositController {
         if(!loginIdentity.isCompany()) throw new Exception403("기업 세션만 이용가능합니다");
 
         depositService.payDeposit(loginIdentity.getId() , sessionId).forEach(eventSessionScheduler::processEventStarted);
-        redirectAttributes.addFlashAttribute("successMessage" , "결제가 완료되었습니다. 해당 행사가 최종 확정됩니다.");
+        redirectAttributes.addFlashAttribute("successMessage" , LocaleMessages.display("결제가 완료되었습니다. 해당 행사가 최종 확정됩니다."));
 
         return "redirect:/events";
     }

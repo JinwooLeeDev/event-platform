@@ -1,5 +1,7 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.I18nTestModels;
+
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.company.CompanyStatus;
 import com.busan.eventplatform.company.businessverification.BusinessVerificationStatus;
@@ -43,7 +45,7 @@ class AdminDashboardTest {
         var compiler = com.samskivert.mustache.Mustache.compiler().withLoader(name -> new java.io.InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), java.nio.charset.StandardCharsets.UTF_8));
         try (var reader = new java.io.InputStreamReader(getClass().getResourceAsStream("/templates/admin/page.mustache"), java.nio.charset.StandardCharsets.UTF_8)) {
-            String html = compiler.compile(reader).execute(model);
+            String html = compiler.compile(reader).execute(I18nTestModels.withLocale(model));
             assertTrue(html.contains("<span>기업 승인 대기</span><strong>8</strong>"));
             assertTrue(html.contains("href=\"/admin/companies/1\""));
             assertFalse(html.contains("href=\"/admin/companies/6\""));

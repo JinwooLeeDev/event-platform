@@ -184,11 +184,12 @@ public class CommunityService {
                 .sessionId(sessionId)
                 .eventTitle(session.getEvent().getTitle())
                 .sessionName(session.getName())
-                .closeText(session.getEndsAt().toLocalDate().format(DATE) + " 24시에 커뮤니티가 종료됩니다")
-                .endDayNotice(CommunityPolicy.showsEndDayNotice(session.getEndsAt(), now) ? CommunityPolicy.END_DAY_NOTICE : null)
+                .closeText(com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.communityCloses", session.getEndsAt().toLocalDate().format(DATE)))
+                .endDayNotice(CommunityPolicy.showsEndDayNotice(session.getEndsAt(), now)
+                        ? com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.communityEndDayNotice") : null)
                 .myKey(viewer.key())
                 .host(viewer.isCompany())
-                .hostName(session.getEvent().getCompany() == null ? "주최 기업" : session.getEvent().getCompany().getName()) // 시드에 기업 없는 행사 방어
+                .hostName(session.getEvent().getCompany() == null ? com.busan.eventplatform.global.i18n.LocaleMessages.display("주최 기업") : session.getEvent().getCompany().getName()) // 시드에 기업 없는 행사 방어
                 .notice(notice == null ? null : notice.getContent())
                 .noticeUpdatedAt(notice == null ? null : CommunityMessage.format(notice.getUpdatedAt()))
                 .participants(participants)
@@ -280,7 +281,7 @@ public class CommunityService {
                         session.getId(),
                         session.getEvent().getTitle(),
                         session.getName(),
-                        session.getEndsAt().toLocalDate().format(DATE) + " 24시까지",
+                        com.busan.eventplatform.global.i18n.LocaleMessages.format("server.display.communityUntil", session.getEndsAt().toLocalDate().format(DATE)),
                         "/community/" + session.getId()))
                 .toList();
     }

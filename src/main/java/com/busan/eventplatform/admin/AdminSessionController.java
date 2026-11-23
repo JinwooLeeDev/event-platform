@@ -1,5 +1,6 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.event.eventSession.EventSessionRepository;
 import com.busan.eventplatform.event.eventSession.EventSessionResponse;
 import com.busan.eventplatform.event.eventSession.EventSessionStatus;
@@ -33,15 +34,15 @@ public class AdminSessionController {
         model.addAttribute("hasNext", result.hasNext());
         model.addAttribute("previousPage", result.getNumber());
         model.addAttribute("nextPage", result.getNumber() + 2);
-        return AdminPageView.prepare(model, "회차 현황", "회차별 일정과 모집·정원 현황을 확인하세요.", "sessions");
+        return AdminPageView.prepare(model, LocaleMessages.display("회차 현황"), LocaleMessages.display("회차별 일정과 모집·정원 현황을 확인하세요."), "sessions");
     }
 
     private static String statusLabel(EventSessionStatus status) {
         return switch (status) {
-            case SCHEDULED -> "진행 예정";
-            case IN_PROGRESS -> "진행 중";
-            case COMPLETED -> "종료";
-            case CANCELLED -> "취소";
+            case SCHEDULED -> LocaleMessages.display("진행 예정");
+            case IN_PROGRESS -> LocaleMessages.display("진행 중");
+            case COMPLETED -> LocaleMessages.display("종료");
+            case CANCELLED -> LocaleMessages.display("취소");
         };
     }
 }

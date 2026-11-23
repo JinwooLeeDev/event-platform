@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>회차 취소 신청 | Busan Play</title><link rel="stylesheet" href="/css/event-cancel.css"></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.common.ui0001}}</title><link rel="stylesheet" href="/css/event-cancel.css"></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
@@ -8,21 +8,21 @@
 <main class="company-workspace session-page"><div class="account-layout">
     {{> layout/company-nav}}
     <section class="account-content">
-        <header class="company-heading"><div><p class="company-location">기업페이지 / 주최 행사 / 회차 취소</p><h1>회차 취소 신청</h1><p class="company-description">취소 사유를 제출하면 운영자가 내용을 검토합니다.</p></div></header>
+        <header class="company-heading"><div><p class="company-location">{{i18n.common.ui0002}}</p><h1>{{i18n.company.ui0068}}</h1><p class="company-description">{{i18n.common.ui0003}}</p></div></header>
         <section class="session-panel cancel-panel" aria-labelledby="cancel-context-title">
-            <h2 id="cancel-context-title">취소할 회차를 확인해주세요</h2>
+            <h2 id="cancel-context-title">{{i18n.common.ui0004}}</h2>
             {{#cancelSession}}
-            <dl class="cancel-context"><div><dt>행사</dt><dd>{{event.title}}</dd></div><div><dt>회차</dt><dd>{{name}}</dd></div><div><dt>개최 일정</dt><dd>{{startsAt}}<br>~ {{endsAt}}</dd></div><div><dt>현재 점유 인원</dt><dd>{{occupiedCount}}명</dd></div></dl>
+            <dl class="cancel-context"><div><dt>{{i18n.company.ui0044}}</dt><dd>{{event.title}}</dd></div><div><dt>{{i18n.admin.ui0098}}</dt><dd>{{name}}</dd></div><div><dt>{{i18n.admin.ui0065}}</dt><dd>{{startsAt}}<br>~ {{endsAt}}</dd></div><div><dt>{{i18n.admin.ui0066}}</dt><dd>{{occupiedCount}}{{i18n.admin.ui0067}}</dd></div></dl>
             {{/cancelSession}}
-            {{#latestCancel}}<div class="cancel-result cancel-result--{{cancelStatusTone}}"><strong>최근 신청 · {{cancelStatusLabel}}</strong><p class="cancel-reason">{{reason}}</p></div>{{/latestCancel}}
+            {{#latestCancel}}<div class="cancel-result cancel-result--{{cancelStatusTone}}"><strong>{{i18n.common.ui0005}} {{cancelStatusLabel}}</strong><p class="cancel-reason">{{reason}}</p></div>{{/latestCancel}}
             {{#canRequestCancel}}
-            <p class="cancel-notice">신청만으로 회차가 취소되지는 않습니다. 운영자 승인 후 회차가 취소되며, 참가비와 기업 보증금은 환불 정책에 따라 처리됩니다.</p>
+            <p class="cancel-notice">{{i18n.common.ui0006}}</p>
             <form action="/event-cancels/save/{{sessionId}}" method="post" id="cancel-request-form">
-                <div class="cancel-field"><label for="cancel-reason">취소 신청 사유 <span aria-hidden="true">*</span></label><textarea id="cancel-reason" name="reason" rows="7" maxlength="255" required aria-describedby="cancel-reason-help" placeholder="취소가 필요한 이유와 운영 상황을 구체적으로 작성해주세요."></textarea><small id="cancel-reason-help">최대 255자 · 운영자가 검토할 사유를 입력해주세요.</small></div>
-                <div class="cancel-actions"><a class="company-button company-button--secondary" href="/event-sessions/{{sessionId}}">회차 관리로 돌아가기</a><button type="submit" class="company-button cancel-submit">취소 신청하기</button></div>
+                <div class="cancel-field"><label for="cancel-reason">{{i18n.admin.ui0068}} <span aria-hidden="true">*</span></label><textarea id="cancel-reason" name="reason" rows="7" maxlength="255" required aria-describedby="cancel-reason-help" placeholder="{{i18n.common.ui0007}}"></textarea><small id="cancel-reason-help">{{i18n.common.ui0008}}</small></div>
+                <div class="cancel-actions"><a class="company-button company-button--secondary" href="/event-sessions/{{sessionId}}">{{i18n.common.ui0009}}</a><button type="submit" class="company-button cancel-submit">{{i18n.common.ui0010}}</button></div>
             </form>
             {{/canRequestCancel}}
-            {{^canRequestCancel}}<p class="cancel-notice">승인 대기 중이거나 진행 중·종료·취소된 회차는 새로 신청할 수 없습니다. 회차 관리에서 처리 상태를 확인해주세요.</p><a class="company-button company-button--secondary" href="/event-sessions/{{sessionId}}">회차 관리로 돌아가기</a>{{/canRequestCancel}}
+            {{^canRequestCancel}}<p class="cancel-notice">{{i18n.common.ui0011}}</p><a class="company-button company-button--secondary" href="/event-sessions/{{sessionId}}">{{i18n.common.ui0009}}</a>{{/canRequestCancel}}
         </section>
     </section>
 </div></main>
@@ -30,11 +30,11 @@
 <script>
 document.getElementById('cancel-request-form')?.addEventListener('submit', function(event) {
     const reason = this.elements.reason;
-    reason.setCustomValidity(reason.value.trim() ? '' : '취소 사유를 입력해주세요.');
+    reason.setCustomValidity(reason.value.trim() ? '' : BusanI18n.t("common.ui0012"));
     if (!this.reportValidity()) { event.preventDefault(); return; }
-    const button = this.querySelector('button[type="submit"]'); button.disabled = true; button.textContent = '신청 접수 중…';
+    const button = this.querySelector('button[type="submit"]'); button.disabled = true; button.textContent = BusanI18n.t("common.ui0013");
 });
 document.getElementById('cancel-reason')?.addEventListener('input', function() { this.setCustomValidity(''); });
-window.addEventListener('pageshow', () => { const button = document.querySelector('.cancel-submit'); if (button) { button.disabled = false; button.textContent = '취소 신청하기'; } });
+window.addEventListener('pageshow', () => { const button = document.querySelector('.cancel-submit'); if (button) { button.disabled = false; button.textContent = BusanI18n.t("common.ui0010"); } });
 </script>
 </body></html>

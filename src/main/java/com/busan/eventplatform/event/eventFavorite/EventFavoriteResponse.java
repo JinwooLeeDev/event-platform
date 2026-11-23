@@ -26,11 +26,9 @@ public class EventFavoriteResponse {
     @Data
     public static class DetailDto {
         private boolean isFavorite;
-        private Long favoriteCount;
 
-        public DetailDto(boolean isFavorite, Long favoriteCount) {
+        public DetailDto(boolean isFavorite) {
             this.isFavorite = isFavorite; // 회원 좋아요 여부
-            this.favoriteCount = favoriteCount; // 행사 좋아요 개수
         }
     }
 }

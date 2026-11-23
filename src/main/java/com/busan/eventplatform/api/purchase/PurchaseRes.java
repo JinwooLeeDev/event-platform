@@ -1,5 +1,6 @@
 package com.busan.eventplatform.api.purchase;
 
+import com.busan.eventplatform.global.i18n.LocaleMessages;
 import com.busan.eventplatform.api.payment.PaymentTypeStatus;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.events.Event;
@@ -70,11 +71,11 @@ public class PurchaseRes {
                 this.status = registration.getStatus();
 
                 this.statusMessage = switch(status) {
-                    case REJECTED -> "신청 처리중";
-                    case CONFIRMED -> "신청 확정";
-                    case WAITING -> "신청 대기";
-                    case PENDING -> "승인 대기";
-                    case CANCELLED -> "신청 취소";
+                    case REJECTED -> LocaleMessages.display("신청 처리중");
+                    case CONFIRMED -> LocaleMessages.display("신청 확정");
+                    case WAITING -> LocaleMessages.display("신청 대기");
+                    case PENDING -> LocaleMessages.display("승인 대기");
+                    case CANCELLED -> LocaleMessages.display("신청 취소");
                 };
                 this.canCancel = selectCancel();
 

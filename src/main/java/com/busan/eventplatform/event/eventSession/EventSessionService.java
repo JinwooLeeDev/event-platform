@@ -93,6 +93,9 @@ public class EventSessionService {
         if (!event.getCompany().getId().equals(companyId)) {
             throw new Exception403("해당 행사에 회차를 수정할 권한이 없습니다.");
         }
+        if (event.getStatus() != EventStatus.FEEDBACK_REQUIRED) {
+            throw new Exception403("보완 요청된 행사만 회차를 수정할 수 있습니다.");
+        }
         // 수정 전 정원 저장
         int previousCapacity = eventSession.getCapacity();
 
@@ -160,5 +163,17 @@ public class EventSessionService {
         }
 
         es.setInProgress();
+    }
+
+    // 기존 행사에 회차를 추가할 수 있는 상태인지 확인
+    public boolean canAddSession(Long eventId, Long companyId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new Exception404("해당 행사를 찾을 수 없습니다."));
+
+        if (!event.getCompany().getId().equals(companyId)) {
+            throw new Exception403("해당 행사에 접근할 권한이 없습니다.");
+        }
+
+        return event.getStatus() == EventStatus.FEEDBACK_REQUIRED;
     }
 }

@@ -16,6 +16,10 @@ public enum RegistrationStatus {
 
     private final String description;
 
+    public String getDescription() {
+        return com.busan.eventplatform.global.i18n.LocaleMessages.display(description);
+    }
+
     /** 정원을 차지하는 상태 (확정 + 승인대기) */
     public static final Set<RegistrationStatus> SEAT_OCCUPYING = EnumSet.of(CONFIRMED, PENDING);
 

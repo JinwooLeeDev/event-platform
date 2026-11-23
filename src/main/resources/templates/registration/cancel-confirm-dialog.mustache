@@ -6,9 +6,9 @@
     <form method="post" id="reg-cancel-form">
         <p id="reg-cancel-message" class="reg-cancel-message"></p>
         <div class="reg-cancel-actions">
-            <button type="button" id="reg-cancel-policy-btn" class="reg-cancel-btn-policy">환불 정책 보기</button>
-            <button type="button" id="reg-cancel-close-btn" class="reg-cancel-btn-close">닫기</button>
-            <button type="submit" id="reg-cancel-submit-btn" class="reg-cancel-btn-submit">참가 취소</button>
+            <button type="button" id="reg-cancel-policy-btn" class="reg-cancel-btn-policy">{{i18n.application.ui0005}}</button>
+            <button type="button" id="reg-cancel-close-btn" class="reg-cancel-btn-close">{{i18n.common.close}}</button>
+            <button type="submit" id="reg-cancel-submit-btn" class="reg-cancel-btn-submit">{{i18n.application.ui0007}}</button>
         </div>
     </form>
 </dialog>
@@ -41,7 +41,7 @@
             event.preventDefault();
 
             form.action = button.dataset.cancelUrl;
-            message.textContent = button.dataset.confirm || "참가 신청을 취소하시겠습니까?";
+            message.textContent = button.dataset.confirm || BusanI18n.t("application.ui0008");
             policyText = button.dataset.refundPolicy || "";
             policyBtn.hidden = !policyText;          // 무료 회차는 환불 정책 버튼 숨김
             submitBtn.disabled = false;

@@ -340,3 +340,210 @@ INSERT INTO event_files (id, event_id, storage_key) VALUES
 (36017, 36017, 'files/10000000-0000-4000-8000-000000036017.png'),
 (36018, 36018, 'files/10000000-0000-4000-8000-000000036018.png'),
 (36019, 36019, 'files/10000000-0000-4000-8000-000000036019.png');
+
+
+
+-- =========================================
+-- 테스트 행사 생성
+-- 행사 ID: 36100
+-- =========================================
+
+INSERT INTO events (
+    id,
+    company_id,
+    category_id,
+    address,
+    title,
+    summary,
+    status,
+    description,
+    published_at,
+    cancelled_at,
+    cancellation_reason,
+    feedback_message,
+    created_at
+) VALUES (
+             36100,
+             36001,
+             36002,
+             '부산광역시 해운대구',
+             '리뷰 테스트 행사',
+             '회차별 리뷰 노출 및 작성 테스트',
+             'PUBLISHED',
+             '1회차와 2회차는 종료 및 출석 완료, 3회차는 모집 중인 테스트 행사입니다.',
+             CURRENT_TIMESTAMP,
+             NULL,
+             NULL,
+             NULL,
+             CURRENT_TIMESTAMP
+         );
+
+
+-- =========================================
+-- 1회차 생성: 종료된 무료 행사
+-- 회차 ID: 36101
+-- =========================================
+
+INSERT INTO event_sessions (
+    id, event_id, name,
+    starts_at, ends_at,
+    apply_start_at, apply_end_at,
+    capacity, occupied_count, next_reception_number,
+    hold_duration_seconds, pricing_type, fee,
+    reservation_deposit_points, minimum_participants,
+    minimum_check_at, status, created_at
+) VALUES (
+             36101,
+             36100,
+             '1회차 - 종료 무료 체험',
+             TIMESTAMPADD(DAY, -5, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(HOUR, 3, TIMESTAMPADD(DAY, -5, CURRENT_TIMESTAMP)),
+             TIMESTAMPADD(DAY, -10, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, -6, CURRENT_TIMESTAMP),
+             30, 1, 2,
+             300, 'FREE', 0,
+             0, 1,
+             TIMESTAMPADD(DAY, -6, CURRENT_TIMESTAMP),
+             'COMPLETED',
+             CURRENT_TIMESTAMP
+         );
+
+
+-- =========================================
+-- 2회차 생성: 종료된 무료 행사
+-- 회차 ID: 36102
+-- =========================================
+
+INSERT INTO event_sessions (
+    id, event_id, name,
+    starts_at, ends_at,
+    apply_start_at, apply_end_at,
+    capacity, occupied_count, next_reception_number,
+    hold_duration_seconds, pricing_type, fee,
+    reservation_deposit_points, minimum_participants,
+    minimum_check_at, status, created_at
+) VALUES (
+             36102,
+             36100,
+             '2회차 - 종료 무료 체험',
+             TIMESTAMPADD(DAY, -3, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(HOUR, 3, TIMESTAMPADD(DAY, -3, CURRENT_TIMESTAMP)),
+             TIMESTAMPADD(DAY, -8, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, -4, CURRENT_TIMESTAMP),
+             30, 1, 2,
+             300, 'FREE', 0,
+             0, 1,
+             TIMESTAMPADD(DAY, -4, CURRENT_TIMESTAMP),
+             'COMPLETED',
+             CURRENT_TIMESTAMP
+         );
+
+
+-- =========================================
+-- 1회차 신청
+-- 회원 ID: 36002
+-- 신청 ID: 36100
+-- =========================================
+
+INSERT INTO registrations (
+    id, user_id, event_session_id,
+    status, reception_number,
+    created_at, updated_at, purchase_id
+) VALUES (
+             36100,
+             36002,
+             36101,
+             'CONFIRMED',
+             1,
+             TIMESTAMPADD(DAY, -10, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, -5, CURRENT_TIMESTAMP),
+             NULL
+         );
+
+
+-- =========================================
+-- 2회차 신청
+-- 회원 ID: 36002
+-- 신청 ID: 36101
+-- =========================================
+
+INSERT INTO registrations (
+    id, user_id, event_session_id,
+    status, reception_number,
+    created_at, updated_at, purchase_id
+) VALUES (
+             36101,
+             36002,
+             36102,
+             'CONFIRMED',
+             1,
+             TIMESTAMPADD(DAY, -8, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, -3, CURRENT_TIMESTAMP),
+             NULL
+         );
+
+
+-- =========================================
+-- 1회차 출석
+-- 신청 ID: 36100
+-- =========================================
+
+INSERT INTO attendances (
+    id, registration_id, attempt_no,
+    checked_by, attended_at, created_at
+) VALUES (
+             36100,
+             36100,
+             1,
+             36002,
+             TIMESTAMPADD(DAY, -5, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, -5, CURRENT_TIMESTAMP)
+         );
+
+
+-- =========================================
+-- 2회차 출석
+-- 신청 ID: 36101
+-- =========================================
+
+INSERT INTO attendances (
+    id, registration_id, attempt_no,
+    checked_by, attended_at, created_at
+) VALUES (
+             36101,
+             36101,
+             1,
+             36002,
+             TIMESTAMPADD(DAY, -3, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, -3, CURRENT_TIMESTAMP)
+         );
+
+
+-- =========================================
+-- 3회차 생성: 모집 중인 유료 행사
+-- 회차 ID: 36103
+-- =========================================
+
+INSERT INTO event_sessions (
+    id, event_id, name,
+    starts_at, ends_at,
+    apply_start_at, apply_end_at,
+    capacity, occupied_count, next_reception_number,
+    hold_duration_seconds, pricing_type, fee,
+    reservation_deposit_points, minimum_participants,
+    minimum_check_at, status, created_at
+) VALUES (
+             36103,
+             36100,
+             '3회차 - 모집 중 유료 체험',
+             TIMESTAMPADD(DAY, 7, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(HOUR, 3, TIMESTAMPADD(DAY, 7, CURRENT_TIMESTAMP)),
+             TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP),
+             TIMESTAMPADD(DAY, 6, CURRENT_TIMESTAMP),
+             30, 0, 1,
+             300, 'PAID', 10000,
+             0, 1,
+             TIMESTAMPADD(DAY, 6, CURRENT_TIMESTAMP),
+             'SCHEDULED',
+             CURRENT_TIMESTAMP
+         );

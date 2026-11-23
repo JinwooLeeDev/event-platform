@@ -10,11 +10,21 @@ const {chromium} = require(process.env.PLAYWRIGHT_MODULE || path.resolve('build/
         const page = await browser.newPage();
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
-        await page.route('**/*', route => route.fulfill({body: route.request().url() === 'http://form.test/events/save'
-            ? fs.readFileSync('build/final-polish/event-save.html') : '', contentType: 'text/html; charset=utf-8'}));
+        await page.route('**/*', route => {
+            const url = new URL(route.request().url());
+            if (url.origin === 'http://form.test' && url.pathname.startsWith('/js/'))
+                return route.fulfill({body: fs.readFileSync(path.resolve('src/main/resources/static' + url.pathname)), contentType:'text/javascript'});
+            return route.fulfill({body: route.request().url() === 'http://form.test/events/save'
+                ? fs.readFileSync('build/final-polish/event-save.html') : '', contentType: 'text/html; charset=utf-8'});
+        });
         await page.addInitScript(() => {
             window.alerts = [];
             window.alert = message => alerts.push(message);
+            window.requestedSave = false;
+            window.fetch = async () => {
+                window.requestedSave = true;
+                return {ok:false,status:400,json:async()=>({message:'Mock validation response'})};
+            };
             window.daum = {Postcode: class {
                 constructor(options) { this.options = options; }
                 open() { this.options.oncomplete({roadAddress: 'Busan Haeundae', zonecode: '48058', buildingName: 'Audit venue'}); }
@@ -40,14 +50,16 @@ const {chromium} = require(process.env.PLAYWRIGHT_MODULE || path.resolve('build/
             event.preventDefault();
         }));
         await page.locator('[type="submit"]').filter({hasText: '주최 신청하기'}).click();
-        assert.equal(await page.evaluate(() => window.formBlocked), false);
+        assert.equal(await page.evaluate(() => window.requestedSave), true, 'valid form uses Fetch submission');
         let values = Object.fromEntries(await page.evaluate(() => window.submitted));
         assert.equal(values['sessions[0].capacity'], '17');
         assert.equal(values['sessions[0].startsAt'], '2030-12-20T09:30');
         assert.equal(values['sessions[0].endsAt'], '2030-12-20T18:15');
         await page.locator('#endTime').fill('08:00');
+        await page.evaluate(() => { window.requestedSave = false; });
         await page.locator('[type="submit"]').filter({hasText: '주최 신청하기'}).click();
         assert.equal(await page.evaluate(() => window.formBlocked), true, 'reversed times are blocked');
+        assert.equal(await page.evaluate(() => window.requestedSave), false, 'invalid times never reach Fetch');
         await page.locator('[name="hasSessions"][value="true"]').check();
         values = Object.fromEntries(await page.evaluate(() => [...new FormData(document.getElementById('event-save-form')).entries()]));
         assert.equal(await page.locator('#capacity').isEnabled(), false);

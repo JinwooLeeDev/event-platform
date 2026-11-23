@@ -26,18 +26,18 @@
             });
             if (!response.ok) {
                 throw new Error(response.status === 401 || response.status === 403
-                    ? '관리자 로그인 상태를 확인한 후 다시 시도해주세요.'
-                    : '취소 신청 내역을 불러오지 못했습니다. 다시 시도해주세요.');
+                    ? BusanI18n.t("common.ui0047")
+                    : BusanI18n.t("common.ui0048"));
             }
             const html = await response.text();
             if (id !== requestId) return;
             const page = new DOMParser().parseFromString(html, 'text/html');
             const incoming = page.querySelector('[data-admin-cancel-list]');
-            if (!incoming) throw new Error('목록을 확인할 수 없습니다. 관리자 로그인 상태를 확인해주세요.');
+            if (!incoming) throw new Error(BusanI18n.t("common.ui0049"));
             // Keep navigation and its keyboard focus; replace only the request list.
             list.replaceChildren(...incoming.childNodes);
             list.querySelectorAll('.admin-badge').forEach(badge => {
-                const label = badge.textContent.trim();
+                const label = BusanI18n.source(badge.textContent.trim());
                 badge.dataset.tone = label.includes('거절') ? 'danger'
                     : label.includes('대기') ? 'warning' : 'success';
             });

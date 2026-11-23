@@ -1,5 +1,7 @@
 package com.busan.eventplatform.admin;
 
+import com.busan.eventplatform.global.i18n.I18nTestModels;
+
 import com.busan.eventplatform.company.Company;
 import com.busan.eventplatform.event.EventSession;
 import com.busan.eventplatform.event.eventCategory.*;
@@ -73,7 +75,7 @@ class AdminOperationsScreenTest {
         var compiler = com.samskivert.mustache.Mustache.compiler().withLoader(name -> new java.io.InputStreamReader(
                 getClass().getResourceAsStream("/templates/" + name + ".mustache"), java.nio.charset.StandardCharsets.UTF_8));
         try (var reader = new java.io.InputStreamReader(getClass().getResourceAsStream("/templates/admin/page.mustache"), java.nio.charset.StandardCharsets.UTF_8)) {
-            return compiler.compile(reader).execute(model);
+            return compiler.compile(reader).execute(I18nTestModels.withLocale(model));
         }
     }
 }

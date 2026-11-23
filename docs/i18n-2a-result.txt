@@ -1,0 +1,177 @@
+Busan Play 2-A — Gemini 동적 행사 번역 인프라
+작성일: 2026-11-21
+
+구현 범위
+feat/다국어지원의 기존 1-B 미커밋 변경을 보존했다. 커밋/Push/브랜치 변경 없음.
+기존 EventService/Controller/DTO/Mustache와 결제/신청/환불 로직에는 연결하지 않았다.
+이번 단계의 기존 파일 변경은 application.yml의 gemini 설정 추가뿐이다.
+
+사전 분석
+Java 21, Spring Boot 4.1.2, Gradle 9.8.2, JPA와 기존 JDBC/Jackson3 사용.
+기본 supabase PostgreSQL, H2 파일 DB와 MySQL 프로필도 있다.
+스키마는 ddl-auto=update이며 Flyway/Liquibase는 없다. demo-data.sql은 최소 계정/분류 시드.
+기존 서비스는 메서드 단위 @Transactional, CommunitySchedulingConfig가 스케줄링을 활성화한다.
+기존 EventSessionScheduler와 커뮤니티 스케줄러를 보호하도록 번역은 자체 bounded executor에서 실행한다.
+Event의 title/summary/description은 nullable=false 기본 varchar(255), DTO에서 trim 기준 필수 검사.
+EventService는 save/update/updateAndResubmit/resubmit, findAllPage/findById와 승인/보완 처리를 제공한다.
+등록/재제출은 PENDING_REVIEW, 승인 후 PAID_READY이며 보증금 처리 후 PUBLISHED가 된다.
+별도 행사 번역 서비스나 저장소는 없었다.
+기존 MessageSource/LocaleResolver/LocaleMessages/LocaleViewAdvice/언어 쿠키/preferredLocale은 유지한다.
+지원 언어 검사는 기존 SupportedLocale.isSupported를 재사용하며 미지원 언어는 엄격히 거부한다.
+
+추가 패키지: com.busan.eventplatform.event.translation
+- SourceContent: 원문 ko, title, summary, description 불변 스냅샷과 SHA-256.
+- TranslatedContent: 번역 결과 불변 DTO.
+- TranslationLocale: 기존 지원 언어의 strict 검증.
+- TranslationClient / GeminiTranslationClient: 독립 Client 계약과 JDK HttpClient 실제 구현.
+- TranslationProperties / TranslationConfiguration: 설정 바인딩, 제한 검증, Client/UTC Clock 구성.
+- TranslationValidator: 응답 필드/공백/길이/HTML/플레이스홀더/숫자/URL/언어 script 검사.
+- TranslationFailure: 안전한 오류 코드, 재시도 가능 여부, Retry-After. 원문·응답·키를 예외에 보관하지 않음.
+- TranslationResult: ORIGINAL/COMPLETED/PENDING/PROCESSING/FAILED/NOT_FOUND/STALE 및 fallback 콘텐츠.
+- TranslationStore: 짧은 독립 JDBC 트랜잭션, 캐시/큐/lease/DB 공통 예산 관리.
+- EventTranslationService: 2-B에서 호출할 요청/조회/상태/무효화/변경 확인/재시도 경계.
+- TranslationWorker: 단일 작업 예약 -> 외부 호출 -> 완료/실패 처리.
+- TranslationScheduler: 기본 OFF, 기존 scheduler thread에서 HTTP/DB 작업을 분리한 전용 실행기.
+
+저장 구조와 DB 적용
+src/main/resources/db/manual/event-translation.sql은 수동 적용용이다.
+spring.sql.init에 연결하지 않았으며 JPA 신규 Entity도 없어 자동 ddl-auto 대상이 아니다.
+이번 작업에서는 실제 사용자 DB에 SQL을 적용하지 않았다.
+PostgreSQL 관리 도구에서 연결 대상/백업과 DDL 권한을 확인하고 이 파일의 신규 테이블 생성만
+트랜잭션으로 적용한 뒤 worker를 활성화한다. 기존 Event 데이터를 수정하거나 초기화하지 않는다.
+
+- event_translation: 완료 결과 캐시. event_id+locale UNIQUE, 원본 hash와 번역/생성/수정 UTC 시각.
+  translated_title varchar(1024), translated_summary varchar(4096), description TEXT.
+  한국어 원본 Event 필드는 바꾸지 않고 별도 저장한다.
+- translation_job: event_id+target_locale+source_hash UNIQUE, 상태/재시도 횟수/다음 실행/오류 코드,
+  lease token/만료/시작/완료 시각. 원문 사본과 개인정보 필드는 저장하지 않는다.
+- translation_budget: id=1 공통 예약 행. 분당/일일 사용량, 시간 창, 429 cooldown.
+- Event FK는 두 테이블 모두 ON DELETE CASCADE. 원본 삭제 시 관련 번역/작업만 정리한다.
+- PostgreSQL과 H2용 SQL이다. MySQL 문법 호환성은 보장하지 않으며 현재 worker 기본 OFF다.
+
+캐시·동시성·해시
+- ko 요청은 원문 ORIGINAL 반환. 다른 세 언어는 완료된 동일 hash 캐시만 반환한다.
+- 그 외에는 상태와 최신 한국어 원문을 함께 반환한다. 존재하지 않는/손상된 원문 또는 DB 자체
+  장애 시 content가 없을 수 있으므로 2-B에서는 기존 Event DTO를 최종 fallback으로 유지한다.
+- title/summary/description 및 원본 Locale을 고정 순서의 UTF-8 길이 프레임으로 직렬화해 SHA-256.
+  구분자 충돌이 없고 공백도 원본 변경으로 간주한다. null/blank 필수 필드는 거부한다.
+- 요청 트랜잭션은 기존 Event 행을 잠시 잠그고 캐시/작업 확인 및 등록한다.
+  JVM 락에 의존하지 않고 유일 제약과 DB 행 잠금으로 다중 인스턴스 요청을 직렬화한다.
+- worker는 budget 행 잠금 후 만료 작업 회수, 예산/동시 슬롯 확인, PROCESSING 및 UUID lease 예약.
+- API 호출 시 DB 트랜잭션은 없다. 저장 시 Event 잠금, 최신 hash/공개 여부/lease token/기한을 재확인한다.
+  오래된 원본/회수된 lease의 결과는 완료 캐시를 덮어쓰지 못한다.
+- 서버 재시작 후 PENDING 작업은 DB에서 다시 조회하며 만료 PROCESSING은 제한 횟수 내 회수한다.
+- API 응답 직후 DB 저장 전에 프로세스가 죽으면 동일 호출이 다시 발생할 수 있다.
+  제공자 측 idempotency가 없으므로 exactly-once API 호출을 보장하지 않는다. lease·재시도·예산으로 제한한다.
+- 오래된 hash의 terminal 작업은 이력으로 남긴다. 운영량이 커지면 별도 보존 기간/정리 정책을 검토한다.
+- A→B→A로 원문을 되돌렸을 때 A의 과거 완료 작업은 같은 고유 행을 재예약해 캐시를 다시 채운다.
+  새 캐시 충전 주기의 재시도 횟수는 0부터 시작하고, 실패한 주기는 요청만으로 초기화하지 않는다.
+  단순 조회는 STALE만 반환하며 재생성 호출에도 동일한 전역 예산/동시 실행 제한이 적용된다.
+
+기본 제한 (공식 Gemini 계정 한도 아님)
+동시 작업 1개, 분당 5회, UTC 날짜당 100회, 원문 합계 10,000 Java UTF-16 문자,
+번역 합계 40,000 문자, 요청 전체 30초, lease 2분, poll 5초, 최초 backoff 30초, 재시도 최대 2회.
+원문 제한은 UTF-16 길이이며 토큰 수 한도를 직접 계산하는 값이 아니다.
+DB 예약 기준으로 예산을 선차감하므로 HTTP 전에 무효화된 작업도 보수적으로 집계될 수 있다.
+예산은 재시작/다중 인스턴스에 공유된다. Google의 일일 한도 초기화 시간(Pacific)과 앱 UTC 예산은 다르다.
+429/timeout/일시적 서버 장애만 제한적 지수 backoff, Retry-After가 더 길면 이를 적용한다.
+429는 전역 cooldown도 적용하며 비정상적으로 긴 대기 헤더는 30일로 상한 처리한다.
+인증/모델/요청 설정/유효하지 않은 응답은 자동 재시도하지 않는다. 명시적 재시도도 같은 횟수 제한을 따른다.
+유료 모델 fallback, 결제 설정 변경, 과금 자동 활성화 기능은 없다.
+앱 제한만으로 클라우드 과금을 완전히 차단할 수 없으므로 사용자가 프로젝트 결제/무료 티어를 확인해야 한다.
+
+API 설정
+GEMINI_API_KEY=<사용자의 키, Git에 저장하지 않음>
+GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_TRANSLATION_WORKER_ENABLED=true   (수동 SQL 적용과 계정 확인 후에만)
+
+모델 예시는 작성일 Google 공식 가격표에서 Standard 무료 입력/출력을 확인한 모델이다.
+코드/설정의 기본 모델은 빈 값이며 자동 대체하지 않는다. 프로젝트별 사용 가능 여부는 AI Studio에서 확인한다.
+키 누락은 KEY_MISSING, 모델 미설정/잘못된 모델은 MODEL_INVALID. 앱은 정상 부팅한다.
+유효 캐시는 키가 없어도 읽을 수 있다. 누락 상태에서 신규 호출/큐 등록은 수행하지 않는다.
+모든 제한값은 application.yml의 GEMINI_* 변수로 조정할 수 있다.
+
+보안과 품질
+system instruction은 resources/translation/gemini-system.txt, 원문은 JSON user DATA로 분리한다.
+sourceLocale와 targetLocale 및 세 콘텐츠 필드만 전송한다. tools, URL fetch, 회원/주소/가격 필드는 없다.
+공개 PUBLISHED 행사만 전송한다. 이 때문에 최초 저장 직후 PENDING_REVIEW 행사는 NOT_PUBLIC이다.
+2-B의 영어 사전 번역은 실제 공개 전환 후 실행하도록 정책을 조정해야 한다.
+공개 본문 안의 개인정보를 자동 판별/삭제하지는 않으므로 행사 작성·검수 정책이 필요하다.
+무료 티어 데이터 이용 조건도 운영 전 확인해야 한다.
+API 키는 x-goog-api-key 헤더로만 전달하고 리다이렉트는 따르지 않는다.
+HTTP 본문 크기 제한과 헤더/본문 전체 타임아웃을 적용한다. 원문/응답/키는 로그에 출력하지 않는다.
+HTTP 400 REQUEST_INVALID, 401/403 AUTHENTICATION, 404 MODEL_INVALID, 408 TIMEOUT,
+429 RATE_LIMIT, 5xx TEMPORARY 등으로 구분한다.
+responseJsonSchema, 중복/추가 JSON 키/후행 데이터/필수 string/공백/길이/생성 완료 STOP을 검증한다.
+HTML 토큰 순서/속성, 플레이스홀더, 숫자, URL을 필드별로 보존해야 성공한다.
+번역 확대를 허용하는 별도 저장 길이를 쓰되 초과 결과는 실패 처리한다.
+언어 script 검사는 기본 이상 탐지이며 의미 정확성·자연스러움·프롬프트 공격 차단을 완전히 보장하지 않는다.
+HTML 보존 검사는 XSS sanitizer가 아니다. 2-B에서 원문과 같은 출력 escape/허용 HTML 정책이 필요하다.
+
+검증 방식
+실제 Gemini 호출 없음. Client는 localhost HttpServer fixture, worker는 Mock TranslationClient 사용.
+H2 메모리 DB에서 SQL/유일성/동시 요청/동시 worker/예산/무효화/오류/재시도/lease를 검증했다.
+임시 파일 H2 엔진을 실제 shutdown 후 재개방하여 PROCESSING 작업과 예산의 영속/복구도 검증했다.
+키·모델 미설정 전체 Spring Boot 부팅, 자동 테이블 생성 없음, worker OFF도 확인했다.
+빌드/전체 회귀 테스트는 별도 build/i18n2a-tests 출력과 메모리 DB에서 수행했다.
+PostgreSQL 실서버는 미검증: 로컬 Docker 엔진이 실행되지 않아 H2 결과로 PG 동시성까지 보장하지 않는다.
+실제 모델 접근 권한/무료 한도/외부 네트워크/실제 번역 품질/PG 운영 권한은 미검증이다.
+최종 테스트 수와 비교 결과는 아래 실행 집계를 참조한다.
+
+2-B 준비용 호출 방법 (이번 단계에서는 연결하지 않음)
+1. 저장/수정 트랜잭션 완료 후 requestTranslation(eventId,"en").
+   현재 비공개 상태에서는 실패하므로 PUBLISHED 전환 후 최초 요청한다.
+   EventService.save/update/updateAndResubmit 및 공개 전환 처리의 AFTER_COMMIT listener가 후보다.
+   원본 트랜잭션 안에서 호출하면 REQUIRES_NEW의 Event 잠금이 대기할 수 있으므로 금지한다.
+2. EventController /event/{id} 또는 서비스 조회 조합에서 ja/zh-CN 최초 요청을 등록한다.
+   requestTranslation은 큐만 등록한다. Controller에서 worker/client를 직접 호출하지 않는다.
+3. findTranslation/getTranslationStatus로 COMPLETED 결과만 DTO에 반영하고 나머지는 기존 원문 DTO 유지.
+   목록 findAllPage는 항목별 원문 fallback을 유지하며 필요 시 batch 캐시 조회를 후속 설계한다.
+4. 수정 후 해시 비교로 stale을 판단한다. 전체 무효화는 invalidateTranslations,
+   변경 확인은 hasSourceChanged, 제한적 수동 재시도는 retryTranslation을 사용한다.
+5. Mustache 변수는 유지하고 조회 DTO 조합 단계에서 번역값을 선택한다. 대기·실패는 MessageSource 정적 UI 사용.
+6. 인증/권한 검사는 기존 Controller/서비스에서 수행한다. 이 인프라 자체는 외부 HTTP endpoint를 노출하지 않는다.
+7. 2-B 작업은 사용자 승인 이후 진행한다. 이번 단계에서 중단한다.
+
+공식 참고 문서 (2026-11-21 확인)
+https://ai.google.dev/gemini-api/docs/pricing#gemini-2.5-flash-lite
+https://ai.google.dev/gemini-api/docs/rate-limits
+https://ai.google.dev/api/generate-content
+https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig.html
+
+최종 실행 집계
+
+New tests: 57/57 PASS.
+Full suite: 432 tests, 39 existing failures.
+1-B baseline: 375 tests, 39 failures.
+Introduced failures (including duplicate testcase names): 0.
+Gradle build -x test: PASS. bootJar: PASS.
+Static i18n validation: 1,524 keys, 0 failures. git diff --check: PASS.
+
+Added source/test files:
+src\main\java\com\busan\eventplatform\event\translation\EventTranslationService.java
+src\main\java\com\busan\eventplatform\event\translation\GeminiTranslationClient.java
+src\main\java\com\busan\eventplatform\event\translation\SourceContent.java
+src\main\java\com\busan\eventplatform\event\translation\TranslatedContent.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationClient.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationConfiguration.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationFailure.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationLocale.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationProperties.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationResult.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationScheduler.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationStore.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationValidator.java
+src\main\java\com\busan\eventplatform\event\translation\TranslationWorker.java
+src\test\java\com\busan\eventplatform\event\translation\GeminiTranslationClientTest.java
+src\test\java\com\busan\eventplatform\event\translation\SourceContentTest.java
+src\test\java\com\busan\eventplatform\event\translation\TranslationConfigurationTest.java
+src\test\java\com\busan\eventplatform\event\translation\TranslationQueueTest.java
+src\test\java\com\busan\eventplatform\event\translation\TranslationSchedulerTest.java
+src\test\java\com\busan\eventplatform\event\translation\TranslationStartupTest.java
+Resources: application.yml (append only), db/manual/event-translation.sql, translation/gemini-system.txt.
+No Gradle dependency changes. No production database applied. No external Gemini API called.
+
+Final review: source A -> B -> A cache regeneration regression reproduced, fixed and tested.
+Final verification: 57 new tests PASS; 432 full tests; 39 pre-existing failures; 0 introduced failures.
+Standalone translation tests: gradlew.bat test --tests com.busan.eventplatform.event.translation.*

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{localeCode}}">
 <head>
     {{> layout/head-meta}}
-    <title>기업 계정·담당자 정보 수정 | Busan Play</title>
+    <title>{{i18n.company.ui0115}}</title>
 </head>
 <body>
 {{> layout/header}}
@@ -54,26 +54,26 @@
     <div class="account-layout">
         {{> layout/company-nav}}
         <section class="company-card account-content">
-            <h1>계정·담당자 정보 수정</h1>
+            <h1>{{i18n.company.ui0116}}</h1>
             <p class="company-description">
-                계정·담당자 정보와 기업 인증정보를 변경할 수 있습니다.<br>
-                사업자 정보를 변경하려면 재검증과 새 사업자등록증 제출이 필요합니다.
+                {{i18n.company.ui0117}}<br>
+                {{i18n.company.ui0118}}
             </p>
             <form id="updateForm" action="/company/update" method="post" enctype="multipart/form-data">
                 {{#company}}
 
                 {{#reviewReason}}
                 <div class="company-review-feedback" role="note">
-                    <strong>관리자 보완 요청</strong>
+                    <strong>{{i18n.company.ui0005}}</strong>
                     <p>{{reviewReason}}</p>
                 </div>
                 {{/reviewReason}}
 
                 <fieldset>
-                    <legend>계정 정보</legend>
+                    <legend>{{i18n.company.ui0119}}</legend>
 
                     <div class="auth-field">
-                        <label for="email">이메일</label>
+                        <label for="email">{{i18n.admin.ui0033}}</label>
 
                         <input id="email"
                                type="email"
@@ -83,12 +83,12 @@
                                aria-describedby="email-help">
 
                         <p id="email-help" class="auth-message">
-                            가입한 이메일은 변경할 수 없습니다.
+                            {{i18n.company.ui0120}}
                         </p>
                     </div>
 
                     <p>
-                        <label for="password">새 비밀번호</label><br>
+                        <label for="password">{{i18n.company.ui0121}}</label><br>
                         <input id="password"
                                name="password"
                                type="password"
@@ -96,11 +96,11 @@
                                minlength="8"
                                maxlength="16">
                         <br>
-                        <small>변경할 경우에만 입력하세요. 영문·숫자·특수문자($@!%*#?&)를 포함한 8~16자입니다.</small>
+                        <small>{{i18n.company.ui0122}}</small>
                     </p>
 
                     <div class="auth-field">
-                        <label for="passwordConfirm">새 비밀번호 확인</label><br>
+                        <label for="passwordConfirm">{{i18n.company.ui0123}}</label><br>
                         <input id="passwordConfirm"
                                type="password"
                                autocomplete="new-password">
@@ -112,10 +112,10 @@
                     </div>
                 </fieldset>
                 <fieldset>
-                    <legend>담당자 정보</legend>
+                    <legend>{{i18n.company.ui0023}}</legend>
 
                     <p>
-                        <label for="contactPersonName">담당자 이름</label><br>
+                        <label for="contactPersonName">{{i18n.company.ui0024}}</label><br>
                         <input id="contactPersonName"
                                name="contactPersonName"
                                value="{{contactPersonName}}"
@@ -124,7 +124,7 @@
                     </p>
 
                     <p>
-                        <label for="contactPersonPhone">담당자 연락처</label><br>
+                        <label for="contactPersonPhone">{{i18n.admin.ui0039}}</label><br>
                         <input id="contactPersonPhone"
                                name="contactPersonPhone"
                                type="tel"
@@ -135,16 +135,16 @@
                 </fieldset>
                 <fieldset id="businessInformation"
                           data-pending="{{#pending}}true{{/pending}}{{^pending}}false{{/pending}}">
-                    <legend>사업자 정보 — 변경 시 재심사</legend>
+                    <legend>{{i18n.company.ui0124}}</legend>
 
                     {{#pending}}
                     <p class="company-description">
-                        검토 중에는 기업 인증 정보 수정이 불가합니다.
+                        {{i18n.company.ui0125}}
                     </p>
                     {{/pending}}
 
                     <div class="auth-field">
-                        <label for="businessNumber">사업자등록번호</label>
+                        <label for="businessNumber">{{i18n.admin.ui0020}}</label>
                         <input id="businessNumber"
                                name="businessNumber"
                                value="{{businessNumber}}"
@@ -158,7 +158,7 @@
                     </div>
 
                     <div class="auth-field">
-                        <label for="representativeName">대표자명</label>
+                        <label for="representativeName">{{i18n.company.ui0021}}</label>
                         <input id="representativeName"
                                name="representativeName"
                                value="{{representativeName}}"
@@ -168,7 +168,7 @@
                     </div>
 
                     <div class="auth-field">
-                        <label for="openedOn">개업일자</label>
+                        <label for="openedOn">{{i18n.company.ui0126}}</label>
                         <input id="openedOn"
                                name="openedOn"
                                value="{{openedOn}}"
@@ -183,19 +183,19 @@
                                 type="button"
                                 {{#pending}}disabled{{
                         /pending}}>
-                        사업자 정보 검증
+                        {{i18n.company.ui0127}}
                         </button>
 
                         <p id="businessVerificationMessage"
                            class="auth-message"
                            role="status"
                            aria-live="polite">
-                            사업자 정보를 변경한 경우 검증해주세요.
+                            {{i18n.company.ui0128}}
                         </p>
                     </div>
 
                     <div class="auth-field">
-                        <label for="certificate">새 사업자등록증</label>
+                        <label for="certificate">{{i18n.company.ui0129}}</label>
                         <input id="certificate"
                                name="businessCertificate"
                                type="file"
@@ -204,8 +204,7 @@
                                {{#pending}}disabled{{/pending}}>
 
                         <small>
-                            사업자 정보 변경 시 필수입니다.
-                            PDF·JPG·JPEG·PNG, 최대 10MB까지 첨부할 수 있습니다.
+                            {{i18n.company.ui0130}}
                         </small>
 
                         <p id="certificateMessage"
@@ -217,8 +216,8 @@
                 {{/company}}
                 <p id="formMessage" class="auth-message" role="alert"></p>
                 <div class="company-form-actions">
-                    <button id="company-save" type="submit">수정 저장</button>
-                    <a class="company-cancel-button" href="/company/detail">취소</a></div>
+                    <button id="company-save" type="submit">{{i18n.company.ui0131}}</button>
+                    <a class="company-cancel-button" href="/company/detail">{{i18n.company.ui0043}}</a></div>
 
             </form>
 
@@ -315,7 +314,7 @@
             businessButton.disabled = blocked || pending;
 
             save.disabled = blocked;
-            save.textContent = submitting ? "저장 중…" : "수정 저장";
+            save.textContent = submitting ? BusanI18n.t("company.ui0132") : BusanI18n.t("company.ui0131");
 
             certificate.required = !pending && businessChanged();
             certificate.disabled = pending || submitting;
@@ -343,20 +342,20 @@
 
             if (!file) {
                 return businessChanged()
-                    ? "사업자 정보를 변경하려면 새 사업자등록증을 첨부해주세요."
+                    ? BusanI18n.t("company.ui0133")
                     : null;
             }
 
             if (file.size === 0) {
-                return "비어 있는 파일은 첨부할 수 없습니다.";
+                return BusanI18n.t("company.ui0134");
             }
 
             if (file.size > 10 * 1024 * 1024) {
-                return "파일 크기는 10MB 이하여야 합니다.";
+                return BusanI18n.t("company.ui0135");
             }
 
             if (!/\.(pdf|jpe?g|png)$/i.test(file.name)) {
-                return "PDF·JPG·JPEG·PNG 파일만 첨부할 수 있습니다.";
+                return BusanI18n.t("company.ui0136");
             }
 
             return null;
@@ -379,12 +378,12 @@
                 result = await response.json();
             } catch {
                 throw new Error(
-                    "요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요."
+                    BusanI18n.t("company.ui0137")
                 );
             }
 
             if (!response.ok) {
-                throw new Error(result.message || "요청에 실패했습니다.");
+                throw new Error(result.message || BusanI18n.t("company.ui0138"));
             }
 
             return result;
@@ -397,10 +396,10 @@
             message(
                 businessMessage,
                 pending
-                    ? "검토 중에는 기업 인증 정보 수정이 불가합니다."
+                    ? BusanI18n.t("company.ui0125")
                     : businessChanged()
-                        ? "사업자 정보가 변경되었습니다. 검증해주세요."
-                        : "기존 사업자 정보와 같아 재검증이 필요하지 않습니다."
+                        ? BusanI18n.t("company.ui0139")
+                        : BusanI18n.t("company.ui0140")
             );
 
             clearCertificateError();
@@ -433,7 +432,7 @@
             const request = currentBusinessInfo();
 
             if (!request.representativeName) {
-                message(businessMessage, "대표자명을 입력해주세요.", "error");
+                message(businessMessage, BusanI18n.t("company.ui0141"), "error");
                 representativeName.focus();
                 syncButtons();
                 return;
@@ -450,7 +449,7 @@
             });
 
             syncButtons();
-            message(businessMessage, "사업자 정보를 확인하고 있습니다.");
+            message(businessMessage, BusanI18n.t("company.ui0142"));
 
             try {
                 const result = await post(
@@ -462,7 +461,7 @@
                 if (requestedInfo !== JSON.stringify(currentBusinessInfo())) {
                     message(
                         businessMessage,
-                        "사업자 정보가 변경되었습니다. 다시 검증해주세요.",
+                        BusanI18n.t("company.ui0143"),
                         "error"
                     );
                     return;
@@ -495,7 +494,7 @@
         certificate.addEventListener("invalid", () => {
             if (certificate.validity.valueMissing) {
                 showCertificateError(
-                    "사업자 정보를 변경하려면 새 사업자등록증을 첨부해주세요."
+                    BusanI18n.t("company.ui0133")
                 );
             }
         });
@@ -516,15 +515,15 @@
             const mismatch = password.value !== confirmation.value;
 
             confirmation.setCustomValidity(
-                mismatch ? "새 비밀번호 확인이 일치하지 않습니다." : ""
+                mismatch ? BusanI18n.t("company.ui0144") : ""
             );
 
             message(
                 passwordMessage,
                 confirmation.value
                     ? mismatch
-                        ? "새 비밀번호 확인이 일치하지 않습니다."
-                        : "비밀번호가 일치합니다."
+                        ? BusanI18n.t("company.ui0144")
+                        : BusanI18n.t("company.ui0145")
                     : "",
                 mismatch ? "error" : "success"
             );
@@ -541,7 +540,7 @@
                 event.preventDefault();
                 message(
                     formMessage,
-                    "사업자 검증 처리가 끝난 뒤 저장해주세요.",
+                    BusanI18n.t("company.ui0146"),
                     "error"
                 );
                 return;
@@ -558,7 +557,7 @@
                 event.preventDefault();
                 message(
                     businessMessage,
-                    "변경한 사업자 정보의 검증을 완료해주세요. 만료됐다면 다시 검증해주세요.",
+                    BusanI18n.t("company.ui0147"),
                     "error"
                 );
                 businessButton.focus();
@@ -572,7 +571,7 @@
                 event.preventDefault();
                 message(
                     formMessage,
-                    "새 비밀번호는 영문·숫자·특수문자를 포함한 8~16자로 입력해주세요.",
+                    BusanI18n.t("company.ui0148"),
                     "error"
                 );
                 password.focus();
@@ -597,7 +596,7 @@
 
             if (!changed.length && !hasFile) {
                 event.preventDefault();
-                message(formMessage, "변경할 정보를 입력해주세요.", "error");
+                message(formMessage, BusanI18n.t("company.ui0149"), "error");
                 return;
             }
 
@@ -632,10 +631,10 @@
             message(
                 businessMessage,
                 pending
-                    ? "검토 중에는 기업 인증 정보 수정이 불가합니다."
+                    ? BusanI18n.t("company.ui0125")
                     : businessChanged()
-                        ? "변경한 사업자 정보를 다시 검증해주세요."
-                        : "사업자 정보를 변경한 경우 검증해주세요."
+                        ? BusanI18n.t("company.ui0150")
+                        : BusanI18n.t("company.ui0128")
             );
         });
 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>{{> layout/head-meta}}<title>주최 행사 | Busan Play</title></head>
+<html lang="{{localeCode}}">
+<head>{{> layout/head-meta}}<title>{{i18n.company.ui0029}}</title></head>
 <body>
 {{> layout/header}}
 {{> layout/account-style}}
@@ -9,44 +9,41 @@
     <div class="account-layout">
         {{> layout/company-nav}}
         <section class="account-content" aria-labelledby="company-events-title">
-            <header class="company-heading"><div><p class="company-location">기업페이지 / 행사 운영</p><h1 id="company-events-title">주최 행사</h1><p class="company-description">행사 진행 상태를 확인하고 회차와 참가자를 관리하세요.</p></div><a class="company-button" href="/events/save">새 행사 주최 신청 <span aria-hidden="true">+</span></a></header>
+            <header class="company-heading"><div><p class="company-location">{{i18n.community.ui0017}}</p><h1 id="company-events-title">{{i18n.company.ui0011}}</h1><p class="company-description">{{i18n.company.ui0030}}</p></div><a class="company-button" href="/events/save">{{i18n.company.ui0013}} <span aria-hidden="true">+</span></a></header>
             {{#successMessage}}<p class="company-success" role="status">{{successMessage}}</p>{{/successMessage}}
-            <section class="company-panel company-events-filter" aria-label="주최 행사 검색과 분류">
-                <div class="company-event-tabs" role="tablist" aria-label="행사 진행 단계">
-                    <button id="company-events-published-tab" type="button" role="tab" aria-selected="true" aria-controls="company-events-panel" data-event-tab="published">공개 중 <span data-event-tab-count="published">0</span></button>
-                    <button id="company-events-review-tab" type="button" role="tab" aria-selected="false" aria-controls="company-events-panel" tabindex="-1" data-event-tab="review">승인 대기 <span data-event-tab-count="review">0</span></button>
-                    <button id="company-events-closed-tab" type="button" role="tab" aria-selected="false" aria-controls="company-events-panel" tabindex="-1" data-event-tab="closed">종료·취소 <span data-event-tab-count="closed">0</span></button>
+            <section class="company-panel company-events-filter" aria-label="{{i18n.company.ui0031}}">
+                <div class="company-event-tabs" role="tablist" aria-label="{{i18n.company.ui0032}}">
+                    <button id="company-events-published-tab" type="button" role="tab" aria-selected="true" aria-controls="company-events-panel" data-event-tab="published">{{i18n.company.ui0033}} <span data-event-tab-count="published">0</span></button>
+                    <button id="company-events-review-tab" type="button" role="tab" aria-selected="false" aria-controls="company-events-panel" tabindex="-1" data-event-tab="review">{{i18n.company.ui0034}} <span data-event-tab-count="review">0</span></button>
+                    <button id="company-events-closed-tab" type="button" role="tab" aria-selected="false" aria-controls="company-events-panel" tabindex="-1" data-event-tab="closed">{{i18n.company.ui0035}} <span data-event-tab-count="closed">0</span></button>
                 </div>
-                <p class="company-description" id="company-event-tab-description">현재 공개되어 운영 중인 행사입니다.</p>
-                <div class="company-events-toolbar"><label>행사 검색<input id="company-event-search" type="search" placeholder="선택한 탭에서 행사명 검색"></label><label>세부 상태<select id="company-event-filter"><option value="">탭 내 전체 상태</option><option value="PENDING_REVIEW">승인 대기</option><option value="FEEDBACK_REQUIRED">보완 요청</option><option value="PAID_READY">결제 대기</option><option value="PUBLISHED">공개 중</option><option value="COMPLETED">종료</option><option value="CANCELLED">취소</option></select></label></div>
+                <p class="company-description" id="company-event-tab-description">{{i18n.company.ui0036}}</p>
+                <div class="company-events-toolbar"><label>{{i18n.common.search}}<input id="company-event-search" type="search" placeholder="{{i18n.company.ui0038}}"></label><label>{{i18n.company.ui0039}}<select id="company-event-filter"><option value="">{{i18n.company.ui0040}}</option><option value="PENDING_REVIEW">{{i18n.company.ui0034}}</option><option value="FEEDBACK_REQUIRED">{{i18n.admin.ui0056}}</option><option value="PAID_READY">{{i18n.company.ui0041}}</option><option value="PUBLISHED">{{i18n.company.ui0033}}</option><option value="COMPLETED">{{i18n.company.ui0042}}</option><option value="CANCELLED">{{i18n.company.ui0043}}</option></select></label></div>
             </section>
             <div id="company-events-panel" role="tabpanel" aria-labelledby="company-events-published-tab">
             <p class="company-result" id="company-event-result" role="status"></p>
             <div class="company-event-list">
             {{#eventList}}{{#eventList}}
                 <article class="company-panel company-event-card" data-event-status="{{status}}" data-event-title="{{title}}">
-                    <div class="company-event-heading"><div><span class="company-category">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}행사{{/categoryName}}</span><h2><a class="company-event-manage-link" href="/events/sessions/list/{{id}}">{{title}}</a></h2></div><span class="company-state" data-company-event-status>{{status}}</span></div>
+                    <div class="company-event-heading"><div><span class="company-category">{{#categoryName}}{{categoryName}}{{/categoryName}}{{^categoryName}}{{i18n.company.ui0044}}{{/categoryName}}</span><h2><a class="company-event-manage-link" href="/events/sessions/list/{{id}}">{{title}}</a></h2></div><span class="company-state" data-company-event-status>{{status}}</span></div>
                     <p class="company-event-summary">{{summary}}</p>
-                    <div class="company-event-meta"><span>등록된 회차 <strong>{{sessionCount}}개</strong></span>{{#createdAt}}<span>등록 <time data-company-event-date>{{createdAt}}</time></span>{{/createdAt}}{{#publishedAt}}<span>공개 <time data-company-event-date>{{publishedAt}}</time></span>{{/publishedAt}}</div>
-                    {{#feedbackMessage}}<div class="company-feedback"><strong>보완 요청을 확인해주세요</strong><p>{{feedbackMessage}}</p><div data-event-edit hidden><a class="company-button company-button--secondary" href="/events/update/{{id}}">행사 정보 수정·재심사</a></div></div>{{/feedbackMessage}}
-                    {{^feedbackMessage}}<div data-event-edit hidden class="company-feedback"><strong>행사 정보 보완이 필요합니다.</strong><p>제출 내용을 확인하고 수정해주세요.</p><a class="company-button company-button--secondary" href="/events/update/{{id}}">행사 정보 수정·재심사</a></div>{{/feedbackMessage}}
+                    <div class="company-event-meta"><span>{{i18n.company.ui0045}} <strong>{{sessionCount}}{{i18n.company.ui0046}}</strong></span>{{#createdAt}}<span>{{i18n.admin.ui0004}} <time data-company-event-date>{{createdAt}}</time></span>{{/createdAt}}{{#publishedAt}}<span>{{i18n.company.ui0047}} <time data-company-event-date>{{publishedAt}}</time></span>{{/publishedAt}}</div>
+                    {{#feedbackMessage}}<div class="company-feedback"><strong>{{i18n.company.ui0048}}</strong><p>{{feedbackMessage}}</p><div data-event-edit hidden><a class="company-button company-button--secondary" href="/events/update/{{id}}">{{i18n.company.ui0049}}</a></div></div>{{/feedbackMessage}}
+                    {{^feedbackMessage}}<div data-event-edit hidden class="company-feedback"><strong>{{i18n.company.ui0050}}</strong><p>{{i18n.company.ui0051}}</p><a class="company-button company-button--secondary" href="/events/update/{{id}}">{{i18n.company.ui0049}}</a></div>{{/feedbackMessage}}
                     {{#paidReadyEvent}}
-                    <section class="company-deposit" aria-label="행사 보증금 결제">
+                    <section class="company-deposit" aria-label="{{i18n.company.ui0052}}">
 
                         <div class="company-deposit-heading">
                             <div>
-                                <h3>승인 완료 · 보증금 결제</h3>
+                                <h3>{{i18n.company.ui0053}}</h3>
                                 <p>
-                                    전체 {{sessionCount}}회차
-                                    · 납부 완료 {{paidSessionCount}}회차
-                                    · 미납 {{unpaidSessionCount}}회차
+                                    {{i18n.admin.ui0144}} {{sessionCount}}{{i18n.common.merge001}} {{paidSessionCount}}{{i18n.common.merge002}} {{unpaidSessionCount}}{{i18n.admin.ui0098}}
                                 </p>
                                 <p>
-                                    기업 보유 포인트로 결제합니다.
-                                    모든 회차의 보증금 납부가 완료되면 행사가 공개됩니다.
+                                    {{i18n.common.merge003}}
                                 </p>
                             </div>
-                            <span>회차당 <strong>150,000 P</strong></span>
+                            <span>{{i18n.company.ui0057}} <strong>150,000 P</strong></span>
                         </div>
 
                         <div class="company-deposit-sessions">
@@ -59,13 +56,13 @@
 
                                     {{! 회차별 실제 금액과 보증금 상태 표시 }}
                                     <small>
-                                        회차 보증금 {{depositAmountText}} P
+                                        {{i18n.company.ui0058}} {{depositAmountText}} P
                                         · {{depositStatusName}}
                                     </small>
 
                                     {{! 납부 시각이 있는 경우에만 표시 }}
                                     {{#depositPaidAt}}
-                                    <small>납부 시각: {{depositPaidAt}}</small>
+                                    <small>{{i18n.company.ui0059}} {{depositPaidAt}}</small>
                                     {{/depositPaidAt}}
                                 </div>
 
@@ -77,7 +74,7 @@
                                         onsubmit="return confirm('선택한 회차의 보증금을 결제하시겠습니까? 모든 회차 납부 후 행사가 공개됩니다.')"
                                 >
                                     <button type="submit" class="company-button">
-                                        보증금 결제
+                                        {{i18n.company.ui0060}}
                                     </button>
                                 </form>
                                 {{/depositPayable}}
@@ -87,24 +84,24 @@
                             {{! 회차 목록이 비어 있을 때 표시 }}
                             {{^sessionPeriods}}
                             <p class="company-description">
-                                결제할 회차가 없습니다. 회차 정보를 먼저 확인해주세요.
+                                {{i18n.company.ui0061}}
                             </p>
                             {{/sessionPeriods}}
                         </div>
 
                         <a class="company-text-link" href="/charge">
-                            포인트가 부족하다면 충전하기
+                            {{i18n.company.ui0062}}
                             <span aria-hidden="true">↗</span>
                         </a>
                     </section>
                     {{/paidReadyEvent}}
-                    <section class="company-operation" aria-label="회차 운영"><div><h3>회차 운영</h3><p>회차별 일정과 모집 현황, 참가자 목록을 확인하세요.</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">회차·참가자 관리</a><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?add=1">회차 추가</a></div></section>
-                    <div class="company-event-secondary"><details class="company-recruitment"><summary>회차별 모집 기간 확인</summary><dl>{{#sessionPeriods}}<div><dt>{{name}}</dt><dd>{{applyStartAt}} ~ {{applyEndAt}}</dd></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">등록된 회차가 없습니다.</p>{{/sessionPeriods}}</dl></details><details class="company-danger"><summary>회차 취소 신청</summary><p>취소할 회차를 선택해 사유를 제출해주세요. 운영자가 승인하면 해당 회차가 취소됩니다.</p><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?select=1">취소할 회차 선택</a></details></div>
+                    <section class="company-operation" aria-label="{{i18n.company.ui0063}}"><div><h3>{{i18n.company.ui0063}}</h3><p>{{i18n.company.ui0064}}</p></div><div class="company-actions"><a class="company-button" href="/events/sessions/list/{{id}}">{{i18n.company.ui0065}}</a></div></section>
+                    <div class="company-event-secondary"><details class="company-recruitment"><summary>{{i18n.company.ui0067}}</summary><dl>{{#sessionPeriods}}<div><dt>{{name}}</dt><dd>{{applyStartAt}} ~ {{applyEndAt}}</dd></div>{{/sessionPeriods}}{{^sessionPeriods}}<p class="company-description">{{i18n.admin.ui0102}}</p>{{/sessionPeriods}}</dl></details><details class="company-danger"><summary>{{i18n.company.ui0068}}</summary><p>{{i18n.company.ui0069}}</p><a class="company-button company-button--secondary" href="/events/sessions/list/{{id}}?select=1">{{i18n.company.ui0070}}</a></details></div>
                 </article>
-            {{/eventList}}{{^eventList}}<div class="company-empty"><h2>첫 행사를 준비해보세요.</h2><p>행사를 등록하면 진행 상태와 회차를 이곳에서 관리할 수 있습니다.</p><a class="company-button company-button--secondary" href="/events/save">행사 주최 신청</a></div>{{/eventList}}{{/eventList}}
-            {{^eventList}}<div class="company-empty"><h2>주최 행사 정보를 확인할 수 없습니다.</h2><p>기업 정보와 로그인 상태를 확인한 뒤 다시 시도해주세요.</p><a class="company-button company-button--secondary" href="/company/detail">기업 정보 확인</a></div>{{/eventList}}
+            {{/eventList}}{{^eventList}}<div class="company-empty"><h2>{{i18n.company.ui0071}}</h2><p>{{i18n.company.ui0072}}</p><a class="company-button company-button--secondary" href="/events/save">{{i18n.company.ui0073}}</a></div>{{/eventList}}{{/eventList}}
+            {{^eventList}}<div class="company-empty"><h2>{{i18n.company.ui0074}}</h2><p>{{i18n.company.ui0075}}</p><a class="company-button company-button--secondary" href="/company/detail">{{i18n.company.ui0076}}</a></div>{{/eventList}}
             </div>
-            <div class="company-empty" id="company-event-filter-empty" hidden><h2>이 탭에 표시할 행사가 없습니다.</h2><p>다른 탭을 선택하거나 검색 조건을 변경해주세요.</p><button class="company-button company-button--secondary" id="company-event-filter-reset" type="button">검색 초기화</button></div>
+            <div class="company-empty" id="company-event-filter-empty" hidden><h2>{{i18n.company.ui0077}}</h2><p>{{i18n.company.ui0078}}</p><button class="company-button company-button--secondary" id="company-event-filter-reset" type="button">{{i18n.company.ui0079}}</button></div>
             </div>
         </section>
     </div>
@@ -112,7 +109,7 @@
 {{> layout/footer}}
 <script>
 (() => {
-    const labels = {PENDING_REVIEW:'승인 대기',FEEDBACK_REQUIRED:'보완 요청',PUBLISHED:'공개 중',COMPLETED:'행사 종료',CANCELLED:'취소됨',PAID_READY:'결제 대기'};
+    const labels = {PENDING_REVIEW:BusanI18n.t("company.ui0034"),FEEDBACK_REQUIRED:BusanI18n.t("admin.ui0056"),PUBLISHED:BusanI18n.t("company.ui0033"),COMPLETED:BusanI18n.t("company.ui0080"),CANCELLED:BusanI18n.t("company.ui0081"),PAID_READY:BusanI18n.t("company.ui0041")};
     const cards = [...document.querySelectorAll('.company-event-card')];
     document.querySelectorAll('[data-company-event-status]').forEach(element => {
         const value = element.textContent.trim(); element.textContent = labels[value] || value;
@@ -122,7 +119,7 @@
     const search = document.getElementById('company-event-search'), filter = document.getElementById('company-event-filter');
     const tabs = [...document.querySelectorAll('[data-event-tab]')];
     const groups = {published:['PUBLISHED'],review:['PENDING_REVIEW','FEEDBACK_REQUIRED','PAID_READY'],closed:['COMPLETED','CANCELLED']};
-    const descriptions = {published:'현재 공개되어 운영 중인 행사입니다.',review:'심사 중이거나 보완·보증금 결제가 필요한 행사입니다.',closed:'종료되었거나 취소된 행사입니다.'};
+    const descriptions = {published:BusanI18n.t("company.ui0036"),review:BusanI18n.t("company.ui0082"),closed:BusanI18n.t("company.ui0083")};
     let currentTab = 'published';
     Object.entries(groups).forEach(([name, states]) => {
         document.querySelector(`[data-event-tab-count="${name}"]`).textContent = cards.filter(card => states.includes(card.dataset.eventStatus)).length.toLocaleString('ko-KR');
@@ -131,7 +128,7 @@
         const keyword = search.value.trim().toLocaleLowerCase('ko-KR');
         let count = 0;
         cards.forEach(card => { const visible = groups[currentTab].includes(card.dataset.eventStatus) && (!filter.value || filter.value === card.dataset.eventStatus) && (!keyword || card.dataset.eventTitle.toLocaleLowerCase('ko-KR').includes(keyword)); card.hidden = !visible; if (visible) count++; });
-        document.getElementById('company-event-result').textContent = cards.length ? `조회 결과 ${count}개 · 탭 건수는 검색 전 기준` : '';
+        document.getElementById('company-event-result').textContent = cards.length ? BusanI18n.t("company.ui0084", [count]) : '';
         document.getElementById('company-event-filter-empty').hidden = !cards.length || count > 0;
     };
     const selectTab = (tab, focus = false) => {

@@ -1,0 +1,39 @@
+Busan Play 2-A 설계 및 실행 계획
+
+환경: Java 21, Spring Boot 4.1.2, JPA/JDBC, PostgreSQL 운영 프로필과 H2 테스트.
+별도 Flyway/Liquibase 없음. ddl-auto=update와 idempotent demo-data.sql 사용.
+기존 1-B 미커밋 변경 보존. 기존 EventService/Controller/DTO/Mustache 수정 없음.
+기존 Scheduler 인프라를 이용하되 번역 worker는 별도 조건부 bean, 기본 OFF.
+
+결정: 신규 event.translation 패키지, 기존 spring-jdbc 의존성 재사용.
+JPA entity 자동 DDL이 운영 DB에 적용되지 않도록 신규 저장소는 JDBC로 구성.
+수동 PostgreSQL/H2 호환 additive SQL 제공, 실제 DB에는 적용하지 않음.
+event_translation은 완료 캐시, translation_job은 실행 이력/재시도 큐,
+translation_budget 1개 행은 다중 인스턴스 공통 요청 한도/동시 실행 예약.
+Event FK ON DELETE CASCADE. 원본 테이블/필드/상태는 변경하지 않음.
+
+요청은 짧은 트랜잭션에서 Event 행 잠금 후 해시/캐시/작업 조회 및 등록.
+unique(event_id,locale), unique(event_id,target_locale,source_hash) 병행.
+원문 ko + title/summary/description UTF-8 길이 프레임 SHA-256. 공백도 변경으로 간주.
+최초 설계는 공개 PUBLISHED 행사만 외부 전송. 초안/비공개 정보 차단.
+ko는 원문 즉시 반환, 다른 언어는 상태와 원문 fallback 제공.
+재시도/무효화는 명시적 서비스 메서드. 별도 UI/API endpoint 없음.
+
+작업자는 DB budget 행 잠금 + 조건부 상태 변경으로 lease를 예약.
+API는 트랜잭션 밖에서 실행. 완료 시 Event 행 잠금, 해시/공개 여부/lease token 재확인.
+원문 변경 또는 lease 만료 후 돌아온 결과는 저장하지 않음.
+재시작 시 만료된 PROCESSING 회수. API 성공 후 crash는 exactly-once가 불가능하며
+재호출 가능성을 인정하고 횟수와 예산으로 제한.
+
+Gemini: JDK HttpClient + 기존 Jackson3, 인터페이스 분리, API key는 header만 사용.
+모델은 설정만 사용, 빈 key/model도 부팅 가능. worker 기본 비활성화.
+JSON schema/출력 필드/type/길이/HTML 토큰/플레이스홀더 검증.
+원문은 JSON 데이터로 보내고 별도 system instruction에서 지시문 실행 금지.
+개인정보 자동 탐지는 보장하지 않음. 공개 입력 내 개인정보는 운영자 검토 필요.
+429/5xx/timeout만 제한적 지수 backoff, Retry-After와 전역 cooldown 적용.
+인증/모델/응답 검증 오류는 즉시 terminal FAILED, 오류 저장은 code만 사용.
+한도는 앱의 보수적 제한이며 공식 계정 한도로 주장하지 않음.
+
+순서: 계약/해시 테스트 -> Client/검증 -> SQL/저장소 -> 서비스/worker ->
+Mock + 메모리 DB 동시성/복구 테스트 -> 격리 전체 회귀/빌드 -> 결과 문서.
+운영 DB 변경/실제 Gemini 호출/2-B 연결은 하지 않음.
