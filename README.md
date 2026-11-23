@@ -1,97 +1,202 @@
-# Event Platform
+# 🌊 Busan Play
 
-팀 개발 시 [Git 협업 규칙](CONTRIBUTING.md)의 브랜치·커밋·PR 작성 기준을 따릅니다.
+부산의 청년과 외국인이 **문화행사·팝업·전시**를 찾아보고, 회차별로 참가 신청하는 웹 플랫폼입니다.
 
-부산 청년·외국인 문화행사 플랫폼의 Spring Boot 기본 프로젝트입니다.
-역할 분담안을 기준으로 패키지 구조와 로컬 DB 자동 초기화를 준비했으며, 업무 기능은 아직 구현하지 않았습니다.
+기업은 관리자 승인을 받아 행사를 열고, 회원은 포인트로 참가비를 낸 뒤 QR로 출석하고 후기와 커뮤니티로 소통합니다. 화면은 한국어·영어·일본어·중국어(간체) 4개 언어로 제공합니다.
 
-- Java 21, Spring Boot 4.1.2, Gradle Wrapper
-- Spring MVC, Spring Data JPA, Bean Validation
-- H2 / MySQL / PostgreSQL(Supabase) JDBC 드라이버
+| 항목 | 내용 |
+| --- | --- |
+| 기간 | 2026-10-30 – 2026-11-23 |
+| 인원 | 5명 |
+| 최종 코드 | `main` `1521d6f` (2026-11-23) |
+| 문서 | [프로젝트 Wiki](https://github.com/JinwooLeeDev/event-platform/wiki) — 설계 문서 7종, 협업 매뉴얼, 통합 테스트 결과 |
 
-## 패키지 구조와 담당 영역
+---
 
-기본 패키지는 `com.busan.eventplatform`입니다.
-각 도메인 아래에는 `controller`, `service`, `repository`, `entity`, `dto` 패키지를 두었습니다.
-빈 패키지는 `.gitkeep`으로 Git에 유지하며, 실제 클래스를 추가하면 해당 파일을 삭제해도 됩니다.
+## 화면
 
-| 담당 | 패키지 (`domain` 하위) |
-|---|---|
-| 조장: 회원·인증·이메일 인증·파일 | `user`, `auth`, `emailverification`, `file` |
-| 부조장: 결제·보증금·환불·알림 | `payment`, `deposit`, `refund`, `notification` |
-| 팀원 1: 행사·카테고리·행사 첨부파일 | `event`, `eventcategory` (행사 첨부파일은 `event`에서 공통 `file` 연동) |
-| 팀원 2: 참가 신청·출석·상태 이력 | `registration`, `attendance` (상태 이력은 해당 도메인에서 관리) |
-| 팀원 3: 기업·사업자 검증·관리자 심사 | `company`, `businessverification`, `adminreview` |
+| 메인 | 행사 상세 |
+| --- | --- |
+| ![메인](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/01-main.png) | ![행사 상세](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/03-event-detail.png) |
+| **출석 QR (기업)** | **회차 커뮤니티** |
+| ![출석 QR](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/14-attendance.png) | ![커뮤니티](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/13-community.png) |
 
-조장이 관리하는 공통 영역은 `global.config`, `global.security`, `global.exception`, `global.response`, `global.util`입니다.
-API, 시큐리티 필터, 외부 연동 및 비즈니스 로직은 구현하지 않았습니다. MySQL 개발용 더미 데이터는 제공됩니다.
+전체 화면 31종은 Wiki의 [화면 설계서](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서)에 있습니다.
 
-## 실행 및 빌드
+---
 
-Windows PowerShell에서 실행합니다. Java 21이 필요하며 Gradle은 별도 설치하지 않아도 됩니다.
+## 주요 기능
+
+### 개인 회원
+- 이메일 인증 회원가입, 로그인, 내 정보·선호 언어·비밀번호 변경
+- 행사 목록·검색·상세 조회, 관심 행사
+- 포인트 충전 (네이버페이·카카오페이, PortOne)
+- 회차별 참가 신청: 정원이 남으면 **즉시 확정**, 가득 차면 **자동 대기** → 앞선 신청이 취소되면 자동 확정
+- 신청 내역 조회, 본인 취소와 일정별 차등 환불
+- 휴대폰으로 QR을 인식해 출석, 출석한 회차에 후기 작성·좋아요
+- 확정된 회차의 실시간 커뮤니티 (WebSocket)
+
+### 기업 회원
+- 사업자 진위 확인(국세청 API)을 거친 기업 가입 신청 → 관리자 승인
+- 행사 주최 신청(회차 함께 등록), 보완 요청 시 수정·재심사
+- 회차별 보증금(150,000P) 결제 → 모든 회차를 납부하면 행사 공개
+- 참가자 관리와 신청 거절(전액 환불), 출석 QR 띄우기, 커뮤니티 공지
+- 회차 취소 신청, 포인트·보증금 내역
+
+### 관리자
+- 대시보드, 회원 상태 관리(정지·정지 해제)
+- 기업 가입 심사, 행사 심사(승인·보완 요청)
+- 회차 취소 승인·거절(참가자 전액 환불, 보증금 환불), 카테고리 관리
+
+### 다국어
+- 헤더의 `언어` 버튼과 첫 방문 언어 선택 창으로 4개 언어 전환. 개인 회원은 선호 언어를 저장
+- 화면 문구, 오류·안내 문구, 인증 메일까지 선택한 언어로 표시
+- **행사 내용 자동 번역 (선택 기능):** 공개 행사의 제목·요약·설명을 Gemini API로 번역해 보여 줍니다. 번역이 없으면 한국어 원문을 보여 줍니다.
+
+### 설계에서 신경 쓴 부분
+- **정원 동시성:** 회차 행을 비관적 잠금(`SELECT … FOR UPDATE`)으로 잠근 뒤 정원을 확인해, 동시에 신청해도 정원을 넘지 않습니다.
+- **포인트 정합성:** 결제·환불 때 회원·기업 행을 잠그고, 결제·환불·신청 상태 변경을 한 트랜잭션에서 처리합니다.
+- **권한:** 비회원·개인 회원·기업·관리자 4단계. 화면 숨김과 별개로 서버에서 역할과 소유권을 다시 확인합니다.
+
+---
+
+## 기술 스택
+
+| 구분 | 사용 기술 |
+| --- | --- |
+| 언어·프레임워크 | Java 21, Spring Boot 4.1.2 (Spring MVC, Spring Data JPA, Hibernate 7.4) |
+| 화면 | Mustache 서버 렌더링, JavaScript(Fetch), WebSocket(STOMP) |
+| DB | H2 (기본, 파일 DB), MySQL 8.0, Supabase PostgreSQL |
+| 외부 연동 | PortOne(네이버페이·카카오페이), 국세청 사업자 진위 확인, 네이버 지도, SMTP 메일, Gemini API |
+| 보안 | BCrypt 비밀번호 해시 (`spring-security-crypto`), 세션 로그인, 인터셉터 권한 검사 |
+| 빌드 | Gradle |
+
+---
+
+## 실행 방법
+
+### 1. 준비
+- **Java 21**
+- IntelliJ IDEA 권장
+- 저장소를 내려받습니다.
+
+```powershell
+git clone https://github.com/JinwooLeeDev/event-platform.git
+cd event-platform
+```
+
+> 저장소에 `gradle/wrapper/gradle-wrapper.jar`가 없어서 `gradlew.bat`이 바로 실행되지 않습니다. IntelliJ에서 Gradle 프로젝트로 열어 실행하거나, Gradle이 설치되어 있다면 `gradle wrapper`로 먼저 만들어 주세요.
+
+### 2. 환경 변수 (`.env`)
+
+프로젝트 루트의 `.env.example`을 `.env`로 복사해 값을 채웁니다. 서버가 시작할 때 `.env`를 자동으로 읽습니다. **`.env`는 Git에 올리지 않습니다.**
+
+| 항목 | 용도 |
+| --- | --- |
+| `SPRING_PROFILES_ACTIVE` | `h2`(기본) / `mysql` / `supabase` |
+| `MYSQL_DB_*`, `SUPABASE_DB_*` | 해당 프로필을 쓸 때 DB 접속 정보 |
+| `MAIL_*` | 회원가입 인증 메일 (SMTP) |
+| `NAVER_*`, `KAKAO_*` (`SECRET_KEY`, `STORE_ID`, `CHANNEL_KEY`) | PortOne 포인트 충전 |
+| `NTS_SERVICE_KEY` | 국세청 사업자 진위 확인 |
+| `NAVER_MAP_CLIENT_ID`, `NAVER_MAP_CLIENT_SECRET` | 행사 상세 지도 |
+| `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_TRANSLATION_WORKER_ENABLED` | 행사 자동 번역 (선택, 기본 꺼짐) |
+
+결제·사업자 확인 키처럼 기본값이 없는 항목이 비어 있으면 서버가 시작되지 않을 수 있습니다. `.env.example`의 항목을 모두 넣어 주세요.
+
+### 3. 실행
+
+IntelliJ에서 `EventPlatformApplication`을 실행합니다. Gradle Wrapper가 준비되었다면 아래처럼 실행할 수도 있습니다.
 
 ```powershell
 .\gradlew.bat bootRun
-.\gradlew.bat test build --console=plain
 ```
 
-기본 포트는 8080입니다. 아직 API가 없어 `/` 요청은 404가 정상입니다.
+- 접속: http://localhost:8080
+- 같은 Wi-Fi의 휴대폰에서 QR 출석을 시험하려면 PC의 IP 주소로 접속합니다 (예: `http://192.168.0.10:8080`).
 
-## 기본 개발 DB: H2
+### 4. DB와 기본 데이터
 
-`.env`나 실행 환경에 활성 프로필을 지정하지 않으면 `h2` 프로필로 실행합니다.
-메모리 DB이므로 앱을 종료하면 데이터가 사라지고, 시작 시 엔티티로 테이블을 생성합니다.
+| 프로필 | DB | 비고 |
+| --- | --- | --- |
+| `h2` (기본) | 파일 DB `./data/event_platform` | 서버를 다시 켜도 데이터가 남습니다. 처음부터 하려면 서버를 끄고 `data/` 폴더를 지웁니다. |
+| `mysql` | 로컬 MySQL 8.0 | `MYSQL_DB_URL` 등 설정 |
+| `supabase` | Supabase PostgreSQL | Session pooler(5432) JDBC 주소 사용 |
 
-- 콘솔: http://localhost:8080/h2-console
-- JDBC URL: `jdbc:h2:mem:event_platform`
-- 사용자: `sa`, 비밀번호: 빈 값
+- 세 프로필 모두 테이블은 JPA가 만들고(`ddl-auto: update`), 서버 시작 때 `db/demo-data.sql`이 **없는 데이터만** 넣습니다.
+- H2 콘솔: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/event_platform`, 사용자 `sa`, 비밀번호 빈 값)
 
-## 로컬 MySQL
+| 테스트 계정 | 이메일 | 비밀번호 |
+| --- | --- | --- |
+| 개인 회원 | `member@example.test` | `1234` |
+| 관리자 (개인 로그인 사용) | `admin@example.test` | `1234` |
+| 기업 (승인됨) | `company@example.test` | `1234` |
 
-MySQL 8.0+ 서버를 실행하고, `.env.example`을 루트의 `.env`로 복사해 다음 값을 작성하세요.
-앱이 `.env`를 자동으로 읽으므로 IDE의 환경 변수 파일 플러그인이 필요하지 않습니다.
+> ⚠️ 최종 main에서는 가입용 비밀번호 규칙이 로그인에도 적용되어 위 계정으로 로그인할 수 없습니다 (Wiki 작업 분담 문서의 **T-20**). 수정되기 전에는 회원가입으로 새 계정을 만들어 사용하세요. 새 비밀번호는 영문·숫자·특수문자(`$@!%*#?&`)를 포함한 8–16자여야 합니다.
 
-```dotenv
-SPRING_PROFILES_ACTIVE=mysql
-MYSQL_DB_URL=jdbc:mysql://localhost:3306/event_platform?connectionTimeZone=UTC&characterEncoding=UTF-8
-MYSQL_DB_USERNAME=root
-MYSQL_DB_PASSWORD=your-local-password
+### 5. 행사 자동 번역 켜기 (선택)
+
+1. DB에서 `src/main/resources/db/manual/event-translation.sql`을 실행해 번역 테이블 3개를 만듭니다. 자동으로 실행되지 않습니다.
+2. `.env`에 `GEMINI_API_KEY`, `GEMINI_MODEL`을 넣고 `GEMINI_TRANSLATION_WORKER_ENABLED=true`로 바꿉니다.
+3. 영어는 행사가 공개·수정될 때, 일본어·중국어는 그 언어로 처음 볼 때 번역을 요청합니다. 분당 5회·하루 100회로 제한합니다.
+
+---
+
+## 프로젝트 구조
+
+```text
+src/main/java/com/busan/eventplatform
+├── admin          관리자 화면 (대시보드, 회원·행사·회차·취소·카테고리)
+├── api            포인트 충전(payment), 참가비·보증금 결제(purchase), 환불(refund)
+├── company        기업 정보, 사업자 진위 확인, 기업 가입 심사
+├── event          행사, 회차, 카테고리, 대표 이미지, 관심 행사, 후기, 회차 취소, 번역(translation)
+├── login          개인·기업 로그인과 가입, 이메일 인증, 마이페이지
+├── user           참가 신청(registration), 출석(attendance), 커뮤니티(community)
+├── global         예외 처리, 다국어(i18n), 인터셉터·보안, 파일, 공통 응답
+└── main           메인 화면
+
+src/main/resources
+├── templates      Mustache 화면 80개
+├── static         CSS, JavaScript, 이미지
+├── messages*.properties   화면 문구 (ko, en, ja, zh_CN)
+└── db             demo-data.sql (기본 데이터), manual/ (번역 테이블)
 ```
 
-```powershell
-.\gradlew.bat bootRun
-```
+---
 
-기본 접속 주소는 `localhost:3306/event_platform`입니다.
-최초 서버 실행 시 DB·테이블 27개·외래키 60개와 더미 데이터를 자동 생성한 뒤 JPA를 시작합니다.
-다음 실행부터는 완료 기록을 확인해 초기화를 건너뛰므로 데이터가 중복되거나 기존 수정 내용이 덮어써지지 않습니다.
-Python이나 MySQL CLI는 서버 자동 초기화에 필요하지 않습니다. Supabase·H2에는 이 초기화를 실행하지 않습니다.
-로컬 주소만 허용하며 DB 이름은 `event_platform`, `event_platform_dev`, `event_platform_test` 중 하나를 사용합니다.
-초기화 기록 없는 기존 테이블이 있으면 중단합니다. 자세한 내용은 [로컬 MySQL 안내](db/local-mysql/README.md)를 참고하세요.
+## 팀
 
-## Supabase PostgreSQL
+| 담당 | 주요 역할 |
+| --- | --- |
+| 조장 (`I3abel` / `JinwooLeeDev`) | 공통 예외·인터셉터, 회원가입·로그인·마이페이지, 전체 화면 디자인, 관리자 화면, 다국어 지원, PR 검토·Merge |
+| `MIKY-0` | 공통 엔티티 설계, 포인트 충전, 참가비·보증금 결제, 환불, 회차 자동 상태 변경 |
+| 윤아 | 행사 등록·수정, 회차, 카테고리, 대표 이미지, 회차 취소 신청, 후기 |
+| `dalyume2876` | 기업 가입·정보 수정, 사업자 진위 확인, 기업 심사, 보증금 상태 표시, 포인트·보증금 내역 |
+| 김도현 (`Sonice-lab`) | 참가 신청·정원 동시성·대기자 승격, 신청 내역, 커뮤니티, 기업 거절, QR 출석, 통합 테스트, 설계 문서·Wiki |
 
-Supabase 프로젝트를 만든 뒤 Dashboard의 **Connect → Session pooler**에서 호스트와 사용자 이름을 확인합니다.
-IPv4 환경에서도 사용할 수 있는 Session pooler(5432)를 기준으로 설정했습니다.
-REST API 주소나 anon/service role 키가 아닌 **DB 비밀번호와 JDBC 접속 정보**가 필요합니다.
+자세한 작업 목록과 PR 기록은 Wiki의 [작업 분담 및 Issue 목록](https://github.com/JinwooLeeDev/event-platform/wiki/작업-분담-및-Issue-목록)에 있습니다.
 
-```powershell
-$env:SPRING_PROFILES_ACTIVE = 'supabase'
-$env:SUPABASE_DB_URL = 'jdbc:postgresql://YOUR-POOLER-HOST:5432/postgres?sslmode=require'
-$env:SUPABASE_DB_USERNAME = 'postgres.YOUR_PROJECT_REF'
-$env:SUPABASE_DB_PASSWORD = 'your-db-password'
-.\gradlew.bat bootRun
-```
+---
 
-SSL을 사용하며 커넥션 풀은 최대 5개입니다. 프로젝트의 연결 한도에 맞춰 조정하세요.
-`ddl-auto=validate`로 기존 스키마만 검증하며 테이블을 자동 생성·수정하지 않습니다.
-엔티티를 추가할 때는 Supabase에 해당 스키마를 먼저 적용해야 합니다. 마이그레이션 도구는 아직 추가하지 않았습니다.
+## 문서
 
-H2·MySQL·PostgreSQL은 SQL과 자료형이 다르므로 실제 배포 전에 Supabase에서도 쿼리·스키마·트랜잭션을 검증하세요.
-이 설정은 DB 연결만 다루며 Supabase Auth·Storage 연동은 포함하지 않습니다.
+| 문서 | 내용 |
+| --- | --- |
+| [요구사항 명세서](https://github.com/JinwooLeeDev/event-platform/wiki/요구사항-명세서) | 기능·보안·데이터·비기능 요구사항 |
+| [권한별 기능 매트릭스](https://github.com/JinwooLeeDev/event-platform/wiki/권한별-기능-매트릭스) | 사용자별 기능 허용 범위 |
+| [데이터베이스 설계서 및 ERD](https://github.com/JinwooLeeDev/event-platform/wiki/데이터베이스-설계서-및-ERD) | 테이블 24개(번역 3개 포함), ERD, 잠금·트랜잭션 |
+| [사용자 시나리오 및 업무 규칙](https://github.com/JinwooLeeDev/event-platform/wiki/사용자-시나리오-및-업무-규칙) | 사용자별 정상·예외 흐름 |
+| [화면 설계서](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서) | 화면 31종의 구성과 동작 |
+| [통합 테스트 결과](https://github.com/JinwooLeeDev/event-platform/wiki/통합-테스트-결과) | 테스트 결과, 발견 문제, 최종 main 반영 상태 |
+| [작업 순서](https://github.com/JinwooLeeDev/event-platform/wiki/작업-순서) | Issue → 브랜치 → PR → 리뷰 → Merge 협업 규칙 |
 
-프로필은 한 번에 하나만 선택하세요. H2로 돌아가려면 `SPRING_PROFILES_ACTIVE`를 `h2`로 설정합니다.
-프로젝트 루트(실행 작업 디렉터리)의 `.env`를 자동으로 읽습니다. OS·IDE 환경 변수와 명령행 설정이 `.env`보다 우선합니다.
-비밀번호가 포함된 `.env`는 Git에 올리지 마세요. `.env.example`에는 예시 값만 유지합니다.
+---
 
-공식 참고: [Supabase Spring Boot 연결](https://supabase.com/docs/guides/getting-started/quickstarts/spring-boot), [DB 접속 방식](https://supabase.com/docs/guides/database/connecting-to-postgres)
+## 남은 과제
+
+통합 테스트에서 찾은 문제 중 아직 남은 주요 항목입니다. 전체 목록은 [통합 테스트 결과](https://github.com/JinwooLeeDev/event-platform/wiki/통합-테스트-결과)에 있습니다.
+
+- 🔴 **T-20** 로그인에 가입용 비밀번호 규칙이 적용되어 기존 계정 로그인 불가
+- 🔴 **T-17** 기업 세션이 없을 때 회차 관리 목록 화면 500
+- 🔴 **T-12** 서버 재시작 후 회차 "진행 중" 자동 전환이 사라짐
+- 🔴 **T-1·T-2** 첫 로그인 시 `;jsessionid` 주소 404, 회차 5개 이상 행사 등록 시 413
+- 행사 상세 지도의 주소 검색 실패 (네이버 클라우드 Geocoding 설정 확인 필요)
