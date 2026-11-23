@@ -15,13 +15,14 @@
 
 ## 화면
 
-| 메인 | 행사 상세 |
-| --- | --- |
-| ![메인](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/01-main.png) | ![행사 상세](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/03-event-detail.png) |
-| **출석 QR (기업)** | **회차 커뮤니티** |
-| ![출석 QR](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/14-attendance.png) | ![커뮤니티](https://raw.githubusercontent.com/wiki/JinwooLeeDev/event-platform/images/13-community.png) |
+화면은 사용자별로 31종입니다. 각 화면의 구성, 동작 규칙, 캡처 이미지는 Wiki의 [화면 설계서](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서)에서 볼 수 있습니다.
 
-전체 화면 31종은 Wiki의 [화면 설계서](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서)에 있습니다.
+| 사용자 | 화면 |
+| --- | --- |
+| 공통·비회원 | [메인](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#3-메인) · [행사 목록·검색](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#4-행사-목록검색) · [행사 상세](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#5-행사-상세) · [로그인](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#6-로그인) · [개인 회원가입](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#7-개인-회원가입) · [기업 가입 신청](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#8-기업-가입-신청) · [오류 화면](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#33-오류-화면) |
+| 개인 회원 | [마이페이지 (내 정보·보안 설정)](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#9-마이페이지-내-정보보안-설정) · [참가 신청 결제](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#10-참가-신청-결제) · [신청한 행사](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#11-신청한-행사) · [포인트 관리](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#12-포인트-관리) · [포인트 충전](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#13-포인트-충전) · [좋아요한 행사](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#14-좋아요한-행사) · [커뮤니티 (목록·회차 대화방)](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#15-커뮤니티-목록회차-대화방) · [출석 (QR·출석 체크)](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#16-출석-qr출석-체크) · [행사 후기](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#17-행사-후기) |
+| 기업 회원 | [기업페이지](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#18-기업페이지) · [기업 정보 수정](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#19-기업-정보-수정) · [주최 행사 목록](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#20-주최-행사-목록) · [행사 주최 신청](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#21-행사-주최-신청) · [행사 정보 수정·재심사](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#22-행사-정보-수정재심사) · [회차 선택·운영과 참가자 관리](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#23-회차-선택운영과-참가자-관리) · [회차 취소 신청](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#24-회차-취소-신청) · [기업 포인트·보증금 내역](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#25-기업-포인트보증금-내역) |
+| 관리자 | [관리자 대시보드](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#26-관리자-대시보드) · [관리자 회원 관리](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#27-관리자-회원-관리) · [관리자 기업 관리 (가입 심사)](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#28-관리자-기업-관리-가입-심사) · [관리자 행사 관리 (행사 심사)](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#29-관리자-행사-관리-행사-심사) · [관리자 회차 현황](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#30-관리자-회차-현황) · [관리자 취소 신청 관리](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#31-관리자-취소-신청-관리) · [관리자 카테고리 관리](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서#32-관리자-카테고리-관리) |
 
 ---
 
@@ -131,8 +132,6 @@ IntelliJ에서 `EventPlatformApplication`을 실행합니다. Gradle Wrapper가 
 | 관리자 (개인 로그인 사용) | `admin@example.test` | `1234` |
 | 기업 (승인됨) | `company@example.test` | `1234` |
 
-> ⚠️ 최종 main에서는 가입용 비밀번호 규칙이 로그인에도 적용되어 위 계정으로 로그인할 수 없습니다 (Wiki 작업 분담 문서의 **T-20**). 수정되기 전에는 회원가입으로 새 계정을 만들어 사용하세요. 새 비밀번호는 영문·숫자·특수문자(`$@!%*#?&`)를 포함한 8–16자여야 합니다.
-
 ### 5. 행사 자동 번역 켜기 (선택)
 
 1. DB에서 `src/main/resources/db/manual/event-translation.sql`을 실행해 번역 테이블 3개를 만듭니다. 자동으로 실행되지 않습니다.
@@ -165,13 +164,13 @@ src/main/resources
 
 ## 팀
 
-| 담당 | 주요 역할 |
-| --- | --- |
-| 조장 (`I3abel` / `JinwooLeeDev`) | 공통 예외·인터셉터, 회원가입·로그인·마이페이지, 전체 화면 디자인, 관리자 화면, 다국어 지원, PR 검토·Merge |
-| `MIKY-0` | 공통 엔티티 설계, 포인트 충전, 참가비·보증금 결제, 환불, 회차 자동 상태 변경 |
-| 윤아 | 행사 등록·수정, 회차, 카테고리, 대표 이미지, 회차 취소 신청, 후기 |
-| `dalyume2876` | 기업 가입·정보 수정, 사업자 진위 확인, 기업 심사, 보증금 상태 표시, 포인트·보증금 내역 |
-| 김도현 (`Sonice-lab`) | 참가 신청·정원 동시성·대기자 승격, 신청 내역, 커뮤니티, 기업 거절, QR 출석, 통합 테스트, 설계 문서·Wiki |
+| 이름 | 역할 | 주요 담당 |
+| --- | --- | --- |
+| 이진우 | 조장 | 공통 예외·인터셉터, 회원가입·로그인·마이페이지, 전체 화면 디자인, 관리자 화면, 다국어 지원, PR 검토·Merge |
+| 한승환 | 부조장 | 공통 엔티티 설계, 포인트 충전, 참가비·보증금 결제, 환불, 회차 자동 상태 변경 |
+| 구도하 | 팀원 | 기업 가입·정보 수정, 사업자 진위 확인, 기업 심사, 보증금 상태 표시, 포인트·보증금 내역 |
+| 김도현 | 팀원 | 참가 신청·정원 동시성·대기자 승격, 신청 내역, 커뮤니티, 기업 거절, QR 출석, 통합 테스트, 설계 문서·Wiki |
+| 정윤아 | 팀원 | 행사 등록·수정, 회차, 카테고리, 대표 이미지, 회차 취소 신청, 후기 |
 
 자세한 작업 목록과 PR 기록은 Wiki의 [작업 분담 및 Issue 목록](https://github.com/JinwooLeeDev/event-platform/wiki/작업-분담-및-Issue-목록)에 있습니다.
 
@@ -189,14 +188,3 @@ src/main/resources
 | [통합 테스트 결과](https://github.com/JinwooLeeDev/event-platform/wiki/통합-테스트-결과) | 테스트 결과, 발견 문제, 최종 main 반영 상태 |
 | [작업 순서](https://github.com/JinwooLeeDev/event-platform/wiki/작업-순서) | Issue → 브랜치 → PR → 리뷰 → Merge 협업 규칙 |
 
----
-
-## 남은 과제
-
-통합 테스트에서 찾은 문제 중 아직 남은 주요 항목입니다. 전체 목록은 [통합 테스트 결과](https://github.com/JinwooLeeDev/event-platform/wiki/통합-테스트-결과)에 있습니다.
-
-- 🔴 **T-20** 로그인에 가입용 비밀번호 규칙이 적용되어 기존 계정 로그인 불가
-- 🔴 **T-17** 기업 세션이 없을 때 회차 관리 목록 화면 500
-- 🔴 **T-12** 서버 재시작 후 회차 "진행 중" 자동 전환이 사라짐
-- 🔴 **T-1·T-2** 첫 로그인 시 `;jsessionid` 주소 404, 회차 5개 이상 행사 등록 시 413
-- 행사 상세 지도의 주소 검색 실패 (네이버 클라우드 Geocoding 설정 확인 필요)
