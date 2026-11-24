@@ -10,7 +10,7 @@ app:
     service-key: ${NTS_SERVICE_KEY}
 spring:
   application:
-    name: event-platform
+    name: jdbc:h2:mem:event_platform;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
   config:
     import: optional:file:.env[.properties]
   profiles:
