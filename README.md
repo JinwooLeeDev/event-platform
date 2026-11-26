@@ -6,10 +6,11 @@
 
 | 항목 | 내용 |
 | --- | --- |
-| 기간 | 2026-10-30 – 2026-11-23 |
+| 기간 | 2026-10-30 – 2026-11-24 |
 | 인원 | 5명 |
-| 최종 코드 | `main` `1521d6f` (2026-11-23) |
-| 문서 | [프로젝트 Wiki](https://github.com/JinwooLeeDev/event-platform/wiki) — 설계 문서 7종, 협업 매뉴얼, 통합 테스트 결과 |
+| 최종 코드 | `main` `6a8b0b2` (2026-11-24, 마지막 PR `#174`) |
+| 배포 | AWS EC2 · Docker · Nginx(HTTPS) — `https://busan-play.duckdns.org` (발표 시점 기준) |
+| 문서 | [프로젝트 Wiki](https://github.com/JinwooLeeDev/event-platform/wiki) — 설계 문서 7종, 협업 매뉴얼, 배포, 통합 테스트 결과 |
 
 ---
 
@@ -71,6 +72,21 @@
 | 외부 연동 | PortOne(네이버페이·카카오페이), 국세청 사업자 진위 확인, 네이버 지도, SMTP 메일, Gemini API |
 | 보안 | BCrypt 비밀번호 해시 (`spring-security-crypto`), 세션 로그인, 인터셉터 권한 검사 |
 | 빌드 | Gradle |
+| 배포 | AWS EC2(Ubuntu), Docker, Nginx 리버스 프록시, DuckDNS, Certbot(HTTPS) |
+
+---
+
+## 배포
+
+주요 기능을 통합한 뒤 AWS에 배포해 외부에서 접속할 수 있게 했습니다. 발표 시연도 배포 사이트에서 진행했습니다.
+
+```text
+사용자 ──HTTPS──▶ Nginx (EC2 · Ubuntu) ──HTTP──▶ Docker 컨테이너 (Spring Boot) ──▶ Supabase PostgreSQL
+```
+
+- 실행 프로필은 `supabase`이고, DB 접속 정보와 API 키는 이미지에 넣지 않고 환경 변수로 주입합니다.
+- 도메인은 DuckDNS, HTTPS 인증서는 Certbot으로 발급했습니다.
+- 배포 구조, HTTPS 리다이렉트 문제 해결, 외부 접속 지연 분석은 Wiki의 [AWS 배포](https://github.com/JinwooLeeDev/event-platform/wiki/AWS-배포)에 정리했습니다.
 
 ---
 
@@ -124,6 +140,7 @@ IntelliJ에서 `EventPlatformApplication`을 실행합니다. Gradle Wrapper가 
 | `supabase` | Supabase PostgreSQL | Session pooler(5432) JDBC 주소 사용 |
 
 - 세 프로필 모두 테이블은 JPA가 만들고(`ddl-auto: update`), 서버 시작 때 `db/demo-data.sql`이 **없는 데이터만** 넣습니다.
+- `h2` 프로필은 `db/showcase-data.sql`로 시연용 공개 행사 20개도 함께 넣습니다. 포스터 이미지 파일은 저장소에 없어 이미지 없이 표시됩니다.
 - H2 콘솔: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/event_platform`, 사용자 `sa`, 비밀번호 빈 값)
 
 | 테스트 계정 | 이메일 | 비밀번호 |
@@ -166,9 +183,9 @@ src/main/resources
 
 | 이름 | 역할 | 주요 담당 |
 | --- | --- | --- |
-| 이진우 | 조장 | 공통 예외·인터셉터, 회원가입·로그인·마이페이지, 전체 화면 디자인, 관리자 화면, 다국어 지원, PR 검토·Merge |
+| 이진우 | 조장 | 공통 예외·인터셉터, 회원가입·로그인·마이페이지, 전체 화면 디자인, 관리자 화면, 다국어 지원, AWS 배포, PR 검토·Merge |
 | 한승환 | 부조장 | 공통 엔티티 설계, 포인트 충전, 참가비·보증금 결제, 환불, 회차 자동 상태 변경 |
-| 구도하 | 팀원 | 기업 가입·정보 수정, 사업자 진위 확인, 기업 심사, 보증금 상태 표시, 포인트·보증금 내역 |
+| 구도하 | 팀원 | 기업 가입·정보 수정, 사업자 진위 확인, 기업 심사, 보증금 상태 표시, 포인트·보증금 내역, 가입·로그인 비밀번호 검사 |
 | 김도현 | 팀원 | 참가 신청·정원 동시성·대기자 승격, 신청 내역, 커뮤니티, 기업 거절, QR 출석, 통합 테스트, 설계 문서·Wiki |
 | 정윤아 | 팀원 | 행사 등록·수정, 회차, 카테고리, 대표 이미지, 회차 취소 신청, 후기 |
 
@@ -185,6 +202,7 @@ src/main/resources
 | [데이터베이스 설계서 및 ERD](https://github.com/JinwooLeeDev/event-platform/wiki/데이터베이스-설계서-및-ERD) | 테이블 24개(번역 3개 포함), ERD, 잠금·트랜잭션 |
 | [사용자 시나리오 및 업무 규칙](https://github.com/JinwooLeeDev/event-platform/wiki/사용자-시나리오-및-업무-규칙) | 사용자별 정상·예외 흐름 |
 | [화면 설계서](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서) | 화면 31종의 구성과 동작 |
-| [통합 테스트 결과](https://github.com/JinwooLeeDev/event-platform/wiki/통합-테스트-결과) | 테스트 결과, 발견 문제, 최종 main 반영 상태 |
+| [AWS 배포](https://github.com/JinwooLeeDev/event-platform/wiki/AWS-배포) | 배포 구조, HTTPS 리다이렉트 해결, 성능 분석, 서버 시간대 문제 |
+| [통합 테스트 결과](https://github.com/JinwooLeeDev/event-platform/wiki/통합-테스트-결과) | 테스트 결과, 발견 문제, 개발 종료 시점 최종 상태와 아쉬운 점 |
 | [작업 순서](https://github.com/JinwooLeeDev/event-platform/wiki/작업-순서) | Issue → 브랜치 → PR → 리뷰 → Merge 협업 규칙 |
 
