@@ -14,6 +14,21 @@
 
 ---
 
+## Engineering & Troubleshooting
+
+[![Engineering Devlog](https://img.shields.io/badge/Engineering-Troubleshooting-2563EB?style=for-the-badge&logo=github&logoColor=white)](https://jinwooleedev.github.io/busan-play-devlog/)
+
+프로젝트 개발 과정에서 발생한 기술적 문제와 해결 과정,
+기술 선택의 이유, 대안 비교 및 검증 결과를 기록한 문서입니다.
+
+- 팀원별 기술적 문제 해결 과정
+- 기술 선택 및 아키텍처 설계 근거
+- 변경 전·후 코드 비교
+- 테스트 및 검증 결과
+- 기술적 한계 및 개선 방향
+
+**[트러블슈팅 및 기술 문서 사이트 바로가기 →](https://jinwooleedev.github.io/busan-play-devlog/)**
+
 ## 화면
 
 화면은 사용자별로 31종입니다. 각 화면의 구성, 동작 규칙, 캡처 이미지는 Wiki의 [화면 설계서](https://github.com/JinwooLeeDev/event-platform/wiki/화면-설계서)에서 볼 수 있습니다.
